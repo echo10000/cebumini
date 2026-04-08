@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Select Payment Method</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        <div class="alert alert-dismissible fade show" role="alert">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Booking Summary -->
+                    <div class="mb-4 p-3 bg-light border rounded">
+                        <h5>Booking Summary</h5>
+                        <table class="table table-sm mb-0">
+                            <tr>
+                                <td><strong>Booking ID:</strong></td>
+                                <td>#{{ booking.id }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Room:</strong></td>
+                                <td>{{ booking.room.name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Check-in:</strong></td>
+                                <td>{{ booking.check_in_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Check-out:</strong></td>
+                                <td>{{ booking.check_out_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Number of Nights:</strong></td>
+                                <td>{{ booking.number_of_nights }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Amount to Pay:</strong></td>
+                                <td><h5 class="text-success mb-0">₱ {{ booking.total_price }}</h5></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    {% if test_mode %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-flask"></i> <strong>Test Mode Active</strong> - You can test payments without spending real money.
+                        </div>
+                    {% endif %}
+
+                    <!-- Payment Method Selection Form -->
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="payment-methods">
+                            {% for value, label in form.payment_method.field.choices %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="payment_method" 
+                                           id="payment_{{ value }}" value="{{ value }}"
+                                           {% if form.payment_method.value == value %}checked{% endif %}>
+                                    <label class="form-check-label" for="payment_{{ value }}">
+                                        <strong>{{ label }}</strong>
+                                        {% if value == 'STRIPE' %}
+                                            <span class="badge bg-info">International</span>
+                                        {% elif value == 'GCASH' %}
+                                            <span class="badge bg-warning">Philippines</span>
+                                        {% elif value == 'BANK_TRANSFER' %}
+                                            <span class="badge bg-secondary">Manual</span>
+                                        {% endif %}
+                                    </label>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        {% if form.errors %}
+                            <div class="alert alert-danger mt-3">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mt-4">
+                            <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Booking
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-arrow-right"></i> Continue to Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Payment Method Information -->
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Payment Methods Available</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6><i class="fab fa-cc-stripe text-info"></i> Stripe (Credit/Debit Card)</h6>
+                                    <p class="small">Secure payment via international credit/debit cards. Instant confirmation.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-mobile-alt text-warning"></i> GCash</h6>
+                                    <p class="small">Popular Philippine mobile payment. Quick and convenient.</p>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6><i class="fas fa-university text-secondary"></i> Bank Transfer</h6>
+                                    <p class="small">Direct bank transfer. Pending admin verification.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .payment-methods {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .payment-methods .form-check {
+        padding: 15px;
+        border-bottom: 1px solid #dee2e6;
+        cursor: pointer;
+    }
+    .payment-methods .form-check:last-child {
+        border-bottom: none;
+    }
+    .payment-methods .form-check:hover {
+        background-color: #e9ecef;
+    }
+    .payment-methods .form-check-input:checked + .form-check-label {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Failed - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white text-center py-4">
+                    <h1><i class="fas fa-exclamation-circle"></i></h1>
+                    <h3 class="mt-2">Payment Failed</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <p class="mb-0"><strong>Your payment could not be processed.</strong></p>
+                    </div>
+
+                    <!-- Failure Reason -->
+                    {% if payment.notes %}
+                    <div class="mb-4 p-3 bg-light border rounded border-danger">
+                        <h6>Reason:</h6>
+                        <p class="mb-0">{{ payment.notes }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Booking Details -->
+                    <div class="mb-4 p-3 bg-light border rounded">
+                        <h5>Booking Information</h5>
+                        <table class="table table-sm mb-0">
+                            <tr>
+                                <td><strong>Booking ID:</strong></td>
+                                <td><span class="badge bg-primary">#{{ booking.id }}</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Room:</strong></td>
+                                <td>{{ booking.room.name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Amount:</strong></td>
+                                <td><strong class="text-success">₱ {{ payment.amount }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Payment Status:</strong></td>
+                                <td><span class="badge bg-danger">{{ payment.status }}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!-- Troubleshooting Tips -->
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-lightbulb"></i> Try the Following:</h6>
+                        <ul class="mb-0">
+                            <li>Make sure your card/account has sufficient balance</li>
+                            <li>Check that all card details are correct</li>
+                            <li>Try a different payment method</li>
+                            <li>Ensure your internet connection is stable</li>
+                            <li>Wait a few minutes and try again</li>
+                        </ul>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'bookings:payment' payment.booking.id %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-redo"></i> Try Payment Again
+                        </a>
+                        <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left"></i> Back to Booking
+                        </a>
+                        <a href="{% url 'bookings:booking_history' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-history"></i> View All Bookings
+                        </a>
+                    </div>
+
+                    <!-- Support -->
+                    <div class="alert alert-info mt-4">
+                        <h6><i class="fas fa-headset"></i> Need Help?</h6>
+                        <p class="mb-0">
+                            If you continue to experience issues, please contact our support team at 
+                            <strong>support@cebuhotel.com</strong> or call <strong>(032) 123-4567</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

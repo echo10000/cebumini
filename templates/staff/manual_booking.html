@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}Manual Booking - Staff{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">Manual Booking (Walk-in)</h1>
+                <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Create New Manual Booking</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Guest Information Section -->
+                        <fieldset class="mb-4">
+                            <legend class="font-weight-bold mb-3">Guest Information</legend>
+                            
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="guest_first_name">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="guest_first_name" name="guest_first_name" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="guest_last_name">Last Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="guest_last_name" name="guest_last_name" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="guest_email">Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="guest_email" name="guest_email" required>
+                                    <small class="form-text text-muted">Used as unique identifier for guest</small>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="guest_phone">Phone Number <span class="text-danger">*</span></label>
+                                    <input type="tel" class="form-control" id="guest_phone" name="guest_phone" required>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Booking Details Section -->
+                        <fieldset class="mb-4">
+                            <legend class="font-weight-bold mb-3">Booking Details</legend>
+                            
+                            <div class="form-group">
+                                <label for="room">Room <span class="text-danger">*</span></label>
+                                <select class="form-control" id="room" name="room" required>
+                                    <option value="">-- Select a Room --</option>
+                                    {% for room in available_rooms %}
+                                        <option value="{{ room.id }}">
+                                            Room {{ room.room_number }} (₱{{ room.price_per_night }}/night)
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if not available_rooms %}
+                                    <div class="alert alert-warning mt-2">
+                                        <i class="fas fa-exclamation-triangle"></i> No available rooms at the moment.
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="check_in">Check-In Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="check_in" name="check_in" required>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="check_out">Check-Out Date <span class="text-danger">*</span></label>
+                                    <input type="date" class="form-control" id="check_out" name="check_out" required>
+                                </div>
+                            </div>
+
+                            <div id="pricing-info" class="alert alert-info">
+                                <p class="mb-0">
+                                    <strong>Estimated Total:</strong> <span id="total-price">₱0.00</span>
+                                    <br>
+                                    <small>(<span id="night-count">0</span> nights)</small>
+                                </p>
+                            </div>
+                        </fieldset>
+
+                        <!-- Payment Information Section -->
+                        <fieldset class="mb-4">
+                            <legend class="font-weight-bold mb-3">Payment Collection</legend>
+                            
+                            <div class="form-group">
+                                <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                <select class="form-control" id="payment_method" name="payment_method" required>
+                                    <option value="">-- Select Payment Method --</option>
+                                    <option value="CASH">💵 Cash</option>
+                                    <option value="STRIPE">💳 Card (Credit/Debit)</option>
+                                    <option value="GCASH">📱 GCash</option>
+                                    <option value="BANK_TRANSFER">🏦 Bank Transfer</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="payment_amount">Amount Collected <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">₱</span>
+                                        </div>
+                                        <input type="number" class="form-control" id="payment_amount" name="payment_amount" step="0.01" min="0" required>
+                                    </div>
+                                    <small class="form-text text-muted">Leave empty to auto-fill with total booking amount</small>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="reference_number">Reference/Receipt Number</label>
+                                    <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="e.g., TRANS123456">
+                                    <small class="form-text text-muted">Auto-generated if left empty</small>
+                                </div>
+                            </div>
+
+                            <div id="payment-summary" class="alert alert-secondary">
+                                <strong>Payment Summary:</strong>
+                                <table class="mt-2 small w-100">
+                                    <tr>
+                                        <td>Total Due:</td>
+                                        <td class="text-right"><strong id="summary-total">₱0.00</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Amount Collected:</td>
+                                        <td class="text-right"><strong id="summary-collected">₱0.00</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"><hr class="my-2"></td>
+                                    </tr>
+                                    <tr id="balance-row" style="display:none;">
+                                        <td><span class="badge badge-warning">Balance Due:</span></td>
+                                        <td class="text-right"><strong id="summary-balance" class="text-warning">₱0.00</strong></td>
+                                    </tr>
+                                    <tr id="paid-row" style="display:none;">
+                                        <td><span class="badge badge-success">Status:</span></td>
+                                        <td class="text-right"><strong id="summary-status" class="text-success">PAID ✓</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </fieldset>
+
+                        <!-- Action Buttons -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Create Booking
+                            </button>
+                            <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Sidebar -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="m-0 font-weight-bold">Instructions</h6>
+                </div>
+                <div class="card-body">
+                    <ol class="small">
+                        <li>Enter guest's full name and contact information</li>
+                        <li>Select an available room from the list</li>
+                        <li>Enter check-in and check-out dates</li>
+                        <li>Review the pricing information (auto-calculated)</li>
+                        <li>Select payment method and enter amount collected</li>
+                        <li>Click "Create Booking" to complete with payment</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="card shadow mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="m-0 font-weight-bold">Important Notes</h6>
+                </div>
+                <div class="card-body small">
+                    <ul class="mb-0">
+                        <li>Guest account will be created automatically if using new email</li>
+                        <li>Booking is automatically set to CONFIRMED status</li>
+                        <li>Room will be marked as unavailable</li>
+                        <li><strong>Payment is collected and recorded immediately</strong></li>
+                        <li>Automatic receipt number generated if not provided</li>
+                        <li>Supports Cash, Card, GCash, and Bank Transfer</li>
+                    </ul>
+                </div>
+            </div>
+
+            {% if not available_rooms %}
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="m-0 font-weight-bold">No Rooms Available</h6>
+                </div>
+                <div class="card-body small">
+                    <p>All rooms are currently booked. Please check back later or contact management.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Calculate pricing dynamically
+    const roomSelect = document.getElementById('room');
+    const checkInInput = document.getElementById('check_in');
+    const checkOutInput = document.getElementById('check_out');
+    const paymentAmountInput = document.getElementById('payment_amount');
+    
+    let currentTotal = 0;
+    
+    function updatePricing() {
+        const roomOption = roomSelect.options[roomSelect.selectedIndex];
+        const roomText = roomOption.text || '';
+        const priceMatch = roomText.match(/₱(\d+(?:\.\d{2})?)/);
+        const pricePerNight = priceMatch ? parseFloat(priceMatch[1]) : 0;
+        
+        const checkIn = new Date(checkInInput.value);
+        const checkOut = new Date(checkOutInput.value);
+        
+        if (checkOut > checkIn) {
+            const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
+            const total = pricePerNight * nights;
+            
+            currentTotal = total;
+            document.getElementById('night-count').textContent = nights;
+            document.getElementById('total-price').textContent = '₱' + total.toFixed(2);
+            
+            // Auto-fill payment amount if not already set
+            if (!paymentAmountInput.value) {
+                paymentAmountInput.value = total.toFixed(2);
+            }
+            
+            updatePaymentSummary();
+        }
+    }
+    
+    function updatePaymentSummary() {
+        const totalDue = currentTotal;
+        const collected = parseFloat(paymentAmountInput.value) || 0;
+        const balance = totalDue - collected;
+        
+        document.getElementById('summary-total').textContent = '₱' + totalDue.toFixed(2);
+        document.getElementById('summary-collected').textContent = '₱' + collected.toFixed(2);
+        
+        const balanceRow = document.getElementById('balance-row');
+        const paidRow = document.getElementById('paid-row');
+        
+        if (collected >= totalDue) {
+            balanceRow.style.display = 'none';
+            paidRow.style.display = 'table-row';
+            document.getElementById('summary-status').textContent = 'PAID ✓';
+            document.getElementById('summary-status').className = 'text-success';
+        } else if (collected > 0) {
+            balanceRow.style.display = 'table-row';
+            paidRow.style.display = 'none';
+            document.getElementById('summary-balance').textContent = '₱' + balance.toFixed(2);
+            document.getElementById('summary-balance').className = 'text-warning';
+        } else {
+            balanceRow.style.display = 'table-row';
+            paidRow.style.display = 'none';
+            document.getElementById('summary-balance').textContent = '₱' + totalDue.toFixed(2);
+            document.getElementById('summary-balance').className = 'text-danger';
+        }
+    }
+    
+    roomSelect.addEventListener('change', updatePricing);
+    checkInInput.addEventListener('change', updatePricing);
+    checkOutInput.addEventListener('change', updatePricing);
+    paymentAmountInput.addEventListener('input', updatePaymentSummary);
+
+    // Set minimum check-in date to today
+    const today = new Date().toISOString().split('T')[0];
+    checkInInput.setAttribute('min', today);
+    checkOutInput.setAttribute('min', today);
+</script>
+
+<style>
+    .text-danger { color: #e74c3c; }
+    fieldset { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+    legend { font-size: 14px; }
+</style>
+{% endblock %}

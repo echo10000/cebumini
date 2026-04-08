@@ -1,0 +1,260 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ room.room_number }} - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <!-- Header with back button -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <a href="{% url 'rooms:list' %}" class="btn btn-secondary btn-sm mb-2">← Back to Rooms</a>
+            </div>
+            {% if user.is_authenticated and user.is_admin %}
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'rooms:edit' room.id %}" class="btn btn-warning btn-sm">✏️ Edit</a>
+                <form method="POST" action="{% url 'rooms:delete' room.id %}" style="display:inline;" 
+                      onsubmit="return confirm('Are you sure you want to delete this room?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger btn-sm">🗑️ Delete</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Main Content -->
+        <div class="row">
+            <!-- Images Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <!-- Image Carousel -->
+                    <div id="roomCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                        <div class="carousel-indicators">
+                            <!-- Main image indicator -->
+                            <button type="button" data-bs-target="#roomCarousel" data-bs-slide-to="0" class="active" 
+                                    aria-current="true" aria-label="Main image"></button>
+                            <!-- Gallery images indicators -->
+                            {% for image in images %}
+                                <button type="button" data-bs-target="#roomCarousel" data-bs-slide-to="{{ forloop.counter }}" 
+                                        aria-label="{{ image.caption }}"></button>
+                            {% endfor %}
+                        </div>
+
+                        <div class="carousel-inner">
+                            <!-- Main Image as First Slide -->
+                            {% if room.image %}
+                                <div class="carousel-item active">
+                                    <img src="{{ room.image.url }}" class="d-block w-100" 
+                                         alt="{{ room.room_number }}" style="height: 400px; object-fit: cover;">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <small class="bg-dark bg-opacity-50 p-2 rounded">Main Image</small>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="carousel-item active">
+                                    <div class="bg-light d-flex align-items-center justify-content-center" 
+                                         style="height: 400px;">
+                                        <span class="text-muted">No main image</span>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Gallery Images as Carousel Slides -->
+                            {% for image in images %}
+                                <div class="carousel-item">
+                                    <img src="{{ image.image.url }}" class="d-block w-100" 
+                                         alt="{{ image.caption }}" style="height: 400px; object-fit: cover;">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <small class="bg-dark bg-opacity-50 p-2 rounded">
+                                            {{ image.caption }}
+                                        </small>
+                                    </div>
+                                    <!-- Admin delete button on image -->
+                                    {% if user.is_authenticated and user.is_admin %}
+                                        <form method="POST" action="{% url 'rooms:delete_image' image.id %}" 
+                                              style="position: absolute; top: 10px; right: 10px;"
+                                              onsubmit="return confirm('Delete this image?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Delete image">
+                                                🗑️ Delete
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Carousel Controls -->
+                        <button class="carousel-control-prev" type="button" data-bs-target="#roomCarousel" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#roomCarousel" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    </div>
+
+                    <!-- Admin: Upload Image -->
+                    {% if user.is_authenticated and user.is_admin %}
+                        <div class="card-footer">
+                            <form method="POST" action="{% url 'rooms:upload_image' room.id %}" 
+                                  enctype="multipart/form-data" class="row g-2">
+                                {% csrf_token %}
+                                <div class="col-md-7">
+                                    <input type="file" name="image" class="form-control form-control-sm" 
+                                           accept="image/*" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" name="caption" class="form-control form-control-sm" 
+                                           placeholder="Caption">
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary btn-sm w-100">Upload</button>
+                                </div>
+                            </form>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Room Details Section -->
+            <div class="col-md-6 mb-4">
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h1 class="card-title">Room {{ room.room_number }}</h1>
+                        
+                        <!-- Status Badge -->
+                        <div class="mb-3">
+                            {% if room.is_available %}
+                                <span class="badge bg-success fs-6">✓ Available</span>
+                            {% else %}
+                                <span class="badge bg-danger fs-6">✗ Occupied</span>
+                            {% endif %}
+                            <span class="badge bg-info fs-6">{{ room.get_room_type_display }}</span>
+                        </div>
+
+                        <!-- Price -->
+                        <div class="mb-3">
+                            <h3 class="text-primary">₱{{ room.price_per_night }}<small class="text-muted fs-6">/night</small></h3>
+                        </div>
+
+                        <!-- Basic Info -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Capacity</h6>
+                                <p class="h5">👥 {{ room.capacity }} guests</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6 class="text-muted">Room Type</h6>
+                                <p class="h5">{{ room.get_room_type_display }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        {% if room.description %}
+                            <div class="mb-3">
+                                <h6 class="text-muted">Description</h6>
+                                <p>{{ room.description }}</p>
+                            </div>
+                        {% endif %}
+
+                        <!-- Amenities -->
+                        {% if room.get_amenities_list %}
+                            <div class="mb-3">
+                                <h6 class="text-muted">Amenities</h6>
+                                <ul class="list-unstyled">
+                                    {% for amenity in room.get_amenities_list %}
+                                        <li><i class="fas fa-check text-success"></i> {{ amenity }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Booking Section (for guests) -->
+                {% if user.is_authenticated and not user.is_admin %}
+                    <div class="card mb-3 border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-calendar-check"></i> Make a Booking
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Select your check-in and check-out dates to book this room.</p>
+                            <a href="{% url 'bookings:create_booking' room.id %}" class="btn btn-success w-100 btn-lg">
+                                <i class="fas fa-calendar-plus"></i> Book Now
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Booking History Link -->
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <p class="text-muted mb-2">View your past and upcoming bookings</p>
+                            <a href="{% url 'bookings:booking_history' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-history"></i> My Bookings
+                            </a>
+                        </div>
+                    </div>
+                {% elif not user.is_authenticated %}
+                    <div class="card mb-3 border-info">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">Interested in this room?</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted mb-3">Sign in to make a booking</p>
+                            <a href="{% url 'account_login' %}" class="btn btn-primary w-100 btn-lg">Sign In</a>
+                            <p class="text-center text-muted mt-2 small">Don't have an account? 
+                                <a href="{% url 'account_signup' %}">Register here</a>
+                            </p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Similar Rooms Section -->
+        {% if similar_rooms %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <h3 class="mb-4">Similar Rooms</h3>
+                    {% for similar_room in similar_rooms %}
+                        <div class="col-md-4 mb-3" style="display: inline-block; width: 32%; margin-right: 2%;">
+                            <div class="card h-100">
+                                {% if similar_room.image %}
+                                    <img src="{{ similar_room.image.url }}" class="card-img-top" 
+                                         alt="{{ similar_room.room_number }}" style="height: 200px; object-fit: cover;">
+                                {% else %}
+                                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                                         style="height: 200px;">
+                                        <span class="text-muted">No image</span>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title">Room {{ similar_room.room_number }}</h6>
+                                    <p class="card-text">
+                                        <strong class="text-primary">₱{{ similar_room.price_per_night }}/night</strong>
+                                    </p>
+                                    <a href="{% url 'rooms:detail' similar_room.id %}" 
+                                       class="btn btn-sm btn-primary w-100">View</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .thumbnail-wrapper {
+        position: relative;
+        overflow: hidden;
+    }
+    .thumbnail-wrapper:hover img {
+        opacity: 0.8;
+    }
+</style>
+{% endblock %}

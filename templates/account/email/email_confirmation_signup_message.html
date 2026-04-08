@@ -1,0 +1,163 @@
+{% load i18n %}<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1a1a1a;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #1a1a1a;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 14px;
+        }
+        .content {
+            margin: 20px 0;
+            color: #333;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #1a1a1a;
+            color: white;
+            padding: 14px 40px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .button:hover {
+            background-color: #333;
+        }
+        .link-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #1a1a1a;
+            border-radius: 4px;
+        }
+        .link-section p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .link-section a {
+            color: #1a1a1a;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        .welcome-box {
+            background-color: #f0fdf4;
+            border-left: 4px solid #22c55e;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .footer {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+        }
+        .footer-links {
+            margin: 10px 0;
+        }
+        .footer-links a {
+            color: #1a1a1a;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏨 Cebu Hotel</h1>
+            <p>Welcome to Your Next Perfect Stay</p>
+        </div>
+
+        <!-- Welcome Message -->
+        <div class="welcome-box">
+            <p style="margin: 0;"><strong>✓ Account Created Successfully!</strong></p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">Please confirm your email address to complete your registration.</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <p>Hello {% if user.first_name %}{{ user.first_name }}{% else %}Guest{% endif %},</p>
+            
+            <p>{% blocktrans %}Thank you for creating an account at Cebu Hotel! To complete your registration, please confirm your email address by clicking the button below:{% endblocktrans %}</p>
+        </div>
+
+        <!-- Button -->
+        <div class="button-container">
+            <a href="{{ activate_url }}" class="button">Confirm Email Address</a>
+        </div>
+
+        <!-- Link Fallback -->
+        <div class="link-section">
+            <p><strong>{% trans "Or copy and paste this link:" %}</strong></p>
+            <p><a href="{{ activate_url }}">{{ activate_url }}</a></p>
+        </div>
+
+        <!-- What's Next -->
+        <div class="content">
+            <p><strong>🎯 What's Next?</strong></p>
+            <ul>
+                <li>Confirm your email using the link above</li>
+                <li>Log in to your account</li>
+                <li>Start booking your perfect room</li>
+                <li>Enjoy exclusive offers and discounts</li>
+            </ul>
+        </div>
+
+        <!-- Important Note -->
+        <div class="content">
+            <p style="font-size: 13px; color: #666; background-color: #f9f9f9; padding: 15px; border-radius: 4px;">
+                <strong>🔒 Security Note:</strong> If you did not create this account, please ignore this email. Do not share this link with anyone.
+            </p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p><strong>Cebu Hotel</strong></p>
+            <div class="footer-links">
+                <a href="mailto:support@cebuhotel.com">📧 support@cebuhotel.com</a>
+                <a href="http://www.cebuhotel.com">🌐 www.cebuhotel.com</a>
+            </div>
+            <p style="margin-top: 15px; color: #999;">
+                {% blocktrans %}We look forward to hosting you!{% endblocktrans %}
+            </p>
+            <p style="color: #999; font-size: 11px; margin-top: 10px;">
+                This is an automated email. Please do not reply directly to this message.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

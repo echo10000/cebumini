@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Confirm Booking - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-clipboard-check"></i> Confirm Your Booking
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Booking Summary -->
+                    <div class="alert alert-info mb-4">
+                        <h5 class="alert-heading mb-3">Booking Summary</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Room Number:</strong> {{ room.room_number }}</p>
+                                <p class="mb-2"><strong>Room Type:</strong> {{ room.get_room_type_display }}</p>
+                                <p class="mb-0"><strong>Check-in:</strong> {{ check_in|date:"F d, Y" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong>Check-out:</strong> {{ check_out|date:"F d, Y" }}</p>
+                                <p class="mb-2"><strong>Duration:</strong> {{ duration }} night{{ duration|pluralize }}</p>
+                                <p class="mb-0"><strong>Price per Night:</strong> ₱{{ room.price_per_night }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Room Details -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">Room Details</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {% if room.image %}
+                                    <img src="{{ room.image.url }}" alt="{{ room.room_number }}" class="img-fluid rounded">
+                                {% else %}
+                                    <div class="bg-secondary rounded text-white text-center py-5">
+                                        <i class="fas fa-image fa-3x"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <p class="mb-2"><strong>Capacity:</strong> {{ room.capacity }} guests</p>
+                                {% if room.amenities %}
+                                    <p class="mb-2"><strong>Amenities:</strong></p>
+                                    <ul class="small mb-0">
+                                        {% for amenity in room.get_amenities_list %}
+                                            <li><i class="fas fa-check text-success"></i> {{ amenity }}</li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Special Requests -->
+                    {% if special_requests %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h5 class="mb-2">Special Requests</h5>
+                            <p class="mb-0">{{ special_requests }}</p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Price Breakdown -->
+                    <div class="mb-4 p-3 bg-light rounded">
+                        <h5 class="mb-3">Price Breakdown</h5>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <p class="mb-1">{{ duration }} night{{ duration|pluralize }} × ₱{{ room.price_per_night }}</p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <p class="mb-1">₱{{ total_price }}</p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="mb-0">Total Amount</h5>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <h4 class="text-primary mb-0">₱{{ total_price }}</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recommended Rooms for You -->
+                    {% if has_recommendations and recommendations %}
+                        <div class="mb-4 p-3 bg-light rounded">
+                            <h5 class="mb-3">
+                                <i class="fas fa-star"></i> You Might Also Like
+                            </h5>
+                            {% include 'recommendations/recommendations_widget.html' with recommendations=recommendations %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Confirmation Form -->
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ confirmation_form.agree_terms }}
+                                <label class="form-check-label" for="{{ confirmation_form.agree_terms.id_for_label }}">
+                                    {{ confirmation_form.agree_terms.label }}
+                                </label>
+                            </div>
+                            {% if confirmation_form.agree_terms.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in confirmation_form.agree_terms.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        {% if confirmation_form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show">
+                                {% for error in confirmation_form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Confirm & Book Now
+                            </button>
+                            <a href="{% url 'bookings:create_booking' room.id %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Edit Dates
+                            </a>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> You will receive a confirmation email with all booking details.
+                        If you have any questions, please contact our customer support team.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

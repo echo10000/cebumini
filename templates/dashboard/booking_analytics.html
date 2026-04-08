@@ -1,0 +1,419 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Booking Analytics - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <h2 class="mb-1">
+                <i class="fas fa-chart-pie"></i> Booking Analytics
+            </h2>
+            <p class="text-muted">Analyze booking patterns and trends</p>
+        </div>
+    </div>
+
+    <!-- Booking Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Bookings</p>
+                    <h3 class="mb-0">{{ booking_analytics.total_bookings }}</h3>
+                    <small class="text-muted">All time</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Confirmed</p>
+                    <h3 class="mb-0 text-success">{{ booking_analytics.confirmed_bookings }}</h3>
+                    <small class="text-success">
+                        {{ booking_analytics.confirmed_percentage }}%
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Pending</p>
+                    <h3 class="mb-0 text-warning">{{ booking_analytics.pending_bookings }}</h3>
+                    <small class="text-warning">
+                        {{ booking_analytics.pending_percentage }}%
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Cancelled</p>
+                    <h3 class="mb-0 text-danger">{{ booking_analytics.cancelled_bookings }}</h3>
+                    <small class="text-danger">
+                        {{ booking_analytics.cancelled_percentage }}%
+                    </small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-5">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Avg Stay Duration</p>
+                    <h3 class="mb-0">{{ booking_analytics.average_stay_days }}</h3>
+                    <small class="text-muted">days</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Status Pie Chart -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Booking Status Distribution</h5>
+                </div>
+                <div class="card-body" style="height: 300px;">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Breakdown -->
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Status Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-check-circle text-success"></i> Confirmed
+                                </h6>
+                                <small class="text-muted">Verified and active</small>
+                            </div>
+                            <div class="text-end">
+                                <h5 class="mb-0">{{ booking_analytics.confirmed_bookings }}</h5>
+                                <small class="text-success">{{ booking_analytics.confirmed_percentage }}%</small>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-success" 
+                                 style="width: {{ booking_analytics.confirmed_percentage }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-hourglass-half text-warning"></i> Pending
+                                </h6>
+                                <small class="text-muted">Awaiting confirmation</small>
+                            </div>
+                            <div class="text-end">
+                                <h5 class="mb-0">{{ booking_analytics.pending_bookings }}</h5>
+                                <small class="text-warning">{{ booking_analytics.pending_percentage }}%</small>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-warning" 
+                                 style="width: {{ booking_analytics.pending_percentage }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <h6 class="mb-0">
+                                    <i class="fas fa-times-circle text-danger"></i> Cancelled
+                                </h6>
+                                <small class="text-muted">Cancelled by guest or admin</small>
+                            </div>
+                            <div class="text-end">
+                                <h5 class="mb-0">{{ booking_analytics.cancelled_bookings }}</h5>
+                                <small class="text-danger">{{ booking_analytics.cancelled_percentage }}%</small>
+                            </div>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-danger" 
+                                 style="width: {{ booking_analytics.cancelled_percentage }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Trends Chart -->
+    <div class="row g-3 mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Booking Trends (Last 30 Days)</h5>
+                    <span class="badge bg-info">Chart Ready</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Performance -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">This Month</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Total Bookings</span>
+                            <strong>{{ booking_analytics.this_month_bookings }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Confirmed</span>
+                            <strong class="text-success">{{ booking_analytics.this_month_confirmed }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Pending</span>
+                            <strong class="text-warning">{{ booking_analytics.this_month_pending }}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between">
+                            <span>Cancelled</span>
+                            <strong class="text-danger">{{ booking_analytics.this_month_cancelled }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Last Month</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Total Bookings</span>
+                            <strong>{{ booking_analytics.last_month_bookings }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Confirmed</span>
+                            <strong class="text-success">{{ booking_analytics.last_month_confirmed }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span>Pending</span>
+                            <strong class="text-warning">{{ booking_analytics.last_month_pending }}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between">
+                            <span>Cancelled</span>
+                            <strong class="text-danger">{{ booking_analytics.last_month_cancelled }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Booking Days -->
+    <div class="row">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Weekly Pattern</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="bg-light rounded p-3 mb-2">
+                                    <h5 class="mb-0">{{ booking_analytics.bookings_by_day.Monday|default:0 }}</h5>
+                                </div>
+                                <small class="text-muted">Monday</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="bg-light rounded p-3 mb-2">
+                                    <h5 class="mb-0">{{ booking_analytics.bookings_by_day.Tuesday|default:0 }}</h5>
+                                </div>
+                                <small class="text-muted">Tuesday</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="bg-light rounded p-3 mb-2">
+                                    <h5 class="mb-0">{{ booking_analytics.bookings_by_day.Wednesday|default:0 }}</h5>
+                                </div>
+                                <small class="text-muted">Wednesday</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="bg-light rounded p-3 mb-2">
+                                    <h5 class="mb-0">{{ booking_analytics.bookings_by_day.Thursday|default:0 }}</h5>
+                                </div>
+                                <small class="text-muted">Thursday</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="bg-light rounded p-3 mb-2">
+                                    <h5 class="mb-0">{{ booking_analytics.bookings_by_day.Friday|default:0 }}</h5>
+                                </div>
+                                <small class="text-muted">Friday</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="text-center">
+                                <div class="bg-info bg-opacity-10 rounded p-3 mb-2">
+                                    <h5 class="mb-0 text-info">{{ booking_analytics.bookings_by_day.Saturday|default:0 }}</h5>
+                                </div>
+                                <small class="text-muted">Saturday</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3 g-2">
+                        <div class="col-md-2 offset-md-5">
+                            <div class="text-center">
+                                <div class="bg-warning bg-opacity-10 rounded p-3 mb-2">
+                                    <h5 class="mb-0 text-warning">{{ booking_analytics.bookings_by_day.Sunday|default:0 }}</h5>
+                                </div>
+                                <small class="text-muted">Sunday</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Status Pie Chart
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Confirmed', 'Pending', 'Cancelled'],
+                datasets: [{
+                    data: [
+                        {{ booking_analytics.confirmed_bookings }},
+                        {{ booking_analytics.pending_bookings }},
+                        {{ booking_analytics.cancelled_bookings }}
+                    ],
+                    backgroundColor: ['#198754', '#ffc107', '#dc3545'],
+                    borderColor: '#fff',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    }
+
+    // Trend Chart
+    const trendData = {{ trend_chart_data|safe }};
+    const trendCtx = document.getElementById('trendChart');
+    
+    if (trendCtx && trendData) {
+        new Chart(trendCtx, {
+            type: 'bar',
+            data: {
+                labels: trendData.labels,
+                datasets: [{
+                    label: 'Bookings',
+                    data: trendData.values,
+                    backgroundColor: '#0d6efd',
+                    borderColor: '#0d6efd',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+    }
+    
+    .progress {
+        background-color: #f0f0f0;
+    }
+    
+    .col-md-2-5 {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+    
+    @media (max-width: 768px) {
+        .col-md-2-5 {
+            flex: 0 0 50%;
+            max-width: 50%;
+        }
+    }
+</style>
+{% endblock %}

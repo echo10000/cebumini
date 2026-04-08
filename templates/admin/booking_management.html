@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Management - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="h3 mb-4">Booking Management</h1>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-primary text-uppercase mb-1 small font-weight-bold">Total Bookings</div>
+                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ total_bookings }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-warning text-uppercase mb-1 small font-weight-bold">Pending</div>
+                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ pending_bookings }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-success text-uppercase mb-1 small font-weight-bold">Confirmed</div>
+                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ confirmed_bookings }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="text-danger text-uppercase mb-1 small font-weight-bold">Cancelled</div>
+                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ cancelled_bookings }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="form-inline">
+                <div class="form-group mr-3">
+                    <label for="status" class="mr-2">Status:</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">All</option>
+                        {% for choice, label in booking_statuses %}
+                            <option value="{{ choice }}" {% if status_filter == choice %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Filter</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bookings Table -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Bookings</h6>
+        </div>
+        <div class="card-body">
+            {% if bookings %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Guest</th>
+                                <th>Room</th>
+                                <th>Check-In</th>
+                                <th>Check-Out</th>
+                                <th>Nights</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in bookings %}
+                            <tr>
+                                <td><strong>#{{ booking.id }}</strong></td>
+                                <td>{{ booking.guest.first_name }} {{ booking.guest.last_name }}</td>
+                                <td>{{ booking.room.room_number }}</td>
+                                <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                                <td>{{ booking.check_out|date:"M d, Y" }}</td>
+                                <td>{{ booking.number_of_nights }}</td>
+                                <td>₱{{ booking.total_price|floatformat:2 }}</td>
+                                <td>
+                                    {% if booking.status == 'PENDING' %}
+                                        <span class="badge badge-warning">Pending</span>
+                                    {% elif booking.status == 'CONFIRMED' %}
+                                        <span class="badge badge-success">Confirmed</span>
+                                    {% elif booking.status == 'CHECKED_IN' %}
+                                        <span class="badge badge-info">Checked In</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Cancelled</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ booking.created_at|date:"M d, Y" }}</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="#" class="btn btn-sm btn-info" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-primary" title="Edit">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">No bookings found.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-left-primary { border-left: 0.25rem solid #4e73df !important; }
+    .border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
+    .border-left-success { border-left: 0.25rem solid #1cc88a !important; }
+    .border-left-danger { border-left: 0.25rem solid #e74c3c !important; }
+    .text-primary { color: #4e73df !important; }
+    .text-warning { color: #f6c23e !important; }
+    .text-success { color: #1cc88a !important; }
+    .text-danger { color: #e74c3c !important; }
+    .badge-warning { background-color: #f6c23e; color: #000; }
+    .badge-success { background-color: #1cc88a; }
+    .badge-danger { background-color: #e74c3c; }
+    .badge-info { background-color: #36b9cc; }
+    .btn-group .btn { margin-right: 2px; }
+</style>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Stripe Payment - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fab fa-cc-stripe"></i> Credit/Debit Card Payment</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        <div class="alert alert-dismissible fade show" role="alert">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Booking Details -->
+                    <div class="mb-4 p-3 bg-light border rounded">
+                        <h6><strong>Booking Details</strong></h6>
+                        <table class="table table-sm mb-0">
+                            <tr>
+                                <td><strong>Room:</strong></td>
+                                <td>{{ payment.booking.room.name }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Check-in:</strong></td>
+                                <td>{{ payment.booking.check_in_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Check-out:</strong></td>
+                                <td>{{ payment.booking.check_out_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Amount to Pay:</strong></td>
+                                <td><h6 class="text-success mb-0">₱ {{ payment.amount }}</h6></td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    {% if test_mode %}
+                        <div class="alert alert-info mb-4">
+                            <h6><i class="fas fa-flask"></i> Test Mode</h6>
+                            <p class="mb-2"><strong>No real payment will be charged.</strong></p>
+                            <p class="mb-2"><strong>Test successful card:</strong> <code>{{ test_card_success }}</code></p>
+                            <p class="mb-0"><strong>Test failed card:</strong> <code>{{ test_card_failure }}</code></p>
+                        </div>
+                    {% endif %}
+
+                    <!-- Stripe Payment Form -->
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="id_cardholder_name" class="form-label">Cardholder Name</label>
+                            {{ form.cardholder_name }}
+                            {% if form.cardholder_name.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.cardholder_name.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_card_number" class="form-label">Card Number</label>
+                            {{ form.card_number }}
+                            {% if form.card_number.errors %}
+                                <div class="alert alert-danger mt-2">{{ form.card_number.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_card_expiry" class="form-label">Expiry Date (MM/YY)</label>
+                                    {{ form.card_expiry }}
+                                    {% if form.card_expiry.errors %}
+                                        <div class="alert alert-danger mt-2">{{ form.card_expiry.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="id_card_cvc" class="form-label">CVC</label>
+                                    {{ form.card_cvc }}
+                                    {% if form.card_cvc.errors %}
+                                        <div class="alert alert-danger mt-2">{{ form.card_cvc.errors }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-3">{{ form.non_field_errors }}</div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-lock"></i> Pay ₱{{ payment.amount }}
+                            </button>
+                        </div>
+
+                        <a href="{% url 'bookings:payment' payment.booking.id %}" class="btn btn-link w-100 mt-2">
+                            <i class="fas fa-arrow-left"></i> Choose Different Payment Method
+                        </a>
+                    </form>
+
+                    <!-- Security Information -->
+                    <div class="alert alert-light mt-4" style="border: 1px solid #d3d3d3;">
+                        <h6 style="font-size: 0.9rem;"><i class="fas fa-shield-alt"></i> Security</h6>
+                        <p style="font-size: 0.85rem; margin: 0;">
+                            Your payment information is encrypted and secure. We use PCI-DSS compliant payment processing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #id_cardholder_name, #id_card_number, #id_card_expiry, #id_card_cvc {
+        border: 1px solid #dee2e6;
+        font-size: 1.1rem;
+        padding: 0.75rem 0.5rem;
+    }
+    code {
+        background-color: #f0f0f0;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+</style>
+{% endblock %}

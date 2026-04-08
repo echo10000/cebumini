@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Login - Cebu Hotel{% endblock %}
+
+{% block extra_css %}
+<style>
+    input, select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        font-family: 'Lato', sans-serif;
+        transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: #1a1a1a;
+        box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 500px; margin: 3rem auto;">
+    <div style="background: white; border-radius: 12px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h2 style="color: #1a1a1a; margin-bottom: 0.5rem;">Welcome Back</h2>
+            <p style="color: #666;">Sign in to your account to continue</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Login Form -->
+        <form method="POST" novalidate style="margin-bottom: 1.5rem;">
+            {% csrf_token %}
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label for="id_login" style="font-weight: 600; color: #1a1a1a;">Email Address</label>
+                <input type="email" name="login" id="id_login" placeholder="Enter your email" required>
+                {% if form.login.errors %}
+                    <small style="color: #dc2626;">{{ form.login.errors }}</small>
+                {% endif %}
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label for="id_password" style="font-weight: 600; color: #1a1a1a;">Password</label>
+                <input type="password" name="password" id="id_password" placeholder="Enter your password" required>
+                {% if form.password.errors %}
+                    <small style="color: #dc2626;">{{ form.password.errors }}</small>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-primary" style="width: 100%; text-align: center;">
+                Sign In
+            </button>
+        </form>
+
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem; text-align: center;">
+            <p style="color: #666; margin-bottom: 1rem;">Don't have an account? <a href="{% url 'account_signup' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Sign Up</a></p>
+            <p style="color: #666;"><a href="{% url 'account_reset_password' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Forgot Password?</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

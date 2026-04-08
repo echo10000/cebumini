@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verify 2FA - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-shield-alt" style="font-size: 48px; color: #1e3c72;"></i>
+                        <h2 class="card-title mt-3" style="color: #1e3c72;">
+                            Verify Your Identity
+                        </h2>
+                        <p class="text-muted">
+                            Enter the code from your authenticator app
+                        </p>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="code" class="form-label d-block text-center mb-3">
+                                <strong>6-Digit Code</strong>
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control form-control-lg text-center" 
+                                id="code" 
+                                name="code" 
+                                placeholder="000000"
+                                maxlength="6"
+                                pattern="\d{6}"
+                                required
+                                autofocus
+                                style="font-size: 32px; letter-spacing: 8px; font-weight: bold;"
+                            >
+                            <small class="text-muted d-block text-center mt-2">
+                                Or paste a backup code
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-lg w-100 mb-2" style="background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none;">
+                            <i class="fas fa-arrow-right"></i> Verify Code
+                        </button>
+
+                        <a href="{% url 'auth:login' %}" class="btn btn-secondary btn-lg w-100">
+                            <i class="fas fa-times"></i> Go Back
+                        </a>
+
+                        <div class="alert alert-info mt-4 mb-0">
+                            <strong>Need help?</strong>
+                            <ul class="mb-0 ps-3 mt-2">
+                                <li>Make sure your device time is synchronized</li>
+                                <li>Use a backup code if your authenticator app is unavailable</li>
+                                <li>Codes are 6 digits from your authenticator app</li>
+                                <li>Each code is valid for 30 seconds</li>
+                            </ul>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Additional Security Info -->
+            <div class="card mt-4 border-0 shadow-sm" style="background: rgba(212, 175, 55, 0.1); border-left: 4px solid #d4af37;">
+                <div class="card-body">
+                    <h5 style="color: #1e3c72;"><i class="fas fa-lock"></i> Your Security Matters</h5>
+                    <p class="text-muted mb-0 small">
+                        We use industry-standard encryption and 2FA to protect your account. 
+                        Your login attempts are logged for security auditing.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-format code input to add spaces every 3 digits
+const codeInput = document.getElementById('code');
+codeInput.addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    e.target.value = value;
+});
+
+codeInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.target.form.submit();
+    }
+});
+</script>
+{% endblock %}

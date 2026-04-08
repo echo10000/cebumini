@@ -1,0 +1,15 @@
+{% load i18n %}{% autoescape off %}Hello {% if user.first_name %}{{ user.first_name }}{% else %}Guest{% endif %},
+
+{% blocktrans %}Please confirm your email address to complete your registration at Cebu Hotel by clicking on the following link:{% endblocktrans %}
+
+{{ activate_url }}
+
+{% blocktrans %}If you did not create this account, please ignore this email.{% endblocktrans %}
+
+---
+{{ site.name }}
+🏨 Cebu Hotel - Your Perfect Stay Awaits
+
+📞 Support: support@cebuhotel.com
+🌐 Website: www.cebuhotel.com
+{% endautoescape %}

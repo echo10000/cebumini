@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1>{{ title }}</h1>
+                <a href="{% url 'rooms:list' %}" class="btn btn-secondary btn-sm">← Back to Rooms</a>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data" novalidate>
+                            {% csrf_token %}
+
+                            <!-- Room Basic Info -->
+                            <fieldset class="mb-4">
+                                <legend class="h5 mb-3">Basic Information</legend>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.room_number.id_for_label }}" class="form-label">Room Number</label>
+                                    {{ form.room_number }}
+                                    {% if form.room_number.errors %}
+                                        <div class="text-danger small">
+                                            {{ form.room_number.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.room_type.id_for_label }}" class="form-label">Room Type</label>
+                                            {{ form.room_type }}
+                                            {% if form.room_type.errors %}
+                                                <div class="text-danger small">
+                                                    {{ form.room_type.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.capacity.id_for_label }}" class="form-label">Guest Capacity</label>
+                                            {{ form.capacity }}
+                                            {% if form.capacity.errors %}
+                                                <div class="text-danger small">
+                                                    {{ form.capacity.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
+                                    {{ form.description }}
+                                    {% if form.description.errors %}
+                                        <div class="text-danger small">
+                                            {{ form.description.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </fieldset>
+
+                            <!-- Pricing & Availability -->
+                            <fieldset class="mb-4">
+                                <legend class="h5 mb-3">Pricing & Availability</legend>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.price_per_night.id_for_label }}" class="form-label">Price per Night (₱)</label>
+                                            {{ form.price_per_night }}
+                                            {% if form.price_per_night.errors %}
+                                                <div class="text-danger small">
+                                                    {{ form.price_per_night.errors }}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Status</label>
+                                            <div class="form-check">
+                                                {{ form.is_available }}
+                                                <label class="form-check-label" for="{{ form.is_available.id_for_label }}">
+                                                    Mark as Available
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <!-- Amenities & Image -->
+                            <fieldset class="mb-4">
+                                <legend class="h5 mb-3">Amenities & Image</legend>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.amenities.id_for_label }}" class="form-label">Amenities</label>
+                                    {{ form.amenities }}
+                                    <small class="form-text text-muted">
+                                        List amenities separated by commas (e.g., WiFi, TV, AC, Minibar)
+                                    </small>
+                                    {% if form.amenities.errors %}
+                                        <div class="text-danger small">
+                                            {{ form.amenities.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="{{ form.image.id_for_label }}" class="form-label">Room Image</label>
+                                    {% if form.image.value %}
+                                        <div class="mb-2">
+                                            <img src="{{ form.image.value.url }}" alt="Room image" 
+                                                 class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
+                                        </div>
+                                    {% endif %}
+                                    {{ form.image }}
+                                    <small class="form-text text-muted">
+                                        Upload a main image for the room. Accepted formats: JPG, PNG, GIF
+                                    </small>
+                                    {% if form.image.errors %}
+                                        <div class="text-danger small">
+                                            {{ form.image.errors }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </fieldset>
+
+                            <!-- Form Actions -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    {% if room %}Save Changes{% else %}Create Room{% endif %}
+                                </button>
+                                <a href="{% url 'rooms:list' %}" class="btn btn-secondary">Cancel</a>
+                                {% if room %}
+                                    <form method="POST" action="{% url 'rooms:delete' room.id %}" 
+                                          style="display:inline;"
+                                          onsubmit="return confirm('Are you sure you want to delete this room?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger">Delete Room</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Gallery (if editing) -->
+        {% if room and images %}
+            <div class="row mt-4">
+                <div class="col-md-8 offset-md-2">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Additional Images</h5>
+                            <div class="row">
+                                {% for image in images %}
+                                    <div class="col-md-4 mb-3">
+                                        <div class="card">
+                                            <img src="{{ image.image.url }}" class="card-img-top" 
+                                                 alt="{{ image.caption }}" style="height: 150px; object-fit: cover;">
+                                            <div class="card-body p-2">
+                                                {% if image.caption %}
+                                                    <small class="text-muted">{{ image.caption }}</small>
+                                                {% else %}
+                                                    <small class="text-muted">No caption</small>
+                                                {% endif %}
+                                            </div>
+                                            <form method="POST" action="{% url 'rooms:delete_image' image.id %}" 
+                                                  class="d-grid"
+                                                  onsubmit="return confirm('Delete this image?');">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

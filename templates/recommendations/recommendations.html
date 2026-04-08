@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recommended Rooms For You - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <a href="{% url 'recommendations:user_profile' %}" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="fas fa-arrow-left"></i> Back to Profile
+            </a>
+            <h2 class="mb-1">
+                <i class="fas fa-heart"></i> Rooms Recommended For You
+            </h2>
+            <p class="text-muted">
+                {% if has_history %}
+                    Based on your {{ profile.booking_count }} booking{{ profile.booking_count|pluralize }}
+                {% else %}
+                    Our most popular rooms
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    {% if has_history %}
+        <!-- Your Profile Summary -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <small class="text-muted d-block mb-1">Favorite Type</small>
+                        <h6 class="mb-0">
+                            {% if profile.favorite_room_type %}
+                                <span class="badge bg-info">{{ profile.favorite_room_type }}</span>
+                            {% else %}
+                                Mixed
+                            {% endif %}
+                        </h6>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <small class="text-muted d-block mb-1">Avg Stay</small>
+                        <h6 class="mb-0">{{ profile.average_stay_duration|floatformat:1 }} nights</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <small class="text-muted d-block mb-1">Avg Price</small>
+                        <h6 class="mb-0">₱{{ profile.average_price|floatformat:0 }}/night</h6>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <small class="text-muted d-block mb-1">Total Bookings</small>
+                        <h6 class="mb-0">{{ profile.booking_count }}</h6>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Recommendations Grid -->
+    <div class="row g-4 mb-4">
+        {% for rec in recommendations %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100 border-1 shadow-sm recommendation-card">
+                    <!-- Match Score Badge -->
+                    <div class="position-absolute top-0 end-0 p-3 z-3">
+                        <div class="text-center">
+                            <div class="badge bg-success p-2" style="font-size: 1.1rem; min-width: 60px;">
+                                {{ rec.score }}%
+                            </div>
+                            <small class="d-block text-muted mt-1">Match</small>
+                        </div>
+                    </div>
+
+                    <!-- Header with Room Type -->
+                    <div class="card-header bg-gradient">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="fas fa-door-open text-primary"></i>
+                                    Room {{ rec.room.room_number }}
+                                </h5>
+                                <span class="badge bg-info">{{ rec.room.get_room_type_display }}</span>
+                                <span class="badge bg-warning">{{ rec.popularity }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Room Details -->
+                    <div class="card-body">
+                        <!-- Price Section -->
+                        <div class="mb-3 p-3 bg-light rounded">
+                            <small class="text-muted">Price per night</small>
+                            <h4 class="text-success mb-0">₱{{ rec.room.price_per_night }}</h4>
+                        </div>
+
+                        <!-- Room Info -->
+                        <ul class="list-unstyled mb-3">
+                            <li class="mb-2">
+                                <i class="fas fa-users text-info"></i>
+                                <span class="ms-2">Capacity: <strong>{{ rec.room.capacity }} guests</strong></span>
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-star text-warning"></i>
+                                <span class="ms-2"><strong>{{ rec.booking_count }}</strong> satisfied bookings</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span class="ms-2">Available for booking</span>
+                            </li>
+                        </ul>
+
+                        <!-- Why Recommended -->
+                        <div class="alert alert-info alert-sm py-3 px-3 mb-3">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-lightbulb text-info me-2 mt-1"></i>
+                                <div>
+                                    <small class="d-block"><strong>Why recommended:</strong></small>
+                                    <small>{{ rec.reason }}</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        {% if rec.room.description %}
+                            <p class="small text-muted mb-3">
+                                <i class="fas fa-quote-left"></i>
+                                {{ rec.room.description|truncatewords:20 }}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Action Button -->
+                    <div class="card-footer bg-white border-top d-grid">
+                        <a href="{% url 'rooms:detail' rec.room.id %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-eye"></i> View Room Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>No recommendations available.</strong>
+                    Try booking a room to get personalized suggestions!
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- Additional Actions -->
+    {% if recommendations %}
+        <div class="row">
+            <div class="col">
+                <div class="card border-0 bg-light">
+                    <div class="card-body">
+                        <h6 class="mb-2">Not finding what you're looking for?</h6>
+                        <a href="{% url 'rooms:list' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-search"></i> Browse All Rooms
+                        </a>
+                        <a href="{% url 'auth:dashboard' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-user"></i> View Your Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+
+    .bg-gradient .card-title {
+        color: white;
+    }
+
+    .recommendation-card {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .recommendation-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .alert-sm {
+        background-color: rgba(13, 202, 240, 0.1);
+        border: 1px solid rgba(13, 202, 240, 0.2);
+        border-radius: 0.375rem;
+    }
+
+    .alert-sm small {
+        color: #0c63e4;
+    }
+</style>
+{% endblock %}

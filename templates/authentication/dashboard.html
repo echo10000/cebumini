@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Cebu Hotel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-card {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .dashboard-card h3 {
+        color: #1a1a1a;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-label {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+
+    .info-value {
+        color: #666;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .status-active {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .status-inactive {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .status-verified {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .status-pending {
+        background: #fffbeb;
+        color: #b45309;
+    }
+
+    .admin-section {
+        background: #fef3c7;
+        border-left: 4px solid #f59e0b;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 3rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <div>
+            <h1 style="color: #1a1a1a; font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome, {{ user.first_name }}! 👋</h1>
+            <p style="color: #666; font-size: 1rem;">Your role: <strong>{{ user.get_role_display }}</strong></p>
+        </div>
+        <a href="{% url 'auth:logout' %}" class="btn-secondary">Logout</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="grid-2">
+        <!-- Profile Information -->
+        <div class="dashboard-card">
+            <h3>👤 Profile Information</h3>
+            <div class="info-item">
+                <span class="info-label">Name:</span>
+                <span class="info-value">{{ user.first_name }} {{ user.last_name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email:</span>
+                <span class="info-value">{{ user.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Phone:</span>
+                <span class="info-value">{{ user.phone_number|default:"Not provided" }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Member Since:</span>
+                <span class="info-value">{{ user.created_at|date:"M d, Y" }}</span>
+            </div>
+        </div>
+
+        <!-- Account Status -->
+        <div class="dashboard-card">
+            <h3>🔐 Account Status</h3>
+            <div class="info-item">
+                <span class="info-label">Role:</span>
+                <span class="info-value">{{ user.get_role_display }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="info-value">
+                    {% if user.is_active %}
+                        <span class="status-badge status-active">Active</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">Inactive</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email Verified:</span>
+                <span class="info-value">
+                    {% if user.is_email_verified %}
+                        <span class="status-badge status-verified">Yes</span>
+                    {% else %}
+                        <span class="status-badge status-pending">Pending</span>
+                    {% endif %}
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Admin:</span>
+                <span class="info-value">
+                    {% if is_admin %}
+                        <span class="status-badge status-verified">Yes</span>
+                    {% else %}
+                        <span class="status-badge status-inactive">No</span>
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    {% if is_admin %}
+    <div class="dashboard-card admin-section">
+        <h3>⚙️ Admin Panel</h3>
+        <p style="color: #b45309; margin-bottom: 1rem;">You have administrative privileges. Access the admin dashboard to manage bookings, rooms, and users.</p>
+        <a href="/admin/" class="btn-primary" style="background: #f59e0b; border-color: #f59e0b;">Go to Admin Dashboard</a>
+    </div>
+    {% endif %}
+
+    <!-- Quick Links -->
+    <div class="dashboard-card">
+        <h3>🔗 Quick Links</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <a href="{% url 'rooms:list' %}" class="btn-secondary">Browse Rooms</a>
+            {% if not user.is_admin and not user.is_staff_member %}
+            <a href="{% url 'bookings:booking_history' %}" class="btn-secondary">My Bookings</a>
+            {% endif %}
+            <a href="{% url 'recommendations:recommendations' %}" class="btn-secondary">Recommendations</a>
+            <a href="/" class="btn-secondary">Back to Home</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

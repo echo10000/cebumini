@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Cebu Luxury Hotel - Exquisite Island Retreat{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    {% block extra_css %}{% endblock %}
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            color: #1a1a1a;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+        }
+
+        /* Main Content Padding for Fixed Navbar */
+        main {
+            padding-top: 80px;
+        }
+
+        /* Navigation Styles */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 0.75rem 0;
+        }
+
+        nav.scrolled {
+            background: rgba(255, 255, 255, 0.98);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+            padding: 0.5rem 0;
+        }
+
+        .navbar-brand {
+            font-size: 1rem !important;
+            font-weight: 700;
+        }
+
+        .nav-link {
+            font-size: 0.9rem !important;
+            padding: 0.25rem 0.75rem !important;
+        }
+
+        .nav-brand {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            text-decoration: none;
+            letter-spacing: -1px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #666;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #1a1a1a;
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Page Content */
+        section {
+            scroll-margin-top: 80px;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #1a1a1a;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .py-20 {
+            padding: 5rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        /* Card Styles */
+        .card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Button Styles */
+        .btn-primary {
+            background: #1a1a1a;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #1a1a1a;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #1a1a1a;
+            padding: 0.75rem 2rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: 2px solid #1a1a1a;
+            display: inline-block;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        /* Booking Button Style */
+        .booking-btn {
+            background: linear-gradient(135deg, #1a1a1a 0%, #3a3a3a 100%);
+            color: white;
+            border: none;
+            padding: 0.875rem 2.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .booking-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Form Styles */
+        input, select, textarea {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 0.875rem 1rem;
+            font-size: 0.95rem;
+            font-family: 'Lato', sans-serif;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1a1a1a;
+            box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: block;
+            color: #1a1a1a;
+        }
+
+        /* Table Styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+
+        table thead {
+            background: #f5f5f5;
+        }
+
+        table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #1a1a1a;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        table tbody tr:hover {
+            background: #f9f9f9;
+        }
+
+        /* Alert Styles */
+        .alert {
+            padding: 1.25rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            color: #166534;
+            border-left-color: #22c55e;
+        }
+
+        .alert-error {
+            background: #fef2f2;
+            color: #991b1b;
+            border-left-color: #ef4444;
+        }
+
+        .alert-info {
+            background: #f0f9ff;
+            color: #0c4a6e;
+            border-left-color: #0ea5e9;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            color: white;
+            padding: 4rem 0 2rem;
+            margin-top: 5rem;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section a {
+            color: #bbb;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            background: white;
+            color: #1a1a1a;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 1rem;
+                font-size: 0.9rem;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .nav-links {
+                display: none;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-bottom {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav-transparent" id="navbar">
+        <div class="container">
+            <div class="flex justify-between items-center py-4">
+                <div class="flex items-center gap-2">
+                    <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.3rem;">C</div>
+                    <span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; color: #1a1a1a;">Cebu Luxury</span>
+                </div>
+                
+                <ul style="display: flex; gap: 3rem; list-style: none; align-items: center;">
+                    <li><a href="/" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">Home</a></li>
+                    <li><a href="{% url 'rooms:list' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">Rooms</a></li>
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'auth:dashboard' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">Dashboard</a></li>
+                        {% if not user.is_admin and not user.is_staff_member %}
+                        <li><a href="{% url 'bookings:booking_history' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">My Bookings</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li><a href="/" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">About</a></li>
+                    {% endif %}
+                </ul>
+                
+                <div style="display: flex; gap: 1rem;">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'auth:dashboard' %}" class="btn" style="padding: 0.6rem 1.5rem; background: #1a1a1a; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">Dashboard</a>
+                        <a href="{% url 'auth:logout' %}" class="btn" style="padding: 0.6rem 1.5rem; background: transparent; color: #1a1a1a; border: 1px solid #1a1a1a; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#1a1a1a'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#1a1a1a'">Logout</a>
+                    {% else %}
+                        <a href="{% url 'account_login' %}" class="btn" style="padding: 0.6rem 1.5rem; background: transparent; color: #1a1a1a; border: 1px solid #1a1a1a; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#1a1a1a'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#1a1a1a'">Login</a>
+                        <a href="{% url 'account_signup' %}" class="btn booking-btn" style="margin: 0; padding: 0.6rem 1.5rem; font-size: 0.95rem;">Sign Up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container py-20">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        const scrollThreshold = 80;
+        
+        if (navbar) {
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > scrollThreshold) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h4>Navigation</h4>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="{% url 'rooms:list' %}">Rooms & Suites</a></li>
+                        <li><a href="{% url 'rooms:list' %}">Browse All Rooms</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="{% url 'rooms:list' %}">Make a Reservation</a></li>
+                        <li><a href="#">Corporate Events</a></li>
+                        <li><a href="#">Weddings</a></li>
+                        <li><a href="#">Group Bookings</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h4>User Account</h4>
+                    <ul>
+                        {% if user.is_authenticated %}
+                            <li><a href="{% url 'auth:dashboard' %}">Dashboard</a></li>
+                            {% if not user.is_admin and not user.is_staff_member %}
+                            <li><a href="{% url 'bookings:booking_history' %}">My Bookings</a></li>
+                            {% endif %}
+                            <li><a href="{% url 'recommendations:recommendations' %}">Recommendations</a></li>
+                            <li><a href="{% url 'auth:logout' %}">Logout</a></li>
+                        {% else %}
+                            <li><a href="{% url 'account_login' %}">Login</a></li>
+                            <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
+                            <li><a href="{% url 'account_reset_password' %}">Forgot Password</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><a href="tel:+1234567890">+1 (234) 567-890</a></li>
+                        <li><a href="mailto:info@cebuhotel.com">info@cebuhotel.com</a></li>
+                        <li style="margin-top: 1rem;">
+                            <strong>Address</strong><br>
+                            <span style="color: #bbb; font-size: 0.9rem;">123 Island Road, Cebu City<br>Philippines 6000</span>
+                        </li>
+                    </ul>
+                    <div class="social-icons">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2026 Cebu Luxury Hotel. All rights reserved.</p>
+                <p>Designed with elegance | Crafted with excellence</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation scroll effect
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+
+    <!-- Chatbot Widget -->
+    {% include 'chatbot/chatbot_widget.html' %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

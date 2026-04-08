@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters %}
+
+{% block title %}Revenue Analytics - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col">
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-sm mb-2">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+            <h2 class="mb-1">
+                <i class="fas fa-chart-bar"></i> Revenue Analytics
+            </h2>
+            <p class="text-muted">Track hotel revenue performance</p>
+        </div>
+    </div>
+
+    <!-- Revenue Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Total Revenue</p>
+                    <h3 class="mb-0">₱{{ revenue_analytics.total_revenue|floatformat:0 }}</h3>
+                    <small class="text-success">All confirmed bookings</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Today's Revenue</p>
+                    <h3 class="mb-0">₱{{ revenue_analytics.daily_revenue|default:0|floatformat:0 }}</h3>
+                    <small class="text-muted">From today's check-ins</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Average Booking Value</p>
+                    <h3 class="mb-0">₱{{ revenue_analytics.average_booking_value|floatformat:0 }}</h3>
+                    <small class="text-muted">Per confirmed booking</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <p class="text-muted small mb-1">Revenue by Status</p>
+                    <small class="text-success d-block"><i class="fas fa-check-circle"></i> ₱{{ revenue_analytics.revenue_by_status.confirmed|floatformat:0 }}</small>
+                    <small class="text-muted"><i class="fas fa-hourglass-half"></i> ₱{{ revenue_analytics.revenue_by_status.pending|floatformat:0 }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue by Room Type -->
+    <div class="row g-3 mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Revenue by Room Type</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Room Type</th>
+                                <th>Bookings</th>
+                                <th>Total Revenue</th>
+                                <th>Average Price</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for room_type in revenue_analytics.revenue_by_room_type %}
+                                <tr>
+                                    <td><strong>{{ room_type.room_type }}</strong></td>
+                                    <td>{{ room_type.booking_count }}</td>
+                                    <td class="text-success"><strong>₱{{ room_type.total_revenue|floatformat:0 }}</strong></td>
+                                    <td>₱{{ room_type.average_price|floatformat:0 }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" 
+                                                 style="width: {% if revenue_analytics.total_revenue > 0 %}{{ room_type.total_revenue|add:0|multiply:100|divide:revenue_analytics.total_revenue }}{% else %}0{% endif %}%">
+                                            </div>
+                                        </div>
+                                        <small>{{ room_type.percentage }}%</small>
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-4">No revenue data</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Daily Revenue Chart Section -->
+    <div class="row g-3 mb-4">
+        <div class="col">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Daily Revenue (Last 30 Days)</h5>
+                    <span class="badge bg-info">Chart Ready</span>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trends -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Weekly Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>This Week</span>
+                            <strong class="text-success">₱{{ revenue_analytics.this_week_revenue|floatformat:0 }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Last Week</span>
+                            <strong>₱{{ revenue_analytics.last_week_revenue|floatformat:0 }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Week Average</span>
+                            <strong>₱{{ revenue_analytics.weekly_average|floatformat:0 }}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Trend</span>
+                            {% if revenue_analytics.week_trend %}
+                                <strong class="text-success">
+                                    <i class="fas fa-arrow-up"></i> +{{ revenue_analytics.week_trend|floatformat:0 }}%
+                                </strong>
+                            {% else %}
+                                <strong class="text-muted">No change</strong>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Monthly Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>This Month</span>
+                            <strong class="text-success">₱{{ revenue_analytics.this_month_revenue|floatformat:0 }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Last Month</span>
+                            <strong>₱{{ revenue_analytics.last_month_revenue|floatformat:0 }}</strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Monthly Average</span>
+                            <strong>₱{{ revenue_analytics.monthly_average|floatformat:0 }}</strong>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span>Trend</span>
+                            {% if revenue_analytics.month_trend %}
+                                <strong class="text-success">
+                                    <i class="fas fa-arrow-up"></i> +{{ revenue_analytics.month_trend|floatformat:0 }}%
+                                </strong>
+                            {% else %}
+                                <strong class="text-muted">No change</strong>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Revenue Chart
+    const revenueData = {{ revenue_chart_data|safe }};
+    const ctx = document.getElementById('revenueChart');
+    
+    if (ctx && revenueData) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: revenueData.labels,
+                datasets: [{
+                    label: 'Daily Revenue',
+                    data: revenueData.values,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#0d6efd',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₱' + value.toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+<style>
+    .card {
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12) !important;
+    }
+    
+    .progress {
+        background-color: #f0f0f0;
+    }
+</style>
+{% endblock %}

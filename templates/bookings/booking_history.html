@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Booking History - Cebu Hotel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .booking-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .booking-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    }
+
+    .booking-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    .booking-status {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .status-confirmed {
+        background: #f0fdf4;
+        color: #166534;
+    }
+
+    .status-pending {
+        background: #fffbeb;
+        color: #b45309;
+    }
+
+    .status-cancelled {
+        background: #fef2f2;
+        color: #991b1b;
+    }
+
+    .booking-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 0.25rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #999;
+    }
+
+    .detail-value {
+        color: #1a1a1a;
+        font-size: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div>
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+        <div>
+            <h2 style="color: #1a1a1a; font-size: 2.5rem; margin-bottom: 0.5rem;">
+                <i class="fas fa-history"></i> My Bookings
+            </h2>
+            <p style="color: #666;">View and manage your reservations</p>
+        </div>
+        <a href="{% url 'rooms:list' %}" class="btn-primary">
+            <i class="fas fa-plus-circle"></i> Make New Booking
+        </a>
+    </div>
+
+    <!-- Status Filter -->
+    <div style="margin-bottom: 2rem;">
+        <form method="get" id="filter-form" style="display: flex; gap: 1rem; align-items: center;">
+            <select name="status" style="max-width: 250px;" onchange="document.getElementById('filter-form').submit();">
+                <option value="">All Bookings</option>
+                <option value="PENDING" {% if status_filter == 'PENDING' %}selected{% endif %}>Pending</option>
+                <option value="CONFIRMED" {% if status_filter == 'CONFIRMED' %}selected{% endif %}>Confirmed</option>
+                <option value="CANCELLED" {% if status_filter == 'CANCELLED' %}selected{% endif %}>Cancelled</option>
+            </select>
+            {% if status_filter %}
+                <a href="?status=" class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                    <i class="fas fa-times"></i> Clear Filter
+                </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Bookings List -->
+    {% if bookings %}
+        <div class="container">
+            {% for booking in bookings %}
+                <div class="booking-card">
+                    <div class="row g-4">
+                        <!-- Room Image -->
+                        <div class="col-md-3">
+                            {% if booking.room.image %}
+                                <img src="{{ booking.room.image.url }}" alt="{{ booking.room.room_number }}" class="img-fluid rounded">
+                            {% else %}
+                                <div class="bg-secondary rounded text-white text-center py-5">
+                                    <i class="fas fa-image fa-3x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Booking Details -->
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <h5 class="mb-2">
+                                Room {{ booking.room.room_number }}
+                                <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% else %}danger{% endif %} ms-2">
+                                    {{ booking.get_status_display }}
+                                </span>
+                            </h5>
+                            <p class="mb-2 text-muted">{{ booking.room.get_room_type_display }}</p>
+                            
+                            <div class="row g-3 small">
+                                <div class="col-6">
+                                    <p class="text-muted mb-1">Check-in</p>
+                                    <p class="fw-bold">{{ booking.check_in|date:"F d, Y" }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <p class="text-muted mb-1">Check-out</p>
+                                    <p class="fw-bold">{{ booking.check_out|date:"F d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price & Action -->
+                        <div class="col-md-3 text-md-end">
+                            <p class="text-muted mb-2">Total Amount</p>
+                            <p class="h5 text-primary mb-3">₱{{ booking.total_price }}</p>
+                            
+                            <div class="d-flex flex-column gap-2">
+                                <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                                {% if booking.can_be_cancelled %}
+                                    <a href="{% url 'bookings:cancel_booking' booking.id %}" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <nav class="mt-4" aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if status_filter %}&status={{ status_filter }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% else %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if status_filter %}&status={{ status_filter }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if status_filter %}&status={{ status_filter }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="fas fa-inbox text-muted" style="font-size: 4rem;"></i>
+            <h5 class="mt-3">No bookings found</h5>
+            <p class="text-muted mb-3">You don't have any bookings yet.</p>
+            <a href="{% url 'rooms:list' %}" class="btn btn-primary">
+                <i class="fas fa-door-open"></i> Browse Rooms & Book Now
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

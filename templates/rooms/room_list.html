@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Rooms - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <h1>🛏️ Our Rooms</h1>
+                <p class="text-muted">Browse our comfortable and well-equipped rooms</p>
+            </div>
+            {% if user.is_authenticated and user.is_admin %}
+            <div class="col-md-4 text-md-end">
+                <a href="{% url 'rooms:create' %}" class="btn btn-primary">
+                    ➕ Add New Room
+                </a>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Search Bar -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <form method="GET" class="card p-3">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <input type="text" name="search" class="form-control" 
+                                   placeholder="Search rooms..." 
+                                   value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-md-2">
+                            <select name="room_type" class="form-control">
+                                <option value="">All Types</option>
+                                {% for value, label in room_types %}
+                                    <option value="{{ value }}" {% if request.GET.room_type == value %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="min_price" class="form-control" 
+                                   placeholder="Min Price" step="0.01" 
+                                   value="{{ request.GET.min_price }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="number" name="max_price" class="form-control" 
+                                   placeholder="Max Price" step="0.01"
+                                   value="{{ request.GET.max_price }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary w-100">
+                                🔍 Filter
+                            </button>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <input type="number" name="capacity" class="form-control" 
+                                   placeholder="Min Capacity" min="1"
+                                   value="{{ request.GET.capacity }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-check">
+                                <input type="checkbox" name="available_only" class="form-check-input" 
+                                       {% if request.GET.available_only %}checked{% endif %}>
+                                <span class="form-check-label">Available only</span>
+                            </label>
+                        </div>
+                        <div class="col-md-4">
+                            <a href="{% url 'rooms:list' %}" class="btn btn-secondary w-100">
+                                ↺ Clear Filters
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rooms Grid -->
+        {% if rooms %}
+            <div class="row">
+                {% for room in rooms %}
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card h-100 room-card">
+                            <!-- Room Image Carousel -->
+                            <div id="carousel-{{ room.id }}" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+                                <div class="carousel-inner">
+                                    <!-- Main Image as First Slide -->
+                                    {% if room.image %}
+                                        <div class="carousel-item active">
+                                            <img src="{{ room.image.url }}" class="d-block w-100" 
+                                                 alt="{{ room.room_number }}" style="height: 250px; object-fit: cover;">
+                                        </div>
+                                    {% else %}
+                                        <div class="carousel-item active">
+                                            <div class="bg-light d-flex align-items-center justify-content-center w-100" 
+                                                 style="height: 250px;">
+                                                <span class="text-muted">No main image</span>
+                                            </div>
+                                        </div>
+                                    {% endif %}
+
+                                    <!-- Gallery Images -->
+                                    {% for image in room.images.all %}
+                                        <div class="carousel-item">
+                                            <img src="{{ image.image.url }}" class="d-block w-100" 
+                                                 alt="{{ image.caption }}" style="height: 250px; object-fit: cover;">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+
+                                <!-- Carousel Controls - Only show if there are multiple images -->
+                                {% if room.images.all.count > 0 %}
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ room.id }}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ room.id }}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    </button>
+                                {% endif %}
+                            </div>
+
+                            <!-- Room Info -->
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title">Room {{ room.room_number }}</h5>
+                                    {% if room.is_available %}
+                                        <span class="badge bg-success">Available</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Occupied</span>
+                                    {% endif %}
+                                </div>
+
+                                <p class="card-text">
+                                    <small class="text-muted">
+                                        {{ room.get_room_type_display }}
+                                    </small>
+                                </p>
+
+                                <div class="mb-2">
+                                    <strong class="text-primary">₱{{ room.price_per_night }}/night</strong>
+                                </div>
+
+                                <div class="mb-2">
+                                    <small>👥 Capacity: {{ room.capacity }} guests</small>
+                                </div>
+
+                                {% if room.get_amenities_list %}
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            ✓ {{ room.get_amenities_list|join:", " }}
+                                        </small>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Card Footer -->
+                            <div class="card-footer bg-white border-top">
+                                <div class="d-flex gap-2">
+                                    <a href="{% url 'rooms:detail' room.id %}" 
+                                       class="btn btn-sm btn-primary flex-grow-1">
+                                        👁️ View Details
+                                    </a>
+                                    {% if user.is_authenticated and user.is_admin %}
+                                        <a href="{% url 'rooms:edit' room.id %}" 
+                                           class="btn btn-sm btn-warning">
+                                            ✏️ Edit
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if rooms.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if rooms.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page=1{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    First
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ rooms.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    Previous
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in rooms.paginator.page_range %}
+                            {% if rooms.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                        {{ num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if rooms.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ rooms.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    Next
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ rooms.paginator.num_pages }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    Last
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info">
+                <h5>No rooms found</h5>
+                <p>Try adjusting your filters or search criteria.</p>
+            </div>
+        {% endif %}
+
+        <!-- Recommendations Section -->
+        {% if has_recommendations and recommendations %}
+            <div class="mt-5">
+                {% include "recommendations/recommendations_widget.html" with recommendations=recommendations %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .room-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .room-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,640 @@
+{% extends 'base.html' %}
+
+{% block title %}Luxury Hotel in Cebu - Cebu Hotel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero {
+        background: linear-gradient(135deg, rgba(30, 60, 114, 0.9) 0%, rgba(42, 82, 152, 0.9) 100%), url('https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=1200&h=600') center/cover;
+        color: white;
+        padding: 180px 0;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    .hero h1 {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        animation: fadeInDown 0.8s ease;
+    }
+    .hero p {
+        font-size: 1.3rem;
+        margin-bottom: 0;
+        opacity: 0.95;
+        animation: fadeInUp 0.8s ease 0.2s both;
+    }
+    .search-box {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        margin-top: 30px;
+        animation: fadeInUp 0.8s ease 0.4s both;
+    }
+    .search-box .form-label {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .search-box button {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        border: none;
+        padding: 12px 30px;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    .search-box button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(30, 60, 114, 0.3);
+    }
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .features-section {
+        padding: 80px 0;
+        background-color: #f8f9fa;
+    }
+    .feature-box {
+        text-align: center;
+        padding: 30px;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .feature-box:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    .feature-box i {
+        font-size: 3rem;
+        color: var(--accent-color);
+        margin-bottom: 20px;
+    }
+    .feature-box h4 {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    .rooms-section {
+        padding: 80px 0;
+    }
+    .room-card {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    .room-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+    .room-image-container {
+        height: 250px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+    }
+    .room-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .room-carousel {
+        position: relative;
+    }
+    .carousel-control-prev, .carousel-control-next {
+        width: auto;
+        background: rgba(30, 60, 114, 0.7);
+        border: none;
+        opacity: 1;
+    }
+    .carousel-control-prev:hover, .carousel-control-next:hover {
+        background: rgba(30, 60, 114, 0.9);
+    }
+    .carousel-indicators {
+        bottom: 10px;
+    }
+    .carousel-indicators button {
+        background-color: rgba(255, 255, 255, 0.5);
+    }
+    .carousel-indicators button.active {
+        background-color: var(--accent-color);
+    }
+    .room-info {
+        padding: 20px;
+    }
+    .room-name {
+        color: var(--primary-color);
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 10px;
+    }
+    .room-details {
+        font-size: 0.9rem;
+        color: var(--text-light);
+        margin-bottom: 10px;
+    }
+    .room-amenities {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-bottom: 10px;
+    }
+    .room-amenities span {
+        display: inline-block;
+        background: #f0f0f0;
+        padding: 3px 8px;
+        border-radius: 4px;
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+    .room-price {
+        color: var(--accent-color);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+    .btn-book {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        width: 100%;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    .btn-book:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(30, 60, 114, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    .amenities-section {
+        padding: 80px 0;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+    }
+    .amenity-item {
+        text-align: center;
+        padding: 20px;
+    }
+    .amenity-item i {
+        font-size: 2.5rem;
+        color: var(--accent-color);
+        margin-bottom: 15px;
+    }
+    .testimonials-section {
+        padding: 80px 0;
+        background-color: #f8f9fa;
+    }
+    .testimonial-card {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+    .testimonial-stars {
+        color: var(--accent-color);
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    .testimonial-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 1.1rem;
+    }
+    .testimonial-text {
+        color: var(--text-light);
+        margin-bottom: 15px;
+        font-style: italic;
+    }
+    .testimonial-author {
+        color: var(--primary-color);
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+    .contact-section {
+        padding: 80px 0;
+        background: white;
+    }
+    .contact-form-wrapper {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    .cta-section {
+        padding: 80px 0;
+        background-color: #f8f9fa;
+        text-align: center;
+    }
+    .cta-section h2 {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+    .btn-cta {
+        padding: 15px 50px;
+        font-size: 1.1rem;
+        border-radius: 8px;
+        margin: 0 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-cta-primary {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        color: white;
+        border: none;
+    }
+    .btn-cta-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(30, 60, 114, 0.3);
+        color: white;
+    }
+    .btn-cta-secondary {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+    .btn-cta-secondary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero">
+    <div class="container">
+        <h1>Welcome to Cebu Hotel</h1>
+        <p>Experience Luxury and Comfort in the Heart of Paradise</p>
+        
+        <!-- Search Bar -->
+        <div class="search-box">
+            <form method="GET" action="{% url 'rooms:list' %}" class="row g-3">
+                <div class="col-md-3">
+                    <label for="checkin" class="form-label">Check-in</label>
+                    <input type="date" class="form-control" id="checkin" name="check_in" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="checkout" class="form-label">Check-out</label>
+                    <input type="date" class="form-control" id="checkout" name="check_out" required>
+                </div>
+                <div class="col-md-3">
+                    <label for="guests" class="form-label">Guests</label>
+                    <input type="number" class="form-control" id="guests" name="guests" value="1" min="1" max="10">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-dark w-100">Search</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">Why Choose Cebu Hotel?</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="feature-box">
+                    <i class="fas fa-star"></i>
+                    <h4>Luxury Rooms</h4>
+                    <p>Elegantly designed rooms with modern amenities and stunning views of the city.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-box">
+                    <i class="fas fa-concierge-bell"></i>
+                    <h4>24/7 Services</h4>
+                    <p>Round-the-clock customer service and concierge to fulfill all your needs.</p>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="feature-box">
+                    <i class="fas fa-utensils"></i>
+                    <h4>Fine Dining</h4>
+                    <p>World-class restaurants and bars offering international and local cuisine.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Rooms Showcase with Carousels -->
+<section class="rooms-section">
+    <div class="container">
+        <h2 class="section-title">Our Rooms</h2>
+        {% if rooms %}
+            <div class="row">
+                {% for room in rooms %}
+                <div class="col-md-4 mb-4">
+                    <div class="card room-card">
+                        <!-- Image Carousel for Each Room -->
+                        <div id="carousel-{{ room.id }}" class="carousel slide room-carousel" data-bs-ride="carousel">
+                            <div class="carousel-indicators">
+                                {% if room.images.all %}
+                                    {% for image in room.images.all %}
+                                    <button type="button" data-bs-target="#carousel-{{ room.id }}" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-current="true"></button>
+                                    {% endfor %}
+                                {% else %}
+                                    <button type="button" data-bs-target="#carousel-{{ room.id }}" data-bs-slide-to="0" class="active" aria-current="true"></button>
+                                {% endif %}
+                            </div>
+                            <div class="carousel-inner">
+                                {% if room.images.all %}
+                                    {% for image in room.images.all %}
+                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                        <div class="room-image-container">
+                                            <img src="{{ image.image.url }}" alt="{{ image.caption }}" loading="lazy">
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="carousel-item active">
+                                        <div class="room-image-container">
+                                            <i class="fas fa-bed"></i>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {% if room.images.all|length > 1 %}
+                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel-{{ room.id }}" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#carousel-{{ room.id }}" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="room-info">
+                            <h5 class="room-name">{{ room.room_type|title }}</h5>
+                            <p class="room-details">
+                                <i class="fas fa-door-open"></i> Room #{{ room.room_number }} 
+                                • <i class="fas fa-users"></i> {{ room.capacity }} guests max
+                            </p>
+                            {% if room.amenities %}
+                            <div class="room-amenities">
+                                {% for amenity in room.get_amenities_list %}
+                                    <span><i class="fas fa-check"></i> {{ amenity }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                            {% if room.description %}
+                            <p class="text-muted small">{{ room.description|truncatewords:15 }}</p>
+                            {% endif %}
+                            <div class="room-price">${{ room.price_per_night }}/night</div>
+                            <a href="{% url 'rooms:list' %}" class="btn-book">View Details & Book</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="text-center mt-4">
+                <a href="{% url 'rooms:list' %}" class="btn btn-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; border: none;">
+                    <i class="fas fa-door-open"></i> View All Rooms
+                </a>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i> No rooms available at the moment. Please check back later!
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Amenities Section -->
+<section class="amenities-section">
+    <div class="container">
+        <h2 class="section-title" style="color: white;">Our Amenities</h2>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-swimming-pool"></i>
+                    <h6>Swimming Pool</h6>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-dumbbell"></i>
+                    <h6>Fitness Center</h6>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-spa"></i>
+                    <h6>Spa & Wellness</h6>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-wifi"></i>
+                    <h6>Free WiFi</h6>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-car"></i>
+                    <h6>Parking</h6>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-utensils"></i>
+                    <h6>Restaurant</h6>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-video"></i>
+                    <h6>Business Center</h6>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 mb-4">
+                <div class="amenity-item">
+                    <i class="fas fa-concierge-bell"></i>
+                    <h6>Concierge</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Testimonials/Reviews Section -->
+{% if testimonials %}
+<section class="testimonials-section">
+    <div class="container">
+        <h2 class="section-title">What Our Guests Say</h2>
+        
+        <!-- Testimonials Carousel -->
+        <div id="testimonials-carousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-indicators">
+                {% for testimonial in testimonials %}
+                <button type="button" data-bs-target="#testimonials-carousel" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active"{% endif %} aria-current="true"></button>
+                {% endfor %}
+            </div>
+            <div class="carousel-inner">
+                {% for testimonial in testimonials %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <div class="row">
+                        <div class="col-md-8 offset-md-2">
+                            <div class="testimonial-card text-center">
+                                <div class="testimonial-stars">{{ testimonial.get_rating_stars }}</div>
+                                <h4 class="testimonial-title">{{ testimonial.title }}</h4>
+                                <p class="testimonial-text">"{{ testimonial.comment }}"</p>
+                                <p class="testimonial-author">— {{ testimonial.guest_name }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonials-carousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonials-carousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon"></span>
+            </button>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="{% url 'auth:contact' %}" class="btn btn-lg" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; border: none;">
+                <i class="fas fa-star"></i> Share Your Experience
+            </a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Contact Section -->
+<section class="contact-section">
+    <div class="container">
+        <h2 class="section-title">Get In Touch</h2>
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="contact-form-wrapper">
+                    <h4 class="text-primary mb-4"><i class="fas fa-envelope"></i> Contact Us</h4>
+                    <form method="POST" action="{% url 'auth:contact' %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.name }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.phone }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.subject }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.message }}
+                        </div>
+                        <button type="submit" class="btn btn-lg w-100" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%); color: white; border: none;">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="contact-form-wrapper">
+                    <h4 class="text-primary mb-4"><i class="fas fa-info-circle"></i> Contact Information</h4>
+                    <div class="mb-4">
+                        <h6 class="text-primary"><i class="fas fa-map-marker-alt"></i> Address</h6>
+                        <p>123 Luxury Avenue<br>Cebu City, Cebu 6000<br>Philippines</p>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="text-primary"><i class="fas fa-phone"></i> Phone</h6>
+                        <p><a href="tel:+63XXX" style="color: var(--primary-color); text-decoration: none;">+63 XXX-XXX-XXXX</a></p>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="text-primary"><i class="fas fa-envelope"></i> Email</h6>
+                        <p><a href="mailto:info@cebuhotel.com" style="color: var(--primary-color); text-decoration: none;">info@cebuhotel.com</a></p>
+                    </div>
+                    <div class="mb-4">
+                        <h6 class="text-primary"><i class="fas fa-clock"></i> Hours</h6>
+                        <p>Monday - Friday: 9:00 AM - 6:00 PM<br>Saturday - Sunday: 10:00 AM - 5:00 PM<br>Holidays: By appointment</p>
+                    </div>
+                    <div>
+                        <h6 class="text-primary"><i class="fas fa-share-alt"></i> Follow Us</h6>
+                        <a href="#" class="me-2" style="font-size: 1.5rem;"><i class="fab fa-facebook text-primary"></i></a>
+                        <a href="#" class="me-2" style="font-size: 1.5rem;"><i class="fab fa-twitter text-primary"></i></a>
+                        <a href="#" class="me-2" style="font-size: 1.5rem;"><i class="fab fa-instagram text-primary"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Ready to Book Your Stay?</h2>
+        <p style="font-size: 1.1rem; color: var(--text-light); margin-bottom: 30px;">
+            Discover the perfect room for your next visit to Cebu City
+        </p>
+        {% if not user.is_authenticated %}
+        <a href="{% url 'auth:register' %}" class="btn btn-cta btn-cta-primary">Get Started</a>
+        <a href="{% url 'auth:login' %}" class="btn btn-cta btn-cta-secondary">Sign In</a>
+        {% else %}
+        <a href="{% url 'rooms:list' %}" class="btn btn-cta btn-cta-primary">Browse Rooms</a>
+        <a href="{% url 'bookings:booking_history' %}" class="btn btn-cta btn-cta-secondary">My Bookings</a>
+        {% endif %}
+    </div>
+</section>
+
+<script>
+function searchRooms() {
+    const checkin = document.getElementById('checkin').value;
+    const checkout = document.getElementById('checkout').value;
+    
+    if (checkin && checkout) {
+        window.location.href = "{% url 'rooms:list' %}?checkin=" + checkin + "&checkout=" + checkout;
+    } else {
+        alert('Please select both check-in and check-out dates');
+    }
+}
+</script>
+{% endblock %}

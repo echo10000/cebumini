@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Details - Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">Payment #{{ payment.id }}</h1>
+                <a href="{% url 'admin_panel:payment_management' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Payment Information -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Payment ID:</label>
+                        <span>#{{ payment.id }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Amount:</label>
+                        <span class="h5 text-success">₱{{ payment.amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Payment Method:</label>
+                        <span>{{ payment.get_payment_method_display }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Status:</label>
+                        <span>
+                            {% if payment.status == 'PENDING' %}
+                                <span class="badge badge-warning">Pending</span>
+                            {% elif payment.status == 'COMPLETED' %}
+                                <span class="badge badge-success">Completed</span>
+                            {% else %}
+                                <span class="badge badge-danger">Failed</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Created Date:</label>
+                        <span>{{ payment.created_at|date:"M d, Y g:i A" }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Notes:</label>
+                        <span>{{ payment.notes|default:"—" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking Information -->
+        <div class="col-md-6">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Booking Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Booking ID:</label>
+                        <span>#{{ booking.id }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Room Number:</label>
+                        <span>{{ booking.room.room_number }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Check-In:</label>
+                        <span>{{ booking.check_in|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Check-Out:</label>
+                        <span>{{ booking.check_out|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Total Amount:</label>
+                        <span class="h6">₱{{ booking.total_price|floatformat:2 }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Status:</label>
+                        <span>
+                            {% if booking.status == 'PENDING' %}
+                                <span class="badge badge-warning">Pending</span>
+                            {% elif booking.status == 'CONFIRMED' %}
+                                <span class="badge badge-success">Confirmed</span>
+                            {% elif booking.status == 'CHECKED_IN' %}
+                                <span class="badge badge-info">Checked In</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Cancelled</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guest Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Guest Information</h6>
+                </div>
+                <div class="card-body">
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Name:</label>
+                        <span>{{ guest.first_name }} {{ guest.last_name }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Email:</label>
+                        <span>{{ guest.email }}</span>
+                    </div>
+                    <div class="info-row mb-3">
+                        <label class="font-weight-bold">Phone:</label>
+                        <span>{{ guest.phone_number|default:"—" }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Forms -->
+    {% if payment.status == 'PENDING' %}
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Payment Action</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="paymentForm">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="notes">Notes (Optional):</label>
+                            <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Add any notes about this payment..."></textarea>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" name="action" value="approve" class="btn btn-success" id="approveBtn">
+                                <i class="fas fa-check"></i> Approve Payment
+                            </button>
+                            <button type="submit" name="action" value="reject" class="btn btn-danger">
+                                <i class="fas fa-times"></i> Reject Payment
+                            </button>
+                            <a href="{% url 'admin_panel:payment_management' %}" class="btn btn-secondary">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .badge-warning { background-color: #f6c23e; color: #000; }
+    .badge-success { background-color: #1cc88a; }
+    .badge-danger { background-color: #e74c3c; }
+    .badge-info { background-color: #36b9cc; }
+    .badge-secondary { background-color: #858796; }
+</style>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" role="dialog" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white border-0">
+                <h5 class="modal-title" id="successModalLabel">
+                    <i class="fas fa-check-circle"></i> Payment Approved Successfully
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                </div>
+                <h6 class="mb-2">Payment #<span id="modalPaymentId">{{ payment.id }}</span> has been approved</h6>
+                <p class="text-muted mb-0">Amount: <strong>₱<span id="modalAmount">{{ payment.amount|floatformat:2 }}</span></strong></p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="redirectToPayments()">
+                    <i class="fas fa-check"></i> OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rejection Modal -->
+<div class="modal fade" id="rejectionModal" tabindex="-1" role="dialog" aria-labelledby="rejectionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-white border-0">
+                <h5 class="modal-title" id="rejectionModalLabel">
+                    <i class="fas fa-info-circle"></i> Payment Rejected
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center py-4">
+                <div class="mb-3">
+                    <i class="fas fa-times-circle text-warning" style="font-size: 3rem;"></i>
+                </div>
+                <h6 class="mb-2">Payment #<span id="rejectionPaymentId">{{ payment.id }}</span> has been rejected</h6>
+                <p class="text-muted mb-0">The guest will be notified of the rejection.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="redirectToPayments()">
+                    <i class="fas fa-check"></i> OK
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('paymentForm');
+        const approveBtn = document.getElementById('approveBtn');
+        
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Get the action button that was clicked
+                const action = event.submitter.value;
+                
+                // If it's an approve action, prevent default and show modal
+                if (action === 'approve') {
+                    e.preventDefault();
+                    
+                    // Show success modal
+                    const successModal = new bootstrap.Modal(document.getElementById('successModal'), {
+                        keyboard: false,
+                        backdrop: 'static'
+                    });
+                    successModal.show();
+                    
+                    // Submit form after a short delay
+                    setTimeout(function() {
+                        form.submit();
+                    }, 1500);
+                } else if (action === 'reject') {
+                    e.preventDefault();
+                    
+                    // Show rejection modal
+                    const rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'), {
+                        keyboard: false,
+                        backdrop: 'static'
+                    });
+                    rejectionModal.show();
+                    
+                    // Submit form after a short delay
+                    setTimeout(function() {
+                        form.submit();
+                    }, 1500);
+                }
+            });
+        }
+    });
+    
+    function redirectToPayments() {
+        window.location.href = '{% url "admin_panel:payment_management" %}';
+    }
+</script>
+
+<!-- Bootstrap JS for Modal -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+{% endblock %}
