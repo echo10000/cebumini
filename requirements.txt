@@ -1,10 +1,12 @@
-Django==4.2.0
+Django==6.0.2
 djangorestframework==3.14.0
 python-decouple==3.8
 Pillow==12.1.1
 pandas
 django-allauth==0.57.0
-django-otp==1.2.4
-qrcode==7.4.2
-google-auth-oauthlib==1.2.0
-google-auth==2.26.2
+django-otp==1.7.0
+qrcode==8.2
+google-auth-oauthlib==1.2.4
+google-auth==2.48.0
+paymongo
+stripe

@@ -137,10 +137,13 @@ SERVER_EMAIL = 'Cebu Hotel <echogoodkid@gmail.com>'
 
 # Allauth Settings
 ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'optional'
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_ADAPTER = 'authentication.adapters.CustomAccountAdapter'
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

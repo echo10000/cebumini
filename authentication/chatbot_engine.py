@@ -18,15 +18,23 @@ class ChatbotEngine:
     
     # Intent keywords - maps keywords to intent types
     INTENT_KEYWORDS = {
-        'room_price': ['price', 'cost', 'how much', 'charge', 'rate', 'expensive', '$', '₱', 'rent'],
-        'room_availability': ['available', 'available room', 'free room', 'vacant', 'open', 'left', 'have any'],
-        'booking_steps': ['book', 'booking', 'how to book', 'reserve', 'reservation', 'step', 'process'],
+        'room_price': ['price', 'cost', 'how much', 'charge', 'rate', 'expensive', '$', '₱', 'rent', 'magkano', 'pila', 'presyo'],
+        'room_availability': ['available', 'available room', 'free room', 'vacant', 'open', 'left', 'have any', 'libre pa', 'may room pa', 'bakante', 'open pa'],
+        'booking_steps': ['book', 'booking', 'how to book', 'reserve', 'reservation', 'step', 'process', 'mag book', 'mag reserve', 'gusto ko mag'],
         'check_in_out': ['check-in', 'check-out', 'check in', 'check out', 'time', 'arrival', 'departure'],
-        'cancellation': ['cancel', 'cancellation', 'refund', 'policy', 'change', 'modify'],
-        'room_details': ['room', 'amenities', 'type', 'capacity', 'bed', 'feature', 'include'],
-        'contact': ['contact', 'phone', 'email', 'call', 'reach', 'support'],
+        'cancellation': ['cancel', 'cancellation', 'refund', 'policy', 'change', 'modify', 'i-cancel', 'kanselahin', 'icancelled'],
+        'room_details': ['room', 'amenities', 'type', 'capacity', 'bed', 'feature', 'include', 'kwarto', 'silid', 'room nyo', 'mga room', 'rooms', 'types'],
+        'contact': ['contact', 'phone', 'email', 'call', 'reach', 'support', 'number nyo', 'numero', 'address nyo'],
         'location': ['location', 'where', 'address', 'cebu'],
-        'help': ['help', 'what can you do', 'commands', 'options', 'menu'],
+        'help': ['help', 'what can you do', 'commands', 'options', 'menu', 'kumusta', 'helo', 'maayong', 'ayo', 'kamusta'],
+        'recommend': [
+            'recommend', 'suggest', 'which room', 'best room', 
+            'what room', 'help me choose', 'room for me', 
+            'which one', 'what should i', 'budget', 'affordable',
+            'luxury room', 'family room', 'couple', 'romantic',
+            'honeymoon', 'anniversary', 'cheapest', 'most expensive',
+            'irekomenda', 'anong room'
+        ],
     }
     
     def __init__(self):
@@ -343,12 +351,100 @@ I can answer questions about:
 📞 **Contact**
 • Ask: "How can I reach you?"
 
+🎁 **Room Recommendations**
+• Ask: "Can you recommend a room for me?"
+
 **Pro Tips:**
 • Ask me naturally - no special keywords needed
 • I'm here 24/7 to help
 • For complex issues, I'll connect you with a real agent
 
 What would you like to know? 😊"""
+        return response
+    
+    def _recommend_room(self, message: str) -> str:
+        """
+        Recommends a room based on budget or guest count keywords.
+        Pulls live prices from the Room model.
+        """
+        message_lower = message.lower()
+
+        # Pull rooms from DB ordered by price (include all rooms, regardless of availability flag)
+        rooms = Room.objects.all().order_by('price_per_night')
+
+        if not rooms.exists():
+            return (
+                "I'm unable to retrieve room information at the moment. "
+                "Please contact our front desk at +63 32 412 3456."
+            )
+
+        # ── Budget detection ─────────────────────────────────
+        if any(word in message_lower for word in 
+               ['cheap', 'affordable', 'budget', 'lowest', 'cheapest', 'basic', 'pila', 'magkano']):
+            room = rooms.first()  # cheapest available
+            desc = room.description if room.description else "A wonderful room"
+            return (
+                f"For the best value, I'd recommend our **{room.name}** "
+                f"at ₱{room.price_per_night:,}/night. 🛏\n\n"
+                f"{desc}\n\n"
+                f"It offers everything you need for a comfortable and "
+                f"refined stay. Shall I guide you through booking?"
+            )
+
+        # ── Luxury / special occasion detection ──────────────
+        if any(word in message_lower for word in 
+               ['luxury', 'best', 'suite', 'special', 'anniversary', 
+                'honeymoon', 'vip', 'premium', 'top', 'pinakamahusay']):
+            room = rooms.last()  # most expensive
+            desc = room.description if room.description else "A wonderful room"
+            return (
+                f"For an extraordinary experience, our **{room.name}** "
+                f"at ₱{room.price_per_night:,}/night is our finest offering. ✨\n\n"
+                f"{desc}\n\n"
+                f"This is our most exclusive accommodation, "
+                f"complete with premium amenities. Shall I help you reserve it?"
+            )
+
+        # ── Group / family detection ──────────────────────────
+        if any(word in message_lower for word in 
+               ['family', 'group', 'kids', 'children', 'large', 'spacious', 'pamilya']):
+            spacious = rooms.filter(capacity__gte=3).order_by('capacity').first()
+            if spacious:
+                desc = spacious.description if spacious.description else "A wonderful room"
+                return (
+                    f"For groups or families, our **{spacious.name}** "
+                    f"is an excellent choice at ₱{spacious.price_per_night:,}/night. 👨‍👩‍👧\n\n"
+                    f"{desc}\n\n"
+                    f"It comfortably accommodates your group with ample space. "
+                    f"Would you like to book this room?"
+                )
+
+        # ── Couple / romantic detection ───────────────────────
+        if any(word in message_lower for word in 
+               ['couple', 'romantic', 'date', 'partner', '2 people', 
+                'two people', 'just two', 'duha']):
+            mid = rooms[len(rooms) // 2] if len(rooms) > 1 else rooms.first()
+            desc = mid.description if mid.description else "A wonderful room"
+            return (
+                f"For a romantic getaway, our **{mid.name}** "
+                f"at ₱{mid.price_per_night:,}/night would be perfect. 🌹\n\n"
+                f"{desc}\n\n"
+                f"An intimate and elegant choice for two. "
+                f"Shall I walk you through the booking process?"
+            )
+
+        # ── Default: show all options ─────────────────────────
+        response = "Here are our available rooms to help you choose: 🏨\n\n"
+        for room in rooms:
+            desc_preview = room.description[:80] if room.description else "A wonderful room"
+            desc_preview = f"{desc_preview}..." if room.description else desc_preview
+            response += (
+                f"🛏 **{room.name}** — ₱{room.price_per_night:,}/night\n"
+                f"{desc_preview}\n\n"
+            )
+        response += (
+            "Tell me your budget or occasion and I can narrow it down for you!"
+        )
         return response
     
     def get_unknown_response(self, message):
@@ -433,6 +529,7 @@ Type **help** to see all options, or just ask me anything! 😊"""
             'room_details': self.get_room_details_response,
             'contact': self.get_contact_response,
             'location': self.get_location_response,
+            'recommend': self._recommend_room,
             'help': self.get_help_response,
         }
         
