@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Navbar Preview - Cebu Luxury</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            font-family: 'DM Sans', sans-serif;
+            color: #e5e7eb;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ============================================
+           LUXURY NAVBAR - CEBU LUXURY
+           ============================================ */
+
+        .luxury-navbar {
+            background: #0a0f1e;
+            border-bottom: 2px solid #c9a84c;
+            padding: 0 2rem;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           LOGO SECTION
+           ============================================ */
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .navbar-logo:hover {
+            opacity: 0.85;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(26, 34, 53, 0.8);
+            border: 2px solid #c9a84c;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            color: #c9a84c;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .logo-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: #c9a84c;
+            margin: 0;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        .logo-text p {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.7rem;
+            color: #9ca3af;
+            margin: 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        /* ============================================
+           NAV LINKS
+           ============================================ */
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.5rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            height: 100%;
+        }
+
+        .nav-link {
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-link a {
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: 'DM Sans', sans-serif;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #c9a84c;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link a:hover {
+            color: #c9a84c;
+        }
+
+        .nav-link a:hover::after {
+            width: 100%;
+        }
+
+        /* Active Link - Subtle Glow Effect */
+        .nav-link a.active {
+            color: #c9a84c;
+            text-shadow: 0 0 10px rgba(201, 168, 76, 0.3);
+        }
+
+        .nav-link a.active::after {
+            width: 100%;
+        }
+
+        /* ============================================
+           ACTION BUTTONS (Right Side)
+           ============================================ */
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        /* Admin Button - Solid Gold */
+        .btn-admin {
+            background: #c9a84c;
+            color: #0a0f1e;
+            padding: 0.75rem 1.75rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-admin:hover {
+            background: #d4b86e;
+            box-shadow: 0 8px 20px rgba(201, 168, 76, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-admin:active {
+            transform: translateY(0);
+        }
+
+        .btn-admin i {
+            font-size: 1rem;
+        }
+
+        /* Logout Button - Outlined Gold */
+        .btn-logout {
+            background: transparent;
+            color: #c9a84c;
+            border: 1.5px solid #c9a84c;
+            padding: 0.75rem 1.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-logout:hover {
+            background: #c9a84c;
+            color: #0a0f1e;
+            box-shadow: 0 8px 20px rgba(201, 168, 76, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .btn-logout:active {
+            transform: translateY(0);
+        }
+
+        .btn-logout i {
+            font-size: 1rem;
+        }
+
+        /* ============================================
+           CONTENT SECTION
+           ============================================ */
+
+        .content {
+            flex: 1;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            overflow-y: auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #c9a84c;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ============================================
+           SPECS SECTION
+           ============================================ */
+
+        .specs-section {
+            background: rgba(26, 34, 53, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .specs-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #c9a84c;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .spec-item {
+            background: rgba(26, 34, 53, 0.8);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .spec-item h3 {
+            color: #c9a84c;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .spec-item p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .color-item {
+            background: rgba(26, 34, 53, 0.8);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 60px;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+        }
+
+        .color-item p {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .color-item code {
+            background: rgba(0, 0, 0, 0.3);
+            color: #d1d5db;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: block;
+        }
+
+        .code-block {
+            background: #0f1419;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #d1d5db;
+            margin-top: 1rem;
+        }
+
+        /* Mobile Menu Toggle */
+        .navbar-toggle {
+            display: none;
+            background: transparent;
+            border: none;
+            color: #c9a84c;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        @media (max-width: 1024px) {
+            .luxury-navbar {
+                padding: 0 1.5rem;
+                height: 70px;
+            }
+
+            .logo-icon {
+                width: 45px;
+                height: 45px;
+                font-size: 1.5rem;
+            }
+
+            .logo-text h1 {
+                font-size: 1.1rem;
+            }
+
+            .nav-links {
+                gap: 1.5rem;
+            }
+
+            .nav-link a {
+                font-size: 0.85rem;
+            }
+
+            .navbar-actions {
+                gap: 1rem;
+            }
+
+            .btn-admin,
+            .btn-logout {
+                padding: 0.6rem 1.25rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .luxury-navbar {
+                padding: 0 1rem;
+                height: 60px;
+            }
+
+            .navbar-toggle {
+                display: block;
+            }
+
+            .logo-text p {
+                display: none;
+            }
+
+            .nav-links {
+                position: absolute;
+                top: 60px;
+                left: 0;
+                right: 0;
+                flex-direction: column;
+                background: #111827;
+                border-bottom: 2px solid #c9a84c;
+                padding: 1rem;
+                gap: 0;
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+
+            .nav-links.active {
+                max-height: 400px;
+            }
+
+            .nav-link {
+                height: auto;
+                padding: 0.75rem 0;
+                border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+            }
+
+            .nav-link a::after {
+                display: none;
+            }
+
+            .nav-link a.active {
+                color: #c9a84c;
+            }
+
+            .navbar-actions {
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .btn-admin,
+            .btn-logout {
+                padding: 0.5rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .logo-text h1 {
+                font-size: 1rem;
+            }
+
+            .logo-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+            }
+
+            .content {
+                padding: 1.5rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Luxury Navbar -->
+    <nav class="luxury-navbar">
+        <!-- Logo Section -->
+        <a href="#" class="navbar-logo">
+            <div class="logo-icon">C</div>
+            <div class="logo-text">
+                <h1>Cebu Luxury</h1>
+                <p>Admin Panel</p>
+            </div>
+        </a>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="navbar-toggle" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- Nav Links -->
+        <ul class="nav-links" id="navLinks">
+            <li class="nav-link">
+                <a href="#" class="active">
+                    <i class="fas fa-home" style="margin-right: 0.5rem;"></i>Home
+                </a>
+            </li>
+            <li class="nav-link">
+                <a href="#">
+                    <i class="fas fa-door-open" style="margin-right: 0.5rem;"></i>Rooms
+                </a>
+            </li>
+            <li class="nav-link">
+                <a href="#">
+                    <i class="fas fa-cog" style="margin-right: 0.5rem;"></i>Admin
+                </a>
+            </li>
+        </ul>
+
+        <!-- Action Buttons -->
+        <ul class="navbar-actions">
+            <li>
+                <a href="#" class="btn-admin">
+                    <i class="fas fa-user-shield"></i>Admin
+                </a>
+            </li>
+            <li>
+                <a href="#" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i>Logout
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Content -->
+    <div class="content">
+        <div class="header">
+            <h1>✨ Luxury Navbar - Cebu Luxury</h1>
+            <p>Premium admin panel navigation with dark navy background and gold accents</p>
+        </div>
+
+        <!-- Specifications -->
+        <div class="specs-section">
+            <h2>🎨 Design Specifications</h2>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 0; margin-bottom: 1.5rem;">Color Palette</h3>
+            <div class="color-grid">
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #0a0f1e;"></div>
+                    <p><strong>Background</strong></p>
+                    <code>#0a0f1e</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #c9a84c;"></div>
+                    <p><strong>Gold Accents</strong></p>
+                    <code>#c9a84c</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #d1d5db;"></div>
+                    <p><strong>Nav Link Text</strong></p>
+                    <code>#d1d5db</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: rgba(26, 34, 53, 0.8); border: 2px solid #c9a84c;"></div>
+                    <p><strong>Logo Icon Box</strong></p>
+                    <code>rgba(26,34,53,0.8)</code>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Component Features</h3>
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <h3><i class="fas fa-square" style="color: #c9a84c; margin-right: 0.5rem;"></i>Dark Navy Background</h3>
+                    <p>Professional dark navy (#0a0f1e) with thin gold bottom border (2px #c9a84c) for sophistication</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-gem" style="color: #c9a84c; margin-right: 0.5rem;"></i>Logo Design</h3>
+                    <p>Square icon with "C" in gold, paired with "Cebu Luxury" in Playfair Display serif font</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-link" style="color: #d1d5db; margin-right: 0.5rem;"></i>Nav Links</h3>
+                    <p>Light gray text with smooth transition to gold on hover. Includes icons for visual hierarchy</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-star" style="color: #c9a84c; margin-right: 0.5rem;"></i>Glow Effect</h3>
+                    <p>Active nav link gets subtle gold glow (text-shadow) for emphasis and visual feedback</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-user-shield" style="color: #c9a84c; margin-right: 0.5rem;"></i>Admin Button</h3>
+                    <p>Solid gold background (#c9a84c) with dark text. Hover effect with lift animation and shadow</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-sign-out-alt" style="color: #c9a84c; margin-right: 0.5rem;"></i>Logout Button</h3>
+                    <p>Outlined gold border with transparent background. Fills gold on hover with smooth transition</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-underline" style="color: #c9a84c; margin-right: 0.5rem;"></i>Underline Animation</h3>
+                    <p>Nav links have animated gold underline that appears on hover and remains on active state</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-mobile-alt" style="color: #14b8a6; margin-right: 0.5rem;"></i>Responsive</h3>
+                    <p>Fully responsive with hamburger menu for mobile devices. Adapts layout and sizes accordingly</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-arrow-up" style="color: #c9a84c; margin-right: 0.5rem;"></i>Sticky Position</h3>
+                    <p>Navbar stays fixed at top while scrolling for easy navigation access throughout the admin panel</p>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Implementation</h3>
+            <p style="color: #9ca3af; margin-bottom: 1rem;">To include this navbar component in your admin base template:</p>
+            <div class="code-block">{% include 'admin/luxury_navbar.html' %}</div>
+
+            <p style="color: #9ca3af; margin-top: 1.5rem; margin-bottom: 1rem;">Place this include at the very top of your admin base template, before any other content:</p>
+            <div class="code-block">{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head content -->
+</head>
+<body>
+    {% include 'admin/luxury_navbar.html' %}
+    
+    <!-- Rest of your admin layout -->
+    <div class="admin-container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html></div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // Close mobile menu when a link is clicked
+        document.querySelectorAll('.nav-link a').forEach(link => {
+            link.addEventListener('click', () => {
+                document.getElementById('navLinks').classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>

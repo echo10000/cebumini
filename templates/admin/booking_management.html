@@ -1,152 +1,166 @@
-{% extends 'base.html' %}
+{% extends 'admin/admin_base.html' %}
 
-{% block title %}Booking Management - Admin Panel{% endblock %}
+{% block title %}Booking Management - Cebu Luxury{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card-luxury { background: #1a2235; border-left: 4px solid #c9a84c; border-radius: 12px; padding: 1.75rem; transition: all 0.3s; }
+    .stat-card-luxury:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(201, 168, 76, 0.15); }
+    .stat-icon { font-size: 2rem; color: #c9a84c; margin-bottom: 0.75rem; }
+    .stat-label { color: #9ca3af; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2rem; color: #ffffff; font-weight: 700; font-family: 'Playfair Display', serif; }
+    .stat-description { font-size: 0.9rem; color: #d1d5db; margin-top: 0.5rem; }
+    .luxury-card { background: #1a2235; border-radius: 12px; overflow: hidden; margin-bottom: 2rem; }
+    .luxury-card-header { background: #2563eb; padding: 1rem 1.5rem; color: #ffffff; font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; }
+    .luxury-card-body { padding: 1.5rem; }
+    .filter-label { color: #c9a84c; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem; }
+    .filter-select { background: #111827 !important; border: 1.5px solid #374151 !important; color: #ffffff !important; border-radius: 6px; transition: all 0.3s ease; }
+    .filter-select:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1); }
+    .btn-filter { background: #2563eb; color: #ffffff; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease; }
+    .btn-filter:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3); }
+    .admin-table { overflow-x: auto; }
+    .admin-table table { width: 100%; border-collapse: collapse; }
+    .admin-table th { background: rgba(201, 168, 76, 0.1); color: #c9a84c; padding: 1rem; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; border-bottom: 2px solid rgba(201, 168, 76, 0.2); }
+    .admin-table td { padding: 1rem; border-bottom: 1px solid rgba(201, 168, 76, 0.1); color: #d1d5db; }
+    .admin-table tr:hover { background: rgba(201, 168, 76, 0.05); }
+    .btn-view { background: transparent; border: 1.5px solid #c9a84c; color: #c9a84c; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; transition: all 0.3s; }
+    .btn-view:hover { background: #c9a84c; color: #0a0f1e; }
+    .badge-pill { display: inline-block; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-pending { background: rgba(251, 146, 60, 0.2); color: #fbbf24; }
+    .badge-confirmed { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .badge-checked { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .badge-cancelled { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .empty-state { padding: 2rem; text-align: center; color: #9ca3af; }
+    .empty-state i { font-size: 2rem; margin-bottom: 1rem; display: block; color: #6b7280; }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="h3 mb-4">Booking Management</h1>
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Booking Management</h1>
+    <p>Manage all hotel bookings and reservations</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4 g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
+            <div class="stat-label">Total Bookings</div>
+            <div class="stat-value">{{ total_bookings }}</div>
+            <div class="stat-description">All-time bookings</div>
         </div>
     </div>
-
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card border-left-primary shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-primary text-uppercase mb-1 small font-weight-bold">Total Bookings</div>
-                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ total_bookings }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-left-warning shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-warning text-uppercase mb-1 small font-weight-bold">Pending</div>
-                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ pending_bookings }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-left-success shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-success text-uppercase mb-1 small font-weight-bold">Confirmed</div>
-                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ confirmed_bookings }}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-left-danger shadow h-100 py-2">
-                <div class="card-body">
-                    <div class="text-danger text-uppercase mb-1 small font-weight-bold">Cancelled</div>
-                    <div class="h3 mb-0 font-weight-bold text-gray-800">{{ cancelled_bookings }}</div>
-                </div>
-            </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-label">Pending</div>
+            <div class="stat-value">{{ pending_bookings }}</div>
+            <div class="stat-description">Awaiting confirmation</div>
         </div>
     </div>
-
-    <!-- Filters -->
-    <div class="card shadow mb-4">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
-        </div>
-        <div class="card-body">
-            <form method="get" class="form-inline">
-                <div class="form-group mr-3">
-                    <label for="status" class="mr-2">Status:</label>
-                    <select name="status" id="status" class="form-control">
-                        <option value="">All</option>
-                        {% for choice, label in booking_statuses %}
-                            <option value="{{ choice }}" {% if status_filter == choice %}selected{% endif %}>{{ label }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <button type="submit" class="btn btn-primary">Filter</button>
-            </form>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-label">Confirmed</div>
+            <div class="stat-value">{{ confirmed_bookings }}</div>
+            <div class="stat-description">Confirmed reservations</div>
         </div>
     </div>
-
-    <!-- Bookings Table -->
-    <div class="card shadow">
-        <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Bookings</h6>
-        </div>
-        <div class="card-body">
-            {% if bookings %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Booking ID</th>
-                                <th>Guest</th>
-                                <th>Room</th>
-                                <th>Check-In</th>
-                                <th>Check-Out</th>
-                                <th>Nights</th>
-                                <th>Total</th>
-                                <th>Status</th>
-                                <th>Created</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for booking in bookings %}
-                            <tr>
-                                <td><strong>#{{ booking.id }}</strong></td>
-                                <td>{{ booking.guest.first_name }} {{ booking.guest.last_name }}</td>
-                                <td>{{ booking.room.room_number }}</td>
-                                <td>{{ booking.check_in|date:"M d, Y" }}</td>
-                                <td>{{ booking.check_out|date:"M d, Y" }}</td>
-                                <td>{{ booking.number_of_nights }}</td>
-                                <td>₱{{ booking.total_price|floatformat:2 }}</td>
-                                <td>
-                                    {% if booking.status == 'PENDING' %}
-                                        <span class="badge badge-warning">Pending</span>
-                                    {% elif booking.status == 'CONFIRMED' %}
-                                        <span class="badge badge-success">Confirmed</span>
-                                    {% elif booking.status == 'CHECKED_IN' %}
-                                        <span class="badge badge-info">Checked In</span>
-                                    {% else %}
-                                        <span class="badge badge-danger">Cancelled</span>
-                                    {% endif %}
-                                </td>
-                                <td>{{ booking.created_at|date:"M d, Y" }}</td>
-                                <td>
-                                    <div class="btn-group" role="group">
-                                        <a href="#" class="btn btn-sm btn-info" title="View Details">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="#" class="btn btn-sm btn-primary" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="alert alert-info">No bookings found.</div>
-            {% endif %}
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-times-circle"></i></div>
+            <div class="stat-label">Cancelled</div>
+            <div class="stat-value">{{ cancelled_bookings }}</div>
+            <div class="stat-description">Cancelled bookings</div>
         </div>
     </div>
 </div>
 
-<style>
-    .border-left-primary { border-left: 0.25rem solid #4e73df !important; }
-    .border-left-warning { border-left: 0.25rem solid #f6c23e !important; }
-    .border-left-success { border-left: 0.25rem solid #1cc88a !important; }
-    .border-left-danger { border-left: 0.25rem solid #e74c3c !important; }
-    .text-primary { color: #4e73df !important; }
-    .text-warning { color: #f6c23e !important; }
-    .text-success { color: #1cc88a !important; }
-    .text-danger { color: #e74c3c !important; }
-    .badge-warning { background-color: #f6c23e; color: #000; }
-    .badge-success { background-color: #1cc88a; }
-    .badge-danger { background-color: #e74c3c; }
-    .badge-info { background-color: #36b9cc; }
-    .btn-group .btn { margin-right: 2px; }
-</style>
+<!-- Filters -->
+<div class="luxury-card">
+    <div class="luxury-card-header">
+        <i class="fas fa-filter"></i> Filter Bookings
+    </div>
+    <div class="luxury-card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-6 col-lg-10">
+                <label for="status" class="filter-label">Status</label>
+                <select name="status" id="status" class="form-control filter-select">
+                    <option value="">All Statuses</option>
+                    {% for choice, label in booking_statuses %}
+                        <option value="{{ choice }}" {% if status_filter == choice %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 col-lg-2">
+                <button type="submit" class="btn-filter w-100">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bookings Table -->
+<div class="luxury-card">
+    <div class="luxury-card-header">
+        <i class="fas fa-calendar-check"></i> Bookings
+    </div>
+    <div class="luxury-card-body">
+        {% if bookings %}
+            <div class="admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Guest</th>
+                            <th>Check-In</th>
+                            <th>Check-Out</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in bookings %}
+                        <tr>
+                            <td><strong style="color: #c9a84c;">#{{ booking.id }}</strong></td>
+                            <td>{{ booking.guest.first_name }} {{ booking.guest.last_name }}</td>
+                            <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                            <td>{{ booking.check_out|date:"M d, Y" }}</td>
+                            <td><strong style="color: #c9a84c;">₱{{ booking.total_price|floatformat:2 }}</strong></td>
+                            <td>
+                                {% if booking.status == 'PENDING' %}
+                                    <span class="badge-pill badge-pending">Pending</span>
+                                {% elif booking.status == 'CONFIRMED' %}
+                                    <span class="badge-pill badge-confirmed">Confirmed</span>
+                                {% elif booking.status == 'CHECKED_IN' %}
+                                    <span class="badge-pill badge-checked">Checked In</span>
+                                {% else %}
+                                    <span class="badge-pill badge-cancelled">Cancelled</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="{% url 'admin_panel:booking_detail' booking.id %}" class="btn-view" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{% url 'admin_panel:booking_edit' booking.id %}" class="btn-view" title="Edit"><i class="fas fa-edit"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No bookings found.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+</div>
 {% endblock %}

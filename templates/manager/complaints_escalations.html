@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+
+{% block title %}Guest Complaint Escalations{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">
+        <i class="fas fa-exclamation-triangle"></i> Guest Complaint Escalations
+    </h1>
+
+    <!-- Status Filters -->
+    <div class="btn-group mb-4" role="group">
+        <a href="?status=all" class="btn btn-outline-secondary {% if status_filter == 'all' %}active{% endif %}">
+            All
+        </a>
+        <a href="?status=OPEN" class="btn btn-outline-danger {% if status_filter == 'OPEN' %}active{% endif %}">
+            Open
+        </a>
+        <a href="?status=IN_PROGRESS" class="btn btn-outline-warning {% if status_filter == 'IN_PROGRESS' %}active{% endif %}">
+            In Progress
+        </a>
+        <a href="?status=RESOLVED" class="btn btn-outline-success {% if status_filter == 'RESOLVED' %}active{% endif %}">
+            Resolved
+        </a>
+        <a href="?status=CLOSED" class="btn btn-outline-secondary {% if status_filter == 'CLOSED' %}active{% endif %}">
+            Closed
+        </a>
+    </div>
+
+    <!-- Complaints Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if complaints %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Booking</th>
+                            <th>Guest</th>
+                            <th>Complaint</th>
+                            <th>Reported By</th>
+                            <th>Status</th>
+                            <th>Escalated</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in complaints %}
+                        <tr>
+                            <td><strong>#{{ complaint.booking.id }}</strong></td>
+                            <td>{{ complaint.guest.get_full_name }}</td>
+                            <td>{{ complaint.complaint_description|truncatewords:5 }}</td>
+                            <td>{{ complaint.reported_by_staff.get_full_name }}</td>
+                            <td>
+                                {% if complaint.status == 'OPEN' %}
+                                    <span class="badge badge-danger">Open</span>
+                                {% elif complaint.status == 'IN_PROGRESS' %}
+                                    <span class="badge badge-warning">In Progress</span>
+                                {% elif complaint.status == 'RESOLVED' %}
+                                    <span class="badge badge-success">Resolved</span>
+                                {% elif complaint.status == 'CLOSED' %}
+                                    <span class="badge badge-secondary">Closed</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ complaint.created_at|date:"M d, Y H:i" }}</td>
+                            <td>
+                                <a href="{% url 'auth:manager_resolve_complaint' complaint.id %}" class="btn btn-sm btn-primary">
+                                    View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">No complaints found</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

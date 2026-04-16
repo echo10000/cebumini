@@ -1,298 +1,372 @@
-{% extends 'base.html' %}
+{% extends 'admin/admin_base.html' %}
 {% load static %}
 
-{% block title %}Admin Dashboard - Cebu Hotel{% endblock %}
+{% block title %}Admin Dashboard - Cebu Luxury{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================
+       STAT CARDS - LUXURY STYLING
+       ============================================ */
+    
+    .luxury-stat-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card-luxury {
+        background: #1a2235;
+        border-left: 4px solid #c9a84c;
+        border-radius: 12px;
+        padding: 1.75rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Subtle background gradient effect */
+    .stat-card-luxury::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(201, 168, 76, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .stat-card-luxury:hover {
+        border-left-color: #e6c76e;
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(201, 168, 76, 0.25),
+                    0 0 30px rgba(201, 168, 76, 0.15);
+    }
+
+    /* Icon styling */
+    .stat-card-luxury .stat-icon {
+        font-size: 2.5rem;
+        color: #c9a84c;
+        margin-bottom: 1rem;
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+        width: 50px;
+    }
+
+    /* Label styling */
+    .stat-card-luxury .stat-label {
+        font-size: 0.9rem;
+        color: #ffffff;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Large value styling */
+    .stat-card-luxury .stat-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #c9a84c;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+        font-family: 'Playfair Display', serif;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Description styling */
+    .stat-card-luxury .stat-description {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        line-height: 1.4;
+        position: relative;
+        z-index: 1;
+    }
+
+    @media (max-width: 1024px) {
+        .luxury-stat-cards {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .stat-card-luxury {
+            padding: 1.5rem;
+        }
+
+        .stat-card-luxury .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-card-luxury .stat-value {
+            font-size: 1.875rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .luxury-stat-cards {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card-luxury {
+            padding: 1.25rem;
+        }
+
+        .stat-card-luxury .stat-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-card-luxury .stat-value {
+            font-size: 1.625rem;
+        }
+
+        .stat-card-luxury .stat-label {
+            font-size: 0.8rem;
+        }
+
+        .stat-card-luxury .stat-description {
+            font-size: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container-fluid mt-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h1><i class="fas fa-chart-line"></i> Admin Dashboard</h1>
-            <p class="text-muted">System Overview & Management</p>
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Dashboard Overview</h1>
+    <p>Welcome back to your hotel management system</p>
+</div>
+
+<!-- Luxury Stat Cards -->
+<div class="luxury-stat-cards">
+    <!-- Card 1: Total Revenue -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-peso-sign"></i>
         </div>
-        <div class="col-auto">
-            <a href="{% url 'home' %}" class="btn btn-outline-secondary">
-                <i class="fas fa-home"></i> Back to Hotel
-            </a>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">₱{{ total_revenue|floatformat:2 }}</div>
+        <div class="stat-description">All-time earnings from bookings</div>
+    </div>
+
+    <!-- Card 2: Confirmed Bookings -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-label">Confirmed Bookings</div>
+        <div class="stat-value">{{ confirmed_bookings }}</div>
+        <div class="stat-description">Total confirmed reservations</div>
+    </div>
+
+    <!-- Card 3: Pending Payments -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="stat-label">Pending Payments</div>
+        <div class="stat-value">{{ pending_payments_count }}</div>
+        <div class="stat-description">Awaiting customer verification</div>
+    </div>
+
+    <!-- Card 4: Occupancy Rate -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-door-open"></i>
+        </div>
+        <div class="stat-label">Occupancy Rate</div>
+        <div class="stat-value">{{ occupancy_rate|floatformat:1 }}%</div>
+        <div class="stat-description">Current room occupancy percentage</div>
+    </div>
+</div>
+
+<div class="gold-divider"></div>
+
+<!-- Today's Check-ins & Check-outs Panels -->
+<style>
+    /* ============================================
+       CHECK-IN/CHECK-OUT PANELS - LUXURY STYLING
+       ============================================ */
+
+    .checkin-checkout-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-panel {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .info-panel:hover {
+        border-color: #c9a84c;
+        box-shadow: 0 12px 24px rgba(201, 168, 76, 0.15);
+        transform: translateY(-4px);
+    }
+
+    /* Header Bars */
+    .info-panel-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Check-in header - Dark Teal */
+    .info-panel.checkin .info-panel-header {
+        background: #0d7377;
+    }
+
+    /* Check-out header - Slate Gray */
+    .info-panel.checkout .info-panel-header {
+        background: #374151;
+    }
+
+    .info-panel-header i {
+        font-size: 1.25rem;
+        line-height: 1;
+    }
+
+    /* Content Area */
+    .info-panel-content {
+        padding: 2rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Large Number Display */
+    .panel-number {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #c9a84c;
+        line-height: 1;
+        margin-bottom: 0.75rem;
+        font-family: 'Playfair Display', serif;
+        display: block;
+    }
+
+    /* Subtitle Label */
+    .panel-label {
+        font-size: 0.95rem;
+        color: #9ca3af;
+        font-weight: 500;
+        text-transform: capitalize;
+        letter-spacing: 0.3px;
+    }
+
+    @media (max-width: 768px) {
+        .checkin-checkout-container {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .info-panel-content {
+            padding: 1.75rem 1.25rem;
+        }
+
+        .panel-number {
+            font-size: 2.75rem;
+            margin-bottom: 0.5rem;
+        }
+    }
+</style>
+
+<div class="checkin-checkout-container">
+    <!-- Check-in Panel -->
+    <div class="info-panel checkin">
+        <div class="info-panel-header">
+            <i class="fas fa-arrow-right"></i>
+            <span>Today's Check-ins</span>
+        </div>
+        <div class="info-panel-content">
+            <span class="panel-number">{{ today_check_ins }}</span>
+            <span class="panel-label">Guests arriving today</span>
         </div>
     </div>
 
-    <!-- Admin Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 rounded">
-        <div class="container-fluid">
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="adminNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="{% url 'admin_panel:dashboard' %}">
-                            <i class="fas fa-tachometer-alt"></i> Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin_panel:payment_management' %}">
-                            <i class="fas fa-credit-card"></i> Payments
-                            {% if pending_payments %}
-                            <span class="badge bg-danger">{{ pending_payments }}</span>
-                            {% endif %}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin_panel:booking_management' %}">
-                            <i class="fas fa-bookmark"></i> Bookings
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin_panel:room_management' %}">
-                            <i class="fas fa-door-open"></i> Rooms
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin_panel:user_management' %}">
-                            <i class="fas fa-users"></i> Users
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'admin_panel:reports' %}">
-                            <i class="fas fa-file-chart-line"></i> Reports
-                        </a>
-                    </li>
-                </ul>
-            </div>
+    <!-- Check-out Panel -->
+    <div class="info-panel checkout">
+        <div class="info-panel-header">
+            <i class="fas fa-arrow-left"></i>
+            <span>Today's Check-outs</span>
         </div>
-    </nav>
+        <div class="info-panel-content">
+            <span class="panel-number">{{ today_check_outs }}</span>
+            <span class="panel-label">Guests departing today</span>
+        </div>
+    </div>
+</div>
 
-    <!-- Key Statistics -->
-    <div class="row mb-4">
-        <div class="col-md-3 mb-3">
-            <div class="card border-primary">
-                <div class="card-body text-center">
-                    <i class="fas fa-peso-sign fa-3x text-primary mb-2"></i>
-                    <h6 class="card-title">Total Revenue</h6>
-                    <h3 class="text-primary">₱{{ total_revenue|floatformat:2 }}</h3>
-                    <small class="text-muted">All time</small>
-                </div>
+<!-- Revenue Overview -->
+<div class="row mb-4 g-4">
+    <div class="col-md-6">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5><i class="fas fa-chart-bar"></i> This Month's Revenue</h5>
             </div>
-        </div>
-        
-        <div class="col-md-3 mb-3">
-            <div class="card border-success">
-                <div class="card-body text-center">
-                    <i class="fas fa-calendar-check fa-3x text-success mb-2"></i>
-                    <h6 class="card-title">Confirmed Bookings</h6>
-                    <h3 class="text-success">{{ confirmed_bookings }}</h3>
-                    <small class="text-muted">Total bookings</small>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 mb-3">
-            <div class="card border-warning">
-                <div class="card-body text-center">
-                    <i class="fas fa-hourglass-half fa-3x text-warning mb-2"></i>
-                    <h6 class="card-title">Pending Payments</h6>
-                    <h3 class="text-warning">{{ pending_payments }}</h3>
-                    <small class="text-muted">Awaiting verification</small>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-3 mb-3">
-            <div class="card border-info">
-                <div class="card-body text-center">
-                    <i class="fas fa-door-open fa-3x text-info mb-2"></i>
-                    <h6 class="card-title">Occupancy</h6>
-                    <h3 class="text-info">{{ occupancy_rate|floatformat:1 }}%</h3>
-                    <small class="text-muted">{{ occupied_rooms }}/{{ total_rooms }} rooms</small>
-                </div>
+            <div class="admin-card-body">
+                <h3 class="text-gold mb-2">₱{{ month_revenue|floatformat:2 }}</h3>
+                <p style="color: var(--text-muted); margin: 0;">Total revenue this month</p>
             </div>
         </div>
     </div>
-
-    <!-- Today's Overview -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-arrow-right"></i> Today's Check-ins</h5>
-                </div>
-                <div class="card-body">
-                    <h2 class="text-center">{{ today_check_ins }}</h2>
-                    <p class="text-muted text-center mb-0">Guests arriving today</p>
-                </div>
+    
+    <div class="col-md-6">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <h5><i class="fas fa-chart-line"></i> Total Bookings</h5>
             </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">
-                    <h5 class="mb-0"><i class="fas fa-arrow-left"></i> Today's Check-outs</h5>
-                </div>
-                <div class="card-body">
-                    <h2 class="text-center">{{ today_check_outs }}</h2>
-                    <p class="text-muted text-center mb-0">Guests departing today</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Revenue Overview -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> This Month</h5>
-                </div>
-                <div class="card-body">
-                    <h3 class="text-success mb-0">₱{{ month_revenue|floatformat:2 }}</h3>
-                    <small class="text-muted">Total revenue this month</small>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Total Bookings</h5>
-                </div>
-                <div class="card-body">
-                    <h3 class="text-primary mb-0">{{ total_bookings }}</h3>
-                    <small class="text-muted">All bookings in system</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pending Payments -->
-    <div class="row mb-4">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header bg-warning">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-hourglass-half"></i> Pending Payments ({{ pending_payments_list|length }})</h5>
-                        <a href="{% url 'admin_panel:payment_management' %}?status=PENDING" class="btn btn-sm btn-warning">
-                            Manage All
-                        </a>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Booking #</th>
-                                <th>Guest</th>
-                                <th>Room</th>
-                                <th>Amount</th>
-                                <th>Method</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for payment in pending_payments_list %}
-                            <tr>
-                                <td>#{{ payment.booking.id }}</td>
-                                <td>{{ payment.booking.guest.get_full_name|default:payment.booking.guest.username }}</td>
-                                <td>{{ payment.booking.room.room_number }}</td>
-                                <td><strong>₱{{ payment.amount }}</strong></td>
-                                <td><span class="badge bg-info">{{ payment.get_payment_method_display }}</span></td>
-                                <td>
-                                    <a href="{% url 'admin_panel:payment_detail' payment.id %}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye"></i> Review
-                                    </a>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    <i class="fas fa-check-circle fa-2x mb-2"></i><br>
-                                    No pending payments
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Recent Bookings -->
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-bookmark"></i> Recent Bookings</h5>
-                        <a href="{% url 'admin_panel:booking_management' %}" class="btn btn-sm btn-light">
-                            View All
-                        </a>
-                    </div>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Booking #</th>
-                                <th>Guest</th>
-                                <th>Room</th>
-                                <th>Dates</th>
-                                <th>Status</th>
-                                <th>Amount</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for booking in recent_bookings %}
-                            <tr>
-                                <td>#{{ booking.id }}</td>
-                                <td>{{ booking.guest.get_full_name|default:booking.guest.username }}</td>
-                                <td>{{ booking.room.room_number }}</td>
-                                <td>{{ booking.check_in }} to {{ booking.check_out }}</td>
-                                <td>
-                                    {% if booking.status == 'CONFIRMED' %}
-                                        <span class="badge bg-success">Confirmed</span>
-                                    {% elif booking.status == 'PENDING' %}
-                                        <span class="badge bg-warning">Pending</span>
-                                    {% else %}
-                                        <span class="badge bg-danger">Cancelled</span>
-                                    {% endif %}
-                                </td>
-                                <td>₱{{ booking.total_price }}</td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center text-muted py-4">
-                                    No recent bookings
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="admin-card-body">
+                <h3 class="text-gold mb-2">{{ total_bookings }}</h3>
+                <p style="color: var(--text-muted); margin: 0;">All bookings in system</p>
             </div>
         </div>
     </div>
 </div>
 
+<div class="gold-divider"></div>
+
+<!-- Pending Payments - Luxury Table Component -->
+{% include 'admin/pending_payments_table.html' %}
+
+<div class="gold-divider"></div>
+
+<!-- Recent Bookings - Luxury Table Component -->
+{% include 'admin/recent_bookings_table.html' %}
+
 <style>
-    .card {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        border: none;
-        margin-bottom: 20px;
-    }
-    
-    .card-body {
-        padding: 20px;
-    }
-    
-    .navbar {
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    
-    .badge {
-        font-size: 0.85rem;
-        padding: 0.5rem 0.75rem;
+    .gold-divider {
+        height: 2px;
+        background: linear-gradient(90deg, rgba(201, 168, 76, 0) 0%, rgba(201, 168, 76, 0.5) 50%, rgba(201, 168, 76, 0) 100%);
+        margin: 2rem 0;
     }
 </style>
 {% endblock %}

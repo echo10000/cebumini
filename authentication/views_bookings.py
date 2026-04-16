@@ -104,8 +104,18 @@ def confirm_booking_view(request):
                 request, 
                 'Booking created! Please proceed to payment to confirm your reservation.'
             )
-            # Redirect to payment page instead of booking detail
-            return redirect('bookings:payment_page', booking_id=booking.id)
+            # Create Payment record for PayMongo
+            Payment.objects.get_or_create(
+                booking=booking,
+                defaults={
+                    'amount': booking.total_price,
+                    'payment_method': 'PAYMONGO',
+                    'status': PaymentStatus.PENDING
+                }
+            )
+            
+            # Redirect directly to PayMongo payment
+            return redirect('bookings:paymongo_payment', booking_id=booking.id)
     else:
         confirmation_form = BookingConfirmationForm()
     
@@ -204,9 +214,9 @@ def cancel_booking_view(request, booking_id):
             # Calculate refund amount
             refund_amount, refund_percent, refund_policy = booking.get_refund_amount()
             
-            # Get or create payment record
+            # Get the most recent payment record
             try:
-                payment = booking.payment
+                payment = booking.payments.latest('created_at')
             except:
                 payment = None
             
@@ -382,3 +392,237 @@ def admin_confirm_booking_view(request, booking_id):
         f'Booking #{booking.id} for {booking.guest.username} has been confirmed.'
     )
     return redirect('bookings:admin_bookings')
+
+
+@login_required(login_url='login')
+def download_invoice_view(request, booking_id):
+    """Guest or Admin can download booking invoice/receipt as PDF"""
+    from django.http import FileResponse, HttpResponse
+    from io import BytesIO
+    from decimal import Decimal
+    import os
+    
+    booking = get_object_or_404(Booking, id=booking_id)
+    
+    # Check permissions: only guest, admin, or manager can download their/any invoice
+    if (request.user != booking.guest and 
+        not request.user.is_admin() and 
+        not request.user.is_manager()):
+        from django.contrib import messages
+        messages.error(request, 'You do not have permission to download this invoice.')
+        return redirect('home')
+    
+    # Try to generate PDF, fallback to HTML if reportlab not available
+    try:
+        from reportlab.lib.pagesizes import letter, A4
+        from reportlab.lib import colors
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, PageBreak
+        from reportlab.lib.units import inch
+        from datetime import datetime
+        import pytz
+        
+        # Create PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=0.5*inch, leftMargin=0.5*inch)
+        elements = []
+        
+        styles = getSampleStyleSheet()
+        
+        # Title
+        title = Paragraph(f"<b>BOOKING INVOICE</b>", styles['Title'])
+        elements.append(title)
+        elements.append(Spacer(1, 0.3*inch))
+        
+        # Invoice details
+        invoice_num = f"INV-{booking.id:05d}"
+        invoice_date = booking.created_at.strftime('%Y-%m-%d %H:%M:%S')
+        
+        details_data = [
+            ['Invoice Number:', invoice_num, 'Invoice Date:', invoice_date],
+            ['Booking ID:', str(booking.id), 'Status:', booking.get_status_display()],
+        ]
+        
+        details_table = Table(details_data, colWidths=[1.5*inch, 1.5*inch, 1.5*inch, 1.5*inch])
+        details_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ]))
+        elements.append(details_table)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Guest information
+        guest_info = Paragraph("<b>Guest Information:</b>", styles['Heading2'])
+        elements.append(guest_info)
+        
+        guest_data = [
+            ['Name:', f"{booking.guest.first_name} {booking.guest.last_name}"],
+            ['Email:', booking.guest.email],
+            ['Phone:', booking.guest.phone_number or 'N/A'],
+        ]
+        
+        guest_table = Table(guest_data, colWidths=[1.5*inch, 4*inch])
+        guest_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(guest_table)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Booking details
+        booking_info = Paragraph("<b>Booking Details:</b>", styles['Heading2'])
+        elements.append(booking_info)
+        
+        booking_data = [
+            ['Room:', booking.room.room_number],
+            ['Room Type:', booking.room.get_room_type_display()],
+            ['Check-in Date:', booking.check_in.strftime('%Y-%m-%d')],
+            ['Check-out Date:', booking.check_out.strftime('%Y-%m-%d')],
+            ['Number of Nights:', str(booking.number_of_nights)],
+        ]
+        
+        booking_table = Table(booking_data, colWidths=[1.5*inch, 4*inch])
+        booking_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ]))
+        elements.append(booking_table)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Pricing breakdown
+        pricing_info = Paragraph("<b>Pricing:</b>", styles['Heading2'])
+        elements.append(pricing_info)
+        
+        pricing_data = [
+            ['Room Rate:', f"₱{booking.room.price_per_night:.2f} per night"],
+            ['Number of Nights:', str(booking.number_of_nights)],
+            ['Subtotal:', f"₱{booking.room.price_per_night * booking.number_of_nights:.2f}"],
+            ['', ''],
+            ['<b>Total Amount:</b>', f"<b>₱{booking.total_price:.2f}</b>"],
+        ]
+        
+        pricing_table = Table(pricing_data, colWidths=[2*inch, 3*inch])
+        pricing_table.setStyle(TableStyle([
+            ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+            ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ('FONTNAME', (0, -1), (-1, -1), 'Helvetica-Bold'),
+            ('FONTSIZE', (0, -1), (-1, -1), 11),
+            ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+            ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+        ]))
+        elements.append(pricing_table)
+        elements.append(Spacer(1, 0.2*inch))
+        
+        # Payment information
+        if booking.payments.exists():
+            payment = booking.payments.latest('created_at')
+            payment_info = Paragraph("<b>Payment Information:</b>", styles['Heading2'])
+            elements.append(payment_info)
+            
+            payment_data = [
+                ['Payment Method:', payment.get_payment_method_display()],
+                ['Payment Status:', payment.get_status_display()],
+                ['Transaction ID:', payment.transaction_id or 'N/A'],
+            ]
+            
+            payment_table = Table(payment_data, colWidths=[2*inch, 3*inch])
+            payment_table.setStyle(TableStyle([
+                ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                ('FONTSIZE', (0, 0), (-1, -1), 10),
+            ]))
+            elements.append(payment_table)
+            elements.append(Spacer(1, 0.2*inch))
+        
+        # Footer
+        footer = Paragraph(
+            "<i>Thank you for your booking. This invoice is valid proof of payment.</i>",
+            styles['Normal']
+        )
+        elements.append(footer)
+        
+        # Build PDF
+        doc.build(elements)
+        buffer.seek(0)
+        
+        # Return PDF
+        response = HttpResponse(buffer, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="Invoice_{invoice_num}.pdf"'
+        return response
+    
+    except ImportError:
+        # Fallback: return HTML invoice
+        from django.http import HttpResponse
+        html_content = f"""
+        <html>
+        <head>
+            <title>Invoice {booking.id}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 20px; }}
+                h1 {{ color: #333; }}
+                table {{ width: 100%; border-collapse: collapse; margin: 15px 0; }}
+                th, td {{ border: 1px solid #ddd; padding: 10px; text-align: left; }}
+                th {{ background-color: #f4f4f4; }}
+                .total {{ font-weight: bold; font-size: 1.2em; }}
+                .footer {{ margin-top: 30px; font-size: 12px; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <h1>BOOKING INVOICE</h1>
+            <p><strong>Invoice Number:</strong> INV-{booking.id:05d}</p>
+            <p><strong>Invoice Date:</strong> {booking.created_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
+            <p><strong>Booking ID:</strong> {booking.id}</p>
+            <p><strong>Status:</strong> {booking.get_status_display()}</p>
+            
+            <h2>Guest Information</h2>
+            <p><strong>Name:</strong> {booking.guest.first_name} {booking.guest.last_name}</p>
+            <p><strong>Email:</strong> {booking.guest.email}</p>
+            <p><strong>Phone:</strong> {booking.guest.phone_number or 'N/A'}</p>
+            
+            <h2>Booking Details</h2>
+            <table>
+                <tr>
+                    <th>Room Number</th>
+                    <th>Room Type</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Nights</th>
+                </tr>
+                <tr>
+                    <td>{booking.room.room_number}</td>
+                    <td>{booking.room.get_room_type_display()}</td>
+                    <td>{booking.check_in.strftime('%Y-%m-%d')}</td>
+                    <td>{booking.check_out.strftime('%Y-%m-%d')}</td>
+                    <td>{booking.number_of_nights}</td>
+                </tr>
+            </table>
+            
+            <h2>Pricing</h2>
+            <table>
+                <tr>
+                    <td>Room Rate (per night)</td>
+                    <td>₱{booking.room.price_per_night:.2f}</td>
+                </tr>
+                <tr>
+                    <td>Number of Nights</td>
+                    <td>{booking.number_of_nights}</td>
+                </tr>
+                <tr>
+                    <td>Subtotal</td>
+                    <td>₱{booking.room.price_per_night * booking.number_of_nights:.2f}</td>
+                </tr>
+                <tr class="total">
+                    <td>TOTAL AMOUNT</td>
+                    <td>₱{booking.total_price:.2f}</td>
+                </tr>
+            </table>
+            
+            <div class="footer">
+                <p>Thank you for your booking. This invoice is valid proof of payment.</p>
+                <p>Generated on {booking.created_at.strftime('%Y-%m-%d %H:%M:%S')}</p>
+            </div>
+        </body>
+        </html>
+        """
+        return HttpResponse(html_content, content_type='text/html')

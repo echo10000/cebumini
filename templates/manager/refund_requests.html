@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Refund Requests{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">
+        <i class="fas fa-money-bill-wave"></i> Refund Requests
+    </h1>
+
+    <!-- Status Filters -->
+    <div class="btn-group mb-4" role="group">
+        <a href="?status=all" class="btn btn-outline-secondary {% if status_filter == 'all' %}active{% endif %}">
+            All
+        </a>
+        <a href="?status=REQUESTED" class="btn btn-outline-warning {% if status_filter == 'REQUESTED' %}active{% endif %}">
+            Pending
+        </a>
+        <a href="?status=APPROVED" class="btn btn-outline-success {% if status_filter == 'APPROVED' %}active{% endif %}">
+            Approved
+        </a>
+        <a href="?status=REJECTED" class="btn btn-outline-danger {% if status_filter == 'REJECTED' %}active{% endif %}">
+            Rejected
+        </a>
+    </div>
+
+    <!-- Refund Requests Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if refund_requests %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Guest</th>
+                            <th>Requested By</th>
+                            <th>Amount</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for refund in refund_requests %}
+                        <tr>
+                            <td><strong>#{{ refund.booking.id }}</strong></td>
+                            <td>{{ refund.booking.guest.get_full_name }}</td>
+                            <td>{{ refund.requested_by.get_full_name }}</td>
+                            <td><strong>₱{{ refund.requested_amount }}</strong></td>
+                            <td>{{ refund.reason|truncatewords:3 }}</td>
+                            <td>
+                                {% if refund.status == 'REQUESTED' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% elif refund.status == 'APPROVED' %}
+                                    <span class="badge badge-success">Approved</span>
+                                {% elif refund.status == 'REJECTED' %}
+                                    <span class="badge badge-danger">Rejected</span>
+                                {% else %}
+                                    <span class="badge badge-info">{{ refund.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ refund.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                {% if refund.status == 'REQUESTED' %}
+                                    <a href="{% url 'auth:manager_approve_refund' refund.id %}" class="btn btn-sm btn-primary">
+                                        Review
+                                    </a>
+                                {% else %}
+                                    <span class="text-muted">Processed</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">No refund requests found</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

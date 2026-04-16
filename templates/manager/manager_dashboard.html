@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manager Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h1 class="mb-4">
+                <i class="fas fa-tasks"></i> Manager Dashboard
+            </h1>
+        </div>
+    </div>
+
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-primary">{{ pending_bookings }}</h3>
+                    <p class="card-text">Pending Bookings</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-warning">{{ pending_refunds }}</h3>
+                    <p class="card-text">Pending Refunds</p>
+                    <small class="text-muted">₱{{ pending_refunds_total }}</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-danger">{{ open_complaints }}</h3>
+                    <p class="card-text">Open Complaints</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-info">{{ confirmed_bookings }}</h3>
+                    <p class="card-text">Confirmed Bookings</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="btn-group" role="group">
+                <a href="{% url 'auth:manager_refunds' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-money-bill-wave"></i> Refund Requests
+                </a>
+                <a href="{% url 'auth:manager_complaints' %}" class="btn btn-outline-danger">
+                    <i class="fas fa-exclamation-triangle"></i> Guest Complaints
+                </a>
+                <a href="{% url 'auth:manager_staff' %}" class="btn btn-outline-info">
+                    <i class="fas fa-users"></i> Staff Management
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Pending Refund Requests -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-hourglass-half"></i> Recent Refund Requests
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if pending_refund_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Booking</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for refund in pending_refund_requests %}
+                                <tr>
+                                    <td>#{{ refund.booking.id }}</td>
+                                    <td>₱{{ refund.requested_amount }}</td>
+                                    <td>
+                                        <span class="badge badge-warning">{{ refund.get_status_display }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'auth:manager_approve_refund' refund.id %}" class="btn btn-sm btn-primary">
+                                            Review
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No pending refund requests</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Open Complaints -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-circle"></i> Open Complaints
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if open_complaints %}
+                    <div class="alert alert-danger" role="alert">
+                        <strong>{{ open_complaints }}</strong> complaint(s) need attention
+                    </div>
+                    <a href="{% url 'auth:manager_complaints' %}" class="btn btn-danger">
+                        View All Complaints
+                    </a>
+                    {% else %}
+                    <p class="text-muted">No open complaints</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Staff Overview -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users"></i> Staff Team
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if staff_members %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Joined</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for staff in staff_members %}
+                                <tr>
+                                    <td>{{ staff.get_full_name|default:staff.username }}</td>
+                                    <td>{{ staff.email }}</td>
+                                    <td>
+                                        {% if staff.is_active %}
+                                        <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                        <span class="badge badge-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ staff.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'auth:manager_staff_dashboard' staff.id %}" class="btn btn-sm btn-info">
+                                            Dashboard
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No staff members registered</p>
+                    {% endif %}
+                    <a href="{% url 'auth:manager_register_staff' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-plus"></i> Register New Staff
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

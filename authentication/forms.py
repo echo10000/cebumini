@@ -49,12 +49,15 @@ class RegisterForm(UserCreationForm):
         widget=forms.CheckboxInput(attrs={
             'class': 'form-check-input',
         }),
-        label='I agree to the Terms and Conditions'
+        label='I agree to the Terms and Conditions',
+        error_messages={
+            'required': 'Please accept the Terms and Conditions to create an account.'
+        }
     )
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'password1', 'password2', 'accept_terms')
+        fields = ('email', 'password1', 'password2')
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -70,9 +73,9 @@ class RegisterForm(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
-        user.email = self.cleaned_data['email']
+        user.email = self.cleaned_data.get('email', '')
         # Auto-generate username from email for internal use
-        user.username = self.cleaned_data['email'].split('@')[0]
+        user.username = self.cleaned_data.get('email', '').split('@')[0]
         # Ensure unique username
         if User.objects.filter(username=user.username).exists():
             counter = 1

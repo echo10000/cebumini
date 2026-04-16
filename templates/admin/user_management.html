@@ -1,0 +1,215 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}User Management - Cebu Luxury{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <h1>User Management</h1>
+    <p>Manage registered users, roles, and permissions</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4 g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-value">{{ total_users }}</div>
+            <div class="stat-description">Registered accounts</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-user-tie"></i>
+            </div>
+            <div class="stat-label">Guests</div>
+            <div class="stat-value">{{ guest_count }}</div>
+            <div class="stat-description">Active guest accounts</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-user-shield"></i>
+            </div>
+            <div class="stat-label">Staff</div>
+            <div class="stat-value">{{ staff_count }}</div>
+            <div class="stat-description">Staff members</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-label">Verified</div>
+            <div class="stat-value">{{ verified_users }}</div>
+            <div class="stat-description">Email verified accounts</div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="admin-card mb-4">
+    <div class="admin-card-header">
+        <h5><i class="fas fa-filter"></i> Filter Users</h5>
+    </div>
+    <div class="admin-card-body">
+        <form method="get" class="d-flex gap-3 flex-wrap align-items-end">
+            <div style="flex: 1; min-width: 200px;">
+                <label for="role" style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem; display: block;">User Role</label>
+                <select name="role" id="role" class="form-control" style="background-color: var(--card-bg); color: var(--text-light); border: 1px solid rgba(201, 168, 76, 0.2);">
+                    <option value="">All Roles</option>
+                    <option value="guest">Guest</option>
+                    <option value="staff">Staff</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-luxury">
+                <i class="fas fa-search"></i> Filter
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="admin-card">
+    <div class="admin-card-header">
+        <h5><i class="fas fa-users"></i> Users</h5>
+    </div>
+    <div class="admin-card-body">
+        {% if users %}
+            <div class="admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.get_full_name|default:user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                {% if user.is_staff %}
+                                    <span class="badge-notification" style="background: #c9a84c; color: #0a0f1e;">Staff</span>
+                                {% else %}
+                                    <span class="badge-notification" style="background: #3b82f6;">Guest</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge-notification" style="background: #10b981;">Active</span>
+                                {% else %}
+                                    <span class="badge-notification" style="background: #dc2626;">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <button class="btn-luxury-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn-luxury-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
+                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
+                No users found.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    .stat-card-luxury {
+        background: #1a2235;
+        border-left: 4px solid #c9a84c;
+        border-radius: 12px;
+        padding: 1.75rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-card-luxury::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(201, 168, 76, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .stat-card-luxury:hover {
+        border-left-color: #e6c76e;
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(201, 168, 76, 0.25),
+                    0 0 30px rgba(201, 168, 76, 0.15);
+    }
+
+    .stat-card-luxury .stat-icon {
+        font-size: 2.5rem;
+        color: #c9a84c;
+        margin-bottom: 1rem;
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+        width: 50px;
+    }
+
+    .stat-card-luxury .stat-label {
+        font-size: 0.9rem;
+        color: #ffffff;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card-luxury .stat-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #c9a84c;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+        font-family: 'Playfair Display', serif;
+        position: relative;
+        z-index: 1;
+    }
+
+    .stat-card-luxury .stat-description {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        line-height: 1.4;
+        position: relative;
+        z-index: 1;
+    }
+</style>
+{% endblock %}

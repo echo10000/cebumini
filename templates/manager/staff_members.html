@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Management{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-users"></i> Staff Management
+        </h1>
+        <a href="{% url 'auth:manager_register_staff' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Register New Staff
+        </a>
+    </div>
+
+    <!-- Staff Members Table -->
+    <div class="card">
+        <div class="card-body">
+            {% if staff_members %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staff_members %}
+                        <tr>
+                            <td><strong>{{ staff.get_full_name|default:staff.username }}</strong></td>
+                            <td>{{ staff.username }}</td>
+                            <td>{{ staff.email }}</td>
+                            <td>{{ staff.phone_number|default:"N/A" }}</td>
+                            <td>
+                                {% if staff.is_active %}
+                                    <span class="badge badge-success">Active</span>
+                                {% else %}
+                                    <span class="badge badge-danger">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ staff.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'auth:manager_staff_dashboard' staff.id %}" class="btn btn-sm btn-info">
+                                    <i class="fas fa-chart-line"></i> Dashboard
+                                </a>
+                                {% if staff.is_active %}
+                                <a href="{% url 'auth:manager_deactivate_staff' staff.id %}" class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Are you sure you want to deactivate this staff member?')">
+                                    <i class="fas fa-ban"></i> Deactivate
+                                </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-4">
+                No staff members registered yet.
+                <a href="{% url 'auth:manager_register_staff' %}">Register one now</a>
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

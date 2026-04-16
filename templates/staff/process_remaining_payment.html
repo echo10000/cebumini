@@ -1,0 +1,310 @@
+{% extends 'base.html' %}
+
+{% block title %}Process Remaining Payment - Staff{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">Collect Remaining Balance - Booking #{{ booking.id }}</h1>
+                <a href="{% url 'staff:pending_balance' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Pending Bookings
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Collect Balance Payment</h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Booking Information Section -->
+                        <fieldset class="mb-4">
+                            <legend class="font-weight-bold mb-3">Booking Information</legend>
+                            
+                            <div class="form-group">
+                                <label for="guest_name">Guest Name</label>
+                                <input type="text" class="form-control" id="guest_name" value="{{ booking.guest.first_name }} {{ booking.guest.last_name }}" disabled>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="room">Room</label>
+                                    <input type="text" class="form-control" id="room" value="Room {{ booking.room.room_number }} ({{ booking.room.get_room_type_display }})" disabled>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label for="dates">Booking Dates</label>
+                                    <input type="text" class="form-control" id="dates" value="{{ booking.check_in|date:'M d' }} - {{ booking.check_out|date:'M d, Y' }}" disabled>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Payment Status Section -->
+                        <fieldset class="mb-4">
+                            <legend class="font-weight-bold mb-3">Payment Status</legend>
+                            
+                            <div id="payment-history" class="alert alert-secondary">
+                                <strong>Payment Summary:</strong>
+                                <table class="mt-2 small w-100">
+                                    <tr>
+                                        <td>Total Amount Due:</td>
+                                        <td class="text-right"><strong class="h6">₱{{ booking.total_price|floatformat:2 }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Previously Paid:</td>
+                                        <td class="text-right"><strong class="text-success">₱{{ total_paid|floatformat:2 }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"><hr class="my-2"></td>
+                                    </tr>
+                                    <tr>
+                                        <td><span class="badge badge-warning">Balance Due:</span></td>
+                                        <td class="text-right"><strong class="text-warning h6">₱{{ balance_due|floatformat:2 }}</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </fieldset>
+
+                        <!-- Payment Collection Section -->
+                        <fieldset class="mb-4">
+                            <legend class="font-weight-bold mb-3">Collect Payment</legend>
+                            
+                            <div class="form-group">
+                                <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                <select class="form-control" id="payment_method" name="payment_method" required>
+                                    <option value="">-- Select Payment Method --</option>
+                                    <option value="CASH">💵 Cash</option>
+                                    <option value="STRIPE">💳 Card (Credit/Debit)</option>
+                                    <option value="GCASH">📱 GCash</option>
+                                    <option value="BANK_TRANSFER">🏦 Bank Transfer</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label for="payment_amount">Amount Collected <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">₱</span>
+                                        </div>
+                                        <input type="number" class="form-control" id="payment_amount" name="payment_amount" step="0.01" min="0" required>
+                                    </div>
+                                    <small class="form-text text-muted">Leave empty to auto-fill with balance due (₱{{ balance_due|floatformat:2 }})</small>
+                                </div>
+                                <div class="form-group col-md-6" id="reference_group" style="display:none;">
+                                    <label for="reference_number" id="reference_label">Reference/Receipt Number</label>
+                                    <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="e.g., TRANS123456">
+                                    <small class="form-text text-muted" id="reference_help">Auto-generated if left empty</small>
+                                </div>
+                            </div>
+
+                            <div id="payment-summary" class="alert alert-secondary">
+                                <strong>Payment Calculation:</strong>
+                                <table class="mt-2 small w-100">
+                                    <tr>
+                                        <td>Balance Due:</td>
+                                        <td class="text-right"><strong id="summary-balance-due">₱{{ balance_due|floatformat:2 }}</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Amount Collected:</td>
+                                        <td class="text-right"><strong id="summary-collected">₱0.00</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2"><hr class="my-2"></td>
+                                    </tr>
+                                    <tr id="remaining-row" style="display:none;">
+                                        <td><span class="badge badge-info">Remaining After Payment:</span></td>
+                                        <td class="text-right"><strong id="summary-remaining" class="text-info">₱0.00</strong></td>
+                                    </tr>
+                                    <tr id="full-paid-row" style="display:none;">
+                                        <td><span class="badge badge-success">Status:</span></td>
+                                        <td class="text-right"><strong id="summary-status" class="text-success">FULLY PAID ✓</strong></td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </fieldset>
+
+                        <!-- Action Buttons -->
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Collect Balance Payment
+                            </button>
+                            <a href="{% url 'staff:pending_balance' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Info Sidebar -->
+        <div class="col-md-4">
+            <div class="card shadow mb-4">
+                <div class="card-header bg-info text-white">
+                    <h6 class="m-0 font-weight-bold">Balance Payment Info</h6>
+                </div>
+                <div class="card-body small">
+                    <div class="mb-3">
+                        <strong class="text-success">💵 💳 Cash / Card:</strong>
+                        <p class="mb-2">Reference number is auto-generated. No input needed.</p>
+                    </div>
+                    <div>
+                        <strong class="text-warning">📱 🏦 GCash / Bank Transfer:</strong>
+                        <p class="mb-0">Reference number is <strong>REQUIRED</strong>. Enter the transaction reference from the payment receipt.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="m-0 font-weight-bold">Instructions</h6>
+                </div>
+                <div class="card-body small">
+                    <ol class="small mb-0">
+                        <li>Select the payment method</li>
+                        <li>Enter amount collected (auto-fills with balance due)</li>
+                        <li>If GCash/Bank Transfer, enter reference number</li>
+                        <li>Check the payment calculation summary</li>
+                        <li>Click "Collect Balance Payment" to finalize</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Payment method and reference field handling
+    const paymentMethodSelect = document.getElementById('payment_method');
+    const referenceNumberInput = document.getElementById('reference_number');
+    const referenceGroup = document.getElementById('reference_group');
+    const referenceLabel = document.getElementById('reference_label');
+    const referenceHelp = document.getElementById('reference_help');
+    const paymentAmountInput = document.getElementById('payment_amount');
+    
+    const BALANCE_DUE = {{ balance_due|floatformat:2 }};
+    
+    // Payment methods that require external reference
+    const REFERENCE_REQUIRED_METHODS = ['GCASH', 'BANK_TRANSFER'];
+    const REFERENCE_AUTO_METHODS = ['CASH', 'STRIPE'];
+    
+    function updateReferenceFieldState() {
+        const selectedMethod = paymentMethodSelect.value;
+        
+        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
+            // Show field for GCash and Bank Transfer
+            referenceGroup.style.display = 'block';
+            referenceNumberInput.required = true;
+            referenceNumberInput.classList.add('is-invalid');
+            
+            // Update label and help text based on payment method
+            if (selectedMethod === 'GCASH') {
+                referenceLabel.innerHTML = 'GCash Reference Number <span class="text-danger">*</span>';
+                referenceHelp.textContent = 'Enter the GCash reference number from the transaction receipt (e.g., G123456789ABC)';
+                referenceNumberInput.placeholder = 'e.g., G123456789ABC';
+            } else if (selectedMethod === 'BANK_TRANSFER') {
+                referenceLabel.innerHTML = 'Bank Transfer Reference/Confirmation Code <span class="text-danger">*</span>';
+                referenceHelp.textContent = 'Enter the bank transfer reference number or confirmation code for verification';
+                referenceNumberInput.placeholder = 'e.g., TRANSFER123456';
+            }
+        } else if (REFERENCE_AUTO_METHODS.includes(selectedMethod)) {
+            // Hide field for Cash and Card - will be auto-generated
+            referenceGroup.style.display = 'none';
+            referenceNumberInput.required = false;
+            referenceNumberInput.classList.remove('is-invalid');
+            referenceNumberInput.value = ''; // Clear the field
+            referenceLabel.innerHTML = 'Reference/Receipt Number';
+            referenceHelp.textContent = 'Auto-generated if left empty';
+        } else {
+            // Default: hide field
+            referenceGroup.style.display = 'none';
+            referenceNumberInput.required = false;
+            referenceNumberInput.classList.remove('is-invalid');
+        }
+    }
+    
+    function updatePaymentSummary() {
+        const collected = parseFloat(paymentAmountInput.value) || 0;
+        const remaining = BALANCE_DUE - collected;
+        
+        document.getElementById('summary-collected').textContent = '₱' + collected.toFixed(2);
+        
+        const remainingRow = document.getElementById('remaining-row');
+        const fullPaidRow = document.getElementById('full-paid-row');
+        
+        if (collected >= BALANCE_DUE) {
+            remainingRow.style.display = 'none';
+            fullPaidRow.style.display = 'table-row';
+            document.getElementById('summary-status').textContent = 'FULLY PAID ✓';
+            document.getElementById('summary-status').className = 'text-success';
+        } else if (collected > 0) {
+            remainingRow.style.display = 'table-row';
+            fullPaidRow.style.display = 'none';
+            document.getElementById('summary-remaining').textContent = '₱' + remaining.toFixed(2);
+            document.getElementById('summary-remaining').className = 'text-info';
+        } else {
+            remainingRow.style.display = 'table-row';
+            fullPaidRow.style.display = 'none';
+            document.getElementById('summary-remaining').textContent = '₱' + BALANCE_DUE.toFixed(2);
+            document.getElementById('summary-remaining').className = 'text-danger';
+        }
+    }
+    
+    // Event listeners
+    paymentMethodSelect.addEventListener('change', updateReferenceFieldState);
+    paymentAmountInput.addEventListener('input', updatePaymentSummary);
+    
+    // Set default amount to balance due
+    paymentAmountInput.value = BALANCE_DUE.toFixed(2);
+    updatePaymentSummary();
+    
+    // Validate form submission
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const selectedMethod = paymentMethodSelect.value;
+        
+        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
+            if (!referenceNumberInput.value.trim()) {
+                e.preventDefault();
+                referenceNumberInput.classList.add('is-invalid');
+                alert(`Reference number is required for ${selectedMethod === 'GCASH' ? 'GCash' : 'Bank Transfer'} payments.`);
+                referenceNumberInput.focus();
+                return false;
+            }
+        }
+        
+        const collected = parseFloat(paymentAmountInput.value) || 0;
+        if (collected > BALANCE_DUE) {
+            e.preventDefault();
+            alert(`Payment amount cannot exceed balance due (₱${BALANCE_DUE.toFixed(2)})`);
+            paymentAmountInput.focus();
+            return false;
+        }
+    });
+</script>
+
+<style>
+    .text-danger { color: #e74c3c; }
+    fieldset { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+    legend { font-size: 14px; }
+    
+    #reference_group {
+        transition: all 0.3s ease-in-out;
+    }
+    
+    #reference_number.is-invalid {
+        border-color: #e74c3c;
+    }
+    
+    #reference_number:focus {
+        box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+    }
+</style>
+{% endblock %}

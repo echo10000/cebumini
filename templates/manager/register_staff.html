@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Register Staff Member{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <h1 class="mb-4">
+                <i class="fas fa-user-plus"></i> Register New Staff Member
+            </h1>
+
+            <div class="card">
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="username"><strong>Username:</strong></label>
+                            <input type="text" class="form-control" id="username" name="username" required 
+                                   placeholder="Enter unique username">
+                            <small class="form-text text-muted">Must be unique</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email"><strong>Email:</strong></label>
+                            <input type="email" class="form-control" id="email" name="email" required 
+                                   placeholder="Enter email address">
+                            <small class="form-text text-muted">Must be unique</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password"><strong>Password:</strong></label>
+                            <input type="password" class="form-control" id="password" name="password" required 
+                                   placeholder="Enter password (minimum 8 characters)">
+                            <small class="form-text text-muted">Minimum 8 characters required</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="first_name">First Name:</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" 
+                                   placeholder="Optional">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="last_name">Last Name:</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" 
+                                   placeholder="Optional">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number:</label>
+                            <input type="tel" class="form-control" id="phone_number" name="phone_number" 
+                                   placeholder="Optional">
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i> Register Staff Member
+                            </button>
+                        </div>
+
+                        <div class="form-group">
+                            <a href="{% url 'auth:manager_staff' %}" class="btn btn-secondary btn-block">
+                                <i class="fas fa-arrow-left"></i> Back to Staff List
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-info-circle"></i>
+                <strong>Note:</strong> The new staff member will need to accept Terms & Conditions upon first login.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

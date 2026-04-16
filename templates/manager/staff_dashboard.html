@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block title %}Staff Dashboard - Performance{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>
+            <i class="fas fa-chart-line"></i> {{ staff_member.get_full_name }} - Performance
+        </h1>
+        <a href="{% url 'auth:manager_staff' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Staff List
+        </a>
+    </div>
+
+    <!-- Staff Info Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Name:</strong> {{ staff_member.get_full_name|default:staff_member.username }}</p>
+                    <p><strong>Email:</strong> {{ staff_member.email }}</p>
+                    <p><strong>Phone:</strong> {{ staff_member.phone_number|default:"N/A" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Joined:</strong> {{ staff_member.created_at|date:"M d, Y" }}</p>
+                    <p><strong>Status:</strong>
+                        {% if staff_member.is_active %}
+                            <span class="badge badge-success">Active</span>
+                        {% else %}
+                            <span class="badge badge-danger">Inactive</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-primary">{{ created_bookings }}</h3>
+                    <p class="card-text">Bookings Created Today</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-info">{{ room_status_updates|length }}</h3>
+                    <p class="card-text">Recent Status Updates</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="card-title text-warning">{{ escalated_complaints|length }}</h3>
+                    <p class="card-text">Escalated Complaints</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recent Room Status Updates -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-door-open"></i> Recent Room Status Updates
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if room_status_updates %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Status</th>
+                                    <th>Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for update in room_status_updates %}
+                                <tr>
+                                    <td><strong>{{ update.room.room_number }}</strong></td>
+                                    <td>
+                                        <span class="badge badge-info">{{ update.current_status }}</span>
+                                    </td>
+                                    <td>{{ update.created_at|date:"H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No recent updates</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Escalated Complaints -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-circle"></i> Escalated Complaints
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if escalated_complaints %}
+                    <div class="list-group">
+                        {% for complaint in escalated_complaints %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">Booking #{{ complaint.booking.id }}</h6>
+                            <p class="mb-1 small">{{ complaint.complaint_description|truncatewords:10 }}</p>
+                            <small class="text-muted">
+                                <strong>Status:</strong> {{ complaint.get_status_display }}
+                            </small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">No escalated complaints</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

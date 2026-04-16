@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
+from django.urls import reverse
 from django.db.models import Q, Sum, Count
 from django.utils import timezone
 from datetime import timedelta
@@ -11,10 +12,18 @@ import json
 
 
 def admin_required(view_func):
-    """Decorator to ensure only admins can access"""
+    """
+    Decorator to ensure only admins can access
+    Also ensures terms and conditions are accepted
+    """
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated or not request.user.is_admin():
             return HttpResponseForbidden("You don't have permission to access this page.")
+        
+        # Check if admin has accepted terms
+        if not request.user.has_accepted_terms():
+            return redirect('auth:accept_terms')
+        
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -27,7 +36,7 @@ def admin_dashboard(request):
     
     # Basic stats
     total_bookings = Booking.objects.count()
-    pending_payments = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
     confirmed_bookings = Booking.objects.filter(status=BookingStatus.CONFIRMED).count()
     
     # Revenue calculations
@@ -55,17 +64,17 @@ def admin_dashboard(request):
     occupied_rooms = Room.objects.filter(is_available=False).count()
     occupancy_rate = (occupied_rooms / total_rooms * 100) if total_rooms > 0 else 0
     
-    # Recent bookings
+    # Recent bookings (QuerySet for template iteration)
     recent_bookings = Booking.objects.select_related('room', 'guest').order_by('-created_at')[:5]
     
-    # Pending payments list
-    pending = Payment.objects.select_related('booking__room', 'booking__guest').filter(
+    # Pending payments list (QuerySet for template iteration)
+    pending_payments = Payment.objects.select_related('booking__room', 'booking__guest').filter(
         status=PaymentStatus.PENDING
     ).order_by('-created_at')[:5]
     
     context = {
         'total_bookings': total_bookings,
-        'pending_payments': pending_payments,
+        'pending_payments_count': pending_payments_count,
         'confirmed_bookings': confirmed_bookings,
         'total_revenue': total_revenue,
         'today_check_ins': today_check_ins,
@@ -74,7 +83,7 @@ def admin_dashboard(request):
         'occupancy_rate': occupancy_rate,
         'total_rooms': total_rooms,
         'recent_bookings': recent_bookings,
-        'pending_payments_list': pending,
+        'pending_payments': pending_payments,
     }
     
     return render(request, 'admin/dashboard.html', context)
@@ -85,8 +94,8 @@ def admin_dashboard(request):
 def payment_management(request):
     """Manage all pending payments with approval/rejection"""
     
-    # Filter by payment status
-    status_filter = request.GET.get('status', 'PENDING')
+    # Filter by payment status (default to empty to show all if not specified)
+    status_filter = request.GET.get('status', '')
     payment_method_filter = request.GET.get('method', '')
     
     payments = Payment.objects.select_related(
@@ -112,8 +121,10 @@ def payment_management(request):
         'pending_count': pending_count,
         'completed_count': completed_count,
         'failed_count': failed_count,
+        'pending_payments_count': pending_count,
         'payment_statuses': PaymentStatus.choices,
         'payment_methods': Payment._meta.get_field('payment_method').choices,
+        'show_pending_by_default': not status_filter,  # Show pending filter tab if no status specified
     }
     
     return render(request, 'admin/payment_management.html', context)
@@ -138,12 +149,14 @@ def payment_detail(request, payment_id):
                 booking.status = BookingStatus.CONFIRMED
                 payment.save()
                 booking.save()
+                # Redirect to show all payments (approved payment now appears as Completed)
                 return redirect('admin_panel:payment_management')
             
             elif action == 'reject':
                 payment.status = PaymentStatus.FAILED
                 payment.notes = form.cleaned_data.get('notes', 'Payment rejected by admin')
                 payment.save()
+                # Redirect to show all payments (rejected payment now appears as Failed)
                 return redirect('admin_panel:payment_management')
             
             elif action == 'pending':
@@ -153,11 +166,15 @@ def payment_detail(request, payment_id):
     else:
         form = PaymentApprovalForm(instance=payment)
     
+    # Get pending payments count for sidebar
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    
     context = {
         'payment': payment,
         'booking': booking,
         'guest': guest,
         'form': form,
+        'pending_payments_count': pending_payments_count,
         'payment_statuses': PaymentStatus.choices,
     }
     
@@ -226,15 +243,30 @@ def room_management(request):
     total_rooms = rooms.count()
     available_rooms = rooms.filter(is_available=True).count()
     occupied_rooms = total_rooms - available_rooms
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
     
     context = {
         'rooms': rooms,
         'total_rooms': total_rooms,
         'available_rooms': available_rooms,
         'occupied_rooms': occupied_rooms,
+        'pending_payments_count': pending_payments_count,
     }
     
     return render(request, 'admin/room_management.html', context)
+
+
+@login_required
+@admin_required
+def room_detail_admin(request, room_id):
+    """Display room details for admin"""
+    room = get_object_or_404(Room, id=room_id)
+    
+    context = {
+        'room': room,
+    }
+    
+    return render(request, 'admin/room_detail_admin.html', context)
 
 
 @login_required
@@ -258,6 +290,7 @@ def booking_management(request):
     pending_bookings = Booking.objects.filter(status=BookingStatus.PENDING).count()
     confirmed_bookings = Booking.objects.filter(status=BookingStatus.CONFIRMED).count()
     cancelled_bookings = Booking.objects.filter(status=BookingStatus.CANCELLED).count()
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
     
     context = {
         'bookings': bookings,
@@ -266,10 +299,69 @@ def booking_management(request):
         'pending_bookings': pending_bookings,
         'confirmed_bookings': confirmed_bookings,
         'cancelled_bookings': cancelled_bookings,
+        'pending_payments_count': pending_payments_count,
         'booking_statuses': BookingStatus.choices,
     }
     
     return render(request, 'admin/booking_management.html', context)
+
+
+@login_required
+@admin_required
+def booking_detail(request, booking_id):
+    """View booking details"""
+    booking = get_object_or_404(Booking, id=booking_id)
+    guest = booking.guest
+    room = booking.room
+    payment = Payment.objects.filter(booking=booking).first()
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    
+    context = {
+        'booking': booking,
+        'guest': guest,
+        'room': room,
+        'payment': payment,
+        'pending_payments_count': pending_payments_count,
+        'booking_statuses': BookingStatus.choices,
+    }
+    
+    return render(request, 'admin/booking_detail.html', context)
+
+
+@login_required
+@admin_required
+def booking_edit(request, booking_id):
+    """Edit booking status and details"""
+    booking = get_object_or_404(Booking, id=booking_id)
+    guest = booking.guest
+    room = booking.room
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        notes = request.POST.get('notes', '')
+        
+        if action == 'confirm':
+            booking.status = BookingStatus.CONFIRMED
+            booking.save()
+        elif action == 'cancel':
+            booking.status = BookingStatus.CANCELLED
+            booking.save()
+        elif action == 'checkin':
+            booking.status = BookingStatus.CHECKED_IN
+            booking.save()
+        
+        return redirect('admin_panel:booking_detail', booking_id=booking.id)
+    
+    context = {
+        'booking': booking,
+        'guest': guest,
+        'room': room,
+        'pending_payments_count': pending_payments_count,
+        'booking_statuses': BookingStatus.choices,
+    }
+    
+    return render(request, 'admin/booking_detail.html', context)
 
 
 @login_required
@@ -289,6 +381,7 @@ def user_management(request):
     total_users = CustomUser.objects.count()
     admin_users = CustomUser.objects.filter(role=UserRole.ADMIN).count()
     guest_users = CustomUser.objects.filter(role=UserRole.GUEST).count()
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
     
     context = {
         'users': users,
@@ -296,6 +389,7 @@ def user_management(request):
         'total_users': total_users,
         'admin_users': admin_users,
         'guest_users': guest_users,
+        'pending_payments_count': pending_payments_count,
         'user_roles': UserRole.choices,
     }
     
@@ -339,6 +433,9 @@ def admin_reports(request):
         avg=Sum('amount') / Count('id')
     )
     
+    # Get pending payments count for sidebar
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    
     context = {
         'total_revenue': total_revenue,
         'month_revenue': month_revenue,
@@ -346,6 +443,7 @@ def admin_reports(request):
         'today_revenue': today_revenue,
         'payment_methods': payment_methods,
         'room_revenue': room_revenue,
+        'pending_payments_count': pending_payments_count,
         'month_payments_count': month_payments.count(),
         'week_payments_count': week_payments.count(),
         'today_payments_count': today_payments.count(),

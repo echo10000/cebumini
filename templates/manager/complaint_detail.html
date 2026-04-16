@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Resolve Guest Complaint{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">
+                <i class="fas fa-comments"></i> Resolve Guest Complaint
+            </h1>
+
+            <!-- Booking & Guest Info -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Booking & Guest Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
+                            <p><strong>Guest:</strong> {{ booking.guest.get_full_name }}</p>
+                            <p><strong>Email:</strong> {{ booking.guest.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Room:</strong> {{ booking.room.room_number }}</p>
+                            <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
+                            <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complaint Details -->
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">Complaint Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Complaint:</strong></p>
+                    <div class="border p-3 bg-light mb-3">
+                        {{ escalation.complaint_description }}
+                    </div>
+                    <p><strong>Reported By:</strong> {{ escalation.reported_by_staff.get_full_name }}</p>
+                    <p><strong>Staff Notes:</strong></p>
+                    <div class="border p-3 bg-light">
+                        {{ escalation.staff_notes|default:"<em>No notes provided</em>" }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resolution Form -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Manager Resolution</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="form-group">
+                            <label for="action"><strong>Status:</strong></label>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" class="custom-control-input" id="in_progress" name="action" value="in_progress" checked>
+                                <label class="custom-control-label" for="in_progress">
+                                    <i class="fas fa-spinner text-warning"></i> Mark In Progress
+                                </label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" class="custom-control-input" id="resolve" name="action" value="resolve">
+                                <label class="custom-control-label" for="resolve">
+                                    <i class="fas fa-check text-success"></i> Mark Resolved
+                                </label>
+                            </div>
+                            <div class="custom-control custom-radio">
+                                <input type="radio" class="custom-control-input" id="close" name="action" value="close">
+                                <label class="custom-control-label" for="close">
+                                    <i class="fas fa-times-circle text-secondary"></i> Close Complaint
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="manager_notes"><strong>Resolution Notes:</strong></label>
+                            <textarea class="form-control" id="manager_notes" name="manager_notes" rows="5" 
+                                      placeholder="Describe the action taken to resolve this complaint"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Update Status
+                            </button>
+                            <a href="{% url 'auth:manager_complaints' %}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

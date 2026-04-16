@@ -7,6 +7,7 @@ from decimal import Decimal
 class UserRole(models.TextChoices):
     GUEST = 'GUEST', 'Guest'
     STAFF = 'STAFF', 'Staff'
+    MANAGER = 'MANAGER', 'Manager'
     ADMIN = 'ADMIN', 'Administrator'
 
 class TermsAndConditions(models.Model):
@@ -54,6 +55,10 @@ class CustomUser(AbstractUser):
     def is_admin(self):
         """Check if user is admin"""
         return self.role == UserRole.ADMIN
+
+    def is_manager(self):
+        """Check if user is manager"""
+        return self.role == UserRole.MANAGER
 
     def is_guest(self):
         """Check if user is guest"""
@@ -332,10 +337,10 @@ class PaymentStatus(models.TextChoices):
 
 class Payment(models.Model):
     """Payment Model for booking transactions"""
-    booking = models.OneToOneField(
+    booking = models.ForeignKey(
         Booking,
         on_delete=models.CASCADE,
-        related_name='payment'
+        related_name='payments'
     )
     amount = models.DecimalField(
         max_digits=10,
@@ -542,3 +547,371 @@ class LoginSession(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+class RefundRequestStatus(models.TextChoices):
+    """Refund request workflow statuses"""
+    REQUESTED = 'REQUESTED', 'Requested by Staff'
+    APPROVED = 'APPROVED', 'Approved by Manager'
+    REJECTED = 'REJECTED', 'Rejected by Manager'
+    ISSUED = 'ISSUED', 'Refund Issued by Admin'
+
+
+class RefundRequest(models.Model):
+    """Refund Request - workflow: Staff request → Manager approve → Admin issue"""
+    booking = models.OneToOneField(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name='refund_request'
+    )
+    requested_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='refund_requests_created',
+        limit_choices_to={'role__in': ['STAFF', 'GUEST']},
+        help_text="Staff or Guest who requested the refund"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=RefundRequestStatus.choices,
+        default=RefundRequestStatus.REQUESTED,
+        help_text="Current status of refund request"
+    )
+    reason = models.TextField(
+        help_text="Reason for refund request"
+    )
+    requested_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        help_text="Amount initially requested for refund"
+    )
+    approved_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='refund_requests_approved',
+        limit_choices_to={'role': 'MANAGER'},
+        help_text="Manager who approved/rejected the request"
+    )
+    approved_amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="Amount approved by manager"
+    )
+    manager_notes = models.TextField(
+        blank=True,
+        help_text="Manager's notes on approval/rejection"
+    )
+    approved_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When manager approved/rejected"
+    )
+    issued_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='refund_requests_issued',
+        limit_choices_to={'role': 'ADMIN'},
+        help_text="Admin who issued the refund"
+    )
+    issued_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="When admin issued the refund"
+    )
+    refund_transaction_id = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text="Transaction ID from payment provider for the refund"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'refund_requests'
+        verbose_name = 'Refund Request'
+        verbose_name_plural = 'Refund Requests'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['booking', 'status']),
+            models.Index(fields=['status', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"Refund Request for Booking #{self.booking.id} - {self.get_status_display()}"
+
+    def can_staff_request(self):
+        """Check if this refund can still be requested by staff"""
+        return self.status == RefundRequestStatus.REQUESTED and not self.approved_by
+
+    def can_manager_approve(self):
+        """Check if manager can approve/reject this request"""
+        return self.status == RefundRequestStatus.REQUESTED and not self.approved_by
+
+    def can_admin_issue(self):
+        """Check if admin can issue this refund"""
+        return self.status == RefundRequestStatus.APPROVED and not self.issued_by
+
+
+class RoomStatus(models.TextChoices):
+    """Housekeeping room status choices"""
+    CLEAN = 'CLEAN', 'Clean'
+    DIRTY = 'DIRTY', 'Dirty'
+    MAINTENANCE = 'MAINTENANCE', 'Under Maintenance'
+
+
+class RoomHousekeepingLog(models.Model):
+    """Track room status changes for housekeeping management"""
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        related_name='housekeeping_logs'
+    )
+    previous_status = models.CharField(
+        max_length=20,
+        choices=RoomStatus.choices
+    )
+    current_status = models.CharField(
+        max_length=20,
+        choices=RoomStatus.choices
+    )
+    updated_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        limit_choices_to={'role': 'STAFF'},
+        related_name='room_status_updates'
+    )
+    notes = models.TextField(
+        blank=True,
+        help_text="Notes about room condition or maintenance needs"
+    )
+    booking = models.ForeignKey(
+        Booking,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        help_text="Related booking if status change is due to booking"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'room_housekeeping_logs'
+        verbose_name = 'Room Housekeeping Log'
+        verbose_name_plural = 'Room Housekeeping Logs'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['room', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"{self.room.room_number} - {self.current_status} on {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class GuestComplaintEscalation(models.Model):
+    """Track guest complaint escalations from Staff to Manager"""
+    
+    COMPLAINT_STATUS = [
+        ('OPEN', 'Open'),
+        ('IN_PROGRESS', 'In Progress'),
+        ('RESOLVED', 'Resolved'),
+        ('CLOSED', 'Closed'),
+    ]
+    
+    booking = models.ForeignKey(
+        Booking,
+        on_delete=models.CASCADE,
+        related_name='complaint_escalations'
+    )
+    guest = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='complaint_escalations',
+        limit_choices_to={'role': 'GUEST'}
+    )
+    complaint_description = models.TextField(
+        help_text="Description of the guest's complaint"
+    )
+    reported_by_staff = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='escalated_complaints',
+        limit_choices_to={'role': 'STAFF'},
+        help_text="Staff member who escalated the complaint"
+    )
+    escalated_to = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='received_escalations',
+        limit_choices_to={'role': 'MANAGER'},
+        help_text="Manager assigned to handle escalation"
+    )
+    staff_notes = models.TextField(
+        blank=True,
+        help_text="Staff's notes about the complaint"
+    )
+    manager_notes = models.TextField(
+        blank=True,
+        help_text="Manager's resolution notes"
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=COMPLAINT_STATUS,
+        default='OPEN'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    resolved_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+
+    class Meta:
+        db_table = 'guest_complaint_escalations'
+        verbose_name = 'Guest Complaint Escalation'
+        verbose_name_plural = 'Guest Complaint Escalations'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['status', '-created_at']),
+            models.Index(fields=['escalated_to', 'status']),
+        ]
+
+    def __str__(self):
+        return f"Complaint for Booking #{self.booking.id} - {self.get_status_display()}"
+
+
+
+class AuditLog(models.Model):
+    """Audit Log for tracking all system actions"""
+    
+    ACTION_CHOICES = [
+        ('BOOKING_CREATED', 'Booking Created'),
+        ('BOOKING_APPROVED', 'Booking Approved'),
+        ('BOOKING_CANCELLED', 'Booking Cancelled'),
+        ('PAYMENT_APPROVED', 'Payment Approved'),
+        ('PAYMENT_REJECTED', 'Payment Rejected'),
+        ('REFUND_REQUESTED', 'Refund Requested'),
+        ('REFUND_APPROVED', 'Refund Approved'),
+        ('REFUND_ISSUED', 'Refund Issued'),
+        ('ROOM_CREATED', 'Room Created'),
+        ('ROOM_UPDATED', 'Room Updated'),
+        ('ROOM_DELETED', 'Room Deleted'),
+        ('PRICING_CHANGED', 'Pricing Changed'),
+        ('ROOM_STATUS_CHANGED', 'Room Status Changed'),
+        ('STAFF_REGISTERED', 'Staff Member Registered'),
+        ('STAFF_DEACTIVATED', 'Staff Member Deactivated'),
+        ('USER_ROLE_CHANGED', 'User Role Changed'),
+        ('COMPLAINT_ESCALATED', 'Guest Complaint Escalated'),
+        ('COMPLAINT_RESOLVED', 'Guest Complaint Resolved'),
+        ('GUEST_PROFILE_VIEWED', 'Guest Profile Viewed'),
+        ('LOGIN_SUCCESSFUL', 'Login Successful'),
+        ('LOGIN_FAILED', 'Login Failed'),
+        ('PASSWORD_CHANGED', 'Password Changed'),
+    ]
+    
+    actor = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs_created',
+        help_text="User who performed the action"
+    )
+    actor_role = models.CharField(
+        max_length=20,
+        choices=UserRole.choices,
+        help_text="Role of the user at time of action"
+    )
+    action = models.CharField(
+        max_length=50,
+        choices=ACTION_CHOICES,
+        help_text="Type of action performed"
+    )
+    affected_user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='audit_logs_affected',
+        help_text="User affected by this action (if any)"
+    )
+    affected_entity_type = models.CharField(
+        max_length=50,
+        help_text="Type of entity affected (Booking, Room, Payment, etc.)"
+    )
+    affected_entity_id = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="ID of the affected entity"
+    )
+    description = models.TextField(
+        blank=True,
+        help_text="Detailed description of the action"
+    )
+    ip_address = models.GenericIPAddressField(
+        null=True,
+        blank=True,
+        help_text="IP address of the request"
+    )
+    user_agent = models.TextField(
+        blank=True,
+        help_text="User agent string from request"
+    )
+    changes = models.JSONField(
+        default=dict,
+        blank=True,
+        help_text="JSON object tracking what changed (old values, new values)"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'audit_logs'
+        verbose_name = 'Audit Log'
+        verbose_name_plural = 'Audit Logs'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['actor', '-created_at']),
+            models.Index(fields=['action', '-created_at']),
+            models.Index(fields=['affected_entity_type', 'affected_entity_id']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_action_display()} by {self.actor.email if self.actor else 'Unknown'} on {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+
+    @staticmethod
+    def log_action(actor, action, affected_entity_type, affected_entity_id=None, 
+                   affected_user=None, description='', changes=None, ip_address=None, user_agent=None):
+        """
+        Create an audit log entry.
+        
+        Args:
+            actor: The user performing the action
+            action: Action type from ACTION_CHOICES
+            affected_entity_type: Type of entity (e.g., 'Booking', 'Room', 'Payment')
+            affected_entity_id: ID of the affected entity
+            affected_user: User affected by the action (if different from actor)
+            description: Additional description
+            changes: Dict of changes (old, new values)
+            ip_address: IP address of the request
+            user_agent: User agent string
+        """
+        return AuditLog.objects.create(
+            actor=actor,
+            actor_role=actor.role if actor else UserRole.GUEST,
+            action=action,
+            affected_user=affected_user,
+            affected_entity_type=affected_entity_type,
+            affected_entity_id=affected_entity_id,
+            description=description,
+            changes=changes or {},
+            ip_address=ip_address,
+            user_agent=user_agent
+        )

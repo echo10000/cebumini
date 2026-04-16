@@ -1,0 +1,314 @@
+{% comment %}
+Recent Bookings Table Component - Luxury Dark Theme
+Features:
+- Royal blue gradient header (#1d4ed8) with white text
+- Gold header accents on table columns
+- Emerald green badges for "Confirmed" status
+- Amber badges for "Pending" status
+- Subtle gold tint on row hover
+- "View All" button with gold text and underline on hover
+- Bookmark icon in section header
+{% endcomment %}
+
+<style>
+    /* ============================================
+       RECENT BOOKINGS TABLE - LUXURY STYLING
+       ============================================ */
+
+    .recent-bookings-section {
+        background: transparent;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .section-header-gradient {
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .section-header-gradient h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        color: #ffffff;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .section-header-gradient i {
+        color: #ffffff;
+        font-size: 1.5rem;
+    }
+
+    .view-all-btn {
+        color: #c9a84c;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        position: relative;
+    }
+
+    .view-all-btn::after {
+        content: '';
+        position: absolute;
+        bottom: -4px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: #c9a84c;
+        transition: width 0.3s ease;
+    }
+
+    .view-all-btn:hover::after {
+        width: 100%;
+    }
+
+    /* ============================================
+       LUXURY TABLE STYLING
+       ============================================ */
+
+    .luxury-bookings-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #0a0f1e;
+    }
+
+    .luxury-bookings-table thead {
+        background: #0a0f1e;
+    }
+
+    .luxury-bookings-table thead th {
+        background: #0a0f1e;
+        color: #c9a84c;
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(201, 168, 76, 0.3);
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .luxury-bookings-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+    }
+
+    /* Alternating row backgrounds */
+    .luxury-bookings-table tbody tr:nth-child(odd) {
+        background: #1a2235;
+    }
+
+    .luxury-bookings-table tbody tr:nth-child(even) {
+        background: #111827;
+    }
+
+    .luxury-bookings-table tbody tr:hover {
+        background: rgba(201, 168, 76, 0.05);
+    }
+
+    .luxury-bookings-table tbody td {
+        color: #ffffff;
+        padding: 1.25rem 1.5rem;
+        font-size: 0.95rem;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ============================================
+       STATUS BADGES
+       ============================================ */
+
+    .badge-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.5rem 1.25rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Confirmed - Emerald Green */
+    .badge-status.confirmed {
+        background: #065f46;
+        color: #6ee7b7;
+        border: 1px solid rgba(110, 231, 183, 0.2);
+    }
+
+    .badge-status.confirmed i {
+        color: #6ee7b7;
+    }
+
+    /* Pending - Amber */
+    .badge-status.pending {
+        background: #92400e;
+        color: #fcd34d;
+        border: 1px solid rgba(252, 211, 77, 0.2);
+    }
+
+    .badge-status.pending i {
+        color: #fcd34d;
+    }
+
+    /* ============================================
+       BOOKING DETAILS TEXT
+       ============================================ */
+
+    .booking-id {
+        color: #c9a84c;
+        font-weight: 600;
+    }
+
+    .room-type {
+        color: #c9a84c;
+        font-weight: 500;
+    }
+
+    .dates-range {
+        color: #d1d5db;
+        font-size: 0.9rem;
+    }
+
+    .booking-amount {
+        color: #c9a84c;
+        font-weight: 600;
+        font-size: 1rem;
+    }
+
+    /* ============================================
+       EMPTY STATE
+       ============================================ */
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #4b5563;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+
+    @media (max-width: 768px) {
+        .section-header-gradient {
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .luxury-bookings-table {
+            font-size: 0.85rem;
+        }
+
+        .luxury-bookings-table thead th,
+        .luxury-bookings-table tbody td {
+            padding: 0.875rem 1rem;
+        }
+
+        .badge-status {
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        .view-all-btn {
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<!-- Recent Bookings Table Component -->
+<div class="recent-bookings-section">
+    <!-- Section Header with Royal Blue Gradient -->
+    <div class="section-header-gradient">
+        <div class="header-left">
+            <i class="fas fa-bookmark"></i>
+            <h2>Recent Bookings</h2>
+        </div>
+        <a href="{% url 'admin_panel:booking_management' %}" class="view-all-btn">View All →</a>
+    </div>
+
+    <!-- Table -->
+    <table class="luxury-bookings-table">
+        <thead>
+            <tr>
+                <th>Booking #</th>
+                <th>Guest</th>
+                <th>Room</th>
+                <th>Check-in / Check-out</th>
+                <th>Status</th>
+                <th>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if recent_bookings %}
+                {% for booking in recent_bookings %}
+                <tr>
+                    <td><span class="booking-id">#{{ booking.id }}</span></td>
+                    <td>{{ booking.guest.first_name }} {{ booking.guest.last_name }}</td>
+                    <td><span class="room-type">{{ booking.room.room_type }}</span></td>
+                    <td>
+                        <span class="dates-range">
+                            {{ booking.check_in|date:"M d" }} - {{ booking.check_out|date:"M d, Y" }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if booking.status == 'confirmed' %}
+                            <span class="badge-status confirmed">
+                                <i class="fas fa-check-circle"></i>
+                                Confirmed
+                            </span>
+                        {% elif booking.status == 'pending' %}
+                            <span class="badge-status pending">
+                                <i class="fas fa-hourglass-half"></i>
+                                Pending
+                            </span>
+                        {% else %}
+                            <span class="badge-status" style="background: rgba(107, 114, 128, 0.3); color: #d1d5db; border: 1px solid rgba(209, 213, 219, 0.3);">
+                                <i class="fas fa-question-circle"></i>
+                                {{ booking.status|upper }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td><span class="booking-amount">₱{{ booking.total_amount|floatformat:2 }}</span></td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No recent bookings</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>

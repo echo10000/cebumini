@@ -1,0 +1,485 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}{% if form.instance.pk %}Edit{% else %}Add{% endif %} Room - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================
+       LUXURY ROOM FORM PAGE
+       ============================================ */
+    
+    .form-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .form-page-header h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        color: #ffffff;
+        margin: 0;
+        font-weight: 700;
+    }
+    
+    .back-link {
+        background: transparent;
+        border: 1.5px solid #c9a84c;
+        color: #c9a84c;
+        padding: 0.6rem 1.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .back-link:hover {
+        background: #c9a84c;
+        color: #0a0f1e;
+    }
+    
+    /* ============================================
+       LUXURY FORM CARD
+       ============================================ */
+    
+    .luxury-form-card {
+        background: #1a2235;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .form-section-header {
+        background: #2563eb;
+        padding: 1rem 1.5rem;
+        color: #ffffff;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .form-section-header i {
+        font-size: 1.5rem;
+    }
+    
+    .form-body {
+        padding: 1.5rem;
+    }
+    
+    /* ============================================
+       LUXURY FORM ELEMENTS
+       ============================================ */
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #c9a84c;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: #111827;
+        border: 1.5px solid #374151;
+        border-radius: 6px;
+        color: #ffffff;
+        font-size: 1rem;
+        font-family: 'DM Sans', sans-serif;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #c9a84c;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+        background: #1a2235;
+    }
+    
+    .form-control::placeholder {
+        color: #6b7280;
+    }
+    
+    select.form-control {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23c9a84c' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 1.5em 1.5em;
+        padding-right: 2.5rem;
+    }
+    
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+    
+    .form-control option {
+        background: #1a2235;
+        color: #ffffff;
+    }
+    
+    .form-help-text {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        margin-top: 0.25rem;
+    }
+    
+    .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .two-column {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    /* ============================================
+       CHECKBOX/RADIO GROUP
+       ============================================ */
+    
+    .checkbox-group,
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .checkbox-item,
+    .radio-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    input[type="checkbox"],
+    input[type="radio"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        accent-color: #c9a84c;
+    }
+    
+    .checkbox-item label,
+    .radio-item label {
+        margin: 0;
+        color: #d1d5db;
+        cursor: pointer;
+        font-weight: 500;
+    }
+    
+    /* ============================================
+       FORM BUTTONS
+       ============================================ */
+    
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .btn-submit {
+        padding: 0.75rem 2rem;
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-submit:hover {
+        background: #1d4ed8;
+        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    .btn-cancel {
+        padding: 0.75rem 2rem;
+        background: transparent;
+        border: 1.5px solid #6b7280;
+        color: #d1d5db;
+        border-radius: 6px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+    }
+    
+    .btn-cancel:hover {
+        border-color: #9ca3af;
+        color: #ffffff;
+    }
+    
+    /* ============================================
+       ERROR STYLING
+       ============================================ */
+    
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+    }
+    
+    .errorlist li {
+        background: rgba(239, 68, 68, 0.1);
+        border-left: 3px solid #ef4444;
+        color: #fca5a5;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #ef4444;
+    }
+    
+    @media (max-width: 768px) {
+        .form-page-header {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        
+        .form-page-header h2 {
+            font-size: 1.5rem;
+        }
+        
+        .form-buttons {
+            flex-direction: column;
+        }
+        
+        .btn-submit,
+        .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="form-page-header">
+        <h2>{% if form.instance.pk %}Edit Room #{{ form.instance.room_number }}{% else %}Add New Room{% endif %}</h2>
+        <a href="{% url 'admin_panel:room_management' %}" class="back-link">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" enctype="multipart/form-data" class="luxury-form-card" style="margin-bottom: 3rem;">
+        {% csrf_token %}
+
+        <!-- Basic Information Section -->
+        <div class="luxury-form-card">
+            <div class="form-section-header">
+                <i class="fas fa-info-circle"></i>
+                Basic Information
+            </div>
+            <div class="form-body">
+                <div class="two-column">
+                    <!-- Room Number -->
+                    <div class="form-group">
+                        <label for="id_room_number" class="form-label">
+                            <i class="fas fa-door-open"></i> Room Number
+                        </label>
+                        {{ form.room_number }}
+                        {{ form.room_number.errors }}
+                        {% if form.room_number.help_text %}
+                            <p class="form-help-text">{{ form.room_number.help_text }}</p>
+                        {% endif %}
+                    </div>
+
+                    <!-- Room Type -->
+                    <div class="form-group">
+                        <label for="id_room_type" class="form-label">
+                            <i class="fas fa-bed"></i> Room Type
+                        </label>
+                        {{ form.room_type }}
+                        {{ form.room_type.errors }}
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <!-- Floor -->
+                    <div class="form-group">
+                        <label for="id_floor" class="form-label">
+                            <i class="fas fa-layer-group"></i> Floor
+                        </label>
+                        {{ form.floor }}
+                        {{ form.floor.errors }}
+                    </div>
+
+                    <!-- Capacity -->
+                    <div class="form-group">
+                        <label for="id_capacity" class="form-label">
+                            <i class="fas fa-users"></i> Guest Capacity
+                        </label>
+                        {{ form.capacity }}
+                        {{ form.capacity.errors }}
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="form-group">
+                    <label for="id_description" class="form-label">
+                        <i class="fas fa-align-left"></i> Description
+                    </label>
+                    {{ form.description }}
+                    {{ form.description.errors }}
+                    <p class="form-help-text">Provide a detailed description of the room.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing & Availability Section -->
+        <div class="luxury-form-card">
+            <div class="form-section-header">
+                <i class="fas fa-tag"></i>
+                Pricing & Availability
+            </div>
+            <div class="form-body">
+                <div class="two-column">
+                    <!-- Price Per Night -->
+                    <div class="form-group">
+                        <label for="id_price_per_night" class="form-label">
+                            <i class="fas fa-peso-sign"></i> Price Per Night (₱)
+                        </label>
+                        {{ form.price_per_night }}
+                        {{ form.price_per_night.errors }}
+                    </div>
+
+                    <!-- Is Available -->
+                    <div class="form-group">
+                        <label class="form-label">
+                            <i class="fas fa-check-circle"></i> Availability
+                        </label>
+                        <div class="radio-group" style="margin-top: 0.5rem;">
+                            <label class="radio-item">
+                                <input type="radio" name="is_available" value="True" 
+                                       {% if form.instance.is_available %}checked{% endif %}>
+                                <span>Available</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="is_available" value="False" 
+                                       {% if not form.instance.is_available %}checked{% endif %}>
+                                <span>Not Available</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Is Maintenance -->
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="fas fa-tools"></i> Maintenance Status
+                    </label>
+                    <div class="checkbox-group" style="margin-top: 0.5rem;">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="is_maintenance" value="True"
+                                   {% if form.instance.is_maintenance %}checked{% endif %}>
+                            <span>Currently Under Maintenance</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amenities & Image Section -->
+        <div class="luxury-form-card">
+            <div class="form-section-header">
+                <i class="fas fa-star"></i>
+                Amenities & Image
+            </div>
+            <div class="form-body">
+                <!-- Amenities -->
+                {% if form.amenities %}
+                    <div class="form-group">
+                        <label for="id_amenities" class="form-label">
+                            <i class="fas fa-list"></i> Select Amenities
+                        </label>
+                        <div class="checkbox-group" style="max-height: 200px; overflow-y: auto; padding: 0.5rem; background: #111827; border-radius: 6px; border: 1.5px solid #374151;">
+                            {% for choice in form.amenities %}
+                                <label class="checkbox-item" style="padding: 0.25rem 0;">
+                                    {{ choice.tag }}
+                                    <span style="color: #d1d5db;">{{ choice.choice_label }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                        {{ form.amenities.errors }}
+                    </div>
+                {% endif %}
+
+                <!-- Image -->
+                {% if form.image %}
+                    <div class="form-group" style="margin-top: 1.5rem;">
+                        <label for="id_image" class="form-label">
+                            <i class="fas fa-image"></i> Room Image
+                        </label>
+                        {{ form.image }}
+                        {{ form.image.errors }}
+                        <p class="form-help-text">Upload a high-quality image of the room.</p>
+                        
+                        {% if form.instance.image %}
+                            <div style="margin-top: 1rem;">
+                                <p style="color: #d1d5db; font-size: 0.9rem; margin-bottom: 0.5rem;">Current Image:</p>
+                                <img src="{{ form.instance.image.url }}" alt="Room Image" style="max-width: 300px; height: auto; border-radius: 6px; border: 1.5px solid #c9a84c;">
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="form-buttons">
+            <button type="submit" class="btn-submit">
+                <i class="fas fa-save"></i> 
+                {% if form.instance.pk %}Update Room{% else %}Create Room{% endif %}
+            </button>
+            <a href="{% url 'admin_panel:room_management' %}" class="btn-cancel">
+                <i class="fas fa-times"></i> Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -129,12 +129,12 @@
                                     <i class="fas fa-eye"></i>
                                 </a>
                                 {% if booking.status == 'PENDING' %}
-                                    <a href="{% url 'admin_confirm_booking' booking.id %}" class="btn btn-sm btn-outline-success" title="Confirm">
+                                    <a href="{% url 'bookings:admin_confirm_booking' booking.id %}" class="btn btn-sm btn-outline-success" title="Confirm">
                                         <i class="fas fa-check"></i>
                                     </a>
                                 {% endif %}
                                 {% if booking.status != 'CANCELLED' %}
-                                    <form method="post" action="{% url 'admin_cancel_booking' booking.id %}" style="display: inline;" 
+                                    <form method="post" action="{% url 'bookings:admin_cancel_booking' booking.id %}" style="display: inline;" 
                                           onsubmit="return confirm('Are you sure you want to cancel this booking?');">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Cancel">

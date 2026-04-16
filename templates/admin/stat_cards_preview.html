@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxury Hotel Admin - Stat Cards Preview</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            font-family: 'DM Sans', sans-serif;
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #c9a84c;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* ============================================
+           STAT CARDS - LUXURY STYLING
+           ============================================ */
+        
+        .luxury-stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card-luxury {
+            background: #1a2235;
+            border-left: 4px solid #c9a84c;
+            border-radius: 12px;
+            padding: 1.75rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Subtle background gradient effect */
+        .stat-card-luxury::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 150px;
+            height: 150px;
+            background: radial-gradient(circle, rgba(201, 168, 76, 0.05) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .stat-card-luxury:hover {
+            border-left-color: #e6c76e;
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(201, 168, 76, 0.25),
+                        0 0 30px rgba(201, 168, 76, 0.15);
+        }
+
+        /* Icon styling */
+        .stat-card-luxury .stat-icon {
+            font-size: 2.5rem;
+            color: #c9a84c;
+            margin-bottom: 1rem;
+            line-height: 1;
+            position: relative;
+            z-index: 1;
+            width: 50px;
+        }
+
+        /* Label styling */
+        .stat-card-luxury .stat-label {
+            font-size: 0.9rem;
+            color: #ffffff;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.75rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Large value styling */
+        .stat-card-luxury .stat-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            color: #c9a84c;
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+            font-family: 'Playfair Display', serif;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Description styling */
+        .stat-card-luxury .stat-description {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            line-height: 1.4;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ============================================
+           DEMO SECTION
+           ============================================ */
+
+        .demo-section {
+            background: rgba(26, 34, 53, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .demo-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #c9a84c;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-item {
+            background: rgba(26, 34, 53, 0.8);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .feature-item .feature-icon {
+            color: #c9a84c;
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .feature-item h3 {
+            color: #c9a84c;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .feature-item p {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .code-section {
+            background: #0f1419;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+
+        .code-section h3 {
+            color: #c9a84c;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .code-section code {
+            color: #d1d5db;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            display: block;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1024px) {
+            .luxury-stat-cards {
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 1.25rem;
+            }
+
+            .stat-card-luxury {
+                padding: 1.5rem;
+            }
+
+            .stat-card-luxury .stat-icon {
+                font-size: 2rem;
+            }
+
+            .stat-card-luxury .stat-value {
+                font-size: 1.875rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .luxury-stat-cards {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 1rem;
+            }
+
+            .stat-card-luxury {
+                padding: 1.25rem;
+            }
+
+            .stat-card-luxury .stat-icon {
+                font-size: 1.75rem;
+                margin-bottom: 0.75rem;
+            }
+
+            .stat-card-luxury .stat-value {
+                font-size: 1.625rem;
+            }
+
+            .stat-card-luxury .stat-label {
+                font-size: 0.8rem;
+            }
+
+            .stat-card-luxury .stat-description {
+                font-size: 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .luxury-stat-cards {
+                grid-template-columns: 1fr;
+            }
+
+            body {
+                padding: 1rem;
+            }
+
+            .demo-section {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card-luxury {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .stat-card-luxury:nth-child(1) { animation-delay: 0s; }
+        .stat-card-luxury:nth-child(2) { animation-delay: 0.1s; }
+        .stat-card-luxury:nth-child(3) { animation-delay: 0.2s; }
+        .stat-card-luxury:nth-child(4) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>✨ Luxury Stat Cards</h1>
+            <p>Elegant dashboard statistics for Cebu Hotel - Hover to see the glow effect</p>
+        </div>
+
+        <!-- Stat Cards -->
+        <div class="luxury-stat-cards">
+            <!-- Card 1: Total Revenue -->
+            <div class="stat-card-luxury">
+                <div class="stat-icon">
+                    <i class="fas fa-peso-sign"></i>
+                </div>
+                <div class="stat-label">Total Revenue</div>
+                <div class="stat-value">₱2.4M</div>
+                <div class="stat-description">All-time earnings from bookings</div>
+            </div>
+
+            <!-- Card 2: Confirmed Bookings -->
+            <div class="stat-card-luxury">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-label">Confirmed Bookings</div>
+                <div class="stat-value">1,284</div>
+                <div class="stat-description">Total confirmed reservations</div>
+            </div>
+
+            <!-- Card 3: Pending Payments -->
+            <div class="stat-card-luxury">
+                <div class="stat-icon">
+                    <i class="fas fa-hourglass-half"></i>
+                </div>
+                <div class="stat-label">Pending Payments</div>
+                <div class="stat-value">47</div>
+                <div class="stat-description">Awaiting customer verification</div>
+            </div>
+
+            <!-- Card 4: Occupancy Rate -->
+            <div class="stat-card-luxury">
+                <div class="stat-icon">
+                    <i class="fas fa-door-open"></i>
+                </div>
+                <div class="stat-label">Occupancy Rate</div>
+                <div class="stat-value">87.5%</div>
+                <div class="stat-description">Current room occupancy percentage</div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="demo-section">
+            <h2>🎨 Design Features</h2>
+            
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-palette"></i></div>
+                    <h3>Luxury Styling</h3>
+                    <p>Dark navy background (#1a2235) with gold accents for premium feel</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-mouse"></i></div>
+                    <h3>Interactive Hover</h3>
+                    <p>Subtle gold glow shadow and lift animation on hover</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-icons"></i></div>
+                    <h3>Font Icons</h3>
+                    <p>Top-left positioning with Font Awesome 6.4.0 icons</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <h3>Fully Responsive</h3>
+                    <p>Adapts to desktop, tablet, and mobile screens seamlessly</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-zap"></i></div>
+                    <h3>Smooth Animations</h3>
+                    <p>GPU-accelerated transitions for optimal performance</p>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-code"></i></div>
+                    <h3>Easy to Customize</h3>
+                    <p>Simple CSS variables and clean HTML structure</p>
+                </div>
+            </div>
+
+            <!-- Implementation Code -->
+            <div class="code-section">
+                <h3>📋 Quick Implementation</h3>
+                <code>&lt;div class="luxury-stat-cards"&gt;
+    &lt;div class="stat-card-luxury"&gt;
+        &lt;div class="stat-icon"&gt;
+            &lt;i class="fas fa-peso-sign"&gt;&lt;/i&gt;
+        &lt;/div&gt;
+        &lt;div class="stat-label"&gt;Total Revenue&lt;/div&gt;
+        &lt;div class="stat-value"&gt;₱2.4M&lt;/div&gt;
+        &lt;div class="stat-description"&gt;All-time earnings&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code>
+            </div>
+
+            <!-- Color Specifications -->
+            <div class="code-section" style="margin-top: 1.5rem;">
+                <h3>🎨 Color Specifications</h3>
+                <code>Card Background: #1a2235
+Gold Accent: #c9a84c
+Text Primary: #ffffff
+Text Secondary: #9ca3af
+Gold Glow Hover: rgba(201, 168, 76, 0.25)</code>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

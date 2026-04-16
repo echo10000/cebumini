@@ -1,0 +1,214 @@
+<!-- TODAY'S CHECK-INS & CHECK-OUTS INFO PANELS COMPONENT -->
+<!-- Elegant side-by-side panels for hotel check-in/check-out overview -->
+
+<style>
+    /* ============================================
+       CHECK-IN/CHECK-OUT PANELS - LUXURY STYLING
+       ============================================ */
+
+    .checkin-checkout-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-panel {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .info-panel:hover {
+        border-color: #c9a84c;
+        box-shadow: 0 12px 24px rgba(201, 168, 76, 0.15);
+        transform: translateY(-4px);
+    }
+
+    /* Header Bars */
+    .info-panel-header {
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Check-in header - Dark Teal */
+    .info-panel.checkin .info-panel-header {
+        background: #0d7377;
+    }
+
+    /* Check-out header - Slate Gray */
+    .info-panel.checkout .info-panel-header {
+        background: #374151;
+    }
+
+    .info-panel-header i {
+        font-size: 1.25rem;
+        line-height: 1;
+    }
+
+    /* Content Area */
+    .info-panel-content {
+        padding: 2rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Large Number Display */
+    .panel-number {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: #c9a84c;
+        line-height: 1;
+        margin-bottom: 0.75rem;
+        font-family: 'Playfair Display', serif;
+        display: block;
+    }
+
+    /* Subtitle Label */
+    .panel-label {
+        font-size: 0.95rem;
+        color: #9ca3af;
+        font-weight: 500;
+        text-transform: capitalize;
+        letter-spacing: 0.3px;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .checkin-checkout-container {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-panel-content {
+            padding: 1.75rem 1.25rem;
+        }
+
+        .panel-number {
+            font-size: 2.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-panel-header {
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .checkin-checkout-container {
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-panel-content {
+            padding: 1.5rem 1rem;
+        }
+
+        .panel-number {
+            font-size: 2.25rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .panel-label {
+            font-size: 0.85rem;
+        }
+
+        .info-panel-header {
+            padding: 0.875rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Animation on load */
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .info-panel {
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .info-panel:nth-child(2) {
+        animation-delay: 0.1s;
+    }
+
+    /* Dark mode compatibility */
+    @media (prefers-color-scheme: dark) {
+        .info-panel {
+            background: #1a2235;
+            border-color: rgba(201, 168, 76, 0.2);
+        }
+    }
+</style>
+
+<!-- HTML STRUCTURE -->
+<div class="checkin-checkout-container">
+    <!-- Check-in Panel -->
+    <div class="info-panel checkin">
+        <div class="info-panel-header">
+            <i class="fas fa-arrow-right"></i>
+            <span>Today's Check-ins</span>
+        </div>
+        <div class="info-panel-content">
+            <span class="panel-number">{{ today_check_ins }}</span>
+            <span class="panel-label">Guests arriving today</span>
+        </div>
+    </div>
+
+    <!-- Check-out Panel -->
+    <div class="info-panel checkout">
+        <div class="info-panel-header">
+            <i class="fas fa-arrow-left"></i>
+            <span>Today's Check-outs</span>
+        </div>
+        <div class="info-panel-content">
+            <span class="panel-number">{{ today_check_outs }}</span>
+            <span class="panel-label">Guests departing today</span>
+        </div>
+    </div>
+</div>
+
+<!-- USAGE NOTES:
+    1. Include the CSS in your template or stylesheet
+    2. Replace {{ today_check_ins }} and {{ today_check_outs }} with your actual data
+    3. The panels are responsive and work on all screen sizes
+    4. Customize colors by modifying the hex values in .info-panel.checkin/.checkout
+    5. Adjust font sizes in .panel-number and .panel-label as needed
+    
+    COLORS USED:
+    - Check-in header: Dark Teal (#0d7377)
+    - Check-out header: Slate Gray (#374151)
+    - Panel background: Dark Blue-Gray (#1a2235)
+    - Text number: Gold (#c9a84c)
+    - Subtitle text: Muted Gray (#9ca3af)
+    - Border: Gold with transparency (rgba(201, 168, 76, 0.2))
+    
+    ICON ALTERNATIVES:
+    - Check-in: arrow-right, sign-in-alt, door-open, user-plus
+    - Check-out: arrow-left, sign-out-alt, door-closed, user-minus
+-->

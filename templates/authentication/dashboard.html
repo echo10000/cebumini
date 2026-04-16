@@ -89,19 +89,10 @@
 <div style="margin-bottom: 3rem;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
-            <h1 style="color: #1a1a1a; font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome, {{ user.first_name }}! 👋</h1>
+            <h1 style="color: #1a1a1a; font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome, {{ user.first_name }} {{ user.last_name }}! 👋</h1>
             <p style="color: #666; font-size: 1rem;">Your role: <strong>{{ user.get_role_display }}</strong></p>
         </div>
-        <a href="{% url 'auth:logout' %}" class="btn-secondary">Logout</a>
     </div>
-
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
 
     <div class="grid-2">
         <!-- Profile Information -->
@@ -185,5 +176,42 @@
             <a href="/" class="btn-secondary">Back to Home</a>
         </div>
     </div>
+
+    <!-- Featured Rooms -->
+    {% if rooms %}
+    <div class="dashboard-card">
+        <h3>🏨 Featured Rooms</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+            {% for room in rooms %}
+            <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: white; transition: all 0.3s ease; cursor: pointer; hover: box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="window.location='{% url 'rooms:detail' room.id %}'">
+                {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="Room {{ room.room_number }}" style="width: 100%; height: 150px; object-fit: cover;">
+                {% else %}
+                    <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">🏨</div>
+                {% endif %}
+                <div style="padding: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Room {{ room.room_number }}</h4>
+                    <p style="color: #666; font-size: 0.875rem; margin-bottom: 0.5rem;">{{ room.get_room_type_display }}</p>
+                    <p style="color: #1a1a1a; font-weight: 600; margin-bottom: 0.5rem;">₱{{ room.price_per_night|floatformat:2 }}/night</p>
+                    {% if room.amenities %}
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        {% for amenity in room.get_amenities_list|slice:":3" %}
+                            <span style="background: #dbeafe; color: #0369a1; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">{{ amenity }}</span>
+                        {% endfor %}
+                        {% if room.get_amenities_list|length > 3 %}
+                            <span style="background: #f3f4f6; color: #666; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">+{{ room.get_amenities_list|length|add:"-3" }} more</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.5rem;">Capacity: {{ room.capacity }} guest{{ room.capacity|pluralize }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="text-align: center; margin-top: 1.5rem;">
+            <a href="{% url 'rooms:list' %}" style="color: #1a1a1a; text-decoration: underline; font-weight: 500;">View all rooms →</a>
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

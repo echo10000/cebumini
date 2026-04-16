@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Bookings Table Preview</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            font-family: 'DM Sans', sans-serif;
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #c9a84c;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ============================================
+           RECENT BOOKINGS TABLE - LUXURY STYLING
+           ============================================ */
+
+        .recent-bookings-section {
+            background: transparent;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 2rem;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .section-header-gradient {
+            padding: 1.5rem 2rem;
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-header-gradient h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .section-header-gradient i {
+            color: #ffffff;
+            font-size: 1.5rem;
+        }
+
+        .view-all-btn {
+            color: #c9a84c;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            position: relative;
+        }
+
+        .view-all-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #c9a84c;
+            transition: width 0.3s ease;
+        }
+
+        .view-all-btn:hover::after {
+            width: 100%;
+        }
+
+        /* ============================================
+           LUXURY TABLE STYLING
+           ============================================ */
+
+        .luxury-bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #0a0f1e;
+        }
+
+        .luxury-bookings-table thead {
+            background: #0a0f1e;
+        }
+
+        .luxury-bookings-table thead th {
+            background: #0a0f1e;
+            color: #c9a84c;
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(201, 168, 76, 0.3);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .luxury-bookings-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+        }
+
+        /* Alternating row backgrounds */
+        .luxury-bookings-table tbody tr:nth-child(odd) {
+            background: #1a2235;
+        }
+
+        .luxury-bookings-table tbody tr:nth-child(even) {
+            background: #111827;
+        }
+
+        .luxury-bookings-table tbody tr:hover {
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        .luxury-bookings-table tbody td {
+            color: #ffffff;
+            padding: 1.25rem 1.5rem;
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        /* ============================================
+           STATUS BADGES
+           ============================================ */
+
+        .badge-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Confirmed - Emerald Green */
+        .badge-status.confirmed {
+            background: #065f46;
+            color: #6ee7b7;
+            border: 1px solid rgba(110, 231, 183, 0.2);
+        }
+
+        .badge-status.confirmed i {
+            color: #6ee7b7;
+        }
+
+        /* Pending - Amber */
+        .badge-status.pending {
+            background: #92400e;
+            color: #fcd34d;
+            border: 1px solid rgba(252, 211, 77, 0.2);
+        }
+
+        .badge-status.pending i {
+            color: #fcd34d;
+        }
+
+        /* ============================================
+           BOOKING DETAILS TEXT
+           ============================================ */
+
+        .booking-id {
+            color: #c9a84c;
+            font-weight: 600;
+        }
+
+        .room-type {
+            color: #c9a84c;
+            font-weight: 500;
+        }
+
+        .dates-range {
+            color: #d1d5db;
+            font-size: 0.9rem;
+        }
+
+        .booking-amount {
+            color: #c9a84c;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        /* ============================================
+           SPECS SECTION
+           ============================================ */
+
+        .specs-section {
+            background: rgba(26, 34, 53, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .specs-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #c9a84c;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .spec-item {
+            background: rgba(26, 34, 53, 0.8);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .spec-item h3 {
+            color: #c9a84c;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .spec-item p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-block {
+            background: #0f1419;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #d1d5db;
+            margin-top: 1rem;
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .color-item {
+            background: rgba(26, 34, 53, 0.8);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .color-swatch {
+            width: 100%;
+            height: 60px;
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+        }
+
+        .color-item p {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .color-item code {
+            background: rgba(0, 0, 0, 0.3);
+            color: #d1d5db;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .section-header-gradient {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .luxury-bookings-table {
+                font-size: 0.85rem;
+            }
+
+            .luxury-bookings-table thead th,
+            .luxury-bookings-table tbody td {
+                padding: 0.875rem 1rem;
+            }
+
+            .badge-status {
+                padding: 0.4rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📋 Recent Bookings Table</h1>
+            <p>Luxury dark theme with emerald & amber status badges and gold accents</p>
+        </div>
+
+        <!-- Live Demo -->
+        <div class="recent-bookings-section">
+            <!-- Section Header with Royal Blue Gradient -->
+            <div class="section-header-gradient">
+                <div class="header-left">
+                    <i class="fas fa-bookmark"></i>
+                    <h2>Recent Bookings</h2>
+                </div>
+                <a href="#" class="view-all-btn">View All →</a>
+            </div>
+
+            <!-- Table -->
+            <table class="luxury-bookings-table">
+                <thead>
+                    <tr>
+                        <th>Booking #</th>
+                        <th>Guest</th>
+                        <th>Room</th>
+                        <th>Check-in / Check-out</th>
+                        <th>Status</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Sample Row 1 - Confirmed -->
+                    <tr>
+                        <td><span class="booking-id">#BK101</span></td>
+                        <td>Maria Santos</td>
+                        <td><span class="room-type">Deluxe Suite</span></td>
+                        <td><span class="dates-range">Apr 16 - Apr 18, 2026</span></td>
+                        <td>
+                            <span class="badge-status confirmed">
+                                <i class="fas fa-check-circle"></i>
+                                Confirmed
+                            </span>
+                        </td>
+                        <td><span class="booking-amount">₱18,500.00</span></td>
+                    </tr>
+
+                    <!-- Sample Row 2 - Pending -->
+                    <tr>
+                        <td><span class="booking-id">#BK102</span></td>
+                        <td>Juan Dela Cruz</td>
+                        <td><span class="room-type">Premium Room</span></td>
+                        <td><span class="dates-range">Apr 17 - Apr 20, 2026</span></td>
+                        <td>
+                            <span class="badge-status pending">
+                                <i class="fas fa-hourglass-half"></i>
+                                Pending
+                            </span>
+                        </td>
+                        <td><span class="booking-amount">₱12,750.00</span></td>
+                    </tr>
+
+                    <!-- Sample Row 3 - Confirmed -->
+                    <tr>
+                        <td><span class="booking-id">#BK103</span></td>
+                        <td>Ana Reyes</td>
+                        <td><span class="room-type">Standard Room</span></td>
+                        <td><span class="dates-range">Apr 15 - Apr 22, 2026</span></td>
+                        <td>
+                            <span class="badge-status confirmed">
+                                <i class="fas fa-check-circle"></i>
+                                Confirmed
+                            </span>
+                        </td>
+                        <td><span class="booking-amount">₱24,300.00</span></td>
+                    </tr>
+
+                    <!-- Sample Row 4 - Pending -->
+                    <tr>
+                        <td><span class="booking-id">#BK104</span></td>
+                        <td>Carlos Gonzales</td>
+                        <td><span class="room-type">Ocean View Suite</span></td>
+                        <td><span class="dates-range">Apr 19 - Apr 21, 2026</span></td>
+                        <td>
+                            <span class="badge-status pending">
+                                <i class="fas fa-hourglass-half"></i>
+                                Pending
+                            </span>
+                        </td>
+                        <td><span class="booking-amount">₱16,900.00</span></td>
+                    </tr>
+
+                    <!-- Sample Row 5 - Confirmed -->
+                    <tr>
+                        <td><span class="booking-id">#BK105</span></td>
+                        <td>Rosa Martinez</td>
+                        <td><span class="room-type">Executive Room</span></td>
+                        <td><span class="dates-range">Apr 18 - Apr 25, 2026</span></td>
+                        <td>
+                            <span class="badge-status confirmed">
+                                <i class="fas fa-check-circle"></i>
+                                Confirmed
+                            </span>
+                        </td>
+                        <td><span class="booking-amount">₱28,400.00</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Specifications -->
+        <div class="specs-section">
+            <h2>🎨 Design Specifications</h2>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 0; margin-bottom: 1.5rem;">Color Palette</h3>
+            <div class="color-grid">
+                <div class="color-item">
+                    <div class="color-swatch" style="background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);"></div>
+                    <p><strong>Header Gradient</strong></p>
+                    <code>#1d4ed8 → #1e40af</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #c9a84c;"></div>
+                    <p><strong>Gold Accents</strong></p>
+                    <code>#c9a84c</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #065f46;"></div>
+                    <p><strong>Confirmed Badge</strong></p>
+                    <code>#065f46 bg, #6ee7b7 text</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #92400e;"></div>
+                    <p><strong>Pending Badge</strong></p>
+                    <code>#92400e bg, #fcd34d text</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #1a2235;"></div>
+                    <p><strong>Row Background</strong></p>
+                    <code>#1a2235 (odd)</code>
+                </div>
+                <div class="color-item">
+                    <div class="color-swatch" style="background: #111827;"></div>
+                    <p><strong>Row Background</strong></p>
+                    <code>#111827 (even)</code>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Component Features</h3>
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <h3><i class="fas fa-palette" style="color: #1d4ed8; margin-right: 0.5rem;"></i>Header Gradient</h3>
+                    <p>Royal blue gradient (#1d4ed8 → #1e40af) with white text and bookmark icon for visual appeal</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-external-link-alt" style="color: #c9a84c; margin-right: 0.5rem;"></i>View All Button</h3>
+                    <p>Gold text with animated underline on hover - appears smoothly from left to right</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-heading" style="color: #c9a84c; margin-right: 0.5rem;"></i>Table Header</h3>
+                    <p>Gold text (#c9a84c) on dark navy (#0a0f1e) with uppercase styling and gold bottom border</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-striped" style="color: #14b8a6; margin-right: 0.5rem;"></i>Alternating Rows</h3>
+                    <p>Rows alternate between #1a2235 (dark) and #111827 (slightly lighter) for readability</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-check-circle" style="color: #6ee7b7; margin-right: 0.5rem;"></i>Confirmed Badge</h3>
+                    <p>Emerald green pill (#065f46 bg, #6ee7b7 text) with check-circle icon and subtle border</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-hourglass-half" style="color: #fcd34d; margin-right: 0.5rem;"></i>Pending Badge</h3>
+                    <p>Amber pill (#92400e bg, #fcd34d text) with hourglass icon and subtle border</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-mouse" style="color: #c9a84c; margin-right: 0.5rem;"></i>Row Hover</h3>
+                    <p>Subtle gold tint background (rgba(201,168,76,0.05)) appears on row hover</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-dollar-sign" style="color: #c9a84c; margin-right: 0.5rem;"></i>Gold Highlights</h3>
+                    <p>Booking IDs, room types, and amounts are colored gold for emphasis and consistency</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-mobile-alt" style="color: #14b8a6; margin-right: 0.5rem;"></i>Responsive</h3>
+                    <p>Fully responsive with adapted font sizes and padding for mobile and tablet devices</p>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Implementation</h3>
+            <p style="color: #9ca3af; margin-bottom: 1rem;">To include this component in your dashboard or dedicated bookings page, use:</p>
+            <div class="code-block">{% include 'admin/recent_bookings_table.html' %}</div>
+
+            <p style="color: #9ca3af; margin-top: 1.5rem; margin-bottom: 1rem;">Ensure you pass the context variable in your view:</p>
+            <div class="code-block">from authentication.models import Booking
+
+def admin_dashboard(request):
+    context = {
+        'recent_bookings': Booking.objects.all().order_by('-created_at')[:5]
+    }
+    return render(request, 'admin/dashboard.html', context)</div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Booking Model Fields Required</h3>
+            <div class="code-block">- guest (ForeignKey to User)
+- room (ForeignKey to Room)
+- check_in (DateField)
+- check_out (DateField)
+- status (CharField: 'confirmed', 'pending', etc.)
+- total_amount (DecimalField)
+- created_at (DateTimeField)</div>
+        </div>
+    </div>
+</body>
+</html>

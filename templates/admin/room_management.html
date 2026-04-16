@@ -1,0 +1,141 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Room Management - Cebu Luxury{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card-luxury { background: #1a2235; border-left: 4px solid #c9a84c; border-radius: 12px; padding: 1.75rem; transition: all 0.3s; }
+    .stat-card-luxury:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(201, 168, 76, 0.15); }
+    .stat-icon { font-size: 2rem; color: #c9a84c; margin-bottom: 0.75rem; }
+    .stat-label { color: #9ca3af; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; }
+    .stat-value { font-size: 2rem; color: #ffffff; font-weight: 700; font-family: 'Playfair Display', serif; }
+    .stat-description { font-size: 0.9rem; color: #d1d5db; margin-top: 0.5rem; }
+    .luxury-card { background: #1a2235; border-radius: 12px; overflow: hidden; margin-bottom: 2rem; }
+    .luxury-card-header { background: #2563eb; padding: 1rem 1.5rem; color: #ffffff; font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; }
+    .luxury-card-body { padding: 1.5rem; }
+    .admin-table { overflow-x: auto; }
+    .admin-table table { width: 100%; border-collapse: collapse; }
+    .admin-table th { background: rgba(201, 168, 76, 0.1); color: #c9a84c; padding: 1rem; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; border-bottom: 2px solid rgba(201, 168, 76, 0.2); }
+    .admin-table td { padding: 1rem; border-bottom: 1px solid rgba(201, 168, 76, 0.1); color: #d1d5db; }
+    .admin-table tr:hover { background: rgba(201, 168, 76, 0.05); }
+    .btn-view { background: transparent; border: 1.5px solid #c9a84c; color: #c9a84c; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; transition: all 0.3s; }
+    .btn-view:hover { background: #c9a84c; color: #0a0f1e; }
+    .badge-pill { display: inline-block; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    .badge-available { background: rgba(16, 185, 129, 0.2); color: #6ee7b7; }
+    .badge-maintenance { background: rgba(251, 146, 60, 0.2); color: #fbbf24; }
+    .badge-occupied { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+    .empty-state { padding: 2rem; text-align: center; color: #9ca3af; }
+    .empty-state i { font-size: 2rem; margin-bottom: 1rem; display: block; color: #6b7280; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+<!-- Page Header -->
+<div class="page-header">
+    <h1>Room Management</h1>
+    <p>Manage hotel rooms, availability, and configurations</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4 g-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div class="stat-label">Total Rooms</div>
+            <div class="stat-value">{{ total_rooms }}</div>
+            <div class="stat-description">All rooms in property</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-label">Available</div>
+            <div class="stat-value">{{ available_rooms }}</div>
+            <div class="stat-description">Ready for booking</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-ban"></i>
+            </div>
+            <div class="stat-label">Occupied</div>
+            <div class="stat-value">{{ occupied_rooms }}</div>
+            <div class="stat-description">Currently occupied</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card-luxury">
+            <div class="stat-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="stat-label">Maintenance</div>
+            <div class="stat-value">{{ maintenance_rooms }}</div>
+            <div class="stat-description">Under maintenance</div>
+        </div>
+    </div>
+</div>
+
+<!-- Rooms Table -->
+<div class="luxury-card">
+    <div class="luxury-card-header">
+        <i class="fas fa-door-open"></i> Rooms
+    </div>
+    <div class="luxury-card-body">
+        {% if rooms %}
+            <div class="admin-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Room #</th>
+                            <th>Type</th>
+                            <th>Floor</th>
+                            <th>Capacity</th>
+                            <th>Price/Night</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for room in rooms %}
+                        <tr>
+                            <td><strong style="color: #c9a84c;">#{{ room.room_number }}</strong></td>
+                            <td>{{ room.get_room_type_display }}</td>
+                            <td>{{ room.floor }}</td>
+                            <td>{{ room.capacity }} guests</td>
+                            <td><strong style="color: #c9a84c;">₱{{ room.price_per_night|floatformat:2 }}</strong></td>
+                            <td>
+                                {% if room.is_available %}
+                                    <span class="badge-pill badge-available">Available</span>
+                                {% elif room.is_maintenance %}
+                                    <span class="badge-pill badge-maintenance">Maintenance</span>
+                                {% else %}
+                                    <span class="badge-pill badge-occupied">Occupied</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="{% url 'admin_panel:room_detail_admin' room.id %}" class="btn-view" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{% url 'rooms:edit' room.id %}" class="btn-view" title="Edit"><i class="fas fa-edit"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No rooms found.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+</div>
+{% endblock %}

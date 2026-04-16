@@ -110,7 +110,7 @@
                     <!-- Actions -->
                     <div class="d-flex gap-2 flex-wrap">
                         {% if can_cancel %}
-                            <a href="{% url 'cancel_booking' booking.id %}" class="btn btn-danger">
+                            <a href="{% url 'bookings:cancel_booking' booking.id %}" class="btn btn-danger">
                                 <i class="fas fa-times-circle"></i> Cancel Booking
                             </a>
                         {% endif %}

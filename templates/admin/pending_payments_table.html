@@ -1,0 +1,312 @@
+{% comment %}
+Pending Payments Table Component - Luxury Dark Theme
+Features:
+- Gold header (#c9a84c) on dark navy background
+- Alternating row backgrounds (#1a2235 and #111827)
+- White text throughout
+- Payment method badges with color coding
+- Review button with outlined gold styling and hover fill effect
+- Amber/yellow left border on section header
+{% endcomment %}
+
+<style>
+    /* ============================================
+       PENDING PAYMENTS TABLE - LUXURY STYLING
+       ============================================ */
+
+    .pending-payments-section {
+        background: transparent;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .section-header-with-border {
+        padding: 1.5rem 2rem;
+        background: #111827;
+        border-left: 4px solid #f59e0b;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .section-header-with-border h2 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5rem;
+        color: #ffffff;
+        margin: 0;
+        font-weight: 700;
+    }
+
+    .section-header-with-border i {
+        color: #c9a84c;
+        font-size: 1.5rem;
+    }
+
+    /* ============================================
+       LUXURY TABLE STYLING
+       ============================================ */
+
+    .luxury-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #0a0f1e;
+    }
+
+    .luxury-table thead {
+        background: #0a0f1e;
+    }
+
+    .luxury-table thead th {
+        background: #0a0f1e;
+        color: #c9a84c;
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid rgba(201, 168, 76, 0.3);
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    .luxury-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+    }
+
+    /* Alternating row backgrounds */
+    .luxury-table tbody tr:nth-child(odd) {
+        background: #1a2235;
+    }
+
+    .luxury-table tbody tr:nth-child(even) {
+        background: #111827;
+    }
+
+    .luxury-table tbody tr:hover {
+        background: rgba(201, 168, 76, 0.08);
+        box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.2);
+    }
+
+    .luxury-table tbody td {
+        color: #ffffff;
+        padding: 1.25rem 1.5rem;
+        font-size: 0.95rem;
+        font-family: 'DM Sans', sans-serif;
+    }
+
+    /* ============================================
+       PAYMENT METHOD BADGES
+       ============================================ */
+
+    .badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1.25rem;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    /* Bank Transfer - Deep Blue */
+    .badge-pill.bank-transfer {
+        background: rgba(30, 58, 138, 0.3);
+        color: #60a5fa;
+        border: 1px solid rgba(96, 165, 250, 0.3);
+    }
+
+    .badge-pill.bank-transfer i {
+        color: #60a5fa;
+    }
+
+    /* PayMongo - Teal */
+    .badge-pill.paymongo {
+        background: rgba(13, 115, 119, 0.3);
+        color: #14b8a6;
+        border: 1px solid rgba(20, 184, 166, 0.3);
+    }
+
+    .badge-pill.paymongo i {
+        color: #14b8a6;
+    }
+
+    /* Stripe - Purple */
+    .badge-pill.stripe {
+        background: rgba(108, 92, 231, 0.3);
+        color: #c4b5fd;
+        border: 1px solid rgba(196, 181, 253, 0.3);
+    }
+
+    .badge-pill.stripe i {
+        color: #c4b5fd;
+    }
+
+    /* ============================================
+       REVIEW BUTTON - OUTLINED GOLD
+       ============================================ */
+
+    .btn-review {
+        background: transparent;
+        border: 1.5px solid #c9a84c;
+        color: #c9a84c;
+        padding: 0.5rem 1.5rem;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        font-family: 'DM Sans', sans-serif;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .btn-review:hover {
+        background: #c9a84c;
+        color: #0a0f1e;
+        box-shadow: 0 8px 16px rgba(201, 168, 76, 0.25);
+        transform: translateY(-2px);
+    }
+
+    .btn-review:active {
+        transform: translateY(0);
+    }
+
+    /* ============================================
+       EMPTY STATE
+       ============================================ */
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #9ca3af;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #4b5563;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .empty-state p {
+        font-size: 1rem;
+        margin: 0;
+    }
+
+    /* ============================================
+       RESPONSIVE
+       ============================================ */
+
+    @media (max-width: 768px) {
+        .section-header-with-border {
+            flex-wrap: wrap;
+        }
+
+        .luxury-table {
+            font-size: 0.85rem;
+        }
+
+        .luxury-table thead th,
+        .luxury-table tbody td {
+            padding: 0.875rem 1rem;
+        }
+
+        .badge-pill {
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+        }
+
+        .btn-review {
+            padding: 0.4rem 1rem;
+            font-size: 0.75rem;
+        }
+    }
+</style>
+
+<!-- Pending Payments Table Component -->
+<div class="pending-payments-section">
+    <!-- Section Header with Amber Left Border -->
+    <div class="section-header-with-border">
+        <i class="fas fa-credit-card"></i>
+        <h2>Pending Payments</h2>
+    </div>
+
+    <!-- Table -->
+    <table class="luxury-table">
+        <thead>
+            <tr>
+                <th>Booking ID</th>
+                <th>Guest Name</th>
+                <th>Amount</th>
+                <th>Payment Method</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if pending_payments %}
+                {% for payment in pending_payments %}
+                <tr>
+                    <td>
+                        <span style="color: #c9a84c; font-weight: 600;">#{{ payment.booking.id }}</span>
+                    </td>
+                    <td>{{ payment.booking.guest.first_name }} {{ payment.booking.guest.last_name }}</td>
+                    <td>
+                        <span style="color: #c9a84c; font-weight: 600;">₱{{ payment.amount|floatformat:2 }}</span>
+                    </td>
+                    <td>
+                        {% if payment.payment_method == 'bank_transfer' %}
+                            <span class="badge-pill bank-transfer">
+                                <i class="fas fa-university"></i>
+                                Bank Transfer
+                            </span>
+                        {% elif payment.payment_method == 'paymongo' %}
+                            <span class="badge-pill paymongo">
+                                <i class="fas fa-mobile-alt"></i>
+                                PayMongo
+                            </span>
+                        {% elif payment.payment_method == 'stripe' %}
+                            <span class="badge-pill stripe">
+                                <i class="fas fa-credit-card"></i>
+                                Stripe
+                            </span>
+                        {% else %}
+                            <span class="badge-pill" style="background: rgba(107, 114, 128, 0.3); color: #d1d5db; border: 1px solid rgba(209, 213, 219, 0.3);">
+                                <i class="fas fa-question-circle"></i>
+                                {{ payment.get_payment_method_display }}
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ payment.created_at|date:"M d, Y" }}</td>
+                    <td>
+                        <span style="color: #fbbf24; font-weight: 600;">
+                            <i class="fas fa-clock"></i> Pending
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'admin_panel:payment_detail' payment.id %}" class="btn-review">
+                            Review
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="7">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No pending payments at this time</p>
+                        </div>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>

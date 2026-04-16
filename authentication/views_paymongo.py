@@ -135,9 +135,18 @@ class PayMongoHandler:
 @login_required
 @require_http_methods(["GET", "POST"])
 def paymongo_payment_view(request, booking_id):
-    """PayMongo payment page - GCash, Cards, Maya"""
+    """PayMongo payment page - GCash, Cards, Maya - ONLY payment method"""
     booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
-    payment = get_object_or_404(Payment, booking=booking)
+    
+    # Ensure payment record exists
+    payment, created = Payment.objects.get_or_create(
+        booking=booking,
+        defaults={
+            'amount': booking.total_price,
+            'payment_method': 'PAYMONGO',
+            'status': PaymentStatus.PENDING
+        }
+    )
     
     # Initialize PayMongo handler
     paymongo = PayMongoHandler()

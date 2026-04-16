@@ -132,10 +132,10 @@
                                     </div>
                                     <small class="form-text text-muted">Leave empty to auto-fill with total booking amount</small>
                                 </div>
-                                <div class="form-group col-md-6">
-                                    <label for="reference_number">Reference/Receipt Number</label>
+                                <div class="form-group col-md-6" id="reference_group" style="display:none;">
+                                    <label for="reference_number" id="reference_label">Reference/Receipt Number</label>
                                     <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="e.g., TRANS123456">
-                                    <small class="form-text text-muted">Auto-generated if left empty</small>
+                                    <small class="form-text text-muted" id="reference_help">Auto-generated if left empty</small>
                                 </div>
                             </div>
 
@@ -199,17 +199,17 @@
 
             <div class="card shadow mb-4">
                 <div class="card-header bg-warning text-white">
-                    <h6 class="m-0 font-weight-bold">Important Notes</h6>
+                    <h6 class="m-0 font-weight-bold">Payment Reference Info</h6>
                 </div>
                 <div class="card-body small">
-                    <ul class="mb-0">
-                        <li>Guest account will be created automatically if using new email</li>
-                        <li>Booking is automatically set to CONFIRMED status</li>
-                        <li>Room will be marked as unavailable</li>
-                        <li><strong>Payment is collected and recorded immediately</strong></li>
-                        <li>Automatic receipt number generated if not provided</li>
-                        <li>Supports Cash, Card, GCash, and Bank Transfer</li>
-                    </ul>
+                    <div class="mb-3">
+                        <strong class="text-success">💵 💳 Cash / Card:</strong>
+                        <p class="mb-2">Reference number is auto-generated. No input needed.</p>
+                    </div>
+                    <div>
+                        <strong class="text-warning">📱 🏦 GCash / Bank Transfer:</strong>
+                        <p class="mb-0">Reference number is <strong>REQUIRED</strong>. Enter the transaction reference from the payment receipt.</p>
+                    </div>
                 </div>
             </div>
 
@@ -233,8 +233,52 @@
     const checkInInput = document.getElementById('check_in');
     const checkOutInput = document.getElementById('check_out');
     const paymentAmountInput = document.getElementById('payment_amount');
+    const paymentMethodSelect = document.getElementById('payment_method');
+    const referenceNumberInput = document.getElementById('reference_number');
+    const referenceGroup = document.getElementById('reference_group');
+    const referenceLabel = document.getElementById('reference_label');
+    const referenceHelp = document.getElementById('reference_help');
     
     let currentTotal = 0;
+    
+    // Payment methods that require external reference
+    const REFERENCE_REQUIRED_METHODS = ['GCASH', 'BANK_TRANSFER'];
+    const REFERENCE_AUTO_METHODS = ['CASH', 'STRIPE'];
+    
+    function updateReferenceFieldState() {
+        const selectedMethod = paymentMethodSelect.value;
+        
+        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
+            // Show field for GCash and Bank Transfer
+            referenceGroup.style.display = 'block';
+            referenceNumberInput.required = true;
+            referenceNumberInput.classList.add('is-invalid');
+            
+            // Update label and help text based on payment method
+            if (selectedMethod === 'GCASH') {
+                referenceLabel.innerHTML = 'GCash Reference Number <span class="text-danger">*</span>';
+                referenceHelp.textContent = 'Enter the GCash reference number from the transaction receipt (e.g., G123456789ABC)';
+                referenceNumberInput.placeholder = 'e.g., G123456789ABC';
+            } else if (selectedMethod === 'BANK_TRANSFER') {
+                referenceLabel.innerHTML = 'Bank Transfer Reference/Confirmation Code <span class="text-danger">*</span>';
+                referenceHelp.textContent = 'Enter the bank transfer reference number or confirmation code for verification';
+                referenceNumberInput.placeholder = 'e.g., TRANSFER123456';
+            }
+        } else if (REFERENCE_AUTO_METHODS.includes(selectedMethod)) {
+            // Hide field for Cash and Card - will be auto-generated
+            referenceGroup.style.display = 'none';
+            referenceNumberInput.required = false;
+            referenceNumberInput.classList.remove('is-invalid');
+            referenceNumberInput.value = ''; // Clear the field
+            referenceLabel.innerHTML = 'Reference/Receipt Number';
+            referenceHelp.textContent = 'Auto-generated if left empty';
+        } else {
+            // Default: hide field
+            referenceGroup.style.display = 'none';
+            referenceNumberInput.required = false;
+            referenceNumberInput.classList.remove('is-invalid');
+        }
+    }
     
     function updatePricing() {
         const roomOption = roomSelect.options[roomSelect.selectedIndex];
@@ -291,20 +335,65 @@
         }
     }
     
+    // Event listeners
     roomSelect.addEventListener('change', updatePricing);
     checkInInput.addEventListener('change', updatePricing);
     checkOutInput.addEventListener('change', updatePricing);
     paymentAmountInput.addEventListener('input', updatePaymentSummary);
+    paymentMethodSelect.addEventListener('change', updateReferenceFieldState);
 
     // Set minimum check-in date to today
     const today = new Date().toISOString().split('T')[0];
     checkInInput.setAttribute('min', today);
     checkOutInput.setAttribute('min', today);
+    
+    // Validate form submission - ensure reference is provided if required
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const selectedMethod = paymentMethodSelect.value;
+        
+        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
+            if (!referenceNumberInput.value.trim()) {
+                e.preventDefault();
+                referenceNumberInput.classList.add('is-invalid');
+                alert(`Reference number is required for ${selectedMethod === 'GCASH' ? 'GCash' : 'Bank Transfer'} payments.`);
+                referenceNumberInput.focus();
+                return false;
+            }
+        }
+    });
 </script>
 
 <style>
     .text-danger { color: #e74c3c; }
     fieldset { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
     legend { font-size: 14px; }
+    
+    /* Styling for reference field when shown */
+    #reference_group {
+        transition: all 0.3s ease-in-out;
+    }
+    
+    #reference_group.visible {
+        animation: slideIn 0.3s ease-in-out;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    #reference_number.is-invalid {
+        border-color: #e74c3c;
+    }
+    
+    #reference_number:focus {
+        box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+    }
 </style>
 {% endblock %}

@@ -1,0 +1,395 @@
+/* ============================================
+   CEBU LUXURY - ADMIN DASHBOARD CSS
+   Dark Navy, Gold & Luxury Theme
+   ============================================ */
+
+:root {
+    --dark-navy: #0a0f1e;
+    --light-dark: #111827;
+    --gold: #c9a84c;
+    --gold-dark: #a68a3a;
+    --text-light: #e5e7eb;
+    --text-muted: #9ca3af;
+    --card-bg: #1a202c;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #dc2626;
+    --info: #3b82f6;
+}
+
+/* ============================================
+   FORM STYLES
+   ============================================ */
+.form-control {
+    background-color: var(--card-bg) !important;
+    border: 1px solid rgba(201, 168, 76, 0.2) !important;
+    color: var(--text-light) !important;
+    border-radius: 6px;
+    padding: 0.625rem 0.875rem;
+    transition: all 0.3s ease;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.form-control:focus {
+    background-color: var(--card-bg) !important;
+    border-color: var(--gold) !important;
+    color: var(--text-light) !important;
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+}
+
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+
+.form-select {
+    background-color: var(--card-bg) !important;
+    border: 1px solid rgba(201, 168, 76, 0.2) !important;
+    color: var(--text-light) !important;
+    border-radius: 6px;
+    padding: 0.625rem 2rem 0.625rem 0.875rem;
+    transition: all 0.3s ease;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c9a84c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+.form-select:focus {
+    background-color: var(--card-bg) !important;
+    border-color: var(--gold) !important;
+    color: var(--text-light) !important;
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+}
+
+.form-label {
+    color: var(--text-light);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   INPUT GROUPS & ADDONS
+   ============================================ */
+.input-group {
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.input-group-text {
+    background: rgba(201, 168, 76, 0.1);
+    border: none;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+/* ============================================
+   ALERTS & NOTIFICATIONS
+   ============================================ */
+.alert {
+    border: none;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.alert-info {
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    border-left: 4px solid #3b82f6;
+}
+
+.alert-success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #6ee7b7;
+    border-left: 4px solid #10b981;
+}
+
+.alert-warning {
+    background: rgba(245, 158, 11, 0.1);
+    color: #fcd34d;
+    border-left: 4px solid #f59e0b;
+}
+
+.alert-danger {
+    background: rgba(220, 38, 38, 0.1);
+    color: #fca5a5;
+    border-left: 4px solid #dc2626;
+}
+
+/* ============================================
+   MODALS & DROPDOWNS
+   ============================================ */
+.modal-content {
+    background: var(--card-bg);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 12px;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.15) 0%, rgba(201, 168, 76, 0.05) 100%);
+    border-bottom: 2px solid rgba(201, 168, 76, 0.2);
+    padding: 1.5rem;
+}
+
+.modal-header .btn-close {
+    filter: invert(1) brightness(0.8);
+}
+
+.modal-body {
+    padding: 1.5rem;
+    color: var(--text-light);
+}
+
+.modal-footer {
+    background: rgba(201, 168, 76, 0.05);
+    border-top: 1px solid rgba(201, 168, 76, 0.2);
+    padding: 1rem 1.5rem;
+}
+
+.dropdown-menu {
+    background: var(--card-bg);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 8px;
+    padding: 0.5rem 0;
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-item {
+    color: var(--text-light);
+    transition: all 0.2s ease;
+}
+
+.dropdown-item:hover {
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold);
+}
+
+.dropdown-divider {
+    border-top: 1px solid rgba(201, 168, 76, 0.2);
+    margin: 0.5rem 0;
+}
+
+/* ============================================
+   PAGINATION
+   ============================================ */
+.pagination {
+    gap: 0.5rem;
+}
+
+.page-link {
+    background: var(--card-bg);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    color: var(--text-light);
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background: rgba(201, 168, 76, 0.1);
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+.page-link.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--dark-navy);
+}
+
+/* ============================================
+   BADGES & LABELS
+   ============================================ */
+.badge {
+    padding: 0.375rem 0.75rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-radius: 4px;
+}
+
+.badge-gold {
+    background: var(--gold);
+    color: var(--dark-navy);
+}
+
+.badge-success {
+    background: var(--success);
+    color: white;
+}
+
+.badge-warning {
+    background: var(--warning);
+    color: var(--dark-navy);
+}
+
+.badge-danger {
+    background: var(--danger);
+    color: white;
+}
+
+.badge-info {
+    background: var(--info);
+    color: white;
+}
+
+/* ============================================
+   PROGRESS BARS
+   ============================================ */
+.progress {
+    background: rgba(201, 168, 76, 0.1);
+    border-radius: 8px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, var(--gold) 0%, var(--gold-dark) 100%);
+    border-radius: 8px;
+}
+
+/* ============================================
+   CARDS - ENHANCED
+   ============================================ */
+.card {
+    background: var(--card-bg);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 12px 24px rgba(201, 168, 76, 0.1);
+}
+
+.card-header {
+    background: linear-gradient(135deg, rgba(201, 168, 76, 0.15) 0%, rgba(201, 168, 76, 0.05) 100%);
+    border-bottom: 2px solid rgba(201, 168, 76, 0.3);
+    padding: 1.25rem 1.5rem;
+    color: var(--text-light);
+}
+
+.card-title {
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.card-body {
+    padding: 1.5rem;
+    color: var(--text-light);
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.nav-tabs {
+    border-bottom: 2px solid rgba(201, 168, 76, 0.2);
+    gap: 0.5rem;
+}
+
+.nav-link {
+    color: var(--text-muted);
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 0.75rem 1.25rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: rgba(201, 168, 76, 0.05);
+}
+
+.nav-link.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+    background: transparent;
+}
+
+/* ============================================
+   TEXTUAL ELEMENTS
+   ============================================ */
+hr {
+    border-top: 1px solid rgba(201, 168, 76, 0.2);
+    margin: 1.5rem 0;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.text-gold {
+    color: var(--gold) !important;
+}
+
+.border-gold {
+    border-color: var(--gold) !important;
+}
+
+/* ============================================
+   SCROLLBAR STYLING (Webkit browsers)
+   ============================================ */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(201, 168, 76, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(201, 168, 76, 0.3);
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(201, 168, 76, 0.5);
+}
+
+/* ============================================
+   RESPONSIVE TWEAKS
+   ============================================ */
+@media (max-width: 768px) {
+    .form-control,
+    .form-select {
+        font-size: 16px;
+    }
+
+    .badge {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.65rem;
+    }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.card,
+.stat-card,
+.admin-card {
+    animation: slideUp 0.5s ease;
+}

@@ -62,7 +62,7 @@
 
                     <!-- Action Buttons -->
                     <div class="d-grid gap-2">
-                        <a href="{% url 'bookings:payment' payment.booking.id %}" class="btn btn-primary btn-lg">
+                        <a href="{% url 'bookings:paymongo_payment' payment.booking.id %}" class="btn btn-primary btn-lg">
                             <i class="fas fa-redo"></i> Try Payment Again
                         </a>
                         <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-outline-primary">

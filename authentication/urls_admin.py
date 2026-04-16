@@ -15,9 +15,12 @@ urlpatterns = [
     
     # Room Management
     path('rooms/', views_admin.room_management, name='room_management'),
+    path('rooms/<int:room_id>/', views_admin.room_detail_admin, name='room_detail_admin'),
     
     # Booking Management
     path('bookings/', views_admin.booking_management, name='booking_management'),
+    path('bookings/<int:booking_id>/', views_admin.booking_detail, name='booking_detail'),
+    path('bookings/<int:booking_id>/edit/', views_admin.booking_edit, name='booking_edit'),
     
     # User Management
     path('users/', views_admin.user_management, name='user_management'),

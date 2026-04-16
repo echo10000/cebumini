@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Payments Table Preview</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            font-family: 'DM Sans', sans-serif;
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #c9a84c;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ============================================
+           PENDING PAYMENTS TABLE - LUXURY STYLING
+           ============================================ */
+
+        .pending-payments-section {
+            background: transparent;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-top: 2rem;
+            box-shadow: 0 20px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .section-header-with-border {
+            padding: 1.5rem 2rem;
+            background: #111827;
+            border-left: 4px solid #f59e0b;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+
+        .section-header-with-border h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #ffffff;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .section-header-with-border i {
+            color: #c9a84c;
+            font-size: 1.5rem;
+        }
+
+        /* ============================================
+           LUXURY TABLE STYLING
+           ============================================ */
+
+        .luxury-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #0a0f1e;
+        }
+
+        .luxury-table thead {
+            background: #0a0f1e;
+        }
+
+        .luxury-table thead th {
+            background: #0a0f1e;
+            color: #c9a84c;
+            padding: 1.25rem 1.5rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid rgba(201, 168, 76, 0.3);
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .luxury-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+        }
+
+        /* Alternating row backgrounds */
+        .luxury-table tbody tr:nth-child(odd) {
+            background: #1a2235;
+        }
+
+        .luxury-table tbody tr:nth-child(even) {
+            background: #111827;
+        }
+
+        .luxury-table tbody tr:hover {
+            background: rgba(201, 168, 76, 0.08);
+            box-shadow: inset 0 0 0 1px rgba(201, 168, 76, 0.2);
+        }
+
+        .luxury-table tbody td {
+            color: #ffffff;
+            padding: 1.25rem 1.5rem;
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        /* ============================================
+           PAYMENT METHOD BADGES
+           ============================================ */
+
+        .badge-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        /* Bank Transfer - Deep Blue */
+        .badge-pill.bank-transfer {
+            background: rgba(30, 58, 138, 0.3);
+            color: #60a5fa;
+            border: 1px solid rgba(96, 165, 250, 0.3);
+        }
+
+        .badge-pill.bank-transfer i {
+            color: #60a5fa;
+        }
+
+        /* PayMongo - Teal */
+        .badge-pill.paymongo {
+            background: rgba(13, 115, 119, 0.3);
+            color: #14b8a6;
+            border: 1px solid rgba(20, 184, 166, 0.3);
+        }
+
+        .badge-pill.paymongo i {
+            color: #14b8a6;
+        }
+
+        /* Stripe - Purple */
+        .badge-pill.stripe {
+            background: rgba(108, 92, 231, 0.3);
+            color: #c4b5fd;
+            border: 1px solid rgba(196, 181, 253, 0.3);
+        }
+
+        .badge-pill.stripe i {
+            color: #c4b5fd;
+        }
+
+        /* ============================================
+           REVIEW BUTTON - OUTLINED GOLD
+           ============================================ */
+
+        .btn-review {
+            background: transparent;
+            border: 1.5px solid #c9a84c;
+            color: #c9a84c;
+            padding: 0.5rem 1.5rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'DM Sans', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-review:hover {
+            background: #c9a84c;
+            color: #0a0f1e;
+            box-shadow: 0 8px 16px rgba(201, 168, 76, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .btn-review:active {
+            transform: translateY(0);
+        }
+
+        /* ============================================
+           SPECS SECTION
+           ============================================ */
+
+        .specs-section {
+            background: rgba(26, 34, 53, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .specs-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #c9a84c;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .spec-item {
+            background: rgba(26, 34, 53, 0.8);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .spec-item h3 {
+            color: #c9a84c;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .spec-item p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .code-block {
+            background: #0f1419;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #d1d5db;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .luxury-table {
+                font-size: 0.85rem;
+            }
+
+            .luxury-table thead th,
+            .luxury-table tbody td {
+                padding: 0.875rem 1rem;
+            }
+
+            .badge-pill {
+                padding: 0.4rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .btn-review {
+                padding: 0.4rem 1rem;
+                font-size: 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>💳 Pending Payments Table</h1>
+            <p>Luxury dark theme table with payment method badges and action buttons</p>
+        </div>
+
+        <!-- Live Demo -->
+        <div class="pending-payments-section">
+            <!-- Section Header with Amber Left Border -->
+            <div class="section-header-with-border">
+                <i class="fas fa-credit-card"></i>
+                <h2>Pending Payments</h2>
+            </div>
+
+            <!-- Table -->
+            <table class="luxury-table">
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Guest Name</th>
+                        <th>Amount</th>
+                        <th>Payment Method</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Sample Row 1 -->
+                    <tr>
+                        <td><span style="color: #c9a84c; font-weight: 600;">#BK001</span></td>
+                        <td>Maria Santos</td>
+                        <td><span style="color: #c9a84c; font-weight: 600;">₱15,500.00</span></td>
+                        <td>
+                            <span class="badge-pill bank-transfer">
+                                <i class="fas fa-university"></i>
+                                Bank Transfer
+                            </span>
+                        </td>
+                        <td>Apr 14, 2026</td>
+                        <td><span style="color: #fbbf24; font-weight: 600;"><i class="fas fa-clock"></i> Pending</span></td>
+                        <td><a href="#" class="btn-review">Review</a></td>
+                    </tr>
+
+                    <!-- Sample Row 2 -->
+                    <tr>
+                        <td><span style="color: #c9a84c; font-weight: 600;">#BK002</span></td>
+                        <td>Juan Dela Cruz</td>
+                        <td><span style="color: #c9a84c; font-weight: 600;">₱8,750.50</span></td>
+                        <td>
+                            <span class="badge-pill paymongo">
+                                <i class="fas fa-mobile-alt"></i>
+                                PayMongo
+                            </span>
+                        </td>
+                        <td>Apr 13, 2026</td>
+                        <td><span style="color: #fbbf24; font-weight: 600;"><i class="fas fa-clock"></i> Pending</span></td>
+                        <td><a href="#" class="btn-review">Review</a></td>
+                    </tr>
+
+                    <!-- Sample Row 3 -->
+                    <tr>
+                        <td><span style="color: #c9a84c; font-weight: 600;">#BK003</span></td>
+                        <td>Ana Reyes</td>
+                        <td><span style="color: #c9a84c; font-weight: 600;">₱22,300.00</span></td>
+                        <td>
+                            <span class="badge-pill stripe">
+                                <i class="fas fa-credit-card"></i>
+                                Stripe
+                            </span>
+                        </td>
+                        <td>Apr 12, 2026</td>
+                        <td><span style="color: #fbbf24; font-weight: 600;"><i class="fas fa-clock"></i> Pending</span></td>
+                        <td><a href="#" class="btn-review">Review</a></td>
+                    </tr>
+
+                    <!-- Sample Row 4 -->
+                    <tr>
+                        <td><span style="color: #c9a84c; font-weight: 600;">#BK004</span></td>
+                        <td>Carlos Gonzales</td>
+                        <td><span style="color: #c9a84c; font-weight: 600;">₱11,200.75</span></td>
+                        <td>
+                            <span class="badge-pill bank-transfer">
+                                <i class="fas fa-university"></i>
+                                Bank Transfer
+                            </span>
+                        </td>
+                        <td>Apr 11, 2026</td>
+                        <td><span style="color: #fbbf24; font-weight: 600;"><i class="fas fa-clock"></i> Pending</span></td>
+                        <td><a href="#" class="btn-review">Review</a></td>
+                    </tr>
+
+                    <!-- Sample Row 5 -->
+                    <tr>
+                        <td><span style="color: #c9a84c; font-weight: 600;">#BK005</span></td>
+                        <td>Rosa Martinez</td>
+                        <td><span style="color: #c9a84c; font-weight: 600;">₱19,900.00</span></td>
+                        <td>
+                            <span class="badge-pill paymongo">
+                                <i class="fas fa-mobile-alt"></i>
+                                PayMongo
+                            </span>
+                        </td>
+                        <td>Apr 10, 2026</td>
+                        <td><span style="color: #fbbf24; font-weight: 600;"><i class="fas fa-clock"></i> Pending</span></td>
+                        <td><a href="#" class="btn-review">Review</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Specifications -->
+        <div class="specs-section">
+            <h2>🎨 Design Specifications</h2>
+
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <h3><i class="fas fa-palette" style="color: #f59e0b; margin-right: 0.5rem;"></i>Section Header</h3>
+                    <p>Dark background (#111827) with 4px amber/yellow left border (#f59e0b) to highlight important sections</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-heading" style="color: #c9a84c; margin-right: 0.5rem;"></i>Table Header</h3>
+                    <p>Gold text (#c9a84c) on dark navy (#0a0f1e) with accent border. Text is uppercase with letter spacing</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-striped" style="color: #14b8a6; margin-right: 0.5rem;"></i>Alternating Rows</h3>
+                    <p>Rows alternate between #1a2235 (dark) and #111827 (slightly lighter) for visual separation</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-layer-group" style="color: #60a5fa; margin-right: 0.5rem;"></i>Bank Transfer Badge</h3>
+                    <p>Deep blue pill badge with semi-transparent background, blue text, and bank icon</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-mobile-alt" style="color: #14b8a6; margin-right: 0.5rem;"></i>PayMongo Badge</h3>
+                    <p>Teal pill badge with semi-transparent background, teal text, and mobile icon</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-credit-card" style="color: #c4b5fd; margin-right: 0.5rem;"></i>Stripe Badge</h3>
+                    <p>Purple pill badge with semi-transparent background, purple text, and card icon</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-check-circle" style="color: #c9a84c; margin-right: 0.5rem;"></i>Review Button</h3>
+                    <p>Outlined gold border, gold text. On hover: fills with gold background, dark text, and lifts up</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-computer-mouse" style="color: #c9a84c; margin-right: 0.5rem;"></i>Row Hover</h3>
+                    <p>Subtle hover effect with semi-transparent gold background and inset border for visual feedback</p>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-dollar-sign" style="color: #c9a84c; margin-right: 0.5rem;"></i>Amount Display</h3>
+                    <p>Gold text with increased font-weight for emphasis. Booking IDs are also gold colored</p>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Color Reference</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #f59e0b; border-radius: 6px; margin: 0 auto 0.5rem;"></div>
+                    <div style="color: #9ca3af; font-size: 0.85rem;">Section Border</div>
+                    <code style="background: rgba(0, 0, 0, 0.3); color: #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">#f59e0b</code>
+                </div>
+                <div style="background: rgba(201, 168, 76, 0.1); border: 1px solid rgba(201, 168, 76, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #c9a84c; border-radius: 6px; margin: 0 auto 0.5rem;"></div>
+                    <div style="color: #9ca3af; font-size: 0.85rem;">Gold Accents</div>
+                    <code style="background: rgba(0, 0, 0, 0.3); color: #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">#c9a84c</code>
+                </div>
+                <div style="background: rgba(96, 165, 250, 0.1); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #60a5fa; border-radius: 6px; margin: 0 auto 0.5rem;"></div>
+                    <div style="color: #9ca3af; font-size: 0.85rem;">Bank Transfer</div>
+                    <code style="background: rgba(0, 0, 0, 0.3); color: #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">#60a5fa</code>
+                </div>
+                <div style="background: rgba(20, 184, 166, 0.1); border: 1px solid rgba(20, 184, 166, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #14b8a6; border-radius: 6px; margin: 0 auto 0.5rem;"></div>
+                    <div style="color: #9ca3af; font-size: 0.85rem;">PayMongo</div>
+                    <code style="background: rgba(0, 0, 0, 0.3); color: #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">#14b8a6</code>
+                </div>
+                <div style="background: rgba(196, 181, 253, 0.1); border: 1px solid rgba(196, 181, 253, 0.3); border-radius: 8px; padding: 1rem; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #c4b5fd; border-radius: 6px; margin: 0 auto 0.5rem;"></div>
+                    <div style="color: #9ca3af; font-size: 0.85rem;">Stripe</div>
+                    <code style="background: rgba(0, 0, 0, 0.3); color: #d1d5db; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">#c4b5fd</code>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Implementation</h3>
+            <p style="color: #9ca3af; margin-bottom: 1rem;">To include this component in your payment management page, add the following include statement:</p>
+            <div class="code-block">{% include 'admin/pending_payments_table.html' %}</div>
+
+            <p style="color: #9ca3af; margin-top: 1.5rem; margin-bottom: 1rem;">Ensure you pass the context variable:</p>
+            <div class="code-block">context = {
+    'pending_payments': Payment.objects.filter(status='pending')
+}</div>
+        </div>
+    </div>
+</body>
+</html>

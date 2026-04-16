@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Check-in/Check-out Panels Preview</title>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 100%);
+            font-family: 'DM Sans', sans-serif;
+            color: #e5e7eb;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            color: #c9a84c;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header p {
+            color: #9ca3af;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ============================================
+           CHECK-IN/CHECK-OUT PANELS - LUXURY STYLING
+           ============================================ */
+
+        .checkin-checkout-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .info-panel {
+            background: #1a2235;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 1rem;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-panel:hover {
+            border-color: #c9a84c;
+            box-shadow: 0 12px 24px rgba(201, 168, 76, 0.15);
+            transform: translateY(-4px);
+        }
+
+        /* Header Bars */
+        .info-panel-header {
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Check-in header - Dark Teal */
+        .info-panel.checkin .info-panel-header {
+            background: #0d7377;
+        }
+
+        /* Check-out header - Slate Gray */
+        .info-panel.checkout .info-panel-header {
+            background: #374151;
+        }
+
+        .info-panel-header i {
+            font-size: 1.25rem;
+            line-height: 1;
+        }
+
+        /* Content Area */
+        .info-panel-content {
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            text-align: center;
+        }
+
+        /* Large Number Display */
+        .panel-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: #c9a84c;
+            line-height: 1;
+            margin-bottom: 0.75rem;
+            font-family: 'Playfair Display', serif;
+            display: block;
+        }
+
+        /* Subtitle Label */
+        .panel-label {
+            font-size: 0.95rem;
+            color: #9ca3af;
+            font-weight: 500;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
+        }
+
+        /* Animation on load */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .info-panel {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .info-panel:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        /* Demo Section */
+        .demo-section {
+            background: rgba(26, 34, 53, 0.5);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        .demo-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            color: #c9a84c;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .spec-item {
+            background: rgba(26, 34, 53, 0.8);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .spec-item h3 {
+            color: #c9a84c;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .spec-item p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .spec-item code {
+            background: rgba(0, 0, 0, 0.3);
+            color: #d1d5db;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+        }
+
+        .color-swatch {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .color-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            border: 1px solid rgba(201, 168, 76, 0.3);
+        }
+
+        .color-box.teal {
+            background: #0d7377;
+        }
+
+        .color-box.gray {
+            background: #374151;
+        }
+
+        .color-box.navy {
+            background: #1a2235;
+        }
+
+        .color-box.gold {
+            background: #c9a84c;
+        }
+
+        .code-block {
+            background: #0f1419;
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            border-radius: 8px;
+            padding: 1.5rem;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: #d1d5db;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .checkin-checkout-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .info-panel-content {
+                padding: 1.75rem 1.25rem;
+            }
+
+            .panel-number {
+                font-size: 2.75rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .header h1 {
+                font-size: 1.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>✨ Check-in/Check-out Panels</h1>
+            <p>Elegant side-by-side display for daily guest arrivals and departures</p>
+        </div>
+
+        <!-- Live Demo -->
+        <div class="checkin-checkout-container">
+            <!-- Check-in Panel -->
+            <div class="info-panel checkin">
+                <div class="info-panel-header">
+                    <i class="fas fa-arrow-right"></i>
+                    <span>Today's Check-ins</span>
+                </div>
+                <div class="info-panel-content">
+                    <span class="panel-number">12</span>
+                    <span class="panel-label">Guests arriving today</span>
+                </div>
+            </div>
+
+            <!-- Check-out Panel -->
+            <div class="info-panel checkout">
+                <div class="info-panel-header">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Today's Check-outs</span>
+                </div>
+                <div class="info-panel-content">
+                    <span class="panel-number">8</span>
+                    <span class="panel-label">Guests departing today</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features & Specifications -->
+        <div class="demo-section">
+            <h2>🎨 Design Specifications</h2>
+            
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 1rem;">Color Palette</h3>
+            
+            <div>
+                <p style="color: #9ca3af; margin-bottom: 1rem;">
+                    <strong style="color: #e5e7eb;">Check-in Header:</strong> Dark Teal
+                </p>
+                <div class="color-swatch">
+                    <div class="color-box teal"></div>
+                    <code>#0d7377</code>
+                </div>
+            </div>
+
+            <div>
+                <p style="color: #9ca3af; margin-bottom: 1rem;">
+                    <strong style="color: #e5e7eb;">Check-out Header:</strong> Slate Gray
+                </p>
+                <div class="color-swatch">
+                    <div class="color-box gray"></div>
+                    <code>#374151</code>
+                </div>
+            </div>
+
+            <div>
+                <p style="color: #9ca3af; margin-bottom: 1rem;">
+                    <strong style="color: #e5e7eb;">Panel Background:</strong> Dark Blue-Gray
+                </p>
+                <div class="color-swatch">
+                    <div class="color-box navy"></div>
+                    <code>#1a2235</code>
+                </div>
+            </div>
+
+            <div>
+                <p style="color: #9ca3af; margin-bottom: 1rem;">
+                    <strong style="color: #e5e7eb;">Number Display:</strong> Gold
+                </p>
+                <div class="color-swatch">
+                    <div class="color-box gold"></div>
+                    <code>#c9a84c</code>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">Component Features</h3>
+
+            <div class="specs-grid">
+                <div class="spec-item">
+                    <h3><i class="fas fa-columns" style="color: #c9a84c; margin-right: 0.5rem;"></i>Side-by-Side Layout</h3>
+                    <p>Responsive CSS Grid that stacks on mobile</p>
+                    <code>grid-template-columns: repeat(auto-fit, minmax(300px, 1fr))</code>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-border-all" style="color: #c9a84c; margin-right: 0.5rem;"></i>Rounded Corners</h3>
+                    <p>Modern rounded design with rounded-xl (1rem)</p>
+                    <code>border-radius: 1rem</code>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-square-check" style="color: #c9a84c; margin-right: 0.5rem;"></i>Gold Border</h3>
+                    <p>Subtle gold accent border on all panels</p>
+                    <code>border: 1px solid rgba(201,168,76,0.2)</code>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-heading" style="color: #c9a84c; margin-right: 0.5rem;"></i>Large Display</h3>
+                    <p>Bold 3.5rem centered number using Playfair Display</p>
+                    <code>font-size: 3.5rem; font-family: 'Playfair Display'</code>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-computer-mouse" style="color: #c9a84c; margin-right: 0.5rem;"></i>Hover Effects</h3>
+                    <p>Smooth lift animation and glow shadow on hover</p>
+                    <code>transform: translateY(-4px)</code>
+                </div>
+
+                <div class="spec-item">
+                    <h3><i class="fas fa-icons" style="color: #c9a84c; margin-right: 0.5rem;"></i>Icons</h3>
+                    <p>Font Awesome arrow icons for visual direction</p>
+                    <code>fa-arrow-right | fa-arrow-left</code>
+                </div>
+            </div>
+
+            <h3 style="color: #c9a84c; font-size: 1.1rem; margin-top: 2rem; margin-bottom: 1rem;">HTML Structure</h3>
+            <div class="code-block">&lt;div class="checkin-checkout-container"&gt;
+    &lt;!-- Check-in Panel --&gt;
+    &lt;div class="info-panel checkin"&gt;
+        &lt;div class="info-panel-header"&gt;
+            &lt;i class="fas fa-arrow-right"&gt;&lt;/i&gt;
+            &lt;span&gt;Today's Check-ins&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class="info-panel-content"&gt;
+            &lt;span class="panel-number"&gt;{{ today_check_ins }}&lt;/span&gt;
+            &lt;span class="panel-label"&gt;Guests arriving today&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Check-out Panel --&gt;
+    &lt;div class="info-panel checkout"&gt;
+        &lt;div class="info-panel-header"&gt;
+            &lt;i class="fas fa-arrow-left"&gt;&lt;/i&gt;
+            &lt;span&gt;Today's Check-outs&lt;/span&gt;
+        &lt;/div&gt;
+        &lt;div class="info-panel-content"&gt;
+            &lt;span class="panel-number"&gt;{{ today_check_outs }}&lt;/span&gt;
+            &lt;span class="panel-label"&gt;Guests departing today&lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;

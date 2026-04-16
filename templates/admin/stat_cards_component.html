@@ -1,0 +1,279 @@
+<!-- LUXURY HOTEL STAT CARDS COMPONENT -->
+<!-- Usage: Include these styles in your dashboard and use the card structure below -->
+
+<style>
+    /* ============================================
+       STAT CARDS - LUXURY STYLING
+       ============================================ */
+    
+    .luxury-stat-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card-luxury {
+        background: #1a2235;
+        border-left: 4px solid #c9a84c;
+        border-radius: 12px;
+        padding: 1.75rem;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Subtle background gradient effect */
+    .stat-card-luxury::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 150px;
+        height: 150px;
+        background: radial-gradient(circle, rgba(201, 168, 76, 0.05) 0%, transparent 70%);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    .stat-card-luxury:hover {
+        border-left-color: #e6c76e;
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(201, 168, 76, 0.25),
+                    0 0 30px rgba(201, 168, 76, 0.15);
+    }
+
+    /* Icon styling */
+    .stat-card-luxury .stat-icon {
+        font-size: 2.5rem;
+        color: #c9a84c;
+        margin-bottom: 1rem;
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Label styling */
+    .stat-card-luxury .stat-label {
+        font-size: 0.9rem;
+        color: #ffffff;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.75rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Large value styling */
+    .stat-card-luxury .stat-value {
+        font-size: 2.25rem;
+        font-weight: 700;
+        color: #c9a84c;
+        margin-bottom: 0.5rem;
+        line-height: 1.2;
+        font-family: 'Playfair Display', serif;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Description styling */
+    .stat-card-luxury .stat-description {
+        font-size: 0.85rem;
+        color: #9ca3af;
+        line-height: 1.4;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+        .luxury-stat-cards {
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .stat-card-luxury {
+            padding: 1.5rem;
+        }
+
+        .stat-card-luxury .stat-icon {
+            font-size: 2rem;
+        }
+
+        .stat-card-luxury .stat-value {
+            font-size: 1.875rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .luxury-stat-cards {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card-luxury {
+            padding: 1.25rem;
+        }
+
+        .stat-card-luxury .stat-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .stat-card-luxury .stat-value {
+            font-size: 1.625rem;
+        }
+
+        .stat-card-luxury .stat-label {
+            font-size: 0.8rem;
+        }
+
+        .stat-card-luxury .stat-description {
+            font-size: 0.75rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .luxury-stat-cards {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Dark mode compatibility */
+    @media (prefers-color-scheme: dark) {
+        .stat-card-luxury {
+            background: #1a2235;
+            color: #ffffff;
+        }
+    }
+</style>
+
+<!-- STAT CARDS HTML STRUCTURE -->
+<div class="luxury-stat-cards">
+    <!-- Card 1: Total Revenue -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-peso-sign"></i>
+        </div>
+        <div class="stat-label">Total Revenue</div>
+        <div class="stat-value">₱2.4M</div>
+        <div class="stat-description">All-time earnings from bookings</div>
+    </div>
+
+    <!-- Card 2: Confirmed Bookings -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stat-label">Confirmed Bookings</div>
+        <div class="stat-value">1,284</div>
+        <div class="stat-description">Total confirmed reservations</div>
+    </div>
+
+    <!-- Card 3: Pending Payments -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div class="stat-label">Pending Payments</div>
+        <div class="stat-value">47</div>
+        <div class="stat-description">Awaiting customer verification</div>
+    </div>
+
+    <!-- Card 4: Occupancy Rate -->
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-door-open"></i>
+        </div>
+        <div class="stat-label">Occupancy Rate</div>
+        <div class="stat-value">87.5%</div>
+        <div class="stat-description">Current room occupancy percentage</div>
+    </div>
+</div>
+
+<!-- DYNAMIC TEMPLATE VERSION (for Django templates) -->
+<!--
+<div class="luxury-stat-cards">
+    {% for stat in stats %}
+    <div class="stat-card-luxury">
+        <div class="stat-icon">
+            <i class="fas fa-{{ stat.icon }}"></i>
+        </div>
+        <div class="stat-label">{{ stat.label }}</div>
+        <div class="stat-value">{{ stat.value }}</div>
+        <div class="stat-description">{{ stat.description }}</div>
+    </div>
+    {% endfor %}
+</div>
+-->
+
+<!-- USAGE INSTRUCTIONS -->
+<!--
+
+1. STATIC HTML IMPLEMENTATION:
+   Copy the CSS and HTML structure above into your template or stylesheet.
+   Replace hardcoded values with your actual data.
+
+2. DJANGO TEMPLATE IMPLEMENTATION:
+   Pass stats context from your view:
+   
+   ```python
+   context = {
+       'stats': [
+           {
+               'icon': 'peso-sign',
+               'label': 'Total Revenue',
+               'value': f'₱{total_revenue:,.2f}',
+               'description': 'All-time earnings from bookings'
+           },
+           {
+               'icon': 'calendar-check',
+               'label': 'Confirmed Bookings',
+               'value': confirmed_bookings,
+               'description': 'Total confirmed reservations'
+           },
+           {
+               'icon': 'hourglass-half',
+               'label': 'Pending Payments',
+               'value': pending_payments,
+               'description': 'Awaiting customer verification'
+           },
+           {
+               'icon': 'door-open',
+               'label': 'Occupancy Rate',
+               'value': f'{occupancy_rate:.1f}%',
+               'description': 'Current room occupancy percentage'
+           }
+       ]
+   }
+   ```
+   
+   Then use the dynamic template version above.
+
+3. CUSTOMIZATION:
+   - Change card background color: Modify #1a2235
+   - Change gold accent color: Modify #c9a84c
+   - Adjust card width: Modify minmax(280px, 1fr)
+   - Adjust spacing: Modify gap: 1.5rem and padding values
+   - Hover effect intensity: Modify box-shadow values
+
+4. ICON VARIANTS (Font Awesome):
+   - Peso Sign: fa-peso-sign
+   - Calendar Check: fa-calendar-check
+   - Hourglass: fa-hourglass-half
+   - Door Open: fa-door-open
+   - Users: fa-users
+   - Chart Bar: fa-chart-bar
+   - Bed: fa-bed
+   - Star: fa-star
+   - WiFi: fa-wifi
+
+5. RESPONSIVE BREAKPOINTS:
+   - Desktop (1200px+): 4 columns
+   - Tablet (768px-1023px): 2-3 columns
+   - Mobile (< 768px): 1 column
+
+-->

@@ -38,6 +38,9 @@ def register_view(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
+            # Explicitly set first_name and last_name before saving
+            user.first_name = form.cleaned_data.get('first_name', '')
+            user.last_name = form.cleaned_data.get('last_name', '')
             user.role = 'GUEST'  # New users are guests by default
             user.save()
             
@@ -134,7 +137,14 @@ def login_view(request):
 @login_required(login_url='auth:login')
 @require_http_methods(["GET", "POST"])
 def accept_terms_view(request):
-    """View for accepting terms and conditions"""
+    """
+    View for accepting terms and conditions
+    
+    ENTITY-SPECIFIC FLOW:
+    - Guests: Optional acceptance (can skip, but features may be limited)
+    - Staff: Required acceptance for employee accounts
+    - Admin: Required acceptance for administrative access
+    """
     # If already accepted, redirect to dashboard
     if request.user.has_accepted_terms():
         return redirect('auth:dashboard')
@@ -148,12 +158,33 @@ def accept_terms_view(request):
         accept = request.POST.get('accept_terms')
         if accept == 'on':
             request.user.accept_terms(version='1.0')
-            messages.success(request, 'Terms and Conditions accepted successfully!')
+            
+            # Entity-specific success message
+            if request.user.is_staff_member():
+                messages.success(request, 'Terms and Conditions accepted! Welcome to the Staff Portal.')
+            elif request.user.is_admin():
+                messages.success(request, 'Terms and Conditions accepted! Welcome to Admin Panel.')
+            else:
+                messages.success(request, 'Terms and Conditions accepted successfully!')
+            
             return redirect('auth:dashboard')
         else:
             messages.error(request, 'You must accept the Terms and Conditions to continue.')
     
-    context = {'terms': terms}
+    # Determine message based on user role
+    role_message = ""
+    if request.user.is_admin():
+        role_message = "As an Administrator, you must accept these terms before accessing the admin panel."
+    elif request.user.is_staff_member():
+        role_message = "As a Staff member, you must accept these terms before accessing the staff portal."
+    else:
+        role_message = "Please review and accept our Terms and Conditions to continue."
+    
+    context = {
+        'terms': terms,
+        'user_role': request.user.role,
+        'role_message': role_message
+    }
     return render(request, 'authentication/accept_terms.html', context)
 
 
@@ -182,10 +213,15 @@ def dashboard_view(request):
     if request.user.is_staff_member():
         return redirect('staff:dashboard')
     
+    # Get available rooms for guest dashboard
+    from .models import Room
+    rooms = Room.objects.filter(is_available=True)[:6]  # Show 6 featured rooms
+    
     # Regular guest dashboard
     context = {
         'user': request.user,
         'is_admin': False,
+        'rooms': rooms,
     }
     return render(request, 'authentication/dashboard.html', context)
 

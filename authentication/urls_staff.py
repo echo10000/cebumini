@@ -21,6 +21,8 @@ urlpatterns = [
     
     # Manual Booking (Walk-in)
     path('manual-booking/', views_staff.manual_booking, name='manual_booking'),
+    path('pending-balance/', views_staff.pending_balance_bookings, name='pending_balance'),
+    path('process-payment/<int:booking_id>/', views_staff.process_remaining_payment, name='process_remaining_payment'),
     
     # Guest Services
     path('guest-services/', views_staff.guest_services, name='guest_services'),
