@@ -7,13 +7,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum, Avg
 from django.db import models
 from django.utils import timezone
 from django.contrib import messages
 from datetime import timedelta
+from decimal import Decimal
 
-from .decorators import staff_required, staff_or_admin_required
+from .decorators import staff_required, staff_or_admin_required, staff_manager_or_admin_required
 from .models import Booking, BookingStatus, Room, CustomUser, UserRole
 from .forms_bookings import ContactForm
 
@@ -163,6 +164,34 @@ def check_in_checkout_list(request):
 
 @login_required(login_url='auth:login')
 @staff_or_admin_required
+@require_http_methods(["POST"])
+def check_in_booking(request, booking_id):
+    """Verify guest proof before marking a booking as checked in."""
+    booking = get_object_or_404(Booking, id=booking_id)
+    checklist = {
+        'reference_verified': request.POST.get('reference_verified') == 'on',
+        'id_verified': request.POST.get('id_verified') == 'on',
+        'contact_verified': request.POST.get('contact_verified') == 'on',
+        'payment_verified': request.POST.get('payment_verified') == 'on',
+    }
+    errors = booking.complete_check_in_verification(
+        request.user,
+        request.POST.get('booking_reference'),
+        checklist,
+        request.POST.get('verification_notes', '')
+    )
+
+    if errors:
+        for error in errors:
+            messages.error(request, error)
+    else:
+        messages.success(request, f'{booking.guest.get_full_name() or booking.guest.username} has been verified and checked in.')
+
+    return redirect('staff:check_in_checkout')
+
+
+@login_required(login_url='auth:login')
+@staff_or_admin_required
 @require_http_methods(["GET", "POST"])
 def mark_room_clean(request, room_id):
     """Mark room as clean"""
@@ -182,34 +211,291 @@ def mark_room_clean(request, room_id):
 
 
 @login_required(login_url='auth:login')
-@staff_or_admin_required
+@staff_manager_or_admin_required
 def guest_services(request):
     """View guest service requests and issues"""
-    # Get contact messages (you might want to add a support ticket model)
+    from .models import ContactMessage
+    
+    # Get all contact messages
+    contact_messages = ContactMessage.objects.all().order_by('-created_at')
+    
+    # Calculate statistics
+    total_messages = contact_messages.count()
+    unread_count = contact_messages.filter(is_read=False).count()
+    replied_count = contact_messages.filter(is_replied=True).count()
+    pending_count = contact_messages.filter(is_read=True, is_replied=False).count()
+
+    base_template = 'staff/staff_base.html'
+    dashboard_url_name = 'staff:dashboard'
+    dashboard_label = 'Staff Dashboard'
+    if request.user.is_manager():
+        base_template = 'manager/manager_base.html'
+        dashboard_url_name = 'auth:manager_dashboard'
+        dashboard_label = 'Manager Dashboard'
+    elif request.user.is_admin():
+        base_template = 'admin/admin_base.html'
+        dashboard_url_name = 'admin_panel:dashboard'
+        dashboard_label = 'Admin Dashboard'
+    
     context = {
-        'page_title': 'Guest Services',
+        'page_title': 'Guest Inquiries',
+        'base_template': base_template,
+        'dashboard_url_name': dashboard_url_name,
+        'dashboard_label': dashboard_label,
+        'contact_messages': contact_messages,
+        'total_messages': total_messages,
+        'unread_count': unread_count,
+        'replied_count': replied_count,
+        'pending_count': pending_count,
     }
     
     return render(request, 'staff/guest_services.html', context)
 
 
 @login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["GET"])
+def get_message_details(request, message_id):
+    """Get message details and replies via AJAX"""
+    from .models import ContactMessage, MessageReply
+    import re
+    from datetime import datetime
+    
+    try:
+        message = ContactMessage.objects.get(id=message_id)
+        
+        # Mark as read
+        if not message.is_read:
+            message.is_read = True
+            message.save()
+        
+        # Get all structured replies
+        structured_replies = MessageReply.objects.filter(contact_message=message).order_by('created_at')
+        
+        # Format staff replies
+        staff_replies_data = []
+        for reply in structured_replies.filter(sender_type=MessageReply.SenderType.STAFF):
+            staff_replies_data.append({
+                'id': reply.id,
+                'staff_name': reply.staff_member.get_full_name() if reply.staff_member else 'System',
+                'staff_email': reply.staff_member.email if reply.staff_member else '',
+                'reply_text': reply.reply_text,
+                'created_at': reply.created_at.strftime('%b %d, %Y at %H:%M'),
+                'created_at_iso': reply.created_at.isoformat(),  # For sorting
+            })
+        
+        # Get structured guest replies, then parse legacy guest replies from staff_response.
+        guest_replies_data = []
+        for reply in structured_replies.filter(sender_type=MessageReply.SenderType.GUEST):
+            guest_replies_data.append({
+                'id': reply.id,
+                'timestamp': reply.created_at.strftime('%b %d, %Y at %H:%M'),
+                'timestamp_iso': reply.created_at.isoformat(),
+                'text': reply.reply_text,
+            })
+
+        if message.staff_response:
+            # Pattern: --- Guest Reply (timestamp): ---\n{reply_text}
+            pattern = r'--- Guest Reply \((.*?)\): ---\n(.*?)(?=\n\n(?:---|$)|$)'
+            matches = re.finditer(pattern, message.staff_response, re.DOTALL)
+            for match in matches:
+                timestamp_str = match.group(1)
+                parsed_dt = None
+                # Support both long and short month formats from historical records
+                for fmt in ('%B %d, %Y at %I:%M %p', '%b %d, %Y at %I:%M %p', '%b %d, %Y at %H:%M'):
+                    try:
+                        parsed_dt = timezone.make_aware(datetime.strptime(timestamp_str, fmt))
+                        break
+                    except Exception:
+                        continue
+
+                guest_replies_data.append({
+                    'timestamp': timestamp_str,
+                    'timestamp_iso': parsed_dt.isoformat() if parsed_dt else '',
+                    'text': match.group(2).strip(),
+                })
+        
+        return JsonResponse({
+            'success': True,
+            'message': {
+                'id': message.id,
+                'name': message.name,
+                'email': message.email,
+                'phone': message.phone,
+                'subject': message.subject,
+                'message': message.message,
+                'created_at': message.created_at.strftime('%b %d, %Y at %H:%M'),
+                'created_at_iso': message.created_at.isoformat(),  # For sorting
+                'is_read': message.is_read,
+                'is_replied': message.is_replied,
+            },
+            'staff_replies': staff_replies_data,
+            'guest_replies': guest_replies_data,
+        })
+    except ContactMessage.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Message not found'}, status=404)
+
+
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["POST"])
+def send_reply(request, message_id):
+    """Send reply to a contact message"""
+    from .models import ContactMessage, MessageReply
+    from django.core.mail import send_mail
+    from django.conf import settings
+    
+    try:
+        message = ContactMessage.objects.get(id=message_id)
+        reply_text = request.POST.get('reply_text', '').strip()
+        
+        if not reply_text:
+            return JsonResponse({'success': False, 'error': 'Reply cannot be empty'}, status=400)
+        
+        # Create reply
+        reply = MessageReply.objects.create(
+            contact_message=message,
+            staff_member=request.user,
+            sender_type=MessageReply.SenderType.STAFF,
+            reply_text=reply_text
+        )
+        
+        # Mark message as replied
+        message.is_replied = True
+        message.notification_sent = False
+        message.save(update_fields=['is_replied', 'notification_sent', 'updated_at'])
+        
+        # Send email to guest
+        try:
+            email_body = f"""
+Hello {message.name},
+
+Thank you for contacting Cebu Luxury Hotel. We appreciate your inquiry.
+
+Your Original Message:
+Subject: {message.subject}
+Message: {message.message}
+
+---
+
+Our Reply:
+
+{reply_text}
+
+---
+
+If you have any further questions, please don't hesitate to contact us.
+
+Best regards,
+Cebu Luxury Hotel Staff
+Contact: info@cebuhotel.com | Phone: +63 2 XXXX-XXXX
+"""
+            
+            send_mail(
+                subject=f'Re: {message.subject}',
+                message=email_body,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[message.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log error but don't fail the reply creation
+            print(f"Error sending email: {str(e)}")
+        
+        staff_name = request.user.get_full_name() or request.user.username
+        timestamp = reply.created_at.strftime('%b %d, %Y at %I:%M %p')
+        return JsonResponse({
+            'success': True,
+            # Flat fields for immediate bubble injection
+            'reply_text': reply_text,
+            'timestamp': timestamp,
+            'staff_name': staff_name,
+            # Nested for backwards compatibility
+            'reply': {
+                'id': reply.id,
+                'staff_name': staff_name,
+                'staff_email': request.user.email,
+                'reply_text': reply_text,
+                'created_at': timestamp,
+            },
+            'message': 'Reply sent successfully and email notification sent to guest!'
+        })
+    except ContactMessage.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Message not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+@login_required(login_url='auth:login')
 @staff_or_admin_required
 def staff_reports(request):
     """Staff reports and statistics"""
+    from .models import Payment, PaymentStatus, ContactMessage
+    
     today = timezone.now().date()
     start_date = today - timedelta(days=30)
     
-    # Occupancy stats
+    # BOOKING STATISTICS
     total_bookings = Booking.objects.filter(check_in__gte=start_date).count()
     completed_bookings = Booking.objects.filter(
         check_out__lte=today,
         status=BookingStatus.CONFIRMED
     ).count()
     
+    # Calculate completion rate percentage
+    if total_bookings > 0:
+        percentage = (completed_bookings / total_bookings) * 100
+    else:
+        percentage = 0
+    
+    # PENDING BOOKINGS
+    pending_bookings = Booking.objects.filter(
+        status=BookingStatus.PENDING,
+        check_in__gte=today
+    ).count()
+    
+    # CANCELLED BOOKINGS
+    cancelled_bookings = Booking.objects.filter(
+        status=BookingStatus.CANCELLED,
+        cancelled_at__gte=start_date
+    ).count()
+    
+    # AVERAGE BOOKING DURATION
+    confirmed_bookings = Booking.objects.filter(
+        check_out__gte=start_date,
+        status=BookingStatus.CONFIRMED
+    )
+    
+    # Better calculation for average duration
+    total_nights = sum([b.get_duration() for b in confirmed_bookings])
+    avg_duration = (total_nights / confirmed_bookings.count()) if confirmed_bookings.count() > 0 else 0
+    
+    # REVENUE GENERATED (Last 30 days from completed payments)
+    revenue = Payment.objects.filter(
+        status=PaymentStatus.COMPLETED,
+        completed_at__gte=timezone.now() - timedelta(days=30)
+    ).aggregate(total=Sum('amount'))['total'] or Decimal('0')
+    
+    # OCCUPANCY RATE
+    total_rooms = Room.objects.count()
+    rooms_occupied = Room.objects.filter(is_available=False).count()
+    occupancy_rate = (rooms_occupied / total_rooms * 100) if total_rooms > 0 else 0
+    
+    # UNREAD CONTACT MESSAGES
+    unread_messages = ContactMessage.objects.filter(is_read=False).count()
+    unreplied_messages = ContactMessage.objects.filter(is_replied=False, is_read=True).count()
+    
     context = {
         'total_bookings': total_bookings,
         'completed_bookings': completed_bookings,
+        'percentage': round(percentage, 1),
+        'pending_bookings': pending_bookings,
+        'cancelled_bookings': cancelled_bookings,
+        'avg_duration': round(avg_duration, 1),
+        'revenue': revenue,
+        'occupancy_rate': round(occupancy_rate, 1),
+        'unread_messages': unread_messages,
+        'unreplied_messages': unreplied_messages,
         'page_title': 'Staff Reports',
     }
     
@@ -503,7 +789,7 @@ def process_remaining_payment(request, booking_id):
                     f'Remaining Balance: ₱{new_balance}\nReference: {final_reference}'
                 )
             
-            return redirect('staff:dashboard')
+            return redirect('staff:pending_balance')
         
         except Exception as e:
             messages.error(request, f'Error processing payment: {str(e)}')
@@ -675,3 +961,215 @@ def request_refund(request, booking_id):
     return render(request, 'staff/request_refund.html', context)
 
 
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["GET"])
+def staff_message_detail_view(request, message_id):
+    """View detail of a specific guest message (STAFF POV)"""
+    from .models import ContactMessage, MessageReply
+    import re
+    from datetime import datetime
+    
+    try:
+        message = ContactMessage.objects.get(id=message_id)
+        # Mark as read when staff views it
+        if not message.is_read:
+            message.is_read = True
+            message.save()
+        
+        # Get structured replies from MessageReply model
+        structured_replies = MessageReply.objects.filter(contact_message=message).order_by('created_at')
+
+        # Parse guest replies from staff_response field
+        guest_replies_raw = []
+        if message.staff_response:
+            # Match both formats:
+            # 1. --- Guest Reply (May 15, 2024 at 10:30 AM): ---
+            # 2. [Staff Reply - Name on May 15, 2024 at 10:30 AM]
+            guest_pattern = r'--- Guest Reply \((.*?)\): ---\n(.*?)(?=\n\n(?:---|$)|$)'
+            matches = re.finditer(guest_pattern, message.staff_response, re.DOTALL)
+            for match in matches:
+                guest_replies_raw.append({
+                    'timestamp': match.group(1),
+                    'text': match.group(2).strip()
+                })
+            
+            # Legacy staff replies in staff_response field (if any still exist)
+            staff_pattern = r'\[Staff Reply - (.*?) on (.*?)\]\n\n(.*?)(?=\n\n---|\Z)'
+            staff_matches = re.finditer(staff_pattern, message.staff_response, re.DOTALL)
+            for match in staff_matches:
+                # To avoid duplication with MessageReply records, we could skip these
+                # but for robustness we'll include them only if they aren't already represented
+                # For now, we trust the MessageReply migration is complete or mostly complete.
+                pass
+
+        # --- Build chronologically-sorted combined reply list ---
+        combined_replies = []
+
+        # Start with the original message
+        combined_replies.append({
+            'type': 'guest',
+            'sender': message.name,
+            'text': message.message,
+            'dt': message.created_at,
+            'timestamp': message.created_at.strftime('%b %d, %Y %I:%M %p'),
+        })
+
+        for reply in structured_replies:
+            sender_name = message.name
+            if reply.sender_type == MessageReply.SenderType.STAFF:
+                sender_name = 'Staff'
+                if reply.staff_member:
+                    sender_name = reply.staff_member.get_full_name() or reply.staff_member.username
+            combined_replies.append({
+                'type': reply.sender_type,
+                'sender': sender_name,
+                'text': reply.reply_text,
+                'dt': reply.created_at,
+                'timestamp': reply.created_at.strftime('%b %d, %Y %I:%M %p'),
+            })
+
+        for gr in guest_replies_raw:
+            # Parse the human-readable timestamp back to datetime for sorting
+            dt = None
+            for fmt in ('%B %d, %Y at %I:%M %p', '%b %d, %Y at %I:%M %p', '%b %d, %Y at %H:%M'):
+                try:
+                    dt = timezone.make_aware(datetime.strptime(gr['timestamp'], fmt))
+                    break
+                except Exception:
+                    continue
+
+            if dt is None:
+                # Keep unknown historical formats near the tail of thread, not at top
+                dt = timezone.now()
+            combined_replies.append({
+                'type': 'guest',
+                'sender': message.name,
+                'text': gr['text'],
+                'dt': dt,
+                'timestamp': gr['timestamp'],
+            })
+
+        combined_replies.sort(key=lambda r: r['dt'])
+
+        base_template = 'staff/staff_base.html'
+        back_label = 'Back to Guest Inquiries'
+        reply_heading = 'Send Reply to Guest'
+        reply_button_label = 'Send Reply & Email Guest'
+        reply_note = 'Your reply will be sent to the guest via email and displayed in the conversation.'
+
+        if request.user.is_manager():
+            base_template = 'manager/manager_base.html'
+            reply_heading = 'Manager Reply to Guest'
+            reply_button_label = 'Send Manager Reply'
+            reply_note = 'Your manager response will be sent to the guest and recorded in the inquiry thread.'
+        elif request.user.is_admin():
+            base_template = 'admin/admin_base.html'
+            reply_heading = 'Admin Reply to Guest'
+            reply_button_label = 'Send Admin Reply'
+            reply_note = 'Your admin response will be sent to the guest and recorded in the inquiry thread.'
+
+        context = {
+            'message': message,
+            'combined_replies': combined_replies,
+            'is_staff_view': True,
+            'base_template': base_template,
+            'back_label': back_label,
+            'reply_heading': reply_heading,
+            'reply_button_label': reply_button_label,
+            'reply_note': reply_note,
+        }
+        return render(request, 'staff/message_detail.html', context)
+    except ContactMessage.DoesNotExist:
+        messages.error(request, 'Message not found.')
+        return redirect('staff:guest_services')
+
+
+# ==================== STAFF COMPLAINT & REFUND TRACKING ====================
+
+@login_required(login_url='auth:login')
+@staff_required
+def staff_escalated_complaints_view(request):
+    """View complaints escalated by this staff member"""
+    from .models import GuestComplaintEscalation
+    
+    complaints = GuestComplaintEscalation.objects.filter(
+        reported_by_staff=request.user
+    ).select_related('booking', 'guest', 'escalated_to').order_by('-created_at')
+    
+    # Filter by status
+    status_filter = request.GET.get('status', 'all')
+    if status_filter != 'all':
+        complaints = complaints.filter(status=status_filter)
+    
+    context = {
+        'complaints': complaints,
+        'status_filter': status_filter,
+        'statuses': dict(GuestComplaintEscalation._meta.get_field('status').choices),
+    }
+    
+    return render(request, 'staff/escalated_complaints.html', context)
+
+
+@login_required(login_url='auth:login')
+@staff_required
+def staff_complaint_detail_view(request, complaint_id):
+    """View detail of a complaint escalated by this staff member"""
+    from .models import GuestComplaintEscalation
+    
+    complaint = get_object_or_404(
+        GuestComplaintEscalation,
+        id=complaint_id,
+        reported_by_staff=request.user
+    )
+    
+    context = {
+        'complaint': complaint,
+        'booking': complaint.booking,
+    }
+    
+    return render(request, 'staff/complaint_detail.html', context)
+
+
+@login_required(login_url='auth:login')
+@staff_required
+def staff_requested_refunds_view(request):
+    """View refunds requested by this staff member"""
+    from .models import RefundRequest
+    
+    refunds = RefundRequest.objects.filter(
+        requested_by=request.user
+    ).select_related('booking', 'approved_by').order_by('-created_at')
+    
+    # Filter by status
+    status_filter = request.GET.get('status', 'all')
+    if status_filter != 'all':
+        refunds = refunds.filter(status=status_filter)
+    
+    context = {
+        'refunds': refunds,
+        'status_filter': status_filter,
+        'statuses': RefundRequestStatus.choices,
+    }
+    
+    return render(request, 'staff/requested_refunds.html', context)
+
+
+@login_required(login_url='auth:login')
+@staff_required
+def staff_refund_detail_view(request, refund_id):
+    """View detail of a refund requested by this staff member"""
+    from .models import RefundRequest
+    
+    refund = get_object_or_404(
+        RefundRequest,
+        id=refund_id,
+        requested_by=request.user
+    )
+    
+    context = {
+        'refund': refund,
+        'booking': refund.booking,
+    }
+    
+    return render(request, 'staff/refund_detail.html', context)

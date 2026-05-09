@@ -6,6 +6,7 @@ app_name = 'rooms'
 urlpatterns = [
     # Public views
     path('', views_rooms.room_list_view, name='list'),
+    path('search/', views_rooms.room_search_view, name='search'),
     path('<int:room_id>/', views_rooms.room_detail_view, name='detail'),
     
     # Admin views

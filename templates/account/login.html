@@ -1,73 +1,64 @@
 {% extends 'base.html' %}
-{% load socialaccount %}
+{% load static socialaccount %}
 
 {% block title %}Login - Cebu Hotel{% endblock %}
+{% block body_class %} class="auth-page"{% endblock %}
 
 {% block extra_css %}
-<style>
-    input, select {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-family: 'Lato', sans-serif;
-        transition: all 0.3s ease;
-    }
-
-    input:focus, select:focus {
-        outline: none;
-        border-color: #1a1a1a;
-        box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
-    }
-</style>
+<link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 500px; margin: 3rem auto;">
-    <div style="background: white; border-radius: 12px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <h2 style="color: #1a1a1a; margin-bottom: 0.5rem;">Welcome Back</h2>
-            <p style="color: #666;">Sign in to your account to continue</p>
+<div class="auth-wrap">
+    <section class="auth-story" aria-label="Cebu Luxury Hotel">
+        <div class="auth-brand-mark">C</div>
+        <div>
+            <h1>Return to your island stay.</h1>
+            <p>Access your Cebu Luxury account, reservations, and role-based dashboard from a single secure sign in.</p>
         </div>
+    </section>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+    <section class="auth-panel" aria-labelledby="account-login-title">
+        <div class="auth-kicker">Account access</div>
+        <h2 id="account-login-title">Welcome back</h2>
+        <p class="auth-subtitle">Sign in with the email address connected to your Cebu Luxury account.</p>
 
-        <!-- Login Form -->
-        <form method="POST" novalidate style="margin-bottom: 1.5rem;">
+        <form method="POST" novalidate>
             {% csrf_token %}
-            
-            <div style="margin-bottom: 1.5rem;">
-                <label for="id_login" style="font-weight: 600; color: #1a1a1a;">Email Address</label>
-                <input type="email" name="login" id="id_login" placeholder="Enter your email" required>
+
+            <div class="auth-field">
+                <label for="id_login">Email Address</label>
+                <input type="email" name="login" id="id_login" placeholder="name@example.com" autocomplete="email" required>
                 {% if form.login.errors %}
-                    <small style="color: #dc2626;">{{ form.login.errors }}</small>
+                    <div class="auth-error">{{ form.login.errors }}</div>
                 {% endif %}
             </div>
 
-            <div style="margin-bottom: 2rem;">
-                <label for="id_password" style="font-weight: 600; color: #1a1a1a;">Password</label>
-                <input type="password" name="password" id="id_password" placeholder="Enter your password" required>
+            <div class="auth-field">
+                <label for="id_password">Password</label>
+                <input type="password" name="password" id="id_password" placeholder="Enter your password" autocomplete="current-password" required>
                 {% if form.password.errors %}
-                    <small style="color: #dc2626;">{{ form.password.errors }}</small>
+                    <div class="auth-error">{{ form.password.errors }}</div>
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn-primary" style="width: 100%; text-align: center;">
+            <div class="auth-actions">
+                <div class="auth-check">
+                    <input type="checkbox" name="remember" id="id_remember">
+                    <label for="id_remember">Remember me</label>
+                </div>
+                <a href="{% url 'account_reset_password' %}" class="auth-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="auth-button">
+                <i class="fas fa-arrow-right-to-bracket"></i>
                 Sign In
             </button>
         </form>
 
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem; text-align: center;">
-            <p style="color: #666; margin-bottom: 1rem;">Don't have an account? <a href="{% url 'account_signup' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Sign Up</a></p>
-            <p style="color: #666;"><a href="{% url 'account_reset_password' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Forgot Password?</a></p>
+        <div class="auth-footer">
+            New guest? <a href="{% url 'auth:register' %}" class="auth-link">Create an account</a>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

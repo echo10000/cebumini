@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'guest/guest_base.html' %}
 
 {% block title %}Email Confirmation - Cebu Hotel{% endblock %}
 
@@ -9,14 +9,6 @@
             <h2 style="color: #1a1a1a; margin-bottom: 0.5rem;">Confirm Email Address</h2>
             <p style="color: #666;">Please confirm your email address by clicking the link below</p>
         </div>
-
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
 
         <div style="padding: 2rem; background: #f9f9f9; border-radius: 8px; margin-bottom: 2rem; text-align: center;">
             {% if confirmation %}

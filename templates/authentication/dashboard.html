@@ -1,130 +1,69 @@
-{% extends 'base.html' %}
+{% extends 'guest/guest_base.html' %}
 
 {% block title %}Dashboard - Cebu Hotel{% endblock %}
 
-{% block extra_css %}
-<style>
-    .dashboard-card {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        transition: all 0.3s ease;
-    }
-
-    .dashboard-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-    }
-
-    .dashboard-card h3 {
-        color: #1a1a1a;
-        margin-bottom: 1.5rem;
-        font-size: 1.5rem;
-    }
-
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #f0f0f0;
-    }
-
-    .info-item:last-child {
-        border-bottom: none;
-    }
-
-    .info-label {
-        font-weight: 600;
-        color: #1a1a1a;
-    }
-
-    .info-value {
-        color: #666;
-    }
-
-    .status-badge {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-
-    .status-active {
-        background: #f0fdf4;
-        color: #166534;
-    }
-
-    .status-inactive {
-        background: #fef2f2;
-        color: #991b1b;
-    }
-
-    .status-verified {
-        background: #f0fdf4;
-        color: #166534;
-    }
-
-    .status-pending {
-        background: #fffbeb;
-        color: #b45309;
-    }
-
-    .admin-section {
-        background: #fef3c7;
-        border-left: 4px solid #f59e0b;
-    }
-
-    .grid-2 {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div style="margin-bottom: 3rem;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+<div class="guest-page">
+    <section class="guest-page-header">
         <div>
-            <h1 style="color: #1a1a1a; font-size: 2.5rem; margin-bottom: 0.5rem;">Welcome, {{ user.first_name }} {{ user.last_name }}! 👋</h1>
-            <p style="color: #666; font-size: 1rem;">Your role: <strong>{{ user.get_role_display }}</strong></p>
+            <p class="guest-kicker">Guest Dashboard</p>
+            <h1>Welcome, {{ user.first_name|default:user.username }}</h1>
+            <p>Manage your profile, bookings, recommendations, and account security.</p>
         </div>
-    </div>
+        <a href="{% url 'rooms:list' %}" class="btn btn-primary">
+            <i class="fas fa-calendar-plus"></i> Book a Room
+        </a>
+    </section>
 
-    <div class="grid-2">
-        <!-- Profile Information -->
-        <div class="dashboard-card">
-            <h3>👤 Profile Information</h3>
+    <section class="guest-grid three">
+        <div class="guest-card guest-stat">
+            <span class="guest-stat-icon"><i class="fas fa-user"></i></span>
+            <div>
+                <div class="guest-stat-value">{{ user.get_role_display }}</div>
+                <div class="guest-stat-label">Account Type</div>
+            </div>
+        </div>
+        <div class="guest-card guest-stat">
+            <span class="guest-stat-icon"><i class="fas fa-envelope-circle-check"></i></span>
+            <div>
+                <div class="guest-stat-value">{% if user.is_email_verified %}Verified{% else %}Pending{% endif %}</div>
+                <div class="guest-stat-label">Email Status</div>
+            </div>
+        </div>
+        <div class="guest-card guest-stat">
+            <span class="guest-stat-icon"><i class="fas fa-shield-halved"></i></span>
+            <div>
+                <div class="guest-stat-value">{% if two_fa and two_fa.is_enabled and two_fa.method == 'EMAIL' %}Enabled{% else %}Off{% endif %}</div>
+                <div class="guest-stat-label">Two-Factor Auth</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="guest-grid two">
+        <div class="guest-card">
+            <h3>Profile Information</h3>
             <div class="info-item">
-                <span class="info-label">Name:</span>
+                <span class="info-label">Name</span>
                 <span class="info-value">{{ user.first_name }} {{ user.last_name }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Email:</span>
+                <span class="info-label">Email</span>
                 <span class="info-value">{{ user.email }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Phone:</span>
+                <span class="info-label">Phone</span>
                 <span class="info-value">{{ user.phone_number|default:"Not provided" }}</span>
             </div>
             <div class="info-item">
-                <span class="info-label">Member Since:</span>
+                <span class="info-label">Member Since</span>
                 <span class="info-value">{{ user.created_at|date:"M d, Y" }}</span>
             </div>
         </div>
 
-        <!-- Account Status -->
-        <div class="dashboard-card">
-            <h3>🔐 Account Status</h3>
+        <div class="guest-card">
+            <h3>Account Security</h3>
             <div class="info-item">
-                <span class="info-label">Role:</span>
-                <span class="info-value">{{ user.get_role_display }}</span>
-            </div>
-            <div class="info-item">
-                <span class="info-label">Status:</span>
+                <span class="info-label">Account</span>
                 <span class="info-value">
                     {% if user.is_active %}
                         <span class="status-badge status-active">Active</span>
@@ -134,84 +73,111 @@
                 </span>
             </div>
             <div class="info-item">
-                <span class="info-label">Email Verified:</span>
+                <span class="info-label">Email</span>
                 <span class="info-value">
                     {% if user.is_email_verified %}
-                        <span class="status-badge status-verified">Yes</span>
+                        <span class="status-badge status-active">Verified</span>
                     {% else %}
                         <span class="status-badge status-pending">Pending</span>
                     {% endif %}
                 </span>
             </div>
-            <div class="info-item">
-                <span class="info-label">Admin:</span>
-                <span class="info-value">
-                    {% if is_admin %}
-                        <span class="status-badge status-verified">Yes</span>
-                    {% else %}
-                        <span class="status-badge status-inactive">No</span>
-                    {% endif %}
-                </span>
-            </div>
-        </div>
-    </div>
-
-    {% if is_admin %}
-    <div class="dashboard-card admin-section">
-        <h3>⚙️ Admin Panel</h3>
-        <p style="color: #b45309; margin-bottom: 1rem;">You have administrative privileges. Access the admin dashboard to manage bookings, rooms, and users.</p>
-        <a href="/admin/" class="btn-primary" style="background: #f59e0b; border-color: #f59e0b;">Go to Admin Dashboard</a>
-    </div>
-    {% endif %}
-
-    <!-- Quick Links -->
-    <div class="dashboard-card">
-        <h3>🔗 Quick Links</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-            <a href="{% url 'rooms:list' %}" class="btn-secondary">Browse Rooms</a>
-            {% if not user.is_admin and not user.is_staff_member %}
-            <a href="{% url 'bookings:booking_history' %}" class="btn-secondary">My Bookings</a>
+            <p class="mt-3 mb-3 text-muted">
+                Add an extra layer of security by requiring a verification code from your email when signing in.
+            </p>
+            {% if two_fa and two_fa.is_enabled and two_fa.method == 'EMAIL' %}
+                <form method="post" action="{% url 'auth:toggle_2fa' %}" id="dashboard-disable-2fa-form">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-danger" onclick="openConfirmDialog('Disabling 2FA will make your account less secure. Are you sure you want to continue?', 'dashboard-disable-2fa-form')">
+                        <i class="fas fa-shield-alt"></i> Disable 2FA
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'auth:setup_email_2fa' %}" class="btn btn-primary">
+                    <i class="fas fa-shield-alt"></i> Enable Email OTP 2FA
+                </a>
             {% endif %}
-            <a href="{% url 'recommendations:recommendations' %}" class="btn-secondary">Recommendations</a>
-            <a href="/" class="btn-secondary">Back to Home</a>
         </div>
-    </div>
+    </section>
 
-    <!-- Featured Rooms -->
-    {% if rooms %}
-    <div class="dashboard-card">
-        <h3>🏨 Featured Rooms</h3>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-            {% for room in rooms %}
-            <div style="border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; background: white; transition: all 0.3s ease; cursor: pointer; hover: box-shadow: 0 4px 12px rgba(0,0,0,0.1);" onclick="window.location='{% url 'rooms:detail' room.id %}'">
-                {% if room.image %}
-                    <img src="{{ room.image.url }}" alt="Room {{ room.room_number }}" style="width: 100%; height: 150px; object-fit: cover;">
-                {% else %}
-                    <div style="width: 100%; height: 150px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem;">🏨</div>
-                {% endif %}
-                <div style="padding: 1rem;">
-                    <h4 style="margin-bottom: 0.5rem; font-size: 1rem;">Room {{ room.room_number }}</h4>
-                    <p style="color: #666; font-size: 0.875rem; margin-bottom: 0.5rem;">{{ room.get_room_type_display }}</p>
-                    <p style="color: #1a1a1a; font-weight: 600; margin-bottom: 0.5rem;">₱{{ room.price_per_night|floatformat:2 }}/night</p>
-                    {% if room.amenities %}
-                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                        {% for amenity in room.get_amenities_list|slice:":3" %}
-                            <span style="background: #dbeafe; color: #0369a1; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">{{ amenity }}</span>
-                        {% endfor %}
-                        {% if room.get_amenities_list|length > 3 %}
-                            <span style="background: #f3f4f6; color: #666; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">+{{ room.get_amenities_list|length|add:"-3" }} more</span>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.5rem;">Capacity: {{ room.capacity }} guest{{ room.capacity|pluralize }}</p>
-                </div>
+    <section class="guest-card">
+        <div class="guest-page-header">
+            <div>
+                <p class="guest-kicker">Shortcuts</p>
+                <h2>What would you like to do?</h2>
             </div>
+        </div>
+        <div class="guest-grid three">
+            <a href="{% url 'rooms:list' %}" class="btn btn-secondary"><i class="fas fa-door-open"></i> Browse Rooms</a>
+            <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary"><i class="fas fa-calendar-alt"></i> My Bookings</a>
+            <a href="{% url 'recommendations:recommendations' %}" class="btn btn-secondary"><i class="fas fa-star"></i> Recommendations</a>
+        </div>
+    </section>
+
+    {% if rooms %}
+    <section class="guest-card">
+        <div class="guest-page-header">
+            <div>
+                <p class="guest-kicker">Featured</p>
+                <h2>Available Rooms</h2>
+            </div>
+            <a href="{% url 'rooms:list' %}" class="btn btn-secondary">View all rooms</a>
+        </div>
+        <div class="guest-grid three">
+            {% for room in rooms %}
+            <a href="{% url 'rooms:detail' room.id %}" class="card room-card text-decoration-none overflow-hidden">
+                {% if room.image %}
+                    <img src="{{ room.image.url }}" alt="Room {{ room.room_number }}" class="guest-room-image">
+                {% else %}
+                    <div class="guest-room-image d-flex align-items-center justify-content-center" style="background:#eef2f7;">
+                        <span class="text-muted">No image</span>
+                    </div>
+                {% endif %}
+                <div class="card-body">
+                    <div class="d-flex justify-content-between gap-2 mb-2">
+                        <h5 class="mb-0">Room {{ room.room_number }}</h5>
+                        <span class="badge bg-success">Available</span>
+                    </div>
+                    <p class="text-muted mb-2">{{ room.get_room_type_display }} · {{ room.capacity }} guest{{ room.capacity|pluralize }}</p>
+                    <div class="guest-price">PHP {{ room.price_per_night|floatformat:2 }}/night</div>
+                </div>
+            </a>
             {% endfor %}
         </div>
-        <div style="text-align: center; margin-top: 1.5rem;">
-            <a href="{% url 'rooms:list' %}" style="color: #1a1a1a; text-decoration: underline; font-weight: 500;">View all rooms →</a>
-        </div>
-    </div>
+    </section>
     {% endif %}
 </div>
+
+<div id="confirmModalBackdrop" class="confirm-modal-backdrop" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
+        <h3 id="confirmModalTitle">Disable Two-Factor Authentication</h3>
+        <p id="confirmModalMessage">Disabling 2FA will make your account less secure. Do you want to continue?</p>
+        <div class="confirm-modal-actions">
+            <button type="button" class="confirm-cancel" onclick="closeConfirmDialog()">Cancel</button>
+            <button type="button" class="confirm-submit" onclick="submitConfirmForm()">Yes, disable 2FA</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let confirmTargetForm = null;
+
+    function openConfirmDialog(message, formId) {
+        confirmTargetForm = formId;
+        document.getElementById('confirmModalMessage').textContent = message;
+        document.getElementById('confirmModalBackdrop').classList.add('show');
+        document.getElementById('confirmModalBackdrop').setAttribute('aria-hidden', 'false');
+    }
+
+    function closeConfirmDialog() {
+        document.getElementById('confirmModalBackdrop').classList.remove('show');
+        document.getElementById('confirmModalBackdrop').setAttribute('aria-hidden', 'true');
+        confirmTargetForm = null;
+    }
+
+    function submitConfirmForm() {
+        if (!confirmTargetForm) return;
+        document.getElementById(confirmTargetForm).submit();
+    }
+</script>
 {% endblock %}

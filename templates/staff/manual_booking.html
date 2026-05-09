@@ -1,234 +1,311 @@
-{% extends 'base.html' %}
+{% extends 'staff/staff_base.html' %}
 
-{% block title %}Manual Booking - Staff{% endblock %}
+{% block title %}Manual Booking - Cebu Luxury{% endblock %}
+
+{% block extra_css %}
+<style>
+    .booking-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .panel-card {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid var(--guest-line);
+        border-radius: 8px;
+        box-shadow: var(--guest-shadow);
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--guest-line);
+        background: rgba(238, 242, 247, 0.7);
+    }
+
+    .panel-header h2,
+    .panel-header h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--guest-ink);
+    }
+
+    .panel-body {
+        padding: 1.25rem;
+    }
+
+    .section-block + .section-block {
+        margin-top: 1.25rem;
+    }
+
+    .section-title {
+        margin: 0 0 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--guest-muted);
+    }
+
+    .summary-box {
+        background: #f8fbfb;
+        border: 1px solid var(--guest-line);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .summary-box strong,
+    .summary-box td {
+        color: var(--guest-ink) !important;
+    }
+
+    .summary-box hr {
+        border-color: var(--guest-line);
+        opacity: 1;
+    }
+
+    .info-list {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .info-item {
+        padding: 0.9rem 1rem;
+        border: 1px solid var(--guest-line);
+        border-radius: 8px;
+        background: #f8fbfb;
+    }
+
+    .info-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--guest-muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .info-value {
+        color: var(--guest-ink);
+        font-weight: 700;
+    }
+
+    .actions-row {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin-top: 1.5rem;
+    }
+
+    .input-group-text {
+        background: #eef2f7 !important;
+        border-color: var(--guest-line) !important;
+        color: var(--guest-muted) !important;
+    }
+
+    #reference_group {
+        transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    #reference_group.is-visible {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    #reference_number.is-invalid {
+        border-color: #dc2626 !important;
+    }
+
+    @media (max-width: 992px) {
+        .booking-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3 mb-0">Manual Booking (Walk-in)</h1>
-                <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Dashboard
-                </a>
-            </div>
-        </div>
+    <div class="page-header mb-4">
+        <h1><i class="fas fa-calendar-check"></i> Manual Booking</h1>
+        <p>Create and collect payment for walk-in reservations from one screen.</p>
     </div>
 
-    <!-- Messages -->
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+    <div class="mb-4">
+        <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="booking-layout">
+        <section class="panel-card">
+            <div class="panel-header">
+                <h2>Create New Manual Booking</h2>
             </div>
-        {% endfor %}
-    {% endif %}
+            <div class="panel-body">
+                <form method="post">
+                    {% csrf_token %}
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">Create New Manual Booking</h6>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <!-- Guest Information Section -->
-                        <fieldset class="mb-4">
-                            <legend class="font-weight-bold mb-3">Guest Information</legend>
-                            
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="guest_first_name">First Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="guest_first_name" name="guest_first_name" required>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="guest_last_name">Last Name <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control" id="guest_last_name" name="guest_last_name" required>
-                                </div>
+                    <div class="section-block">
+                        <h3 class="section-title">Guest Information</h3>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="guest_first_name">First Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="guest_first_name" name="guest_first_name" required>
                             </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="guest_email">Email <span class="text-danger">*</span></label>
-                                    <input type="email" class="form-control" id="guest_email" name="guest_email" required>
-                                    <small class="form-text text-muted">Used as unique identifier for guest</small>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="guest_phone">Phone Number <span class="text-danger">*</span></label>
-                                    <input type="tel" class="form-control" id="guest_phone" name="guest_phone" required>
-                                </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="guest_last_name">Last Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="guest_last_name" name="guest_last_name" required>
                             </div>
-                        </fieldset>
+                            <div class="col-md-6">
+                                <label class="form-label" for="guest_email">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="guest_email" name="guest_email" required>
+                                <small class="form-text">Used as the unique guest identifier.</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="guest_phone">Phone Number <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="guest_phone" name="guest_phone" required>
+                            </div>
+                        </div>
+                    </div>
 
-                        <!-- Booking Details Section -->
-                        <fieldset class="mb-4">
-                            <legend class="font-weight-bold mb-3">Booking Details</legend>
-                            
-                            <div class="form-group">
-                                <label for="room">Room <span class="text-danger">*</span></label>
-                                <select class="form-control" id="room" name="room" required>
-                                    <option value="">-- Select a Room --</option>
+                    <div class="section-block">
+                        <h3 class="section-title">Booking Details</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label" for="room">Room <span class="text-danger">*</span></label>
+                                <select class="form-select" id="room" name="room" required>
+                                    <option value="">Select a room</option>
                                     {% for room in available_rooms %}
                                         <option value="{{ room.id }}">
-                                            Room {{ room.room_number }} (₱{{ room.price_per_night }}/night)
+                                            Room {{ room.room_number }} (&#8369;{{ room.price_per_night }}/night)
                                         </option>
                                     {% endfor %}
                                 </select>
                                 {% if not available_rooms %}
-                                    <div class="alert alert-warning mt-2">
+                                    <div class="alert alert-warning mt-3 mb-0">
                                         <i class="fas fa-exclamation-triangle"></i> No available rooms at the moment.
                                     </div>
                                 {% endif %}
                             </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="check_in">Check-In Date <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="check_in" name="check_in" required>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="check_out">Check-Out Date <span class="text-danger">*</span></label>
-                                    <input type="date" class="form-control" id="check_out" name="check_out" required>
-                                </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="check_in">Check-In Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="check_in" name="check_in" required>
                             </div>
-
-                            <div id="pricing-info" class="alert alert-info">
-                                <p class="mb-0">
-                                    <strong>Estimated Total:</strong> <span id="total-price">₱0.00</span>
-                                    <br>
-                                    <small>(<span id="night-count">0</span> nights)</small>
-                                </p>
+                            <div class="col-md-6">
+                                <label class="form-label" for="check_out">Check-Out Date <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="check_out" name="check_out" required>
                             </div>
-                        </fieldset>
+                        </div>
 
-                        <!-- Payment Information Section -->
-                        <fieldset class="mb-4">
-                            <legend class="font-weight-bold mb-3">Payment Collection</legend>
-                            
-                            <div class="form-group">
-                                <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
-                                <select class="form-control" id="payment_method" name="payment_method" required>
-                                    <option value="">-- Select Payment Method --</option>
-                                    <option value="CASH">💵 Cash</option>
-                                    <option value="STRIPE">💳 Card (Credit/Debit)</option>
-                                    <option value="GCASH">📱 GCash</option>
-                                    <option value="BANK_TRANSFER">🏦 Bank Transfer</option>
+                        <div id="pricing-info" class="summary-box mt-3">
+                            <strong>Estimated Total</strong>
+                            <div class="mt-2 d-flex justify-content-between align-items-end flex-wrap gap-2">
+                                <span id="night-count">0</span>
+                                <span id="total-price" class="guest-price">&#8369;0.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <h3 class="section-title">Payment Collection</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label" for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                <select class="form-select" id="payment_method" name="payment_method" required>
+                                    <option value="">Select payment method</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="STRIPE">Card (Credit/Debit)</option>
+                                    <option value="GCASH">GCash</option>
+                                    <option value="BANK_TRANSFER">Bank Transfer</option>
                                 </select>
                             </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="payment_amount">Amount Collected <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">₱</span>
-                                        </div>
-                                        <input type="number" class="form-control" id="payment_amount" name="payment_amount" step="0.01" min="0" required>
-                                    </div>
-                                    <small class="form-text text-muted">Leave empty to auto-fill with total booking amount</small>
+                            <div class="col-md-6">
+                                <label class="form-label" for="payment_amount">Amount Collected <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8369;</span>
+                                    <input type="number" class="form-control" id="payment_amount" name="payment_amount" step="0.01" min="0" required>
                                 </div>
-                                <div class="form-group col-md-6" id="reference_group" style="display:none;">
-                                    <label for="reference_number" id="reference_label">Reference/Receipt Number</label>
-                                    <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="e.g., TRANS123456">
-                                    <small class="form-text text-muted" id="reference_help">Auto-generated if left empty</small>
-                                </div>
+                                <small class="form-text">Leave empty to auto-fill with the booking total.</small>
                             </div>
-
-                            <div id="payment-summary" class="alert alert-secondary">
-                                <strong>Payment Summary:</strong>
-                                <table class="mt-2 small w-100">
-                                    <tr>
-                                        <td>Total Due:</td>
-                                        <td class="text-right"><strong id="summary-total">₱0.00</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Amount Collected:</td>
-                                        <td class="text-right"><strong id="summary-collected">₱0.00</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2"><hr class="my-2"></td>
-                                    </tr>
-                                    <tr id="balance-row" style="display:none;">
-                                        <td><span class="badge badge-warning">Balance Due:</span></td>
-                                        <td class="text-right"><strong id="summary-balance" class="text-warning">₱0.00</strong></td>
-                                    </tr>
-                                    <tr id="paid-row" style="display:none;">
-                                        <td><span class="badge badge-success">Status:</span></td>
-                                        <td class="text-right"><strong id="summary-status" class="text-success">PAID ✓</strong></td>
-                                    </tr>
-                                </table>
+                            <div class="col-md-6" id="reference_group" style="display:none;">
+                                <label class="form-label" for="reference_number" id="reference_label">Reference / Receipt Number</label>
+                                <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="e.g. TRANS123456">
+                                <small class="form-text" id="reference_help">Auto-generated if left empty.</small>
                             </div>
-                        </fieldset>
-
-                        <!-- Action Buttons -->
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-save"></i> Create Booking
-                            </button>
-                            <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary btn-lg">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
 
-        <!-- Info Sidebar -->
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-info text-white">
-                    <h6 class="m-0 font-weight-bold">Instructions</h6>
-                </div>
-                <div class="card-body">
-                    <ol class="small">
-                        <li>Enter guest's full name and contact information</li>
-                        <li>Select an available room from the list</li>
-                        <li>Enter check-in and check-out dates</li>
-                        <li>Review the pricing information (auto-calculated)</li>
-                        <li>Select payment method and enter amount collected</li>
-                        <li>Click "Create Booking" to complete with payment</li>
-                    </ol>
-                </div>
-            </div>
-
-            <div class="card shadow mb-4">
-                <div class="card-header bg-warning text-white">
-                    <h6 class="m-0 font-weight-bold">Payment Reference Info</h6>
-                </div>
-                <div class="card-body small">
-                    <div class="mb-3">
-                        <strong class="text-success">💵 💳 Cash / Card:</strong>
-                        <p class="mb-2">Reference number is auto-generated. No input needed.</p>
+                        <div id="payment-summary" class="summary-box mt-3">
+                            <strong>Payment Summary</strong>
+                            <table class="mt-3 small w-100">
+                                <tr>
+                                    <td>Total Due</td>
+                                    <td class="text-end"><strong id="summary-total">&#8369;0.00</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Amount Collected</td>
+                                    <td class="text-end"><strong id="summary-collected">&#8369;0.00</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><hr class="my-2"></td>
+                                </tr>
+                                <tr id="balance-row" style="display:none;">
+                                    <td><span class="badge bg-warning-subtle text-warning-emphasis">Balance Due</span></td>
+                                    <td class="text-end"><strong id="summary-balance" class="text-warning">&#8369;0.00</strong></td>
+                                </tr>
+                                <tr id="paid-row" style="display:none;">
+                                    <td><span class="badge bg-success-subtle text-success-emphasis">Status</span></td>
+                                    <td class="text-end"><strong id="summary-status" class="text-success">Paid in full</strong></td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
-                    <div>
-                        <strong class="text-warning">📱 🏦 GCash / Bank Transfer:</strong>
-                        <p class="mb-0">Reference number is <strong>REQUIRED</strong>. Enter the transaction reference from the payment receipt.</p>
-                    </div>
-                </div>
-            </div>
 
-            {% if not available_rooms %}
-            <div class="card shadow border-danger">
-                <div class="card-header bg-danger text-white">
-                    <h6 class="m-0 font-weight-bold">No Rooms Available</h6>
-                </div>
-                <div class="card-body small">
-                    <p>All rooms are currently booked. Please check back later or contact management.</p>
+                    <div class="actions-row">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Create Booking
+                        </button>
+                        <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <aside class="panel-card">
+            <div class="panel-header">
+                <h3>Booking Notes</h3>
+            </div>
+            <div class="panel-body">
+                <div class="info-list">
+                    <div class="info-item">
+                        <span class="info-label">Room availability</span>
+                        <div class="info-value">{{ available_rooms|length }} ready for walk-in booking</div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Reference required</span>
+                        <div class="info-value">GCash and bank transfer payments need a transaction code.</div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Payment behavior</span>
+                        <div class="info-value">Cash and card entries can be completed without a manual reference number.</div>
+                    </div>
+                    {% if not available_rooms %}
+                        <div class="info-item">
+                            <span class="info-label">Availability alert</span>
+                            <div class="info-value">All rooms are currently booked. Manual booking is blocked until a room opens up.</div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
-            {% endif %}
-        </div>
+        </aside>
     </div>
 </div>
 
 <script>
-    // Calculate pricing dynamically
     const roomSelect = document.getElementById('room');
     const checkInInput = document.getElementById('check_in');
     const checkOutInput = document.getElementById('check_out');
@@ -238,162 +315,115 @@
     const referenceGroup = document.getElementById('reference_group');
     const referenceLabel = document.getElementById('reference_label');
     const referenceHelp = document.getElementById('reference_help');
-    
+
     let currentTotal = 0;
-    
-    // Payment methods that require external reference
+
     const REFERENCE_REQUIRED_METHODS = ['GCASH', 'BANK_TRANSFER'];
     const REFERENCE_AUTO_METHODS = ['CASH', 'STRIPE'];
-    
+
     function updateReferenceFieldState() {
         const selectedMethod = paymentMethodSelect.value;
-        
+
         if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
-            // Show field for GCash and Bank Transfer
             referenceGroup.style.display = 'block';
+            referenceGroup.classList.add('is-visible');
             referenceNumberInput.required = true;
             referenceNumberInput.classList.add('is-invalid');
-            
-            // Update label and help text based on payment method
+
             if (selectedMethod === 'GCASH') {
                 referenceLabel.innerHTML = 'GCash Reference Number <span class="text-danger">*</span>';
-                referenceHelp.textContent = 'Enter the GCash reference number from the transaction receipt (e.g., G123456789ABC)';
-                referenceNumberInput.placeholder = 'e.g., G123456789ABC';
-            } else if (selectedMethod === 'BANK_TRANSFER') {
-                referenceLabel.innerHTML = 'Bank Transfer Reference/Confirmation Code <span class="text-danger">*</span>';
-                referenceHelp.textContent = 'Enter the bank transfer reference number or confirmation code for verification';
-                referenceNumberInput.placeholder = 'e.g., TRANSFER123456';
+                referenceHelp.textContent = 'Enter the GCash reference from the payment receipt.';
+                referenceNumberInput.placeholder = 'e.g. G123456789ABC';
+            } else {
+                referenceLabel.innerHTML = 'Bank Transfer Reference Code <span class="text-danger">*</span>';
+                referenceHelp.textContent = 'Enter the bank transfer confirmation code for verification.';
+                referenceNumberInput.placeholder = 'e.g. TRANSFER123456';
             }
         } else if (REFERENCE_AUTO_METHODS.includes(selectedMethod)) {
-            // Hide field for Cash and Card - will be auto-generated
             referenceGroup.style.display = 'none';
+            referenceGroup.classList.remove('is-visible');
             referenceNumberInput.required = false;
             referenceNumberInput.classList.remove('is-invalid');
-            referenceNumberInput.value = ''; // Clear the field
-            referenceLabel.innerHTML = 'Reference/Receipt Number';
-            referenceHelp.textContent = 'Auto-generated if left empty';
+            referenceNumberInput.value = '';
+            referenceLabel.innerHTML = 'Reference / Receipt Number';
+            referenceHelp.textContent = 'Auto-generated if left empty.';
         } else {
-            // Default: hide field
             referenceGroup.style.display = 'none';
+            referenceGroup.classList.remove('is-visible');
             referenceNumberInput.required = false;
             referenceNumberInput.classList.remove('is-invalid');
         }
     }
-    
+
     function updatePricing() {
         const roomOption = roomSelect.options[roomSelect.selectedIndex];
-        const roomText = roomOption.text || '';
-        const priceMatch = roomText.match(/₱(\d+(?:\.\d{2})?)/);
+        const roomText = roomOption ? roomOption.text : '';
+        const priceMatch = roomText.match(/₱(\d+(?:\.\d{2})?)/) || roomText.match(/&#8369;(\d+(?:\.\d{2})?)/);
         const pricePerNight = priceMatch ? parseFloat(priceMatch[1]) : 0;
-        
+
         const checkIn = new Date(checkInInput.value);
         const checkOut = new Date(checkOutInput.value);
-        
-        if (checkOut > checkIn) {
+
+        if (checkOut > checkIn && pricePerNight > 0) {
             const nights = Math.ceil((checkOut - checkIn) / (1000 * 60 * 60 * 24));
             const total = pricePerNight * nights;
-            
+
             currentTotal = total;
-            document.getElementById('night-count').textContent = nights;
-            document.getElementById('total-price').textContent = '₱' + total.toFixed(2);
-            
-            // Auto-fill payment amount if not already set
+            document.getElementById('night-count').textContent = `${nights} night${nights === 1 ? '' : 's'}`;
+            document.getElementById('total-price').textContent = `₱${total.toFixed(2)}`;
+
             if (!paymentAmountInput.value) {
                 paymentAmountInput.value = total.toFixed(2);
             }
-            
+
             updatePaymentSummary();
         }
     }
-    
+
     function updatePaymentSummary() {
         const totalDue = currentTotal;
         const collected = parseFloat(paymentAmountInput.value) || 0;
         const balance = totalDue - collected;
-        
-        document.getElementById('summary-total').textContent = '₱' + totalDue.toFixed(2);
-        document.getElementById('summary-collected').textContent = '₱' + collected.toFixed(2);
-        
+
+        document.getElementById('summary-total').textContent = `₱${totalDue.toFixed(2)}`;
+        document.getElementById('summary-collected').textContent = `₱${collected.toFixed(2)}`;
+
         const balanceRow = document.getElementById('balance-row');
         const paidRow = document.getElementById('paid-row');
-        
-        if (collected >= totalDue) {
+
+        if (collected >= totalDue && totalDue > 0) {
             balanceRow.style.display = 'none';
             paidRow.style.display = 'table-row';
-            document.getElementById('summary-status').textContent = 'PAID ✓';
-            document.getElementById('summary-status').className = 'text-success';
         } else if (collected > 0) {
             balanceRow.style.display = 'table-row';
             paidRow.style.display = 'none';
-            document.getElementById('summary-balance').textContent = '₱' + balance.toFixed(2);
-            document.getElementById('summary-balance').className = 'text-warning';
+            document.getElementById('summary-balance').textContent = `₱${balance.toFixed(2)}`;
         } else {
-            balanceRow.style.display = 'table-row';
+            balanceRow.style.display = totalDue > 0 ? 'table-row' : 'none';
             paidRow.style.display = 'none';
-            document.getElementById('summary-balance').textContent = '₱' + totalDue.toFixed(2);
-            document.getElementById('summary-balance').className = 'text-danger';
+            document.getElementById('summary-balance').textContent = `₱${totalDue.toFixed(2)}`;
         }
     }
-    
-    // Event listeners
+
     roomSelect.addEventListener('change', updatePricing);
     checkInInput.addEventListener('change', updatePricing);
     checkOutInput.addEventListener('change', updatePricing);
     paymentAmountInput.addEventListener('input', updatePaymentSummary);
     paymentMethodSelect.addEventListener('change', updateReferenceFieldState);
 
-    // Set minimum check-in date to today
     const today = new Date().toISOString().split('T')[0];
     checkInInput.setAttribute('min', today);
     checkOutInput.setAttribute('min', today);
-    
-    // Validate form submission - ensure reference is provided if required
-    document.querySelector('form').addEventListener('submit', function(e) {
+
+    document.querySelector('form').addEventListener('submit', function (event) {
         const selectedMethod = paymentMethodSelect.value;
-        
-        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
-            if (!referenceNumberInput.value.trim()) {
-                e.preventDefault();
-                referenceNumberInput.classList.add('is-invalid');
-                alert(`Reference number is required for ${selectedMethod === 'GCASH' ? 'GCash' : 'Bank Transfer'} payments.`);
-                referenceNumberInput.focus();
-                return false;
-            }
+
+        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod) && !referenceNumberInput.value.trim()) {
+            event.preventDefault();
+            referenceNumberInput.classList.add('is-invalid');
+            alert(`Reference number is required for ${selectedMethod === 'GCASH' ? 'GCash' : 'Bank Transfer'} payments.`);
+            referenceNumberInput.focus();
         }
     });
 </script>
-
-<style>
-    .text-danger { color: #e74c3c; }
-    fieldset { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
-    legend { font-size: 14px; }
-    
-    /* Styling for reference field when shown */
-    #reference_group {
-        transition: all 0.3s ease-in-out;
-    }
-    
-    #reference_group.visible {
-        animation: slideIn 0.3s ease-in-out;
-    }
-    
-    @keyframes slideIn {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    #reference_number.is-invalid {
-        border-color: #e74c3c;
-    }
-    
-    #reference_number:focus {
-        box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
-    }
-</style>
 {% endblock %}

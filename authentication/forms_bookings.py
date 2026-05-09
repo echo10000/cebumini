@@ -239,7 +239,7 @@ class ContactForm(forms.Form):
         label='Message'
     )
     
-    def save(self):
+    def save(self, guest=None):
         """Save contact message to database"""
         from .models import ContactMessage
         
@@ -250,6 +250,8 @@ class ContactForm(forms.Form):
             subject=self.cleaned_data['subject'],
             message=self.cleaned_data['message'],
         )
+        if guest:
+            contact_msg.guest = guest
         contact_msg.save()
         return contact_msg
 

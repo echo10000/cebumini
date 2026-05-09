@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
@@ -28,6 +30,16 @@ class RegisterForm(UserCreationForm):
         widget=forms.TextInput(attrs={
             'class': 'form-control',
             'placeholder': 'Last Name',
+        })
+    )
+    phone = forms.CharField(
+        max_length=15,
+        required=True,
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'e.g. 09123456789',
+            'type': 'tel',
+            'maxlength': '15',
         })
     )
     password1 = forms.CharField(
@@ -65,6 +77,16 @@ class RegisterForm(UserCreationForm):
             raise ValidationError('This email is already registered.')
         return email
 
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone', '').strip()
+        if not phone:
+            raise ValidationError('Phone number is required.')
+
+        phone_pattern = re.compile(r'^(\+63|09)\d{9,10}$')
+        if not phone_pattern.match(phone):
+            raise ValidationError('Please enter a valid Philippine phone number.')
+        return phone
+
     def clean_accept_terms(self):
         accept_terms = self.cleaned_data.get('accept_terms')
         if not accept_terms:
@@ -74,6 +96,7 @@ class RegisterForm(UserCreationForm):
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data.get('email', '')
+        user.phone_number = self.cleaned_data.get('phone', '')
         # Auto-generate username from email for internal use
         user.username = self.cleaned_data.get('email', '').split('@')[0]
         # Ensure unique username

@@ -55,7 +55,8 @@
     }
     
     .luxury-info-header {
-        background: #2563eb;
+        background: #111827;
+        border-left: 4px solid #f59e0b;
         padding: 1rem 1.5rem;
         color: #ffffff;
         font-family: 'Playfair Display', serif;
@@ -67,6 +68,7 @@
     }
     
     .luxury-info-header i {
+        color: #c9a84c;
         font-size: 1.5rem;
     }
     
@@ -147,7 +149,8 @@
     }
     
     .payment-action-header {
-        background: #2563eb;
+        background: #111827;
+        border-left: 4px solid #f59e0b;
         padding: 1rem 1.5rem;
         color: #ffffff;
         font-family: 'Playfair Display', serif;
@@ -283,7 +286,8 @@
     }
     
     .modal-header {
-        background: #2563eb !important;
+        background: #111827 !important;
+        border-left: 4px solid #f59e0b;
         color: #ffffff;
         border: none !important;
         padding: 1.5rem;
@@ -476,7 +480,7 @@
                     Payment Action
                 </div>
                 <div class="payment-action-body">
-                    <form method="post" id="paymentForm">
+                    <form method="post" id="paymentForm" action="">
                         {% csrf_token %}
                         <!-- Hidden input to store the action value for JavaScript submission -->
                         <input type="hidden" name="action" id="actionInput" value="">
@@ -485,10 +489,10 @@
                             <textarea name="notes" id="notes" class="form-control" rows="3" placeholder="Add any notes about this payment..."></textarea>
                         </div>
                         <div class="action-buttons">
-                            <button type="submit" class="btn-action btn-approve" id="approveBtn" data-action="approve">
+                            <button type="submit" name="action" value="approve" class="btn-action btn-approve" id="approveBtn">
                                 <i class="fas fa-check"></i> Approve Payment
                             </button>
-                            <button type="submit" class="btn-action btn-reject" id="rejectBtn" data-action="reject">
+                            <button type="submit" name="action" value="reject" class="btn-action btn-reject" id="rejectBtn">
                                 <i class="fas fa-times"></i> Reject Payment
                             </button>
                             <a href="{% url 'admin_panel:payment_management' %}" class="btn-action btn-cancel">
@@ -523,8 +527,8 @@
                 <p class="text-muted mb-0">Amount: <strong>₱<span id="modalAmount">{{ payment.amount|floatformat:2 }}</span></strong></p>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="redirectToPayments()">
-                    <i class="fas fa-check"></i> OK
+                <button type="button" class="btn btn-primary" id="successOkBtn" data-dismiss="modal" disabled>
+                    <i class="fas fa-check"></i> Processing...
                 </button>
             </div>
         </div>
@@ -551,62 +555,94 @@
                 <p class="text-muted mb-0">The guest will be notified of the rejection.</p>
             </div>
             <div class="modal-footer border-0">
-                <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="redirectToPayments()">
-                    <i class="fas fa-check"></i> OK
+                <button type="button" class="btn btn-primary" id="rejectionOkBtn" data-dismiss="modal" disabled>
+                    <i class="fas fa-check"></i> Processing...
                 </button>
             </div>
         </div>
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-    $(document).ready(function() {
-        const form = $('#paymentForm');
-        const actionInput = $('#actionInput');
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('paymentForm');
+        let submitting = false;
+        let action = null;
         
-        // Handle form submission
-        form.on('submit', function(e) {
+        if (!form) {
+            console.error('Form not found!');
+            return;
+        }
+        
+        console.log('Payment form found, setting up handlers');
+        
+        // Handle approve button
+        document.getElementById('approveBtn').addEventListener('click', function(e) {
+            if (submitting) return;
+            
             e.preventDefault();
+            console.log('Approve button clicked');
+            action = 'approve';
             
-            // Get the action from the clicked button
-            const clickedButton = $(this).find(':focus') || $(this).find('button[type="submit"]:last');
-            const action = clickedButton.data('action');
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('successModal'));
+            modal.show();
+            console.log('Success modal shown');
             
-            if (!action) {
-                return;
-            }
-            
-            // Set the action value in the hidden input
-            actionInput.val(action);
-            
-            if (action === 'approve') {
-                // Show success modal
-                $('#successModal').modal('show');
+            // Submit form after modal animation
+            setTimeout(function() {
+                console.log('Submitting form with action:', action);
+                submitting = true;
                 
-                // Submit form after modal delay
-                setTimeout(function() {
-                    form.off('submit').submit();
-                }, 1500);
-            } else if (action === 'reject') {
-                // Show rejection modal
-                $('#rejectionModal').modal('show');
+                // Set the action value in the hidden input
+                document.getElementById('actionInput').value = action;
                 
-                // Submit form after modal delay
+                // Submit the form
+                form.submit();
+                
+                // Wait a bit then navigate to dashboard
                 setTimeout(function() {
-                    form.off('submit').submit();
-                }, 1500);
-            }
+                    console.log('Navigating to dashboard');
+                    window.location.href = '{% url "admin_panel:dashboard" %}';
+                }, 500);
+            }, 1500);
         });
         
-        // Track which button was clicked
-        form.find('button[type="submit"]').on('click', function() {
-            $(this).focus();
+        // Handle reject button
+        document.getElementById('rejectBtn').addEventListener('click', function(e) {
+            if (submitting) return;
+            
+            e.preventDefault();
+            console.log('Reject button clicked');
+            action = 'reject';
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('rejectionModal'));
+            modal.show();
+            console.log('Rejection modal shown');
+            
+            // Submit form after modal animation
+            setTimeout(function() {
+                console.log('Submitting form with action:', action);
+                submitting = true;
+                
+                // Set the action value in the hidden input
+                document.getElementById('actionInput').value = action;
+                
+                // Submit the form
+                form.submit();
+                
+                // Wait a bit then navigate to dashboard
+                setTimeout(function() {
+                    console.log('Navigating to dashboard');
+                    window.location.href = '{% url "admin_panel:dashboard" %}';
+                }, 500);
+            }, 1500);
         });
     });
     
     function redirectToPayments() {
-        window.location.href = '{% url "admin_panel:payment_management" %}';
+        window.location.href = '{% url "admin_panel:dashboard" %}';
     }
 </script>
 

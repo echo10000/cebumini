@@ -1,153 +1,296 @@
-{% extends 'base.html' %}
+{% extends 'staff/staff_base.html' %}
 
-{% block title %}Staff Reports - Staff Dashboard{% endblock %}
+{% block title %}Staff Reports - Cebu Luxury{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
-    .staff-nav {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        margin-bottom: 2rem;
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.5rem;
     }
-    
-    .staff-nav .navbar-brand {
-        color: white;
-        font-weight: 700;
-    }
-    
-    .staff-nav .nav-link {
-        color: rgba(255,255,255,0.8);
-        margin-right: 1rem;
-    }
-    
-    .staff-nav .nav-link:hover {
-        color: white;
-    }
-    
+
     .report-card {
-        background: white;
-        border-radius: 0.5rem;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid var(--guest-line);
+        border-radius: 8px;
         padding: 1.5rem;
-        margin-bottom: 1rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: var(--guest-shadow);
+        height: 100%;
     }
-    
+
     .report-card h5 {
-        color: #333;
-        font-weight: 600;
+        color: var(--guest-ink);
+        font-weight: 800;
         margin-bottom: 1rem;
-        border-bottom: 2px solid #667eea;
-        padding-bottom: 0.5rem;
+        font-size: 1rem;
     }
-    
+
     .stat-row {
         display: flex;
         justify-content: space-between;
-        padding: 0.8rem 0;
-        border-bottom: 1px solid #f0f0f0;
+        gap: 1rem;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--guest-line);
     }
-    
+
     .stat-row:last-child {
         border-bottom: none;
+        padding-bottom: 0;
     }
-    
+
     .stat-label {
-        color: #666;
-        font-weight: 600;
-    }
-    
-    .stat-value {
-        color: #667eea;
+        color: var(--guest-muted);
         font-weight: 700;
-        font-size: 1.2rem;
+        font-size: 0.92rem;
+    }
+
+    .stat-value {
+        color: var(--guest-brand-dark);
+        font-weight: 850;
+        font-size: 1rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .info-box {
+        background: #f8fbfb;
+        border: 1px solid var(--guest-line);
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    .info-box-label {
+        color: var(--guest-muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+        margin-bottom: 0.45rem;
+    }
+
+    .info-box-value {
+        color: var(--guest-brand-dark);
+        font-size: 1.8rem;
+        font-weight: 850;
+        line-height: 1.1;
+    }
+
+    .key-insights {
+        display: grid;
+        gap: 0.85rem;
+    }
+
+    .key-insight-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.9rem 1rem;
+        border-radius: 8px;
+        border: 1px solid var(--guest-line);
+        background: #f8fbfb;
+    }
+
+    .key-insight-item i {
+        margin-top: 0.15rem;
+    }
+
+    .insight-success {
+        color: var(--guest-success);
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .insight-warning {
+        color: var(--guest-warning);
+        background: #fffbeb;
+        border-color: #fde68a;
+    }
+
+    .insight-danger {
+        color: var(--guest-danger);
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    .insight-copy strong {
+        display: block;
+        margin-bottom: 0.2rem;
+    }
+
+    @media (max-width: 992px) {
+        .metrics-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
+{% endblock %}
 
-<nav class="navbar navbar-expand-lg navbar-dark staff-nav">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'staff:dashboard' %}">
-            <i class="fas fa-users-cog"></i> Staff Dashboard
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#staffNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="staffNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:dashboard' %}">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:room_status' %}">
-                        <i class="fas fa-door-open"></i> Rooms
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:check_in_checkout' %}">
-                        <i class="fas fa-sign-in-alt"></i> Check-In/Out
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:guest_services' %}">
-                        <i class="fas fa-headset"></i> Guest Services
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'staff:reports' %}">
-                        <i class="fas fa-file-alt"></i> Reports
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
+{% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-3">
-        <div class="col-12">
-            <h2><i class="fas fa-file-alt"></i> Staff Reports</h2>
-            <p class="text-muted">View operational reports and statistics</p>
-        </div>
+    <div class="page-header mb-4">
+        <h1><i class="fas fa-chart-bar"></i> Staff Reports</h1>
+        <p>Performance, occupancy, and guest communications at a glance.</p>
     </div>
-    
-    <div class="row">
-        <div class="col-lg-6">
-            <div class="report-card">
-                <h5><i class="fas fa-chart-bar"></i> Booking Statistics (Last 30 Days)</h5>
-                <div class="stat-row">
-                    <span class="stat-label">Total Bookings:</span>
-                    <span class="stat-value">{{ total_bookings }}</span>
+
+    <div class="metrics-grid">
+        <section class="report-card">
+            <h5><i class="fas fa-chart-line"></i> Booking Statistics (Last 30 Days)</h5>
+            <div class="stat-row">
+                <span class="stat-label">Total Bookings</span>
+                <span class="stat-value">{{ total_bookings }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Completed</span>
+                <span class="stat-value">{{ completed_bookings }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Completion Rate</span>
+                <span class="stat-value">
+                    {% if total_bookings > 0 %}
+                        {{ percentage }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Pending</span>
+                <span class="stat-value">{{ pending_bookings }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Cancelled</span>
+                <span class="stat-value">{{ cancelled_bookings }}</span>
+            </div>
+        </section>
+
+        <section class="report-card">
+            <h5><i class="fas fa-grid-2"></i> Report Information</h5>
+            <div class="info-grid">
+                <div class="info-box">
+                    <div class="info-box-label">Avg Duration</div>
+                    <div class="info-box-value">{{ avg_duration }}</div>
+                    <small class="text-muted">nights/booking</small>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Completed:</span>
-                    <span class="stat-value">{{ completed_bookings }}</span>
+                <div class="info-box">
+                    <div class="info-box-label">Occupancy Rate</div>
+                    <div class="info-box-value">{{ occupancy_rate }}%</div>
+                    <small class="text-muted">current</small>
                 </div>
-                <div class="stat-row">
-                    <span class="stat-label">Completion Rate:</span>
-                    <span class="stat-value">
-                        {% if total_bookings > 0 %}
-                            {{ percentage|floatformat:1 }}%
-                        {% else %}
-                            N/A
-                        {% endif %}
-                    </span>
+                <div class="info-box">
+                    <div class="info-box-label">Revenue</div>
+                    <div class="info-box-value">&#8369;{{ revenue|floatformat:0 }}</div>
+                    <small class="text-muted">last 30 days</small>
+                </div>
+                <div class="info-box">
+                    <div class="info-box-label">Unread Messages</div>
+                    <div class="info-box-value">{{ unread_messages }}</div>
+                    <small class="text-muted">from guests</small>
+                </div>
+                <div class="info-box">
+                    <div class="info-box-label">Unreplied</div>
+                    <div class="info-box-value">{{ unreplied_messages }}</div>
+                    <small class="text-muted">messages</small>
                 </div>
             </div>
-        </div>
-        
-        <div class="col-lg-6">
-            <div class="report-card">
-                <h5><i class="fas fa-info-circle"></i> Report Information</h5>
-                <p class="text-muted">Detailed reports and analytics coming soon. This section will include:</p>
-                <ul class="text-muted" style="font-size: 0.9rem;">
-                    <li>Occupancy rates</li>
-                    <li>Room turnover metrics</li>
-                    <li>Guest satisfaction ratings</li>
-                    <li>Staff performance metrics</li>
-                    <li>Maintenance logs</li>
-                </ul>
-            </div>
-        </div>
+        </section>
     </div>
+
+    <section class="report-card mt-4">
+        <h5><i class="fas fa-lightbulb"></i> Key Insights</h5>
+        <div class="key-insights">
+            {% if percentage >= 80 %}
+                <div class="key-insight-item insight-success">
+                    <i class="fas fa-circle-check"></i>
+                    <div class="insight-copy">
+                        <strong>Strong Performance</strong>
+                        <span>{{ percentage }}% completion rate indicates solid booking reliability.</span>
+                    </div>
+                </div>
+            {% elif percentage >= 60 %}
+                <div class="key-insight-item insight-warning">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <div class="insight-copy">
+                        <strong>Monitor Completion</strong>
+                        <span>{{ percentage }}% completion rate suggests a review of pending bookings.</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="key-insight-item insight-danger">
+                    <i class="fas fa-triangle-exclamation"></i>
+                    <div class="insight-copy">
+                        <strong>Action Needed</strong>
+                        <span>{{ percentage }}% completion rate is below target and needs follow-up.</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if occupancy_rate >= 80 %}
+                <div class="key-insight-item insight-success">
+                    <i class="fas fa-bed"></i>
+                    <div class="insight-copy">
+                        <strong>High Occupancy</strong>
+                        <span>{{ occupancy_rate }}% occupancy shows excellent room utilization.</span>
+                    </div>
+                </div>
+            {% elif occupancy_rate >= 50 %}
+                <div class="key-insight-item insight-warning">
+                    <i class="fas fa-bed"></i>
+                    <div class="insight-copy">
+                        <strong>Moderate Occupancy</strong>
+                        <span>{{ occupancy_rate }}% occupancy leaves some room inventory available.</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="key-insight-item insight-warning">
+                    <i class="fas fa-bed"></i>
+                    <div class="insight-copy">
+                        <strong>Low Occupancy</strong>
+                        <span>{{ occupancy_rate }}% occupancy may benefit from promotional activity.</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if avg_duration >= 3 %}
+                <div class="key-insight-item insight-success">
+                    <i class="fas fa-moon"></i>
+                    <div class="insight-copy">
+                        <strong>Extended Stays</strong>
+                        <span>Average stay length is {{ avg_duration }} nights, which points to longer visits.</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="key-insight-item insight-warning">
+                    <i class="fas fa-moon"></i>
+                    <div class="insight-copy">
+                        <strong>Short Stays</strong>
+                        <span>Average stay length is {{ avg_duration }} nights, closer to short-visit patterns.</span>
+                    </div>
+                </div>
+            {% endif %}
+
+            {% if unread_messages > 0 or unreplied_messages > 0 %}
+                <div class="key-insight-item insight-danger">
+                    <i class="fas fa-envelope-open-text"></i>
+                    <div class="insight-copy">
+                        <strong>Messages Pending</strong>
+                        <span>{{ unread_messages }} unread and {{ unreplied_messages }} unreplied messages still need attention.</span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="key-insight-item insight-success">
+                    <i class="fas fa-envelope-circle-check"></i>
+                    <div class="insight-copy">
+                        <strong>Inbox Up to Date</strong>
+                        <span>No unread or unreplied guest messages are waiting.</span>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </section>
 </div>
 {% endblock %}

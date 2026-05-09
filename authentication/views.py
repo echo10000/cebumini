@@ -1,10 +1,18 @@
+from urllib.parse import urlencode
+
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.urls import reverse
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import RegisterForm, LoginForm
-from .models import TermsAndConditions
+from .models import Room, TermsAndConditions, TwoFactorAuth
+from .decorators import guest_required
+from .otp_utils import send_otp_email, verify_otp
 
 User = get_user_model()
 
@@ -13,7 +21,8 @@ def allauth_login_redirect(request):
     """Redirect allauth login to our custom login page"""
     next_url = request.GET.get('next', '')
     if next_url:
-        return redirect(f"auth:login?next={next_url}")
+        login_url = reverse('auth:login')
+        return redirect(f"{login_url}?{urlencode({'next': next_url})}")
     return redirect('auth:login')
 
 @require_http_methods(["GET"])
@@ -100,11 +109,16 @@ def login_view(request):
                 # Check if 2FA is enabled
                 try:
                     two_fa = user.two_factor_auth
-                    if two_fa.is_enabled and two_fa.is_verified:
-                        # Store user id in session for 2FA verification
-                        request.session['2fa_user_id'] = user.id
-                        request.session['2fa_remember_me'] = remember_me
-                        return redirect('auth:verify_2fa_login')
+                    if two_fa.is_enabled:
+                        if two_fa.method == 'EMAIL':
+                            send_otp_email(user)
+                            request.session['email_otp_user_id'] = user.id
+                            request.session['email_otp_remember_me'] = remember_me
+                            return redirect('auth:verify_otp')
+                        elif two_fa.method == 'TOTP' and two_fa.is_verified:
+                            request.session['2fa_user_id'] = user.id
+                            request.session['2fa_remember_me'] = remember_me
+                            return redirect('auth:verify_2fa_login')
                 except TwoFactorAuth.DoesNotExist:
                     pass
                 
@@ -115,11 +129,17 @@ def login_view(request):
                 if remember_me:
                     request.session.set_expiry(86400 * 30)  # 30 days
                 
-                messages.success(request, f'Welcome back, {user.first_name}!')
-                
                 # Redirect to terms acceptance if not yet accepted
                 if not user.has_accepted_terms():
                     return redirect('auth:accept_terms')
+
+                next_url = request.GET.get('next') or request.POST.get('next')
+                if next_url and url_has_allowed_host_and_scheme(
+                    next_url,
+                    allowed_hosts={request.get_host()},
+                    require_https=request.is_secure(),
+                ):
+                    return redirect(next_url)
                 
                 return redirect('auth:dashboard')
             else:
@@ -193,7 +213,6 @@ def accept_terms_view(request):
 def logout_view(request):
     """User logout view"""
     logout(request)
-    messages.success(request, 'You have been logged out successfully.')
     return redirect('auth:login')
 
 
@@ -212,16 +231,26 @@ def dashboard_view(request):
     # Redirect staff users to staff dashboard
     if request.user.is_staff_member():
         return redirect('staff:dashboard')
+
+    # Redirect manager users to manager dashboard
+    if request.user.is_manager():
+        return redirect('auth:manager_dashboard')
     
     # Get available rooms for guest dashboard
     from .models import Room
     rooms = Room.objects.filter(is_available=True)[:6]  # Show 6 featured rooms
     
     # Regular guest dashboard
+    try:
+        two_fa = request.user.two_factor_auth
+    except TwoFactorAuth.DoesNotExist:
+        two_fa = None
+
     context = {
         'user': request.user,
         'is_admin': False,
         'rooms': rooms,
+        'two_fa': two_fa,
     }
     return render(request, 'authentication/dashboard.html', context)
 
@@ -235,10 +264,10 @@ def contact_view(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            contact = form.save(commit=False)
-            if request.user.is_authenticated:
-                contact.guest = request.user
-            contact.save()
+            guest = request.user if request.user.is_authenticated else None
+            contact = form.save(guest=guest)
+            # Send confirmation email
+            contact.send_confirmation_email()
             messages.success(request, 'Thank you! We will get back to you soon.')
             return redirect('home')
     else:
@@ -248,10 +277,64 @@ def contact_view(request):
     return render(request, 'authentication/contact.html', context)
 
 
-@require_http_methods(["GET"])
+@require_http_methods(["POST"])
+def contact_form_api(request):
+    """API endpoint for contact form submissions - returns JSON for AJAX requests"""
+    from .forms_bookings import ContactForm
+    
+    form = ContactForm(request.POST)
+    if form.is_valid():
+        # Pass authenticated user as guest
+        guest = request.user if request.user.is_authenticated else None
+        contact = form.save(guest=guest)
+        
+        # Send confirmation email to guest
+        contact.send_confirmation_email()
+        
+        return JsonResponse({
+            'success': True,
+            'message': 'Thank you for your message! We will get back to you soon.',
+            'message_type': 'success'
+        })
+    else:
+        # Return form errors
+        errors = form.errors
+        error_list = []
+        for field, field_errors in errors.items():
+            for error in field_errors:
+                error_list.append(f"{field}: {error}")
+        
+        return JsonResponse({
+            'success': False,
+            'message': 'Please fix the following errors:',
+            'errors': error_list,
+            'message_type': 'error'
+        }, status=400)
+
+
+@require_http_methods(["GET", "POST"])
 def home_view(request):
     """Home page - Modern luxury hotel landing page"""
-    return render(request, 'hotel_landing.html')
+    from .forms_bookings import ContactForm
+    
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            guest = request.user if request.user.is_authenticated else None
+            contact = form.save(guest=guest)
+            # Send confirmation email
+            contact.send_confirmation_email()
+            messages.success(request, 'Thank you! We will get back to you soon.')
+            return redirect('home')
+    else:
+        form = ContactForm()
+    
+    featured_rooms = Room.objects.filter(is_available=True).order_by('room_number')[:3]
+    context = {
+        'form': form,
+        'featured_rooms': featured_rooms,
+    }
+    return render(request, 'hotel_landing.html', context)
 
 
 @login_required(login_url='auth:login')
@@ -381,8 +464,8 @@ def verify_2fa_login(request):
                     )
                     
                     del request.session['2fa_user_id']
-                    messages.success(request, 'You have been logged in successfully!')
-                    return redirect('auth:dashboard')
+                    request.session['otp_verified_notice'] = 'Two-factor authentication verified successfully. Redirecting you to your dashboard.'
+                    return redirect('auth:otp_success')
                 
                 # Check backup codes
                 elif two_fa.use_backup_code(code):
@@ -395,8 +478,8 @@ def verify_2fa_login(request):
                     )
                     
                     del request.session['2fa_user_id']
-                    messages.warning(request, 'Backup code used. Please save your remaining backup codes.')
-                    return redirect('auth:setup_2fa')
+                    request.session['otp_verified_notice'] = 'Backup code verified. Redirecting you to the 2FA setup page to manage your backup codes.'
+                    return redirect('auth:otp_success')
                 else:
                     messages.error(request, 'Invalid code or backup code.')
         
@@ -404,6 +487,121 @@ def verify_2fa_login(request):
             pass
     
     return render(request, 'authentication/verify_2fa.html', {'user': user})
+
+
+@require_http_methods(["GET", "POST"])
+def verify_otp_view(request):
+    """Verify email OTP during login."""
+    user_id = request.session.get('email_otp_user_id')
+    if not user_id:
+        return redirect('auth:login')
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return redirect('auth:login')
+
+    if request.method == 'POST':
+        otp_code = request.POST.get('otp_code', '').strip()
+        if verify_otp(user, otp_code):
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            if request.session.get('email_otp_remember_me'):
+                request.session.set_expiry(86400 * 30)
+            request.session.pop('email_otp_user_id', None)
+            request.session.pop('email_otp_remember_me', None)
+            request.session['otp_verified_notice'] = 'Email OTP verified successfully. Redirecting you to your dashboard.'
+            return redirect('auth:otp_success')
+        messages.error(request, 'Invalid or expired code. Please try again.')
+
+    masked_email = None
+    if user.email:
+        local, _, domain = user.email.partition('@')
+        if len(local) > 2:
+            masked_local = local[0] + '*' * (len(local) - 2) + local[-1]
+        else:
+            masked_local = local[0] + '*'
+        masked_email = f"{masked_local}@{domain}"
+
+    context = {
+        'user': user,
+        'masked_email': masked_email,
+    }
+    return render(request, 'authentication/verify_otp.html', context)
+
+
+@login_required(login_url='auth:login')
+@require_http_methods(["GET", "POST"])
+def setup_email_2fa(request):
+    """Dedicated onboarding flow for email OTP 2FA."""
+    try:
+        two_fa = request.user.two_factor_auth
+    except TwoFactorAuth.DoesNotExist:
+        two_fa = TwoFactorAuth.objects.create(user=request.user)
+
+    if request.method == 'POST':
+        two_fa.is_enabled = True
+        two_fa.is_verified = True
+        two_fa.method = 'EMAIL'
+        two_fa.save()
+        messages.success(request, 'Email OTP two-factor authentication has been enabled.')
+        return redirect('auth:dashboard')
+
+    return render(request, 'authentication/setup_email_2fa.html', {'two_fa': two_fa})
+
+
+@require_http_methods(["GET"])
+def resend_otp_view(request):
+    """Resend the email OTP code."""
+    user_id = request.session.get('email_otp_user_id')
+    if not user_id:
+        return redirect('auth:login')
+
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return redirect('auth:login')
+
+    send_otp_email(user)
+    messages.info(request, 'A new code has been sent to your email.')
+    return redirect('auth:verify_otp')
+
+
+@login_required(login_url='auth:login')
+@require_http_methods(["GET"])
+def otp_success_view(request):
+    """Show OTP verification success feedback before redirecting to dashboard."""
+    if not request.user.is_authenticated:
+        return redirect('auth:login')
+
+    notice = request.session.pop('otp_verified_notice', None)
+    if not notice:
+        return redirect('auth:dashboard')
+
+    return render(request, 'authentication/otp_success.html', {'notice': notice})
+
+
+@login_required(login_url='auth:login')
+@require_http_methods(["POST"])
+def toggle_2fa_view(request):
+    """Enable or disable email OTP 2FA from the dashboard."""
+    try:
+        two_fa = request.user.two_factor_auth
+    except TwoFactorAuth.DoesNotExist:
+        two_fa = TwoFactorAuth.objects.create(user=request.user)
+
+    if two_fa.is_enabled and two_fa.method == 'EMAIL':
+        two_fa.is_enabled = False
+        two_fa.is_verified = False
+        two_fa.save()
+        messages.success(request, 'Two-factor authentication has been disabled.')
+    else:
+        two_fa.is_enabled = True
+        two_fa.is_verified = True
+        two_fa.method = 'EMAIL'
+        two_fa.save()
+        messages.success(request, 'Email OTP two-factor authentication has been enabled.')
+
+    return redirect('auth:dashboard')
 
 
 @login_required(login_url='auth:login')
@@ -433,3 +631,152 @@ def get_client_ip(request):
     if x_forwarded_for:
         return x_forwarded_for.split(',')[0]
     return request.META.get('REMOTE_ADDR')
+
+
+@login_required(login_url='auth:login')
+@require_http_methods(["GET"])
+@guest_required
+def guest_messages_view(request):
+    """View guest's own contact messages"""
+    from .models import ContactMessage
+    
+    # Get guest's messages ordered by most recent
+    guest_messages = ContactMessage.objects.filter(guest=request.user).order_by('-created_at')
+    
+    # Count unread/unreplied messages
+    unreplied_count = guest_messages.filter(is_replied=False).count()
+    unnotified_count = guest_messages.filter(is_replied=True, notification_sent=False).count()
+    
+    context = {
+        'messages': guest_messages,
+        'unreplied_count': unreplied_count,
+        'unnotified_count': unnotified_count,
+        'total_count': guest_messages.count(),
+    }
+    
+    return render(request, 'authentication/guest_messages.html', context)
+
+
+@login_required(login_url='auth:login')
+@require_http_methods(["GET"])
+@guest_required
+def guest_message_detail_view(request, message_id):
+    """View detail of a specific guest message"""
+    from .models import ContactMessage, MessageReply
+    import re
+    
+    try:
+        message = ContactMessage.objects.get(id=message_id, guest=request.user)
+        had_new_response = message.is_replied and not message.notification_sent
+        # Clear the guest-facing new-response indicator when the guest opens it.
+        if had_new_response:
+            message.notification_sent = True
+            message.save(update_fields=['notification_sent', 'updated_at'])
+        
+        # Get structured replies from MessageReply. Legacy guest replies are
+        # still parsed below so older conversations remain visible.
+        structured_replies = MessageReply.objects.filter(contact_message=message).order_by('created_at')
+
+        # Parse guest replies from staff_response field
+        guest_replies_raw = []
+        if message.staff_response:
+            pattern = r'--- Guest Reply \((.*?)\): ---\n(.*?)(?=\n\n(?:---|$)|$)'
+            matches = re.finditer(pattern, message.staff_response, re.DOTALL)
+            for match in matches:
+                guest_replies_raw.append({
+                    'timestamp': match.group(1),
+                    'text': match.group(2).strip()
+                })
+
+        # --- Build chronologically-sorted combined reply list ---
+        from datetime import datetime
+        combined_replies = []
+
+        for reply in structured_replies:
+            sender_name = message.name if reply.sender_type == MessageReply.SenderType.GUEST else 'Staff'
+            if reply.staff_member and reply.sender_type != MessageReply.SenderType.GUEST:
+                sender_name = reply.staff_member.get_full_name() or reply.staff_member.username
+            combined_replies.append({
+                'type': reply.sender_type,
+                'sender': sender_name,
+                'text': reply.reply_text,
+                'dt': reply.created_at,
+                'timestamp': reply.created_at.strftime('%b %d, %Y %I:%M %p'),
+            })
+
+        for gr in guest_replies_raw:
+            # Parse the human-readable timestamp back to datetime for sorting
+            try:
+                dt = datetime.strptime(gr['timestamp'], '%B %d, %Y at %I:%M %p')
+                dt = timezone.make_aware(dt)
+            except Exception:
+                dt = message.created_at  # fallback
+            combined_replies.append({
+                'type': 'guest',
+                'sender': message.name,
+                'text': gr['text'],
+                'dt': dt,
+                'timestamp': gr['timestamp'],
+            })
+
+        combined_replies.sort(key=lambda r: r['dt'])
+
+        context = {
+            'message': message,
+            'combined_replies': combined_replies,
+            'had_new_response': had_new_response,
+        }
+        return render(request, 'authentication/guest_message_detail.html', context)
+    except ContactMessage.DoesNotExist:
+        messages.error(request, 'Message not found.')
+        return redirect('auth:guest_messages')
+
+
+@login_required(login_url='auth:login')
+@require_http_methods(["POST"])
+@guest_required
+def reply_message_view(request, message_id):
+    """Guest reply to a staff message"""
+    from .models import ContactMessage, MessageReply
+    
+    try:
+        message = ContactMessage.objects.get(id=message_id, guest=request.user)
+        reply_text = request.POST.get('reply_text', '').strip()
+        
+        if not reply_text:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'error': 'Please type a message before sending.'}, status=400)
+            messages.error(request, 'Please type a message before sending.')
+            return redirect('auth:guest_message_detail', message_id=message_id)
+        
+        reply = MessageReply.objects.create(
+            contact_message=message,
+            staff_member=request.user,
+            sender_type=MessageReply.SenderType.GUEST,
+            reply_text=reply_text,
+        )
+
+        # A guest follow-up puts the inquiry back in the staff queue.
+        message.is_replied = False
+        message.notification_sent = True
+        message.save(update_fields=['is_replied', 'notification_sent', 'updated_at'])
+
+        timestamp_str = reply.created_at.strftime('%B %d, %Y at %I:%M %p')
+        
+        # AJAX response: return JSON so the front-end can inject the bubble immediately
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'reply_text': reply_text,
+                'timestamp': timestamp_str,
+                'sender_name': request.user.get_full_name() or request.user.username,
+            })
+        
+        messages.success(request, 'Your reply has been sent successfully!')
+        return redirect('auth:guest_message_detail', message_id=message_id)
+        
+    except ContactMessage.DoesNotExist:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': 'Message not found.'}, status=404)
+        messages.error(request, 'Message not found.')
+        return redirect('auth:guest_messages')

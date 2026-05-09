@@ -55,7 +55,8 @@
     }
     
     .luxury-info-header {
-        background: #2563eb;
+        background: #111827;
+        border-left: 4px solid #f59e0b;
         padding: 1rem 1.5rem;
         color: #ffffff;
         font-family: 'Playfair Display', serif;
@@ -67,6 +68,7 @@
     }
     
     .luxury-info-header i {
+        color: #c9a84c;
         font-size: 1.5rem;
     }
     
@@ -105,6 +107,48 @@
         font-weight: 600;
         color: #c9a84c;
     }
+
+    .verification-panel {
+        background: rgba(10, 15, 30, 0.45);
+        border: 1px solid rgba(201, 168, 76, 0.22);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .verification-panel label {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .verification-panel input[type="text"],
+    .verification-panel textarea {
+        width: 100%;
+        background: #0f172a;
+        border: 1px solid rgba(201, 168, 76, 0.35);
+        border-radius: 6px;
+        color: #ffffff;
+        padding: 0.7rem 0.85rem;
+        margin-top: 0.35rem;
+    }
+
+    .verification-check {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        margin-top: 0.85rem;
+        color: #e5e7eb;
+    }
+
+    .verification-check input {
+        margin-top: 0.25rem;
+    }
+
+    .verification-meta {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
     
     /* ============================================
        STATUS BADGES
@@ -135,11 +179,11 @@
         color: #93c5fd;
     }
     
-    .status-badge.cancelled {
-        background: rgba(244, 63, 94, 0.2);
-        color: #ff6b9d;
+    .status-badge.checked-out {
+        background: rgba(34, 197, 94, 0.2);
+        color: #86efac;
     }
-    
+
     /* ============================================
        ACTION SECTION
        ============================================ */
@@ -152,7 +196,8 @@
     }
     
     .action-header {
-        background: #2563eb;
+        background: #111827;
+        border-left: 4px solid #f59e0b;
         padding: 1rem 1.5rem;
         color: #ffffff;
         font-family: 'Playfair Display', serif;
@@ -203,36 +248,130 @@
     .btn-checkin {
         background: #3b82f6;
         color: #ffffff;
+        border: 1px solid #3b82f6;
     }
-    
+
     .btn-checkin:hover {
         background: #2563eb;
         box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
         transform: translateY(-2px);
     }
-    
-    .btn-cancel {
-        background: #ef4444;
-        color: #ffffff;
+
+    .btn-checkout {
+        background: #1e3a5f;
+        color: #93c5fd;
+        border: 1px solid #3b82f6;
     }
-    
+
+    .btn-checkout:hover {
+        background: #2563eb;
+        color: #ffffff;
+        box-shadow: 0 8px 16px rgba(59, 130, 246, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-undo {
+        background: #78350f;
+        color: #fcd34d;
+        border: 1px solid #f59e0b;
+    }
+
+    .btn-undo:hover {
+        background: #92400e;
+        color: #ffffff;
+        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-restore {
+        background: #c9a84c;
+        color: #0a0f1e;
+        border: 1px solid #c9a84c;
+    }
+
+    .btn-restore:hover {
+        background: #a68a3a;
+        box-shadow: 0 8px 16px rgba(201, 168, 76, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-cancel {
+        background: #7f1d1d;
+        color: #fca5a5;
+        border: 1px solid #dc2626;
+    }
+
     .btn-cancel:hover {
         background: #dc2626;
+        color: #ffffff;
         box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
         transform: translateY(-2px);
     }
     
     .btn-back {
         background: transparent;
-        border: 1.5px solid #6b7280;
-        color: #d1d5db;
-    }
-    
-    .btn-back:hover {
+        border: 1.5px solid #c9a84c;
+        color: #c9a84c;
         border-color: #9ca3af;
         color: #ffffff;
     }
-    
+
+    .confirm-modal {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1200;
+        padding: 1rem;
+    }
+
+    .confirm-modal.show {
+        display: flex;
+    }
+
+    .confirm-modal-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(10, 15, 30, 0.85);
+        backdrop-filter: blur(3px);
+    }
+
+    .confirm-modal-card {
+        position: relative;
+        z-index: 1;
+        background: #111827;
+        border: 1px solid rgba(201, 168, 76, 0.25);
+        border-radius: 18px;
+        padding: 2rem;
+        width: min(480px, 100%);
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+        text-align: center;
+    }
+
+    .confirm-modal-card h3 {
+        margin-bottom: 0.75rem;
+        font-size: 1.35rem;
+        color: #ffffff;
+    }
+
+    .confirm-modal-card p {
+        color: #d1d5db;
+        margin-bottom: 1.5rem;
+        line-height: 1.75;
+    }
+
+    .confirm-modal-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .confirm-modal-actions .btn-action {
+        min-width: 140px;
+    }
+
     /* ============================================
        TWO COLUMN LAYOUT
        ============================================ */
@@ -296,6 +435,10 @@
                         <span class="info-value">#{{ booking.id }}</span>
                     </div>
                     <div class="info-row">
+                        <span class="info-label">Reference Code:</span>
+                        <span class="info-value info-value-large">{{ booking.booking_reference }}</span>
+                    </div>
+                    <div class="info-row">
                         <span class="info-label">Check-In:</span>
                         <span class="info-value">{{ booking.check_in|date:"M d, Y" }}</span>
                     </div>
@@ -320,6 +463,8 @@
                                 <span class="status-badge confirmed">Confirmed</span>
                             {% elif booking.status == 'CHECKED_IN' %}
                                 <span class="status-badge checked-in">Checked In</span>
+                            {% elif booking.status == 'CHECKED_OUT' %}
+                                <span class="status-badge checked-out">Checked Out</span>
                             {% else %}
                                 <span class="status-badge cancelled">Cancelled</span>
                             {% endif %}
@@ -380,6 +525,15 @@
                         <span class="info-label">Phone:</span>
                         <span class="info-value">{{ guest.phone_number|default:"—" }}</span>
                     </div>
+                    {% if booking.verified_at %}
+                    <div class="info-row">
+                        <span class="info-label">Verified:</span>
+                        <span class="info-value">
+                            {{ booking.verified_at|date:"M d, Y g:i A" }}
+                            {% if booking.verified_by %}<br>by {{ booking.verified_by.get_full_name|default:booking.verified_by.username }}{% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -406,6 +560,10 @@
                                 <span class="status-badge pending">Pending</span>
                             {% elif payment.status == 'COMPLETED' %}
                                 <span class="status-badge confirmed">Completed</span>
+                            {% elif payment.status == 'REFUND_PENDING' %}
+                                <span class="status-badge cancelled">Refund Pending</span>
+                            {% elif payment.status == 'REFUNDED' %}
+                                <span class="status-badge confirmed">Refunded</span>
                             {% else %}
                                 <span class="status-badge cancelled">Failed</span>
                             {% endif %}
@@ -420,31 +578,81 @@
             {% endif %}
 
             <!-- Action Card -->
-            {% if booking.status != 'CANCELLED' %}
             <div class="action-card">
                 <div class="action-header">
                     <i class="fas fa-gavel"></i>
                     Booking Actions
                 </div>
                 <div class="action-body">
-                    <form method="post">
+                    <form method="post" action="{% url 'admin_panel:booking_edit' booking.id %}" id="booking-action-form">
                         {% csrf_token %}
+                        <input type="hidden" name="action" id="booking-action-input" value="">
+                        {% if booking.status == 'CONFIRMED' %}
+                        <div class="verification-panel">
+                            <label for="booking-reference-input">Check-in Reference Code</label>
+                            <input type="text" id="booking-reference-input" name="booking_reference" placeholder="Ask guest for {{ booking.booking_reference }}" autocomplete="off" required>
+
+                            <label class="verification-check">
+                                <input type="checkbox" name="reference_verified" required>
+                                <span>Guest presented the booking confirmation/reference code.</span>
+                            </label>
+                            <label class="verification-check">
+                                <input type="checkbox" name="id_verified" required>
+                                <span>Valid ID matches {{ guest.first_name }} {{ guest.last_name }}.</span>
+                            </label>
+                            <label class="verification-check">
+                                <input type="checkbox" name="contact_verified" required>
+                                <span>Email or phone matches the guest account.</span>
+                            </label>
+                            <label class="verification-check">
+                                <input type="checkbox" name="payment_verified" required>
+                                <span>Payment status or remaining balance requirement is verified.</span>
+                            </label>
+
+                            <label for="verification-notes" class="mt-3 d-block">Verification Notes</label>
+                            <textarea id="verification-notes" name="verification_notes" rows="2" placeholder="Optional notes"></textarea>
+                            <p class="verification-meta mt-2 mb-0">Do not ask for the guest account password or OTP.</p>
+                        </div>
+                        {% elif booking.verified_at %}
+                        <div class="verification-panel">
+                            <p class="verification-meta mb-0">
+                                Check-in verification completed on {{ booking.verified_at|date:"M d, Y g:i A" }}
+                                {% if booking.verified_by %}by {{ booking.verified_by.get_full_name|default:booking.verified_by.username }}{% endif %}.
+                            </p>
+                            {% if booking.verification_notes %}
+                            <p class="verification-meta mt-2 mb-0">{{ booking.verification_notes }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
                         <div class="action-buttons">
                             {% if booking.status == 'PENDING' %}
                                 <button type="submit" name="action" value="confirm" class="btn-action btn-confirm">
                                     <i class="fas fa-check"></i> Confirm
                                 </button>
-                            {% endif %}
-                            
-                            {% if booking.status in 'PENDING,CONFIRMED' %}
+                                <button type="button" data-action-value="cancel" data-confirm-title="Cancel Booking" data-confirm-message="Are you sure you want to cancel this booking?" class="btn-action btn-cancel confirm-action">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                            {% elif booking.status == 'CONFIRMED' %}
                                 <button type="submit" name="action" value="checkin" class="btn-action btn-checkin">
                                     <i class="fas fa-sign-in-alt"></i> Check-In
                                 </button>
-                            {% endif %}
-                            
-                            {% if booking.status != 'CHECKED_IN' %}
-                                <button type="submit" name="action" value="cancel" class="btn-action btn-cancel">
+                                <button type="button" data-action-value="cancel" data-confirm-title="Cancel Booking" data-confirm-message="Are you sure you want to cancel this booking?" class="btn-action btn-cancel confirm-action">
                                     <i class="fas fa-times"></i> Cancel
+                                </button>
+                            {% elif booking.status == 'CHECKED_IN' %}
+                                <button type="submit" name="action" value="checkout" class="btn-action btn-checkout">
+                                    <i class="fas fa-sign-out-alt"></i> Check-Out
+                                </button>
+                                <button type="button" data-action-value="undo_checkin" data-confirm-title="Undo Check-In" data-confirm-message="Are you sure you want to undo check-in?" class="btn-action btn-undo confirm-action">
+                                    <i class="fas fa-undo"></i> Undo Check-In
+                                </button>
+                            {% elif booking.status == 'CHECKED_OUT' %}
+                                <button type="button" data-action-value="undo_checkout" data-confirm-title="Undo Check-Out" data-confirm-message="Are you sure you want to undo check-out?" class="btn-action btn-undo confirm-action">
+                                    <i class="fas fa-undo"></i> Undo Check-Out
+                                </button>
+                            {% elif booking.status == 'CANCELLED' %}
+                                <button type="button" data-action-value="restore" data-confirm-title="Restore Booking" data-confirm-message="Restore this cancelled booking?" class="btn-action btn-restore confirm-action">
+                                    <i class="fas fa-redo"></i> Restore Booking
                                 </button>
                             {% endif %}
                             
@@ -455,8 +663,56 @@
                     </form>
                 </div>
             </div>
-            {% endif %}
+
+            <div class="confirm-modal" id="confirm-modal" aria-hidden="true">
+                <div class="confirm-modal-backdrop"></div>
+                <div class="confirm-modal-card">
+                    <h3 id="confirm-modal-title">Confirm action</h3>
+                    <p id="confirm-modal-message">Are you sure?</p>
+                    <div class="confirm-modal-actions">
+                        <button type="button" class="btn-action btn-back" id="confirm-modal-cancel">Cancel</button>
+                        <button type="button" class="btn-action btn-confirm" id="confirm-modal-confirm">Confirm</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
+{% block extra_js %}
+<script>
+    const bookingForm = document.getElementById('booking-action-form');
+    const bookingActionInput = document.getElementById('booking-action-input');
+    const confirmModal = document.getElementById('confirm-modal');
+    const confirmModalTitle = document.getElementById('confirm-modal-title');
+    const confirmModalMessage = document.getElementById('confirm-modal-message');
+    const confirmModalConfirm = document.getElementById('confirm-modal-confirm');
+    const confirmModalCancel = document.getElementById('confirm-modal-cancel');
+
+    let pendingAction = null;
+
+    document.querySelectorAll('.confirm-action').forEach(button => {
+        button.addEventListener('click', event => {
+            const actionValue = event.currentTarget.dataset.actionValue;
+            const title = event.currentTarget.dataset.confirmTitle || 'Confirm action';
+            const message = event.currentTarget.dataset.confirmMessage || 'Are you sure you want to continue?';
+
+            pendingAction = actionValue;
+            confirmModalTitle.textContent = title;
+            confirmModalMessage.textContent = message;
+            confirmModal.classList.add('show');
+        });
+    });
+
+    confirmModalCancel.addEventListener('click', () => {
+        pendingAction = null;
+        confirmModal.classList.remove('show');
+    });
+
+    confirmModalConfirm.addEventListener('click', () => {
+        if (!pendingAction) return;
+        bookingActionInput.value = pendingAction;
+        confirmModal.classList.remove('show');
+        bookingForm.submit();
+    });
+</script>{% endblock %}

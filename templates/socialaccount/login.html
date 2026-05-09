@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load static socialaccount %}
+
+{% block title %}Continue with Google - Cebu Luxury{% endblock %}
+{% block body_class %} class="auth-page"{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
+<style>
+    .social-wrap {
+        width: min(1100px, calc(100% - 32px));
+        min-height: calc(100vh - 76px);
+        margin: 0 auto;
+        padding: 2rem 0;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(360px, 0.82fr);
+        gap: 1.25rem;
+        align-items: center;
+    }
+
+    .social-hero {
+        min-height: 580px;
+        padding: clamp(1.25rem, 3vw, 2.25rem);
+        border-radius: var(--auth-radius);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        background:
+            linear-gradient(180deg, rgba(15, 23, 42, 0.12), rgba(15, 23, 42, 0.76)),
+            url("https://images.unsplash.com/photo-1522798514-97ceb8c4f1c8?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        box-shadow: var(--auth-shadow);
+    }
+
+    .social-badge {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+        color: #fff;
+        font-weight: 850;
+        backdrop-filter: blur(12px);
+    }
+
+    .social-hero h1 {
+        max-width: 620px;
+        margin: 0;
+        color: #fff !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-size: clamp(2.7rem, 6vw, 5rem);
+        font-weight: 900 !important;
+        line-height: 0.96;
+        letter-spacing: 0;
+    }
+
+    .social-hero p {
+        max-width: 530px;
+        margin: 1rem 0 0;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: clamp(1rem, 2vw, 1.15rem);
+    }
+
+    .social-panel {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--auth-line);
+        border-radius: var(--auth-radius);
+        box-shadow: var(--auth-shadow);
+        padding: clamp(1.25rem, 3vw, 2.25rem);
+        color: var(--auth-ink);
+    }
+
+    .social-kicker {
+        color: var(--auth-muted);
+        font-size: 0.78rem;
+        font-weight: 850;
+        text-transform: uppercase;
+        margin-bottom: 0.45rem;
+    }
+
+    .social-panel h2 {
+        color: var(--auth-ink) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 900 !important;
+        margin: 0 0 0.6rem;
+        line-height: 1.04;
+    }
+
+    .social-panel p {
+        color: var(--auth-muted);
+        margin-bottom: 1rem;
+    }
+
+    .social-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin: 1rem 0 1.5rem;
+    }
+
+    .social-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.85rem;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--auth-line);
+        color: var(--auth-ink);
+        font-weight: 750;
+        text-decoration: none;
+    }
+
+    .social-links a:hover {
+        background: var(--auth-surface-alt);
+        color: var(--auth-ink);
+    }
+
+    .google-button {
+        width: 100%;
+        min-height: 50px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        border-radius: var(--auth-radius);
+        border: 1px solid var(--auth-line);
+        background: #fff;
+        color: var(--auth-ink);
+        font-weight: 850;
+        transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .google-button:hover {
+        background: var(--auth-surface-alt);
+        transform: translateY(-1px);
+    }
+
+    .google-button i {
+        font-size: 1.05rem;
+    }
+
+    .social-note {
+        margin-top: 1rem;
+        text-align: center;
+        color: var(--auth-muted);
+        font-size: 0.9rem;
+    }
+
+    .social-footer {
+        margin-top: 1.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--auth-line);
+        text-align: center;
+    }
+
+    .social-footer a {
+        color: var(--auth-brand);
+        font-weight: 800;
+        text-decoration: none;
+    }
+
+    .social-footer a:hover {
+        color: var(--auth-brand-dark);
+        text-decoration: underline;
+    }
+
+    @media (max-width: 920px) {
+        .social-wrap {
+            grid-template-columns: 1fr;
+        }
+
+        .social-hero {
+            min-height: 320px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="social-wrap">
+    <section class="social-hero" aria-label="Google account sign in">
+        <div class="social-badge"><i class="fab fa-google"></i> Google sign in</div>
+        <div>
+            <h1>Pick up your stay with one tap.</h1>
+            <p>Use your Google account to move straight into bookings, messages, and your Cebu Luxury guest experience.</p>
+        </div>
+    </section>
+
+    <section class="social-panel" aria-labelledby="social-login-title">
+        <div class="social-kicker">Third-party access</div>
+        <h2 id="social-login-title">Continue with Google</h2>
+        <p>You are about to sign in using your Google account. Review the options below, then continue when you're ready.</p>
+
+        <div class="social-links">
+            <a href="{% url 'account_login' %}">
+                <i class="fas fa-arrow-left"></i> Sign In
+            </a>
+            <a href="{% url 'auth:register' %}">
+                <i class="fas fa-user-plus"></i> Sign Up
+            </a>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if redirect_field_value %}
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+            {% endif %}
+            <button type="submit" class="google-button">
+                <i class="fab fa-google"></i>
+                Continue with Google
+            </button>
+        </form>
+
+        <div class="social-note">
+            <i class="fas fa-lock"></i> Your information stays encrypted. Your Google password is never stored here.
+        </div>
+
+        <div class="social-footer">
+            <a href="{% url 'home' %}">
+                <i class="fas fa-arrow-left"></i> Back to Home
+            </a>
+        </div>
+    </section>
+</div>
+{% endblock %}

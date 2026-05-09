@@ -1,0 +1,66 @@
+{% extends 'guest/guest_base.html' %}
+
+{% block title %}Enable Email OTP 2FA - Cebu Hotel{% endblock %}
+
+{% block content %}
+<div class="guest-page">
+    <section class="guest-page-header">
+        <div>
+            <p class="guest-kicker">Account Security</p>
+            <h1>Enable Email OTP 2FA</h1>
+            <p>Add a one-time email code to protected logins.</p>
+        </div>
+        <a href="{% url 'auth:dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </section>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+            <section class="guest-card">
+                <div class="text-center mb-4">
+                    <span class="guest-stat-icon mx-auto mb-3" style="width:64px;height:64px;font-size:1.6rem;">
+                        <i class="fas fa-shield-alt"></i>
+                    </span>
+                    <h2 class="h3">Secure your account</h2>
+                    <p class="text-muted mb-0">A 6-digit code will be sent to your email when extra verification is required.</p>
+                </div>
+
+                {% for message in messages %}
+                    <div class="alert alert-info">{{ message }}</div>
+                {% endfor %}
+
+                <div class="guest-grid three mb-4">
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Simple setup</div>
+                        <p class="mb-0 text-muted">No authenticator app required.</p>
+                    </div>
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Secure login</div>
+                        <p class="mb-0 text-muted">A code is sent to your email on protected logins.</p>
+                    </div>
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Fast recovery</div>
+                        <p class="mb-0 text-muted">Use your email to regain access.</p>
+                    </div>
+                </div>
+
+                {% if two_fa and two_fa.is_enabled and two_fa.method == 'EMAIL' %}
+                    <div class="alert alert-success">Email OTP 2FA is already enabled for your account.</div>
+                    <a href="{% url 'auth:dashboard' %}" class="btn btn-primary w-100">Return to Dashboard</a>
+                {% else %}
+                    <form method="post" class="d-grid gap-2">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shield-alt"></i> Enable Email OTP 2FA
+                        </button>
+                        <a href="{% url 'auth:dashboard' %}" class="btn btn-secondary">
+                            No thanks, maybe later
+                        </a>
+                    </form>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

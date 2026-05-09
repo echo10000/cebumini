@@ -8,6 +8,12 @@ from .views_bookings import (
     admin_bookings_view,
     admin_cancel_booking_view,
     admin_confirm_booking_view,
+    guest_submit_complaint_view,
+    guest_my_complaints_view,
+    guest_complaint_detail_view,
+    guest_request_refund_view,
+    guest_my_refund_requests_view,
+    guest_refund_detail_view,
 )
 from .views_payments import (
     payment_success_view,
@@ -42,4 +48,14 @@ urlpatterns = [
     path('admin/all/', admin_bookings_view, name='admin_bookings'),
     path('admin/<int:booking_id>/confirm/', admin_confirm_booking_view, name='admin_confirm_booking'),
     path('admin/<int:booking_id>/cancel/', admin_cancel_booking_view, name='admin_cancel_booking'),
+    
+    # Guest complaint URLs
+    path('<int:booking_id>/complaint/submit/', guest_submit_complaint_view, name='submit_complaint'),
+    path('complaints/', guest_my_complaints_view, name='my_complaints'),
+    path('complaints/<int:complaint_id>/', guest_complaint_detail_view, name='complaint_detail'),
+    
+    # Guest refund URLs
+    path('<int:booking_id>/refund/request/', guest_request_refund_view, name='request_refund'),
+    path('refunds/', guest_my_refund_requests_view, name='my_refunds'),
+    path('refunds/<int:refund_id>/', guest_refund_detail_view, name='refund_detail'),
 ]

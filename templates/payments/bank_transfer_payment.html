@@ -1,133 +1,72 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'guest/guest_base.html' %}
 
 {% block title %}Bank Transfer Payment - Cebu Hotel{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="guest-page">
+    <section class="guest-page-header">
+        <div>
+            <p class="guest-kicker">Payment</p>
+            <h1>Bank Transfer Payment</h1>
+            <p>Submit your bank transfer details for manual verification.</p>
+        </div>
+    </section>
+
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header bg-secondary text-white">
-                    <h4 class="mb-0"><i class="fas fa-university"></i> Bank Transfer Payment</h4>
+        <div class="col-lg-9">
+            <section class="guest-card">
+                <div class="guest-card shadow-none mb-4">
+                    <h2 class="h5">Booking Details</h2>
+                    <p class="mb-1"><strong>Room:</strong> {{ payment.booking.room.room_number }}</p>
+                    <p class="mb-1"><strong>Check-in:</strong> {{ payment.booking.check_in|date:"M d, Y" }}</p>
+                    <p class="mb-1"><strong>Check-out:</strong> {{ payment.booking.check_out|date:"M d, Y" }}</p>
+                    <p class="mb-0"><strong>Amount:</strong> <span class="guest-price">PHP {{ payment.amount }}</span></p>
                 </div>
-                <div class="card-body">
-                    {% if messages %}
-                        <div class="alert alert-dismissible fade show" role="alert">
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
 
-                    <!-- Booking Details -->
-                    <div class="mb-4 p-3 bg-light border rounded">
-                        <h6><strong>Booking Details</strong></h6>
-                        <table class="table table-sm mb-0">
-                            <tr>
-                                <td><strong>Room:</strong></td>
-                                <td>{{ payment.booking.room.name }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Check-in:</strong></td>
-                                <td>{{ payment.booking.check_in_date }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Check-out:</strong></td>
-                                <td>{{ payment.booking.check_out_date }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Amount to Pay:</strong></td>
-                                <td><h6 class="text-success mb-0">₱ {{ payment.amount }}</h6></td>
-                            </tr>
-                        </table>
+                <div class="alert alert-info">
+                    Transfer the exact amount to one of the accounts below, then submit your reference number.
+                </div>
+
+                <div class="guest-grid three mb-4">
+                    {% for bank, account in bank_accounts.items %}
+                        <div class="guest-card shadow-none">
+                            <h3 class="h6">{{ bank }}</h3>
+                            <code>{{ account }}</code>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_bank_name" class="form-label">Which Bank Did You Transfer From?</label>
+                        {{ form.bank_name }}
+                        {% if form.bank_name.errors %}<div class="alert alert-danger mt-2">{{ form.bank_name.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_reference_number" class="form-label">Bank Reference Number</label>
+                        {{ form.reference_number }}
+                        {% if form.reference_number.errors %}<div class="alert alert-danger mt-2">{{ form.reference_number.errors }}</div>{% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_notes" class="form-label">Additional Notes</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}<div class="alert alert-danger mt-2">{{ form.notes.errors }}</div>{% endif %}
                     </div>
 
-                    <!-- Bank Accounts -->
-                    <div class="alert alert-warning mb-4">
-                        <h6><i class="fas fa-hand-point-right"></i> Transfer to any of these accounts:</h6>
-                        <div class="row mt-3">
-                            {% for bank, account in bank_accounts.items %}
-                                <div class="col-md-4 mb-2">
-                                    <div class="card">
-                                        <div class="card-body p-2">
-                                            <h6 class="mb-1">{{ bank }}</h6>
-                                            <p class="mb-0" style="font-size: 0.9rem; font-family: monospace;">
-                                                <strong>{{ account }}</strong>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                    {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
 
-                    <!-- Transfer Form -->
-                    <form method="post">
-                        {% csrf_token %}
-
-                        <div class="mb-3">
-                            <label for="id_bank_name" class="form-label">Which Bank Did You Transfer From?</label>
-                            {{ form.bank_name }}
-                            {% if form.bank_name.errors %}
-                                <div class="alert alert-danger mt-2">{{ form.bank_name.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_reference_number" class="form-label">Bank Reference Number</label>
-                            {{ form.reference_number }}
-                            <small class="form-text text-muted">The transaction reference from your bank</small>
-                            {% if form.reference_number.errors %}
-                                <div class="alert alert-danger mt-2">{{ form.reference_number.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="id_notes" class="form-label">Additional Notes (Optional)</label>
-                            {{ form.notes }}
-                            <small class="form-text text-muted">Any additional information about your transfer</small>
-                            {% if form.notes.errors %}
-                                <div class="alert alert-danger mt-2">{{ form.notes.errors }}</div>
-                            {% endif %}
-                        </div>
-
-                        {% if form.non_field_errors %}
-                            <div class="alert alert-danger mb-3">{{ form.non_field_errors }}</div>
-                        {% endif %}
-
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> 
-                            <strong>Pending Verification:</strong> Your payment will be pending until our admin team 
-                            verifies the bank transfer. You'll receive an email confirmation once verified.
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-check-circle"></i> Confirm Bank Transfer
-                            </button>
-                        </div>
-
-                        <a href="{% url 'bookings:booking_detail' payment.booking.id %}" class="btn btn-link w-100 mt-2">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check-circle"></i> Confirm Bank Transfer
+                        </button>
+                        <a href="{% url 'bookings:booking_detail' payment.booking.id %}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Choose Different Payment Method
                         </a>
-                    </form>
-                </div>
-            </div>
+                    </div>
+                </form>
+            </section>
         </div>
     </div>
 </div>
-
-<style>
-    #id_bank_name, #id_reference_number, #id_notes {
-        border: 1px solid #dee2e6;
-        padding: 0.75rem 0.5rem;
-    }
-    #id_bank_name, #id_reference_number {
-        font-size: 1rem;
-    }
-</style>
 {% endblock %}

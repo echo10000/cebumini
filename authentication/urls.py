@@ -12,12 +12,21 @@ urlpatterns = [
     path('accept-terms/', views.accept_terms_view, name='accept_terms'),
     path('dashboard/', views.dashboard_view, name='dashboard'),
     path('contact/', views.contact_view, name='contact'),
+    path('api/contact/', views.contact_form_api, name='contact_api'),
+    path('messages/', views.guest_messages_view, name='guest_messages'),
+    path('messages/<int:message_id>/', views.guest_message_detail_view, name='guest_message_detail'),
+    path('messages/<int:message_id>/reply/', views.reply_message_view, name='reply_message'),
     
     # ============= 2FA ROUTES =============
     path('2fa/setup/', views.setup_2fa, name='setup_2fa'),
+    path('2fa/email-setup/', views.setup_email_2fa, name='setup_email_2fa'),
     path('2fa/backup-codes/', views.view_backup_codes, name='2fa_backup_codes'),
     path('2fa/verify/', views.verify_2fa_login, name='verify_2fa_login'),
     path('2fa/disable/', views.disable_2fa, name='disable_2fa'),
+    path('verify-otp/', views.verify_otp_view, name='verify_otp'),
+    path('resend-otp/', views.resend_otp_view, name='resend_otp'),
+    path('otp-success/', views.otp_success_view, name='otp_success'),
+    path('toggle-2fa/', views.toggle_2fa_view, name='toggle_2fa'),
     
     # ============= MANAGER ROUTES =============
     path('manager/dashboard/', views_manager.manager_dashboard_view, name='manager_dashboard'),
@@ -28,6 +37,7 @@ urlpatterns = [
     path('manager/staff/', views_manager.staff_members_view, name='manager_staff'),
     path('manager/staff/register/', views_manager.register_staff_view, name='manager_register_staff'),
     path('manager/staff/<int:staff_id>/deactivate/', views_manager.deactivate_staff_view, name='manager_deactivate_staff'),
+    path('manager/staff/<int:staff_id>/reactivate/', views_manager.reactivate_staff_view, name='manager_reactivate_staff'),
     path('manager/staff/<int:staff_id>/dashboard/', views_manager.staff_dashboard_view, name='manager_staff_dashboard'),
     
     # ============= STAFF ENHANCEMENTS =============

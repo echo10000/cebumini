@@ -1,0 +1,81 @@
+{% extends 'guest/guest_base.html' %}
+
+{% block title %}Refund Details - Cebu Luxury{% endblock %}
+
+{% block content %}
+<div class="guest-page">
+    <section class="guest-page-header">
+        <div>
+            <p class="guest-kicker">Payments</p>
+            <h1>Refund Request Details</h1>
+            <p>Booking #{{ booking.id }}</p>
+        </div>
+        <a href="{% url 'bookings:my_refunds' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to My Refunds
+        </a>
+    </section>
+
+    <section class="guest-card">
+        <h2 class="h4 mb-3">Booking Information</h2>
+        <div class="guest-grid two">
+            <div>
+                <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
+                <p><strong>Room:</strong> {{ booking.room.room_number }}</p>
+            </div>
+            <div>
+                <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
+                <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
+            </div>
+        </div>
+        <p class="mb-0"><strong>Total Booking Price:</strong> <span class="guest-price">PHP {{ booking.total_price }}</span></p>
+    </section>
+
+    <section class="guest-card">
+        <div class="d-flex justify-content-between gap-3 flex-wrap mb-3">
+            <h2 class="h4 mb-0">Refund Request</h2>
+            {% if refund.status == 'REQUESTED' %}
+                <span class="badge bg-warning">Pending</span>
+            {% elif refund.status == 'APPROVED' %}
+                <span class="badge bg-success">Approved</span>
+            {% elif refund.status == 'REJECTED' %}
+                <span class="badge bg-danger">Rejected</span>
+            {% elif refund.status == 'ISSUED' %}
+                <span class="badge bg-info">Issued</span>
+            {% endif %}
+        </div>
+        <p><strong>Submitted:</strong> {{ refund.created_at|date:"M d, Y H:i" }}</p>
+        <p><strong>Requested Amount:</strong> <span class="text-danger">PHP {{ refund.requested_amount }}</span></p>
+        {% if refund.approved_amount %}
+            <p><strong>Approved Amount:</strong> <span class="text-success">PHP {{ refund.approved_amount }}</span></p>
+        {% endif %}
+        <p><strong>Reason for Refund:</strong></p>
+        <div class="guest-card shadow-none">{{ refund.reason }}</div>
+    </section>
+
+    {% if refund.status != 'REQUESTED' %}
+        <section class="guest-card">
+            <h2 class="h4 mb-3">Manager Decision</h2>
+            <p><strong>Decision Date:</strong> {{ refund.approved_at|date:"M d, Y H:i"|default:"N/A" }}</p>
+            {% if refund.status == 'APPROVED' %}
+                <div class="alert alert-success">Your refund request has been approved for PHP {{ refund.approved_amount }}.</div>
+            {% elif refund.status == 'REJECTED' %}
+                <div class="alert alert-danger">Your refund request has been rejected.</div>
+            {% elif refund.status == 'ISSUED' %}
+                <div class="alert alert-info">The refund of PHP {{ refund.approved_amount }} has been issued.</div>
+            {% endif %}
+            <p><strong>Manager Notes:</strong></p>
+            <div class="guest-card shadow-none">{{ refund.manager_notes|default:"No notes provided" }}</div>
+            {% if refund.issued_at %}
+                <p class="mt-3"><strong>Issued Date:</strong> {{ refund.issued_at|date:"M d, Y H:i" }}</p>
+                {% if refund.refund_transaction_id %}
+                    <p><strong>Transaction ID:</strong> <code>{{ refund.refund_transaction_id }}</code></p>
+                {% endif %}
+            {% endif %}
+        </section>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Your refund request is awaiting manager review.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

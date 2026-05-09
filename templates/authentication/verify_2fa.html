@@ -2,97 +2,239 @@
 {% load static %}
 
 {% block title %}Verify 2FA - Cebu Hotel{% endblock %}
+{% block body_class %} class="auth-page"{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
+<style>
+    .totp-wrap {
+        width: min(1040px, calc(100% - 32px));
+        min-height: calc(100vh - 76px);
+        margin: 0 auto;
+        padding: 2rem 0;
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(360px, 0.72fr);
+        align-items: center;
+        gap: 1.25rem;
+    }
+
+    .totp-card,
+    .totp-info {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--auth-line);
+        border-radius: var(--auth-radius);
+        box-shadow: var(--auth-shadow);
+        color: var(--auth-ink);
+    }
+
+    .totp-card {
+        padding: clamp(1.25rem, 3vw, 2.25rem);
+    }
+
+    .totp-info {
+        padding: 1.25rem;
+        margin-top: 1rem;
+    }
+
+    .totp-hero {
+        min-height: 560px;
+        border-radius: var(--auth-radius);
+        padding: clamp(1.25rem, 3vw, 2.25rem);
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        background:
+            linear-gradient(180deg, rgba(15, 23, 42, 0.14), rgba(15, 23, 42, 0.76)),
+            url("https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=1400&q=80") center/cover no-repeat;
+        border: 1px solid rgba(255, 255, 255, 0.72);
+        box-shadow: var(--auth-shadow);
+    }
+
+    .totp-hero h1 {
+        max-width: 650px;
+        margin: 0;
+        color: #fff !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-size: clamp(2.6rem, 6vw, 5rem);
+        font-weight: 900 !important;
+        line-height: 0.96;
+    }
+
+    .totp-hero p {
+        max-width: 540px;
+        margin: 1rem 0 0;
+        color: rgba(255, 255, 255, 0.88);
+        font-size: clamp(1rem, 2vw, 1.15rem);
+    }
+
+    .totp-icon {
+        width: 56px;
+        height: 56px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: var(--auth-radius);
+        background: #e0f2f1;
+        color: var(--auth-brand-dark);
+        font-size: 1.45rem;
+        margin-bottom: 1rem;
+    }
+
+    .totp-card h2,
+    .totp-info h5 {
+        color: var(--auth-ink) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-weight: 900 !important;
+    }
+
+    .totp-card p,
+    .totp-card small,
+    .totp-info p,
+    .totp-help {
+        color: var(--auth-muted);
+    }
+
+    .totp-code {
+        width: 100%;
+        min-height: 72px;
+        background: #fff !important;
+        border: 1px solid var(--auth-line) !important;
+        color: var(--auth-ink) !important;
+        border-radius: var(--auth-radius);
+        font-size: clamp(1.8rem, 5vw, 2.4rem);
+        font-weight: 900;
+        text-align: center;
+        letter-spacing: 0.42rem;
+        padding: 0.9rem 0.7rem;
+    }
+
+    .totp-code:focus {
+        border-color: var(--auth-brand) !important;
+        box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.13) !important;
+        outline: none;
+    }
+
+    .totp-submit,
+    .totp-back {
+        width: 100%;
+        min-height: 48px;
+        border-radius: var(--auth-radius);
+        font-weight: 800;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+    }
+
+    .totp-submit {
+        background: var(--auth-brand);
+        border: 1px solid var(--auth-brand);
+        color: #fff;
+    }
+
+    .totp-submit:hover {
+        background: var(--auth-brand-dark);
+        border-color: var(--auth-brand-dark);
+        color: #fff;
+    }
+
+    .totp-back {
+        background: #fff;
+        border: 1px solid var(--auth-line);
+        color: var(--auth-ink);
+        margin-top: 0.75rem;
+    }
+
+    .totp-back:hover {
+        background: var(--auth-surface-alt);
+        color: var(--auth-ink);
+    }
+
+    .totp-help {
+        background: #eef6f5;
+        border: 1px solid rgba(15, 118, 110, 0.16);
+        border-radius: var(--auth-radius);
+        padding: 1rem;
+        margin-top: 1.25rem;
+    }
+
+    @media (max-width: 920px) {
+        .totp-wrap {
+            grid-template-columns: 1fr;
+        }
+
+        .totp-hero {
+            min-height: 300px;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card border-0 shadow-lg" style="background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-shield-alt" style="font-size: 48px; color: #1e3c72;"></i>
-                        <h2 class="card-title mt-3" style="color: #1e3c72;">
-                            Verify Your Identity
-                        </h2>
-                        <p class="text-muted">
-                            Enter the code from your authenticator app
-                        </p>
-                    </div>
-
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                                {{ message }}
-                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                        {% endfor %}
-                    {% endif %}
-
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <div class="mb-4">
-                            <label for="code" class="form-label d-block text-center mb-3">
-                                <strong>6-Digit Code</strong>
-                            </label>
-                            <input 
-                                type="text" 
-                                class="form-control form-control-lg text-center" 
-                                id="code" 
-                                name="code" 
-                                placeholder="000000"
-                                maxlength="6"
-                                pattern="\d{6}"
-                                required
-                                autofocus
-                                style="font-size: 32px; letter-spacing: 8px; font-weight: bold;"
-                            >
-                            <small class="text-muted d-block text-center mt-2">
-                                Or paste a backup code
-                            </small>
-                        </div>
-
-                        <button type="submit" class="btn btn-lg w-100 mb-2" style="background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; border: none;">
-                            <i class="fas fa-arrow-right"></i> Verify Code
-                        </button>
-
-                        <a href="{% url 'auth:login' %}" class="btn btn-secondary btn-lg w-100">
-                            <i class="fas fa-times"></i> Go Back
-                        </a>
-
-                        <div class="alert alert-info mt-4 mb-0">
-                            <strong>Need help?</strong>
-                            <ul class="mb-0 ps-3 mt-2">
-                                <li>Make sure your device time is synchronized</li>
-                                <li>Use a backup code if your authenticator app is unavailable</li>
-                                <li>Codes are 6 digits from your authenticator app</li>
-                                <li>Each code is valid for 30 seconds</li>
-                            </ul>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Additional Security Info -->
-            <div class="card mt-4 border-0 shadow-sm" style="background: rgba(212, 175, 55, 0.1); border-left: 4px solid #d4af37;">
-                <div class="card-body">
-                    <h5 style="color: #1e3c72;"><i class="fas fa-lock"></i> Your Security Matters</h5>
-                    <p class="text-muted mb-0 small">
-                        We use industry-standard encryption and 2FA to protect your account. 
-                        Your login attempts are logged for security auditing.
-                    </p>
-                </div>
-            </div>
+<div class="totp-wrap">
+    <section class="totp-hero" aria-label="Authenticator verification">
+        <div>
+            <h1>Confirm it's really you.</h1>
+            <p>Use your authenticator app or a backup code to keep your Cebu Luxury account protected.</p>
         </div>
-    </div>
+    </section>
+
+    <section>
+        <div class="totp-card">
+            <div class="totp-icon"><i class="fas fa-shield-alt"></i></div>
+            <h2>Verify your identity</h2>
+            <p>Enter the code from your authenticator app.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <label for="code" class="form-label fw-bold">6-Digit Code</label>
+                    <input
+                        type="text"
+                        class="totp-code"
+                        id="code"
+                        name="code"
+                        placeholder="000000"
+                        maxlength="6"
+                        pattern="\d{6}"
+                        required
+                        autofocus
+                    >
+                    <small class="d-block text-center mt-2">Or paste a backup code</small>
+                </div>
+
+                <button type="submit" class="totp-submit">
+                    <i class="fas fa-arrow-right me-2"></i> Verify Code
+                </button>
+
+                <a href="{% url 'auth:login' %}" class="totp-back">
+                    <i class="fas fa-arrow-left me-2"></i> Go Back
+                </a>
+
+                <div class="totp-help">
+                    <strong>Need help?</strong>
+                    <ul class="mb-0 ps-3 mt-2">
+                        <li>Make sure your device time is synchronized.</li>
+                        <li>Use a backup code if your authenticator app is unavailable.</li>
+                        <li>Each authenticator code is valid for 30 seconds.</li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="totp-info">
+            <h5><i class="fas fa-lock me-2"></i>Your security matters</h5>
+            <p class="mb-0 small">
+                We use two-factor verification to help protect your bookings, payments, and guest messages.
+            </p>
+        </div>
+    </section>
 </div>
 
 <script>
-// Auto-format code input to add spaces every 3 digits
 const codeInput = document.getElementById('code');
 codeInput.addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    e.target.value = value;
+    e.target.value = e.target.value.replace(/\D/g, '');
 });
 
 codeInput.addEventListener('keypress', function(e) {

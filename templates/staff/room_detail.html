@@ -1,103 +1,123 @@
-{% extends 'base.html' %}
+{% extends 'staff/staff_base.html' %}
 {% load static %}
 
-{% block title %}Room Details - Staff Dashboard{% endblock %}
+{% block title %}Room Details - Cebu Luxury{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
     .back-link {
         margin-bottom: 2rem;
+        display: inline-block;
     }
-    
+
     .room-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        color: #fff;
         padding: 2rem;
-        border-radius: 0.5rem;
+        border-radius: 8px;
         margin-bottom: 2rem;
+        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.16);
     }
-    
+
     .room-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 1rem;
+        gap: 1rem;
     }
-    
+
     .room-header h1 {
         margin: 0;
+        font-size: 2.5rem;
+        font-weight: 850;
+        color: #fff !important;
     }
-    
+
+    .room-subtitle {
+        margin: 0.35rem 0 0;
+        color: rgba(255, 255, 255, 0.88);
+    }
+
     .info-card {
-        background: white;
-        border-left: 4px solid #667eea;
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid var(--guest-line);
         padding: 1.5rem;
-        margin-bottom: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        border-radius: 8px;
+        box-shadow: var(--guest-shadow);
     }
-    
+
     .info-card h5 {
-        color: #667eea;
-        font-weight: 600;
+        color: var(--guest-ink);
+        font-weight: 800;
         margin-bottom: 1rem;
         font-size: 1rem;
     }
-    
+
     .info-row {
         display: flex;
         justify-content: space-between;
-        padding: 0.5rem 0;
-        border-bottom: 1px solid #f0f0f0;
+        gap: 1rem;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--guest-line);
     }
-    
+
     .info-row:last-child {
         border-bottom: none;
     }
-    
+
     .info-label {
-        font-weight: 600;
-        color: #666;
+        font-weight: 700;
+        color: var(--guest-muted);
     }
-    
+
     .info-value {
-        color: #333;
+        color: var(--guest-ink);
+        text-align: right;
     }
-    
-    .status-badge {
-        display: inline-block;
-        padding: 0.4rem 0.8rem;
-        border-radius: 2rem;
-        font-weight: 600;
-    }
-    
-    .status-available {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .status-occupied {
-        background: #ffebee;
-        color: #c62828;
-    }
-    
+
     .guest-section {
         margin-top: 1rem;
         padding-top: 1rem;
-        border-top: 2px solid #f0f0f0;
+        border-top: 1px solid var(--guest-line);
+    }
+
+    .amenities-copy p {
+        color: var(--guest-ink);
+        margin-bottom: 0.65rem;
+    }
+
+    .action-strip {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .room-header,
+        .info-row {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .info-value {
+            text-align: left;
+        }
     }
 </style>
+{% endblock %}
 
-<div class="container py-4">
+{% block content %}
+<div class="container-fluid py-4">
     <a href="{% url 'staff:room_status' %}" class="btn btn-secondary back-link">
         <i class="fas fa-arrow-left"></i> Back to Rooms
     </a>
-    
+
     <div class="room-hero">
         <div class="room-header">
             <div>
                 <h1>Room {{ room.room_number }}</h1>
-                <p class="mb-0">{{ room.get_room_type_display }} • Capacity: {{ room.capacity }} guests</p>
+                <p class="room-subtitle">{{ room.get_room_type_display }} • Capacity: {{ room.capacity }} guests</p>
             </div>
             {% if current_booking %}
                 <span class="status-badge status-occupied">
@@ -110,8 +130,7 @@
             {% endif %}
         </div>
     </div>
-    
-    <!-- Room Information -->
+
     <div class="row">
         <div class="col-lg-6">
             <div class="info-card">
@@ -130,7 +149,7 @@
                 </div>
                 <div class="info-row">
                     <span class="info-label">Price/Night:</span>
-                    <span class="info-value">₱{{ room.price_per_night }}</span>
+                    <span class="info-value">&#8369;{{ room.price_per_night }}</span>
                 </div>
                 <div class="info-row">
                     <span class="info-label">Floor:</span>
@@ -138,21 +157,19 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Room Amenities -->
+
         <div class="col-lg-6">
             <div class="info-card">
                 <h5><i class="fas fa-star"></i> Amenities</h5>
                 {% if room.amenities %}
-                    <div class="info-value">{{ room.amenities|linebreaks }}</div>
+                    <div class="amenities-copy">{{ room.amenities|linebreaks }}</div>
                 {% else %}
-                    <p class="text-muted">No amenities listed</p>
+                    <p class="text-muted">No amenities listed.</p>
                 {% endif %}
             </div>
         </div>
     </div>
-    
-    <!-- Current Booking Information -->
+
     {% if current_booking %}
     <div class="info-card">
         <h5><i class="fas fa-calendar-alt"></i> Current Booking</h5>
@@ -175,7 +192,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Check-Out:</span>
-                <span class="info-value"><strong style="color: #e74c3c;">{{ current_booking.check_out|date:"M d, Y" }}</strong></span>
+                <span class="info-value"><strong class="text-danger">{{ current_booking.check_out|date:"M d, Y" }}</strong></span>
             </div>
             <div class="info-row">
                 <span class="info-label">Number of Nights:</span>
@@ -183,16 +200,15 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Total Price:</span>
-                <span class="info-value">₱{{ current_booking.total_price }}</span>
+                <span class="info-value">&#8369;{{ current_booking.total_price }}</span>
             </div>
         </div>
     </div>
     {% endif %}
-    
-    <!-- Upcoming Booking Information -->
+
     {% if upcoming_booking %}
-    <div class="info-card" style="border-left-color: #28a745;">
-        <h5 style="color: #28a745;"><i class="fas fa-calendar-plus"></i> Next Booking</h5>
+    <div class="info-card">
+        <h5><i class="fas fa-calendar-plus"></i> Next Booking</h5>
         <div class="info-row">
             <span class="info-label">Guest:</span>
             <span class="info-value"><strong>{{ upcoming_booking.guest.get_full_name|default:upcoming_booking.guest.username }}</strong></span>
@@ -207,23 +223,22 @@
         </div>
     </div>
     {% endif %}
-    
-    <!-- Quick Actions -->
+
     <div class="row mt-4">
         <div class="col-12">
             <div class="info-card">
                 <h5><i class="fas fa-tasks"></i> Quick Actions</h5>
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <div class="action-strip">
                     {% if not current_booking %}
-                        <button class="btn btn-success">
+                        <button class="btn btn-primary">
                             <i class="fas fa-check"></i> Mark as Clean
                         </button>
                     {% else %}
-                        <button class="btn btn-warning" disabled>
+                        <button class="btn btn-secondary" disabled>
                             <i class="fas fa-user"></i> Room Occupied
                         </button>
                     {% endif %}
-                    <a href="{% url 'staff:room_status' %}" class="btn btn-info">
+                    <a href="{% url 'staff:room_status' %}" class="btn btn-secondary">
                         <i class="fas fa-list"></i> Back to List
                     </a>
                 </div>

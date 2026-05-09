@@ -1,89 +1,75 @@
 {% extends 'base.html' %}
-{% load socialaccount %}
+{% load static socialaccount %}
 
 {% block title %}Login - Cebu Hotel{% endblock %}
+{% block body_class %} class="auth-page"{% endblock %}
 
 {% block extra_css %}
-<style>
-    input, select {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-family: 'Lato', sans-serif;
-        transition: all 0.3s ease;
-    }
-
-    input:focus, select:focus {
-        outline: none;
-        border-color: #1a1a1a;
-        box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
-    }
-</style>
+<link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 500px; margin: 3rem auto;">
-    <div style="background: white; border-radius: 12px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
-        <div style="text-align: center; margin-bottom: 2rem;">
-            <h2 style="color: #1a1a1a; margin-bottom: 0.5rem;">Welcome Back</h2>
-            <p style="color: #666;">Sign in to your account to continue</p>
+<div class="auth-wrap">
+    <section class="auth-story" aria-label="Cebu Luxury Hotel">
+        <div class="auth-brand-mark">C</div>
+        <div>
+            <h1>Return to your island stay.</h1>
+            <p>Access reservations, guest messages, room operations, and management tools from one secure portal.</p>
         </div>
+    </section>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+    <section class="auth-panel" aria-labelledby="login-title">
+        <div class="auth-kicker">Secure sign in</div>
+        <h2 id="login-title">Welcome back</h2>
+        <p class="auth-subtitle">Use your email or username to continue to the right dashboard for your role.</p>
 
-        <!-- Google OAuth Login -->
         {% if google_oauth_configured %}
-        <div style="margin-bottom: 2rem;">
-            <a href="{% provider_login_url 'google' %}" class="btn-primary" style="text-align: center; display: block; background: white; color: #1a1a1a; border: 2px solid #e5e7eb;">
-                <i class="fab fa-google"></i> Continue with Google
+            <a href="{% provider_login_url 'google' %}" class="auth-button secondary">
+                <i class="fab fa-google"></i>
+                Continue with Google
             </a>
-        </div>
-
-        <div style="display: flex; align-items: center; margin: 2rem 0;">
-            <hr style="flex: 1; border: none; border-top: 1px solid #e5e7eb;">
-            <span style="margin: 0 1rem; color: #999;">or</span>
-            <hr style="flex: 1; border: none; border-top: 1px solid #e5e7eb;">
-        </div>
+            <div class="auth-divider">or</div>
         {% endif %}
 
-        <!-- Traditional Login Form -->
-        <form method="POST" novalidate style="margin-bottom: 1.5rem;">
+        <form method="POST" novalidate>
             {% csrf_token %}
-            
-            <div style="margin-bottom: 1.5rem;">
-                <label for="{{ form.username.id_for_label }}" style="font-weight: 600; color: #1a1a1a;">Email Address</label>
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif %}
+
+            <div class="auth-field">
+                <label for="{{ form.username.id_for_label }}">Email or Username</label>
                 {{ form.username }}
                 {% if form.username.errors %}
-                    <small style="color: #dc2626;">{{ form.username.errors }}</small>
+                    <div class="auth-error">{{ form.username.errors }}</div>
                 {% endif %}
             </div>
 
-            <div style="margin-bottom: 2rem;">
-                <label for="{{ form.password.id_for_label }}" style="font-weight: 600; color: #1a1a1a;">Password</label>
+            <div class="auth-field">
+                <label for="{{ form.password.id_for_label }}">Password</label>
                 {{ form.password }}
                 {% if form.password.errors %}
-                    <small style="color: #dc2626;">{{ form.password.errors }}</small>
+                    <div class="auth-error">{{ form.password.errors }}</div>
                 {% endif %}
             </div>
 
-            <button type="submit" class="btn-primary" style="width: 100%; text-align: center;">
+            <div class="auth-actions">
+                <div class="auth-check">
+                    {{ form.remember_me }}
+                    <label for="{{ form.remember_me.id_for_label }}">Remember me</label>
+                </div>
+                <a href="{% url 'account_reset_password' %}" class="auth-link">Forgot password?</a>
+            </div>
+
+            <button type="submit" class="auth-button">
+                <i class="fas fa-arrow-right-to-bracket"></i>
                 Sign In
             </button>
         </form>
 
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem; text-align: center;">
-            <p style="color: #666; margin-bottom: 1rem;">Don't have an account? <a href="{% url 'account_signup' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Sign Up</a></p>
-            <p style="color: #666;"><a href="{% url 'account_reset_password' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Forgot Password?</a></p>
+        <div class="auth-footer">
+            New guest? <a href="{% url 'auth:register' %}" class="auth-link">Create an account</a>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}
-

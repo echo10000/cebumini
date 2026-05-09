@@ -198,7 +198,7 @@ def get_guest_statistics():
     }
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @admin_required
 def dashboard_view(request):
     """Admin dashboard with statistics"""
@@ -223,7 +223,7 @@ def dashboard_view(request):
     return render(request, 'dashboard/admin_dashboard.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def revenue_analytics_view(request):
     """Detailed revenue analytics"""
     if not request.user.is_admin():
@@ -361,7 +361,7 @@ def revenue_analytics_view(request):
     return render(request, 'dashboard/revenue_analytics.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def occupancy_analytics_view(request):
     """Occupancy analysis and room status"""
     if not request.user.is_admin():
@@ -529,7 +529,7 @@ def occupancy_analytics_view(request):
     return render(request, 'dashboard/occupancy_analytics.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def booking_analytics_view(request):
     """Detailed booking analytics"""
     if not request.user.is_admin():
@@ -790,7 +790,7 @@ def get_guest_statistics():
     }
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def dashboard_view(request):
     """Admin/User dashboard with statistics"""
     if not request.user.is_admin():
@@ -820,7 +820,7 @@ def dashboard_view(request):
     return render(request, 'dashboard/admin_dashboard.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def revenue_analytics_view(request):
     """Detailed revenue analytics"""
     if not request.user.is_admin():
@@ -893,7 +893,7 @@ def revenue_analytics_view(request):
     return render(request, 'dashboard/revenue_analytics.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def occupancy_analytics_view(request):
     """Occupancy analysis and room status"""
     if not request.user.is_admin():
@@ -983,7 +983,7 @@ def occupancy_analytics_view(request):
     return render(request, 'dashboard/occupancy_analytics.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def booking_analytics_view(request):
     """Detailed booking analytics"""
     if not request.user.is_admin():

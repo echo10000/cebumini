@@ -1,0 +1,23 @@
+Dear {{ guest.first_name|default:guest.username }},
+
+Your booking at Cebu Hotel is confirmed.
+
+Booking details:
+- Booking ID: #{{ booking.id }}
+- Check-in Reference: {{ booking.booking_reference }}
+- Room: {{ room.room_number }}{% if room.get_room_type_display %} ({{ room.get_room_type_display }}){% endif %}
+- Check-in: {{ booking.check_in }}
+- Check-out: {{ booking.check_out }}
+- Nights: {{ booking.number_of_nights }}
+- Total Paid: PHP {{ booking.total_price }}
+
+You can view your booking here:
+{{ booking_url }}
+
+At check-in, please show your reference code and a valid ID matching the booking name.
+
+If you need help, please contact support@cebuhotel.com.
+
+Thank you for choosing Cebu Hotel.
+
+Cebu Hotel Team

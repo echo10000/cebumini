@@ -1,174 +1,807 @@
-{% extends 'base.html' %}
+{% extends 'staff/staff_base.html' %}
 {% load static %}
 
-{% block title %}Room Status - Staff Dashboard{% endblock %}
+{% block title %}Room Status - Cebu Luxury{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
-    .staff-nav {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        margin-bottom: 2rem;
+    /* ============================================
+       BOOTSTRAP OVERRIDES
+       ============================================ */
+    
+    body {
+        background: #0a0f1e !important;
     }
     
-    .staff-nav .navbar-brand {
-        color: white;
+    .container-fluid {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    h2, h3, h4, h5, h6 {
+        color: #ffffff !important;
+    }
+    
+    .text-muted {
+        color: #9ca3af !important;
+    }
+    
+    .text-white {
+        color: #ffffff !important;
+    }
+    
+    /* ============================================
+       BREADCRUMB / NAVIGATION TRAIL
+       ============================================ */
+    
+    .breadcrumb-trail {
+        display: flex;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        font-size: 0.85rem;
+        color: #9ca3af;
+        align-items: center;
+    }
+    
+    .breadcrumb-trail a {
+        color: #9ca3af;
+        text-decoration: none;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .breadcrumb-trail a:hover {
+        color: #c9a84c;
+    }
+    
+    .breadcrumb-trail a i {
+        color: #c9a84c;
+    }
+    
+    .breadcrumb-trail .separator {
+        color: #6b7280;
+    }
+    
+    .breadcrumb-trail .active {
+        color: #c9a84c;
+        font-weight: 600;
+    }
+    
+    /* ============================================
+       PAGE HEADER
+       ============================================ */
+    
+    .page-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .page-header h2 {
+        font-size: 1.6rem;
         font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ffffff !important;
     }
     
-    .staff-nav .nav-link {
-        color: rgba(255,255,255,0.8);
-        margin-right: 1rem;
+    .page-header h2 i {
+        color: #c9a84c;
+        font-size: 1.4rem;
     }
     
-    .staff-nav .nav-link:hover {
-        color: white;
+    .page-header .subtitle {
+        color: #9ca3af;
+        font-size: 0.95rem;
+        margin: 0;
     }
+    
+    /* ============================================
+       FILTERS / SEARCH BAR
+       ============================================ */
+    
+    .filters-section {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .filter-input {
+        background: #0f1623 !important;
+        border: 1px solid rgba(201, 168, 76, 0.3) !important;
+        color: #ffffff !important;
+        padding: 0.75rem 1.25rem;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        min-width: 250px;
+    }
+    
+    .filter-input::placeholder {
+        color: #6b7280;
+    }
+    
+    .filter-input:hover {
+        border-color: #c9a84c !important;
+    }
+    
+    .filter-input:focus {
+        outline: none;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+    }
+    
+    .filter-button {
+        background: #c9a84c !important;
+        color: #0a0f1e !important;
+        border: none !important;
+        padding: 0.75rem 1.5rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-left: auto;
+    }
+    
+    .filter-button:hover {
+        background: #b8963d !important;
+        transform: scale(1.02);
+    }
+    
+    /* ============================================
+       ROOM GRID LAYOUT
+       ============================================ */
     
     .room-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
         gap: 1.5rem;
+        margin-bottom: 2rem;
     }
     
+    /* ============================================
+       ROOM CARD
+       ============================================ */
+    
     .room-card {
-        background: white;
-        border-radius: 0.5rem;
+        background: #1a2235 !important;
+        border: 1px solid rgba(201, 168, 76, 0.15) !important;
+        border-radius: 10px;
         overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transition: transform 0.2s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s ease;
     }
     
     .room-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+        border-color: #c9a84c !important;
     }
     
+    /* ============================================
+       ROOM CARD HEADER
+       ============================================ */
+    
     .room-card-header {
-        padding: 1rem;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: linear-gradient(135deg, #c9a84c 0%, #a68a3d 100%) !important;
+        color: #0a0f1e !important;
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 0;
+        border: none;
+        border-bottom: 2px solid rgba(201, 168, 76, 0.2);
     }
     
     .room-number {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         font-weight: 700;
+        font-family: 'Playfair Display', serif;
+        color: #0a0f1e !important;
+        line-height: 1;
     }
     
     .room-type {
-        font-size: 0.9rem;
-        opacity: 0.9;
+        font-size: 0.85rem;
+        color: rgba(10, 15, 30, 0.7) !important;
+        font-weight: 500;
     }
+    
+    /* ============================================
+       ROOM CARD BODY
+       ============================================ */
     
     .room-card-body {
-        padding: 1rem;
+        padding: 1.5rem;
+        background: #1a2235 !important;
     }
+    
+    /* ============================================
+       STATUS BADGE
+       ============================================ */
     
     .status-badge {
-        display: inline-block;
-        padding: 0.4rem 0.8rem;
-        border-radius: 2rem;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    
-    .status-available {
-        background-color: #d4edda;
-        color: #155724;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
     }
     
     .status-occupied {
-        background-color: #ffebee;
-        color: #c62828;
+        background: #7f1d1d !important;
+        color: #fca5a5 !important;
+        border: 1px solid #dc2626;
+    }
+    
+    .status-available {
+        background: #064e3b !important;
+        color: #6ee7b7 !important;
+        border: 1px solid #10b981;
     }
     
     .status-cleaning {
-        background-color: #fff3cd;
-        color: #856404;
+        background: #78350f !important;
+        color: #fbbf24 !important;
+        border: 1px solid #d97706;
     }
     
+    .status-badge i {
+        font-size: 0.95rem;
+    }
+    
+    /* ============================================
+       GUEST INFO
+       ============================================ */
+    
     .guest-info {
-        margin: 0.8rem 0;
-        padding: 0.8rem;
-        background: #f8f9fa;
-        border-radius: 0.3rem;
-        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        padding: 1rem 0;
+        border-top: 1px solid rgba(201, 168, 76, 0.1);
     }
     
     .guest-name {
         font-weight: 600;
-        color: #333;
+        color: #ffffff !important;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
     }
     
     .checkout-time {
-        color: #e74c3c;
-        font-weight: 600;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .checkout-time .label {
+        color: #9ca3af !important;
+        font-size: 0.8rem;
+    }
+    
+    .checkout-time .date {
+        color: #ef4444 !important;
+        font-weight: 700;
+        font-size: 0.9rem;
     }
     
     .action-buttons {
         display: flex;
-        gap: 0.5rem;
-        margin-top: 0.8rem;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
     }
     
     .action-buttons .btn {
         flex: 1;
-        padding: 0.5rem;
+        min-width: 100px;
+        padding: 0.6rem 1.25rem;
         font-size: 0.85rem;
+        font-weight: 700;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .action-buttons .btn-primary {
+        background: #f59e0b !important;
+        color: #0a0f1e !important;
+    }
+    
+    .action-buttons .btn-primary:hover {
+        background: #d97706 !important;
+        transform: scale(1.05);
+    }
+    
+    .action-buttons .btn-success {
+        background: #10b981 !important;
+        color: white !important;
+    }
+    
+    .action-buttons .btn-success:hover {
+        background: #059669 !important;
+        transform: scale(1.05);
+    }
+    
+    /* ============================================
+       MODAL STYLING
+       ============================================ */
+    
+    .modal-content {
+        background: #1a2235 !important;
+        border: 1px solid rgba(201, 168, 76, 0.15) !important;
+        color: #ffffff !important;
+    }
+    
+    .modal-header {
+        background: linear-gradient(135deg, #c9a84c 0%, #a68a3d 100%) !important;
+        border: none !important;
+        border-bottom: 2px solid rgba(201, 168, 76, 0.2);
+    }
+    
+    .modal-header .modal-title {
+        color: #0a0f1e !important;
+        font-weight: 700;
+    }
+    
+    .modal-header .btn-close {
+        filter: brightness(0.3) !important;
+    }
+    
+    .modal-body {
+        color: #9ca3af !important;
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+    
+    .modal-footer {
+        background: #0f1623 !important;
+        border-top: 1px solid rgba(201, 168, 76, 0.15) !important;
+    }
+    
+    .modal-footer .btn-secondary {
+        background: #4b5563 !important;
+        color: white !important;
+        border: none !important;
+    }
+    
+    .modal-footer .btn-secondary:hover {
+        background: #3a3f4e !important;
+    }
+    
+    .modal-footer .btn-success {
+        background: #10b981 !important;
+        color: white !important;
+        border: none !important;
+    }
+    
+    .modal-footer .btn-success:hover {
+        background: #059669 !important;
+    }
+    
+    /* ============================================
+       SUCCESS TOAST NOTIFICATION
+       ============================================ */
+    
+    .toast-notification {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 1.25rem 1.75rem;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
+        z-index: 9999;
+        animation: slideIn 0.3s ease;
+        border-left: 4px solid #6ee7b7;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .toast-notification i {
+        font-size: 1.25rem;
+    }
+    
+    .toast-notification .message {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    @keyframes slideIn {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+    
+    .toast-notification.removing {
+        animation: slideOut 0.3s ease forwards;
+    }
+    
+    /* ============================================
+       EMPTY STATE
+       ============================================ */
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #9ca3af;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #6b7280;
+        margin-bottom: 1rem;
+        display: block;
+        opacity: 0.5;
+    }
+    
+    .empty-state h4 {
+        margin: 0.5rem 0 0.5rem;
+    }
+    
+    .empty-state p {
+        margin: 0;
+        font-size: 0.95rem;
+    }
+    
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1.5rem;
+        }
+        
+        .toast-notification {
+            top: 1rem;
+            right: 1rem;
+            left: 1rem;
+        }
+        
+        .room-grid {
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .page-header h2 {
+            font-size: 1.4rem;
+        }
+        
+        .breadcrumb-trail {
+            font-size: 0.8rem;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .filters-section {
+            flex-direction: column;
+            padding: 1.25rem;
+            gap: 1rem;
+        }
+        
+        .filter-input {
+            min-width: 100% !important;
+        }
+        
+        .filter-button {
+            width: 100%;
+            justify-content: center;
+            margin-left: 0;
+        }
+        
+        .room-card-header {
+            padding: 1.25rem;
+        }
+        
+        .room-number {
+            font-size: 1.4rem;
+        }
+        
+        .room-type {
+            font-size: 0.8rem;
+        }
+        
+        .room-card-body {
+            padding: 1.25rem;
+        }
+        
+        .action-buttons {
+            gap: 0.5rem;
+        }
+    }
+    
+    /* ============================================
+       RESPONSIVE DESIGN - MOBILE (480px)
+       ============================================ */
+    
+    @media (max-width: 480px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
+        .toast-notification {
+            top: 0.75rem;
+            right: 0.75rem;
+            left: 0.75rem;
+            padding: 1rem 1.25rem;
+            font-size: 0.9rem;
+        }
+        
+        .room-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .page-header {
+            margin-bottom: 1.5rem;
+        }
+        
+        .page-header h2 {
+            font-size: 1.2rem;
+            gap: 0.75rem;
+        }
+        
+        .page-header h2 i {
+            font-size: 1.3rem;
+        }
+        
+        .page-header .subtitle {
+            font-size: 0.85rem;
+        }
+        
+        .breadcrumb-trail {
+            font-size: 0.75rem;
+            gap: 0.4rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .breadcrumb-trail .separator {
+            margin: 0 0.2rem;
+        }
+        
+        .filters-section {
+            padding: 1rem;
+            gap: 0.75rem;
+            flex-direction: column;
+        }
+        
+        .filter-input {
+            min-width: 100% !important;
+            padding: 0.65rem 0.75rem;
+            font-size: 0.9rem;
+        }
+        
+        .filter-button {
+            width: 100%;
+            padding: 0.65rem 1rem;
+            font-size: 0.8rem;
+            margin-left: 0;
+        }
+        
+        .room-card-header {
+            padding: 1rem;
+        }
+        
+        .room-number {
+            font-size: 1.2rem;
+        }
+        
+        .room-type {
+            font-size: 0.75rem;
+        }
+        
+        .room-card-body {
+            padding: 1rem;
+        }
+        
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+        
+        .guest-info {
+            margin-bottom: 0.75rem;
+            padding: 0.75rem 0;
+            border-top: 1px solid rgba(201, 168, 76, 0.1);
+        }
+        
+        .guest-name {
+            font-size: 0.9rem;
+        }
+        
+        .checkout-time {
+            font-size: 0.8rem;
+        }
+        
+        .action-buttons {
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        
+        .action-buttons .btn {
+            width: 100%;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+    }
+
+    .room-card {
+        background: rgba(255, 255, 255, 0.96) !important;
+        border: 1px solid var(--guest-line) !important;
+        box-shadow: var(--guest-shadow) !important;
+    }
+
+    .room-card-header {
+        background: transparent !important;
+        border-bottom: 1px solid var(--guest-line) !important;
+    }
+
+    .room-number {
+        color: var(--guest-brand-dark) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-weight: 850 !important;
+    }
+
+    .room-type {
+        color: var(--guest-muted) !important;
+    }
+
+    .room-card-body,
+    .guest-info {
+        background: transparent !important;
+        color: var(--guest-ink) !important;
+    }
+
+    .guest-info {
+        border-top: 1px solid var(--guest-line) !important;
+    }
+
+    .guest-name,
+    .checkout-time .label {
+        color: var(--guest-ink) !important;
+    }
+
+    .checkout-time .date {
+        color: var(--guest-danger) !important;
+    }
+
+    .status-occupied {
+        background: #dbeafe !important;
+        color: #1d4ed8 !important;
+        border-color: #bfdbfe !important;
+    }
+
+    .status-available {
+        background: #dcfce7 !important;
+        color: var(--guest-success) !important;
+        border-color: #bbf7d0 !important;
+    }
+
+    .status-cleaning {
+        background: #fef3c7 !important;
+        color: var(--guest-warning) !important;
+        border-color: #fde68a !important;
+    }
+
+    .action-buttons .btn-primary {
+        background: var(--guest-brand) !important;
+        color: #fff !important;
+    }
+
+    .action-buttons .btn-primary:hover {
+        background: var(--guest-brand-dark) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    .action-buttons .btn-success {
+        background: #fff !important;
+        color: var(--guest-ink) !important;
+        border: 1px solid var(--guest-line) !important;
+    }
+
+    .action-buttons .btn-success:hover {
+        background: var(--guest-surface-alt) !important;
+        color: var(--guest-ink) !important;
+        transform: translateY(-1px) !important;
     }
 </style>
 
-<nav class="navbar navbar-expand-lg navbar-dark staff-nav">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'staff:dashboard' %}">
-            <i class="fas fa-users-cog"></i> Staff Dashboard
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#staffNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="staffNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:dashboard' %}">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'staff:room_status' %}">
-                        <i class="fas fa-door-open"></i> Rooms
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:check_in_checkout' %}">
-                        <i class="fas fa-sign-in-alt"></i> Check-In/Out
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:guest_services' %}">
-                        <i class="fas fa-headset"></i> Guest Services
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:reports' %}">
-                        <i class="fas fa-file-alt"></i> Reports
-                    </a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+{% endblock %}
 
+{% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-3">
-        <div class="col-12">
-            <h2><i class="fas fa-door-open"></i> Room Status Overview</h2>
-            <p class="text-muted">Monitor and manage room status at a glance</p>
-        </div>
-    </div>
+    <!-- BREADCRUMB / NAVIGATION TRAIL -->
+    <nav class="breadcrumb-trail">
+        <a href="{% url 'staff:dashboard' %}">
+            <i class="fas fa-home"></i> Staff Dashboard
+        </a>
+        <span class="separator">/</span>
+        <span class="active">Rooms</span>
+    </nav>
     
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h2>
+            <i class="fas fa-door-open"></i>
+            Room Status Overview
+        </h2>
+        <p class="subtitle">Monitor and manage room status at a glance</p>
+    </div>
+    <!-- FILTERS / SEARCH BAR -->
+    {% if rooms %}
+    <div class="filters-section">
+        <input 
+            type="text" 
+            class="filter-input" 
+            id="searchRooms" 
+            placeholder="Search by room number or guest name..."
+        >
+        <select class="filter-input" id="filterStatus" style="min-width: 200px;">
+            <option value="">All Status</option>
+            <option value="occupied">Occupied</option>
+            <option value="available">Available</option>
+        </select>
+        <select class="filter-input" id="filterType" style="min-width: 200px;">
+            <option value="">All Room Types</option>
+            <option value="standard">Standard</option>
+            <option value="deluxe">Deluxe</option>
+            <option value="suite">Suite</option>
+            <option value="presidential">Presidential</option>
+        </select>
+        <button class="filter-button" id="resetFilters">
+            <i class="fas fa-redo"></i> Reset Filters
+        </button>
+    </div>
+    {% endif %}
+    
+    <!-- ROOM CARDS GRID -->
+    {% if rooms %}
     <div class="room-grid">
         {% for room in rooms %}
-        <div class="room-card">
+        <div class="room-card" data-room-number="{{ room.room_number|lower }}" data-room-type="{{ room.get_room_type_display|lower }}" data-status="{% if room.current_booking %}occupied{% else %}available{% endif %}" data-guest="{% if room.current_booking %}{{ room.current_booking.guest.get_full_name|default:room.current_booking.guest.username|lower }}{% endif %}">
             <div class="room-card-header">
                 <div class="room-number">{{ room.room_number }}</div>
                 <div class="room-type">{{ room.get_room_type_display }}</div>
@@ -181,7 +814,8 @@
                     <div class="guest-info">
                         <div class="guest-name">{{ room.current_booking.guest.get_full_name|default:room.current_booking.guest.username }}</div>
                         <div class="checkout-time">
-                            Checkout: {{ room.current_booking.check_out|date:"M d, Y" }}
+                            <span class="label"><i class="fas fa-calendar-times"></i> Checkout</span>
+                            <span class="date">{{ room.current_booking.check_out|date:"M d, Y" }}</span>
                         </div>
                     </div>
                 {% else %}
@@ -204,6 +838,14 @@
         </div>
         {% endfor %}
     </div>
+    {% else %}
+    <!-- EMPTY STATE -->
+    <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <h4 style="color: #9ca3af; margin-top: 0.5rem;">No Rooms Found</h4>
+        <p>There are currently no rooms in the system. Please contact your administrator.</p>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Mark Clean Modal -->
@@ -229,12 +871,137 @@
 </div>
 
 <script>
+// ============================================
+// FILTER FUNCTIONALITY
+// ============================================
+
+const searchInput = document.getElementById('searchRooms');
+const filterStatus = document.getElementById('filterStatus');
+const filterType = document.getElementById('filterType');
+const resetButton = document.getElementById('resetFilters');
+const roomCards = document.querySelectorAll('.room-card');
+
+function filterRooms() {
+    const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+    const statusFilter = filterStatus ? filterStatus.value.toLowerCase() : '';
+    const typeFilter = filterType ? filterType.value.toLowerCase() : '';
+    
+    roomCards.forEach(card => {
+        const roomNumber = card.getAttribute('data-room-number') || '';
+        const roomType = card.getAttribute('data-room-type') || '';
+        const status = card.getAttribute('data-status') || '';
+        const guestName = card.getAttribute('data-guest') || '';
+        
+        // Check if card matches all filters
+        const matchesSearch = 
+            roomNumber.includes(searchTerm) || 
+            guestName.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesType = !typeFilter || roomType === typeFilter;
+        
+        // Show or hide card
+        if (matchesSearch && matchesStatus && matchesType) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Show empty state if all cards are hidden
+    updateEmptyState();
+}
+
+function updateEmptyState() {
+    const visibleCards = Array.from(roomCards).some(card => card.style.display !== 'none');
+    const emptyState = document.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.style.display = visibleCards ? 'none' : '';
+    }
+}
+
+function resetFilters() {
+    if (searchInput) searchInput.value = '';
+    if (filterStatus) filterStatus.value = '';
+    if (filterType) filterType.value = '';
+    roomCards.forEach(card => card.style.display = '');
+    updateEmptyState();
+}
+
+// Event listeners
+if (searchInput) searchInput.addEventListener('input', filterRooms);
+if (filterStatus) filterStatus.addEventListener('change', filterRooms);
+if (filterType) filterType.addEventListener('change', filterRooms);
+if (resetButton) resetButton.addEventListener('click', resetFilters);
+
+// Mark Clean Modal Handler with AJAX
 const markCleanModal = document.getElementById('markCleanModal');
-markCleanModal.addEventListener('show.bs.modal', function(event) {
-    const button = event.relatedTarget;
-    const roomId = button.getAttribute('data-room-id');
-    const form = document.getElementById('markCleanForm');
-    form.action = `/staff/rooms/${roomId}/mark-clean/`;
-});
+let currentRoomId = null;
+
+if (markCleanModal) {
+    markCleanModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+        currentRoomId = button.getAttribute('data-room-id');
+        const form = document.getElementById('markCleanForm');
+        form.action = `/staff/rooms/${currentRoomId}/mark-clean/`;
+    });
+}
+
+// Handle Mark Clean Form Submission via AJAX
+const markCleanForm = document.getElementById('markCleanForm');
+if (markCleanForm) {
+    markCleanForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const roomId = currentRoomId;
+        
+        fetch(`/staff/rooms/${roomId}/mark-clean/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(markCleanModal);
+            modal.hide();
+            
+            // Show success message
+            showSuccessMessage(`Room ${roomId} marked as clean successfully!`);
+            
+            // Remove the clean button from the card
+            const cleanButton = document.querySelector(`button[data-room-id="${roomId}"]`);
+            if (cleanButton) {
+                cleanButton.parentElement.removeChild(cleanButton);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while marking the room as clean.');
+        });
+    });
+}
+
+// Show Success Toast Notification
+function showSuccessMessage(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.innerHTML = `
+        <i class="fas fa-check-circle"></i>
+        <span class="message">${message}</span>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // Auto-remove after 4 seconds
+    setTimeout(() => {
+        toast.classList.add('removing');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 4000);
+}
 </script>
 {% endblock %}

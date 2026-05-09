@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'guest/guest_base.html' %}
 {% load static %}
 
 {% block title %}Your Booking Profile - Cebu Hotel{% endblock %}
@@ -19,10 +19,10 @@
         <!-- Profile Stats -->
         <div class="row g-3 mb-4">
             <div class="col-md-3">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body">
-                        <p class="text-muted small mb-1">Total Bookings</p>
-                        <h3 class="mb-0">{{ profile.booking_count }}</h3>
+                <div class="card border-0 shadow-sm" style="background: #1a2235; border: 1px solid rgba(201,168,76,0.15);">
+                    <div class="card-body" style="background: #1a2235;">
+                        <p style="color: #9ca3af; font-size: 0.875rem; margin-bottom: 0.5rem;">Total Bookings</p>
+                        <h3 class="mb-0" style="color: #ffffff;">{{ profile.booking_count }}</h3>
                     </div>
                 </div>
             </div>
@@ -61,20 +61,20 @@
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="fas fa-heart"></i> Your Preferences
+                    <div class="card-header" style="background: #1a2235; border-bottom: 1px solid rgba(201,168,76,0.15);">
+                        <h5 class="mb-0" style="color: #ffffff;">
+                            <i class="fas fa-heart" style="color: #c9a84c;"></i> Your Preferences
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="background: #1a2235; color: #ffffff;">
                         {% if profile.favorite_room_type %}
                             <p class="mb-2">
                                 <strong>Favorite Room Type:</strong>
-                                <span class="badge bg-info">{{ profile.favorite_room_type }}</span>
+                                <span class="badge" style="background: #c9a84c; color: #0a0f1e;">{{ profile.favorite_room_type }}</span>
                             </p>
                         {% endif %}
 
-                        <p class="mb-2">
+                        <p class="mb-2" style="color: #c9a84c;">
                             <strong>Price Range:</strong>
                             ₱{{ profile.price_range.min|floatformat:0 }} - ₱{{ profile.price_range.max|floatformat:0 }}
                         </p>
@@ -83,7 +83,7 @@
                             <strong>Room Types Booked:</strong>
                             <br>
                             {% for room_type in profile.room_types_booked %}
-                                <span class="badge bg-secondary me-1">{{ room_type }}</span>
+                                <span class="badge" style="background: #1e3a5f; color: #93c5fd; margin: 0.25rem;">{{ room_type }}</span>
                             {% endfor %}
                         </p>
                     </div>
@@ -92,34 +92,34 @@
 
             <div class="col-md-6">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="fas fa-lightbulb"></i> Our Insights
+                    <div class="card-header" style="background: #1a2235; border-bottom: 1px solid rgba(201,168,76,0.15);">
+                        <h5 class="mb-0" style="color: #ffffff;">
+                            <i class="fas fa-lightbulb" style="color: #c9a84c;"></i> Our Insights
                         </h5>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="background: #1a2235; color: #9ca3af;">
                         <p class="mb-2">
-                            <strong>Based on your {{ profile.booking_count }} booking{{ profile.booking_count|pluralize }}:</strong>
+                            <strong style="color: #ffffff;">Based on your {{ profile.booking_count }} booking{{ profile.booking_count|pluralize }}:</strong>
                         </p>
                         
                         <ul class="mb-0">
                             <li>
                                 You prefer {{ profile.favorite_room_type|lower }} rooms
                                 {% if profile.favorite_room_type %}
-                                    <span class="text-muted">({{ profile.favorite_room_type }})</span>
+                                    <span style="color: #c9a84c;">({{ profile.favorite_room_type }})</span>
                                 {% endif %}
                             </li>
                             <li>
                                 Your typical stay is about 
-                                <strong>{{ profile.average_stay_duration|floatformat:0 }} nights</strong>
+                                <strong style="color: #ffffff;">{{ profile.average_stay_duration|floatformat:0 }} nights</strong>
                             </li>
                             <li>
                                 You typically spend 
-                                <strong>₱{{ profile.average_price|floatformat:0 }} per night</strong>
+                                <strong style="color: #c9a84c;">₱{{ profile.average_price|floatformat:0 }} per night</strong>
                             </li>
                             <li>
                                 Total investment: 
-                                <strong>₱{{ profile.total_spent|floatformat:0 }}</strong>
+                                <strong style="color: #c9a84c;">₱{{ profile.total_spent|floatformat:0 }}</strong>
                             </li>
                         </ul>
                     </div>
@@ -131,18 +131,18 @@
         <div class="row mb-4">
             <div class="col">
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-history"></i> Recent Bookings
+                    <div class="card-header d-flex justify-content-between align-items-center" style="background: #1a2235; border-bottom: 1px solid rgba(201,168,76,0.15);">
+                        <h5 class="mb-0" style="color: #ffffff;">
+                            <i class="fas fa-history" style="color: #c9a84c;"></i> Recent Bookings
                         </h5>
-                        <a href="{% url 'booking_history' %}" class="btn btn-sm btn-outline-primary">
+                        <a href="{% url 'bookings:booking_history' %}" class="btn btn-sm btn-outline-primary" style="color: #c9a84c; border-color: #c9a84c;">
                             View all →
                         </a>
                     </div>
                     <div class="table-responsive">
                         <table class="table table-hover mb-0">
-                            <thead class="table-light">
-                                <tr>
+                            <thead style="background: #1a2235; border-bottom: 1px solid rgba(201,168,76,0.15);">
+                                <tr style="color: #c9a84c;">
                                     <th>Room</th>
                                     <th>Check-in</th>
                                     <th>Check-out</th>

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'manager/manager_base.html' %}
 
 {% block title %}Staff Management{% endblock %}
 
@@ -50,10 +50,17 @@
                                     <i class="fas fa-chart-line"></i> Dashboard
                                 </a>
                                 {% if staff.is_active %}
-                                <a href="{% url 'auth:manager_deactivate_staff' staff.id %}" class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Are you sure you want to deactivate this staff member?')">
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deactivateStaffModal"
+                                        data-deactivate-url="{% url 'auth:manager_deactivate_staff' staff.id %}"
+                                        data-staff-name="{{ staff.get_full_name|default:staff.username }}">
                                     <i class="fas fa-ban"></i> Deactivate
-                                </a>
+                                </button>
+                                {% else %}
+                                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#reactivateStaffModal"
+                                        data-reactivate-url="{% url 'auth:manager_reactivate_staff' staff.id %}"
+                                        data-staff-name="{{ staff.get_full_name|default:staff.username }}">
+                                    <i class="fas fa-rotate-left"></i> Reactivate
+                                </button>
                                 {% endif %}
                             </td>
                         </tr>
@@ -70,4 +77,88 @@
         </div>
     </div>
 </div>
+
+<!-- Deactivate Staff Confirmation Modal -->
+<div class="modal fade" id="deactivateStaffModal" tabindex="-1" aria-labelledby="deactivateStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deactivateStaffModalLabel">Confirm Deactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="deactivateStaffForm" method="post" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    Are you sure you want to deactivate <strong id="deactivateStaffName">this staff member</strong>?
+                    This action will immediately revoke their access.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="confirmDeactivateButton" class="btn btn-danger">Yes, deactivate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Reactivate Staff Confirmation Modal -->
+<div class="modal fade" id="reactivateStaffModal" tabindex="-1" aria-labelledby="reactivateStaffModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="reactivateStaffModalLabel">Confirm Reactivation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="reactivateStaffForm" method="post" action="">
+                {% csrf_token %}
+                <div class="modal-body">
+                    Are you sure you want to reactivate <strong id="reactivateStaffName">this staff member</strong>?
+                    This will restore their staff access.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" id="confirmReactivateButton" class="btn btn-success">Yes, reactivate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const deactivateStaffModal = document.getElementById('deactivateStaffModal');
+    const deactivateStaffForm = document.getElementById('deactivateStaffForm');
+    const deactivateStaffName = document.getElementById('deactivateStaffName');
+    const reactivateStaffModal = document.getElementById('reactivateStaffModal');
+    const reactivateStaffForm = document.getElementById('reactivateStaffForm');
+    const reactivateStaffName = document.getElementById('reactivateStaffName');
+
+    if (deactivateStaffModal) {
+        document.body.appendChild(deactivateStaffModal);
+
+        deactivateStaffModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const deactivateUrl = button.getAttribute('data-deactivate-url');
+            const staffName = button.getAttribute('data-staff-name') || 'this staff member';
+
+            deactivateStaffForm.action = deactivateUrl;
+            deactivateStaffName.textContent = staffName;
+        });
+    }
+
+    if (reactivateStaffModal) {
+        document.body.appendChild(reactivateStaffModal);
+
+        reactivateStaffModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const reactivateUrl = button.getAttribute('data-reactivate-url');
+            const staffName = button.getAttribute('data-staff-name') || 'this staff member';
+
+            reactivateStaffForm.action = reactivateUrl;
+            reactivateStaffName.textContent = staffName;
+        });
+    }
+</script>
 {% endblock %}

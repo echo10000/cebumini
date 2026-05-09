@@ -3,83 +3,221 @@
 
 {% block title %}Backup Codes - Cebu Hotel{% endblock %}
 
+{% block body_class %} class="dark-theme"{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #0a0f1e;
+        color: #ffffff;
+    }
+
+    main {
+        background-color: #0a0f1e;
+    }
+
+    .dark-card {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        border-radius: 12px;
+        padding: 3rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .dark-card h2 {
+        color: #c9a84c;
+    }
+
+    .dark-alert-danger {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-left: 4px solid #ef4444;
+        color: #fca5a5;
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    .dark-alert-danger h5 {
+        color: #fca5a5;
+    }
+
+    .dark-alert-danger strong {
+        color: #f87171;
+    }
+
+    .backup-codes-container {
+        background: #0f1623;
+        padding: 2rem;
+        border-radius: 8px;
+        border: 2px dashed rgba(201, 168, 76, 0.3);
+    }
+
+    .backup-code {
+        background: #1a2235;
+        padding: 1rem;
+        border-radius: 6px;
+        border-left: 4px solid #c9a84c;
+        font-family: 'Courier New', monospace;
+        font-size: 14px;
+        word-break: break-all;
+        color: #c9a84c;
+        border: 1px solid rgba(201, 168, 76, 0.2);
+    }
+
+    .dark-btn {
+        background: #2563eb;
+        color: white;
+        border: 1.5px solid #2563eb;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dark-btn:hover {
+        background: #1d4ed8;
+        border-color: #1d4ed8;
+    }
+
+    .dark-btn-secondary {
+        background: rgba(201, 168, 76, 0.1);
+        border: 1.5px solid rgba(201, 168, 76, 0.3);
+        color: #c9a84c;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .dark-btn-secondary:hover {
+        background: rgba(201, 168, 76, 0.2);
+        border-color: #c9a84c;
+    }
+
+    .security-box {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .security-box h5 {
+        color: #c9a84c;
+    }
+
+    .security-box ul {
+        color: #9ca3af;
+    }
+
+    .security-box li {
+        margin-bottom: 0.5rem;
+    }
+
+    @media print {
+
+        .dark-btn,
+        .dark-btn-secondary,
+        .security-box,
+        .dark-card>div:not(.backup-codes-container) {
+            display: none !important;
+        }
+
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+
+        .backup-codes-container {
+            background: white !important;
+            border: 1px solid #000 !important;
+            color: black !important;
+        }
+
+        .backup-code {
+            background: white !important;
+            border: 1px solid #000 !important;
+            color: black !important;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card border-0 shadow-lg">
-                <div class="card-body p-5">
-                    <h2 class="card-title mb-4" style="color: #1e3c72;">
-                        <i class="fas fa-download"></i> Backup Codes
-                    </h2>
+            <div class="dark-card">
+                <h2 class="mb-4">
+                    <i class="fas fa-download"></i> Backup Codes
+                </h2>
 
-                    <div class="alert alert-warning" role="alert">
-                        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Important!</h5>
-                        <p>
-                            Save these backup codes in a secure location. If you lose access to your authenticator app, 
-                            you can use these codes to regain access to your account.
-                        </p>
-                        <hr>
-                        <p class="mb-0">
-                            <strong>Each code can only be used once.</strong> Treat these codes with the same level of 
-                            security as your password.
-                        </p>
-                    </div>
+                <div class="dark-alert-danger" role="alert">
+                    <h5><i class="fas fa-exclamation-triangle"></i> Important!</h5>
+                    <p>
+                        Save these backup codes in a secure location. If you lose access to your authenticator app,
+                        you can use these codes to regain access to your account.
+                    </p>
+                    <hr style="border-color: rgba(239, 68, 68, 0.3);">
+                    <p class="mb-0">
+                        <strong>Each code can only be used once.</strong> Treat these codes with the same level of
+                        security as your password.
+                    </p>
+                </div>
 
-                    <!-- Backup Codes Display -->
-                    <div class="backup-codes-container" style="background: #f8f9fa; padding: 30px; border-radius: 8px; border: 2px dashed #d4af37; margin-bottom: 30px;">
-                        <div class="row g-3">
-                            {% for code in backup_codes %}
-                                <div class="col-md-6">
-                                    <div class="backup-code" style="background: white; padding: 12px 16px; border-radius: 6px; border-left: 4px solid #d4af37; font-family: 'Courier New', monospace; font-size: 16px; word-break: break-all;">
-                                        {{ code }}
-                                    </div>
-                                </div>
-                            {% empty %}
-                                <div class="col-12">
-                                    <p class="text-muted text-center">No backup codes available. Please regenerate them.</p>
-                                </div>
-                            {% endfor %}
+                <!-- Backup Codes Display -->
+                <div class="backup-codes-container mt-4 mb-4">
+                    <div class="row g-3">
+                        {% for code in backup_codes %}
+                        <div class="col-md-6">
+                            <div class="backup-code">
+                                {{ code }}
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="d-grid gap-2 d-md-flex mb-4">
-                        <button type="button" class="btn btn-primary btn-lg" onclick="copyAllCodes()">
-                            <i class="fas fa-copy"></i> Copy All Codes
-                        </button>
-                        <button type="button" class="btn btn-info btn-lg" onclick="downloadCodes()">
-                            <i class="fas fa-download"></i> Download as File
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-lg" onclick="printCodes()">
-                            <i class="fas fa-print"></i> Print
-                        </button>
-                    </div>
-
-                    <!-- Security Tips -->
-                    <div class="card border-0 bg-light mb-4">
-                        <div class="card-body">
-                            <h5 class="card-title" style="color: #1e3c72;">
-                                <i class="fas fa-shield-alt"></i> Security Best Practices
-                            </h5>
-                            <ul class="mb-0">
-                                <li>Store codes in a password manager</li>
-                                <li>Keep a printed copy in a secure location</li>
-                                <li>Never share these codes with anyone</li>
-                                <li>Regenerate codes periodically for added security</li>
-                            </ul>
+                        {% empty %}
+                        <div class="col-12">
+                            <p style="color: #9ca3af; text-align: center;">No backup codes available. Please regenerate
+                                them.</p>
                         </div>
+                        {% endfor %}
                     </div>
+                </div>
 
-                    <!-- Navigation -->
-                    <div class="d-grid gap-2 d-md-flex">
-                        <a href="{% url 'auth:dashboard' %}" class="btn btn-secondary btn-lg">
-                            <i class="fas fa-arrow-left"></i> Back to Dashboard
-                        </a>
-                        <a href="{% url 'auth:setup_2fa' %}" class="btn btn-outline-primary btn-lg">
-                            <i class="fas fa-cog"></i> 2FA Settings
-                        </a>
-                    </div>
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2 d-md-flex mb-4" style="gap: 1rem;">
+                    <button type="button" class="dark-btn" onclick="copyAllCodes()">
+                        <i class="fas fa-copy"></i> Copy All Codes
+                    </button>
+                    <button type="button" class="dark-btn" onclick="downloadCodes()">
+                        <i class="fas fa-download"></i> Download as File
+                    </button>
+                    <button type="button" class="dark-btn" onclick="printCodes()">
+                        <i class="fas fa-print"></i> Print
+                    </button>
+                </div>
+
+                <!-- Security Tips -->
+                <div class="security-box mb-4">
+                    <h5>
+                        <i class="fas fa-shield-alt"></i> Security Best Practices
+                    </h5>
+                    <ul class="mb-0">
+                        <li>Store codes in a password manager</li>
+                        <li>Keep a printed copy in a secure location</li>
+                        <li>Never share these codes with anyone</li>
+                        <li>Regenerate codes periodically for added security</li>
+                    </ul>
+                </div>
+
+                <!-- Navigation -->
+                <div class="d-grid gap-2 d-md-flex" style="gap: 1rem;">
+                    <a href="{% url 'auth:dashboard' %}" class="dark-btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Back to Dashboard
+                    </a>
+                    <a href="{% url 'auth:setup_2fa' %}" class="dark-btn-secondary">
+                        <i class="fas fa-cog"></i> 2FA Settings
+                    </a>
                 </div>
             </div>
         </div>
@@ -87,61 +225,48 @@
 </div>
 
 <script>
-function copyAllCodes() {
-    const codes = Array.from(document.querySelectorAll('.backup-code'))
-        .map(el => el.textContent.trim())
-        .join('\n');
-    
-    navigator.clipboard.writeText(codes).then(() => {
-        const btn = event.target.closest('button');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
-        btn.classList.add('btn-success');
-        btn.classList.remove('btn-primary');
-        
-        setTimeout(() => {
-            btn.innerHTML = originalText;
-            btn.classList.remove('btn-success');
-            btn.classList.add('btn-primary');
-        }, 2000);
-    }).catch(err => {
-        alert('Failed to copy codes');
-    });
-}
+    function copyAllCodes() {
+        const codes = Array.from(document.querySelectorAll('.backup-code'))
+            .map(el => el.textContent.trim())
+            .join('\n');
 
-function downloadCodes() {
-    const codes = Array.from(document.querySelectorAll('.backup-code'))
-        .map(el => el.textContent.trim())
-        .join('\n');
-    
-    const header = 'CEBU HOTEL - BACKUP CODES\n';
-    const warning = 'KEEP THESE CODES SAFE! Do not share them with anyone.\n\n';
-    const content = header + warning + codes;
-    
-    const element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
-    element.setAttribute('download', 'cebu-hotel-backup-codes-' + new Date().toISOString().split('T')[0] + '.txt');
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-}
+        navigator.clipboard.writeText(codes).then(() => {
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            btn.style.background = '#10b981';
+            btn.style.borderColor = '#10b981';
 
-function printCodes() {
-    window.print();
-}
-</script>
-
-<style>
-    @media print {
-        .btn, .alert-warning, .card-body > div:not(.backup-codes-container) {
-            display: none !important;
-        }
-        
-        .backup-codes-container {
-            border: 1px solid #000 !important;
-            padding: 20px !important;
-        }
+            setTimeout(() => {
+                btn.innerHTML = originalText;
+                btn.style.background = '#2563eb';
+                btn.style.borderColor = '#2563eb';
+            }, 2000);
+        }).catch(err => {
+            alert('Failed to copy codes');
+        });
     }
-</style>
+
+    function downloadCodes() {
+        const codes = Array.from(document.querySelectorAll('.backup-code'))
+            .map(el => el.textContent.trim())
+            .join('\n');
+
+        const header = 'CEBU HOTEL - BACKUP CODES\n';
+        const warning = 'KEEP THESE CODES SAFE! Do not share them with anyone.\n\n';
+        const content = header + warning + codes;
+
+        const element = document.createElement('a');
+        element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+        element.setAttribute('download', 'cebu-hotel-backup-codes-' + new Date().toISOString().split('T')[0] + '.txt');
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+    function printCodes() {
+        window.print();
+    }
+</script>
 {% endblock %}

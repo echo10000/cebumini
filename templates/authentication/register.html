@@ -1,113 +1,108 @@
 {% extends 'base.html' %}
+{% load static socialaccount %}
 
 {% block title %}Register - Cebu Hotel{% endblock %}
+{% block body_class %} class="auth-page"{% endblock %}
 
 {% block extra_css %}
-<style>
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-    .password-requirements {
-        background: #f9f9f9;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: #666;
-    }
-    .password-requirements li {
-        margin-bottom: 0.25rem;
-    }
-</style>
+<link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 600px; margin: 3rem auto;">
-    <div style="background: white; border-radius: 12px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
-        <div style="text-align: center; margin-bottom: 2.5rem;">
-            <h2 style="color: #1a1a1a; margin-bottom: 0.5rem;">Create Your Account</h2>
-            <p style="color: #666;">Join our luxury hotel and book your perfect stay</p>
+<div class="auth-wrap">
+    <section class="auth-story" aria-label="Cebu Luxury Hotel">
+        <div class="auth-brand-mark">C</div>
+        <div>
+            <h1>Plan your Cebu escape with less friction.</h1>
+            <p>Create a guest account for bookings, payment updates, service messages, and personalized room recommendations.</p>
         </div>
+    </section>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+    <section class="auth-panel" aria-labelledby="register-title">
+        <div class="auth-kicker">Guest registration</div>
+        <h2 id="register-title">Create your account</h2>
+        <p class="auth-subtitle">Your account starts as a guest profile. Staff, manager, and admin access is assigned internally.</p>
 
         <form method="POST" novalidate>
             {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="{{ form.email.id_for_label }}" style="font-weight: 600; color: #1a1a1a;">Email Address</label>
+
+            <div class="auth-field">
+                <label for="{{ form.email.id_for_label }}">Email Address</label>
                 {{ form.email }}
                 {% if form.email.errors %}
-                    <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.email.errors }}</small>
+                    <div class="auth-error">{{ form.email.errors }}</div>
                 {% endif %}
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    <label for="{{ form.first_name.id_for_label }}" style="font-weight: 600; color: #1a1a1a;">First Name</label>
+            <div class="auth-grid">
+                <div class="auth-field">
+                    <label for="{{ form.first_name.id_for_label }}">First Name</label>
                     {{ form.first_name }}
                     {% if form.first_name.errors %}
-                        <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.first_name.errors }}</small>
+                        <div class="auth-error">{{ form.first_name.errors }}</div>
                     {% endif %}
                 </div>
 
-                <div class="form-group">
-                    <label for="{{ form.last_name.id_for_label }}" style="font-weight: 600; color: #1a1a1a;">Last Name</label>
+                <div class="auth-field">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name</label>
                     {{ form.last_name }}
                     {% if form.last_name.errors %}
-                        <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.last_name.errors }}</small>
+                        <div class="auth-error">{{ form.last_name.errors }}</div>
                     {% endif %}
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.password1.id_for_label }}" style="font-weight: 600; color: #1a1a1a;">Password</label>
+            <div class="auth-field">
+                <label for="{{ form.phone.id_for_label }}">Phone Number</label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                    <div class="auth-error">{{ form.phone.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="auth-field">
+                <label for="{{ form.password1.id_for_label }}">Password</label>
                 {{ form.password1 }}
-                <div class="password-requirements">
-                    <strong style="color: #1a1a1a;">Password requirements:</strong>
-                    <ul style="list-style: none; padding-left: 1rem; margin-top: 0.5rem;">
-                        <li>✓ At least 8 characters</li>
-                        <li>✓ Cannot be entirely numeric</li>
-                        <li>✓ Not a common password</li>
+                <div class="auth-help">
+                    <strong>Password requirements</strong>
+                    <ul>
+                        <li>At least 8 characters</li>
+                        <li>Cannot be entirely numeric</li>
+                        <li>Cannot be a commonly used password</li>
                     </ul>
                 </div>
                 {% if form.password1.errors %}
-                    <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.password1.errors }}</small>
+                    <div class="auth-error">{{ form.password1.errors }}</div>
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                <label for="{{ form.password2.id_for_label }}" style="font-weight: 600; color: #1a1a1a;">Confirm Password</label>
+            <div class="auth-field">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
                 {{ form.password2 }}
                 {% if form.password2.errors %}
-                    <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.password2.errors }}</small>
+                    <div class="auth-error">{{ form.password2.errors }}</div>
                 {% endif %}
             </div>
 
-            <div class="form-group" style="display: flex; gap: 0.5rem; align-items: flex-start;">
+            <div class="auth-check">
                 {{ form.accept_terms }}
-                <label for="{{ form.accept_terms.id_for_label }}" style="color: #666; font-weight: 500; margin-top: 0.25rem;">
-                    I agree to the <a href="{% url 'auth:terms' %}" target="_blank" style="color: #1a1a1a; text-decoration: underline;">Terms and Conditions</a>
+                <label for="{{ form.accept_terms.id_for_label }}">
+                    I agree to the <a href="{% url 'auth:terms' %}" target="_blank" class="auth-link">Terms and Conditions</a>
                 </label>
             </div>
             {% if form.accept_terms.errors %}
-                <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.accept_terms.errors }}</small>
+                <div class="auth-error">{{ form.accept_terms.errors }}</div>
             {% endif %}
 
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 2rem;">
+            <button type="submit" class="auth-button" style="margin-top: 1.25rem;">
+                <i class="fas fa-user-plus"></i>
                 Create Account
             </button>
         </form>
 
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem; margin-top: 2rem; text-align: center;">
-            <p style="color: #666;">Already have an account? <a href="{% url 'account_login' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Login here</a></p>
+        <div class="auth-footer">
+            Already registered? <a href="{% url 'auth:login' %}" class="auth-link">Sign in</a>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

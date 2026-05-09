@@ -2,9 +2,9 @@
 <div class="recommendations-widget mt-4">
     {% if recommendations %}
         <div class="card border-0 shadow-sm">
-            <div class="card-header bg-light">
-                <h5 class="mb-0">
-                    <i class="fas fa-heart"></i> Recommended For You
+            <div class="card-header" style="background: #1a2235; border-bottom: 1px solid rgba(201,168,76,0.15);">
+                <h5 class="mb-0" style="color: #ffffff;">
+                    <i class="fas fa-heart" style="color: #c9a84c;"></i> Recommended For You
                 </h5>
             </div>
             <div class="card-body">
@@ -13,20 +13,33 @@
                         {% if rec.room %}
                             <div class="col-md-4">
                                 <div class="card h-100">
-                                    <div class="card-body">
-                                        <h6 class="card-title">Room {{ rec.room.room_number }}</h6>
-                                        <p class="text-muted">
-                                            {{ rec.room.room_type_display|default:rec.room.room_type }}
-                                        </p>
-                                        <p class="text-success"><strong>₱{{ rec.room.price_per_night }}/night</strong></p>
-                                        <small>Capacity: {{ rec.room.capacity }} guests</small>
-                                        {% if rec.score %}
-                                            <div class="mt-2">
-                                                <span class="badge bg-success">{{ rec.score }}% Match</span>
-                                            </div>
+                                {% if rec.room.image or rec.room.images.all.count > 0 %}
+                                    <div style="overflow: hidden; height: 180px;">
+                                        {% if rec.room.image %}
+                                            <img src="{{ rec.room.image.url }}" alt="Room {{ rec.room.room_number }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                                        {% else %}
+                                            {% with rec.room.images.all|first as fallback_image %}
+                                                {% if fallback_image %}
+                                                    <img src="{{ fallback_image.image.url }}" alt="Room {{ rec.room.room_number }}" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                                                {% endif %}
+                                            {% endwith %}
                                         {% endif %}
                                     </div>
-                                    <div class="card-footer">
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title">Room {{ rec.room.room_number }}</h6>
+                                    <p class="text-muted">
+                                        {{ rec.room.room_type_display|default:rec.room.room_type }}
+                                    </p>
+                                    <p class="text-success"><strong>₱{{ rec.room.price_per_night }}/night</strong></p>
+                                    <small>Capacity: {{ rec.room.capacity }} guests</small>
+                                    {% if rec.score %}
+                                        <div class="mt-2">
+                                            <span class="badge bg-success">{{ rec.score }}% Match</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-footer">
                                         <a href="{% url 'rooms:detail' rec.room.id %}" class="btn btn-primary btn-sm w-100">
                                             View Room
                                         </a>

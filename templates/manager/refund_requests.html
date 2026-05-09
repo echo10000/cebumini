@@ -1,6 +1,331 @@
-{% extends 'base.html' %}
+{% extends 'manager/manager_base.html' %}
 
 {% block title %}Refund Requests{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #0a0f1e;
+    }
+
+    main.manager-main {
+        background: #0a0f1e;
+    }
+
+    .manager-main .container.mt-4 {
+        padding: 2rem;
+        background: #0a0f1e;
+    }
+
+    .manager-main .container.mt-4 > h1 {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        color: #ffffff;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+
+    .manager-main .container.mt-4 > h1 i {
+        color: #c9a84c;
+        font-size: 1.5rem;
+    }
+
+    /* FILTER BUTTONS */
+    .manager-main .btn-group {
+        background: transparent;
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .manager-main .btn-group .btn {
+        background: #1a2235;
+        border: 1px solid rgba(201,168,76,0.2);
+        color: #9ca3af;
+        padding: 0.6rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .manager-main .btn-group .btn:hover {
+        border-color: #c9a84c;
+        color: #ffffff;
+        background: #1f2937;
+    }
+
+    /* ACTIVE BUTTON - ALL */
+    .manager-main .btn-group a[href="?status=all"].active {
+        background: #1a2235;
+        border-color: #c9a84c;
+        color: #c9a84c;
+        font-weight: 700;
+    }
+
+    /* PENDING BUTTON */
+    .manager-main .btn-group a[href="?status=REQUESTED"] {
+        border-color: #f59e0b;
+        color: #f59e0b;
+    }
+
+    .manager-main .btn-group a[href="?status=REQUESTED"]:hover {
+        background: rgba(245,158,11,0.1);
+    }
+
+    .manager-main .btn-group a[href="?status=REQUESTED"].active {
+        background: #78350f;
+        border-color: #f59e0b;
+        color: #fcd34d;
+        font-weight: 700;
+    }
+
+    /* APPROVED BUTTON */
+    .manager-main .btn-group a[href="?status=APPROVED"] {
+        border-color: #10b981;
+        color: #10b981;
+    }
+
+    .manager-main .btn-group a[href="?status=APPROVED"]:hover {
+        background: rgba(16,185,129,0.1);
+    }
+
+    .manager-main .btn-group a[href="?status=APPROVED"].active {
+        background: #064e3b;
+        border-color: #10b981;
+        color: #6ee7b7;
+        font-weight: 700;
+    }
+
+    /* REJECTED BUTTON */
+    .manager-main .btn-group a[href="?status=REJECTED"] {
+        border-color: #dc2626;
+        color: #dc2626;
+    }
+
+    .manager-main .btn-group a[href="?status=REJECTED"]:hover {
+        background: rgba(220,38,38,0.1);
+    }
+
+    .manager-main .btn-group a[href="?status=REJECTED"].active {
+        background: #7f1d1d;
+        border-color: #dc2626;
+        color: #fca5a5;
+        font-weight: 700;
+    }
+
+    /* ISSUED BUTTON (if exists) */
+    .manager-main .btn-group a[href="?status=ISSUED"] {
+        border-color: #3b82f6;
+        color: #3b82f6;
+    }
+
+    .manager-main .btn-group a[href="?status=ISSUED"]:hover {
+        background: rgba(59,130,246,0.1);
+    }
+
+    .manager-main .btn-group a[href="?status=ISSUED"].active {
+        background: #1e3a5f;
+        border-color: #3b82f6;
+        color: #93c5fd;
+        font-weight: 700;
+    }
+
+    /* CARD STYLING */
+    .manager-main .card {
+        background: #1a2235;
+        border: 1px solid rgba(201,168,76,0.15);
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        margin-bottom: 2rem;
+    }
+
+    .manager-main .card-body {
+        padding: 0;
+    }
+
+    /* TABLE RESPONSIVE */
+    .manager-main .table-responsive {
+        overflow-x: auto;
+    }
+
+    /* TABLE STYLING */
+    .manager-main .table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #1a2235;
+        color: #ffffff;
+        margin-bottom: 0;
+    }
+
+    .manager-main .table thead tr {
+        background: #0f1623;
+        border-bottom: 2px solid rgba(201,168,76,0.3);
+    }
+
+    .manager-main .table thead th {
+        color: #c9a84c;
+        font-weight: 700;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1rem;
+        text-align: left;
+        border: none;
+        background: #0f1623;
+    }
+
+    .manager-main .table tbody tr {
+        border-bottom: 1px solid rgba(201,168,76,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .manager-main .table tbody tr:nth-child(odd) {
+        background: #1a2235;
+    }
+
+    .manager-main .table tbody tr:nth-child(even) {
+        background: #111827;
+    }
+
+    .manager-main .table tbody tr:hover {
+        background: rgba(201,168,76,0.08);
+        transform: translateX(4px);
+    }
+
+    .manager-main .table tbody td {
+        color: #ffffff;
+        font-size: 0.95rem;
+        padding: 1rem;
+        vertical-align: middle;
+        border: none;
+    }
+
+    .manager-main .table tbody td strong {
+        font-weight: 700;
+        color: #c9a84c;
+    }
+
+    /* BADGE STYLING */
+    .manager-main .badge {
+        display: inline-block;
+        padding: 0.4rem 0.85rem;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        border: 1px solid;
+    }
+
+    .manager-main .badge-success {
+        background: #064e3b;
+        color: #6ee7b7;
+        border-color: #10b981;
+    }
+
+    .manager-main .badge-warning {
+        background: #78350f;
+        color: #fcd34d;
+        border-color: #f59e0b;
+    }
+
+    .manager-main .badge-danger {
+        background: #7f1d1d;
+        color: #fca5a5;
+        border-color: #dc2626;
+    }
+
+    .manager-main .badge-info {
+        background: #1e3a5f;
+        color: #93c5fd;
+        border-color: #3b82f6;
+    }
+
+    /* BUTTON STYLING */
+    .manager-main .btn-sm.btn-primary {
+        background: #3b82f6;
+        color: #ffffff;
+        border: none;
+        padding: 0.5rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .manager-main .btn-sm.btn-primary:hover {
+        background: #2563eb;
+        transform: scale(1.05);
+    }
+
+    .manager-main .btn-sm.btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    /* EMPTY STATE */
+    .manager-main .text-muted.text-center.py-4 {
+        color: #9ca3af;
+        font-size: 1rem;
+        line-height: 1.6;
+        padding: 3rem 2rem;
+    }
+
+    /* BACK BUTTON */
+    .manager-main .btn-secondary {
+        background: transparent;
+        border: 1px solid #c9a84c;
+        color: #c9a84c;
+        padding: 0.6rem 1.25rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .manager-main .btn-secondary:hover {
+        background: #c9a84c;
+        color: #0a0f1e;
+        transform: scale(1.02);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 1199px) {
+        .manager-main .container.mt-4 > h1 {
+            font-size: 1.6rem;
+        }
+
+        .manager-main .btn-group .btn {
+            padding: 0.55rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .manager-main .table thead th,
+        .manager-main .table tbody td {
+            padding: 0.85rem;
+        }
+    }
+
+    @media (max-width: 767px) {
+        .manager-main .table {
+            min-width: 700px;
+        }
+
+        .manager-main .table thead th,
+        .manager-main .table tbody td {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">

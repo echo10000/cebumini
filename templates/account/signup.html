@@ -1,129 +1,82 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Sign Up - Cebu Hotel{% endblock %}
+{% block body_class %} class="auth-page"{% endblock %}
 
 {% block extra_css %}
-<style>
-    input, select, textarea {
-        width: 100%;
-        padding: 0.875rem 1rem;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        font-size: 0.95rem;
-        font-family: 'Lato', sans-serif;
-        transition: all 0.3s ease;
-    }
-
-    input:focus, select:focus, textarea:focus {
-        outline: none;
-        border-color: #1a1a1a;
-        box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.1);
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .password-requirements {
-        background: #f9f9f9;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
-        color: #666;
-    }
-
-    .password-requirements li {
-        margin-bottom: 0.25rem;
-    }
-</style>
+<link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="container" style="max-width: 600px; margin: 3rem auto;">
-    <div style="background: white; border-radius: 12px; padding: 3rem; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);">
-        <div style="text-align: center; margin-bottom: 2.5rem;">
-            <h2 style="color: #1a1a1a; margin-bottom: 0.5rem;">Create Your Account</h2>
-            <p style="color: #666;">Join our luxury hotel and book your perfect stay</p>
+<div class="auth-wrap">
+    <section class="auth-story" aria-label="Cebu Luxury Hotel">
+        <div class="auth-brand-mark">C</div>
+        <div>
+            <h1>Plan your Cebu escape with less friction.</h1>
+            <p>Create a guest account for room reservations, payment updates, and service messages before you arrive.</p>
         </div>
+    </section>
 
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        {% endif %}
+    <section class="auth-panel" aria-labelledby="account-signup-title">
+        <div class="auth-kicker">Guest signup</div>
+        <h2 id="account-signup-title">Create your account</h2>
+        <p class="auth-subtitle">Start with the essentials. You can complete guest details after signing in.</p>
 
         <form method="POST" novalidate>
             {% csrf_token %}
-            
-            <div class="form-group">
-                <label for="id_email" style="font-weight: 600; color: #1a1a1a;">Email Address</label>
-                <input type="email" name="email" id="id_email" placeholder="Enter your email" required>
+
+            <div class="auth-field">
+                <label for="id_email">Email Address</label>
+                <input type="email" name="email" id="id_email" placeholder="name@example.com" autocomplete="email" required>
                 {% if form.email.errors %}
-                    <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.email.errors }}</small>
+                    <div class="auth-error">{{ form.email.errors }}</div>
                 {% endif %}
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="form-group">
-                    <label for="id_first_name" style="font-weight: 600; color: #1a1a1a;">First Name</label>
-                    <input type="text" name="first_name" id="id_first_name" placeholder="First name">
-                    {% if form.first_name.errors %}
-                        <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.first_name.errors }}</small>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_last_name" style="font-weight: 600; color: #1a1a1a;">Last Name</label>
-                    <input type="text" name="last_name" id="id_last_name" placeholder="Last name">
-                    {% if form.last_name.errors %}
-                        <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.last_name.errors }}</small>
-                    {% endif %}
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label for="id_password1" style="font-weight: 600; color: #1a1a1a;">Password</label>
-                <input type="password" name="password1" id="id_password1" placeholder="Create a strong password" required>
-                <div class="password-requirements">
-                    <strong style="color: #1a1a1a;">Password requirements:</strong>
-                    <ul style="list-style: none; padding-left: 1rem; margin-top: 0.5rem;">
-                        <li>✓ At least 8 characters</li>
-                        <li>✓ Cannot be entirely numeric</li>
-                        <li>✓ Not a common password</li>
+            <div class="auth-field">
+                <label for="id_password1">Password</label>
+                <input type="password" name="password1" id="id_password1" placeholder="Create a strong password" autocomplete="new-password" required>
+                <div class="auth-help">
+                    <strong>Password requirements</strong>
+                    <ul>
+                        <li>At least 8 characters</li>
+                        <li>Cannot be entirely numeric</li>
+                        <li>Cannot be a commonly used password</li>
                     </ul>
                 </div>
                 {% if form.password1.errors %}
-                    <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.password1.errors }}</small>
+                    <div class="auth-error">{{ form.password1.errors }}</div>
                 {% endif %}
             </div>
 
-            <div class="form-group">
-                <label for="id_password2" style="font-weight: 600; color: #1a1a1a;">Confirm Password</label>
-                <input type="password" name="password2" id="id_password2" placeholder="Confirm your password" required>
+            <div class="auth-field">
+                <label for="id_password2">Confirm Password</label>
+                <input type="password" name="password2" id="id_password2" placeholder="Confirm your password" autocomplete="new-password" required>
                 {% if form.password2.errors %}
-                    <small style="color: #dc2626; display: block; margin-top: 0.5rem;">{{ form.password2.errors }}</small>
+                    <div class="auth-error">{{ form.password2.errors }}</div>
                 {% endif %}
             </div>
 
-            <!-- Terms and Conditions Checkbox -->
-            <div class="form-group" style="display: flex; gap: 0.5rem; align-items: flex-start; margin-top: 2rem;">
-                <input type="checkbox" name="accept_terms" id="id_accept_terms" required style="width: auto; margin-top: 0.5rem;">
-                <label for="id_accept_terms" style="color: #666; font-weight: 500;">
-                    I agree to the <a href="{% url 'auth:terms' %}" target="_blank" style="color: #1a1a1a; text-decoration: underline; font-weight: 600;">Terms and Conditions</a>
+            <div class="auth-check">
+                <input type="checkbox" name="accept_terms" id="id_accept_terms" required>
+                <label for="id_accept_terms">
+                    I agree to the <a href="{% url 'auth:terms' %}" target="_blank" class="auth-link">Terms and Conditions</a>
                 </label>
             </div>
+            {% if form.accept_terms.errors %}
+                <div class="auth-error">{{ form.accept_terms.errors }}</div>
+            {% endif %}
 
-            <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1.5rem;">
+            <button type="submit" class="auth-button" style="margin-top: 1.25rem;">
+                <i class="fas fa-user-plus"></i>
                 Create Account
             </button>
         </form>
 
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 1.5rem; margin-top: 2rem; text-align: center;">
-            <p style="color: #666;">Already have an account? <a href="{% url 'account_login' %}" style="color: #1a1a1a; font-weight: 600; text-decoration: none;">Login here</a></p>
+        <div class="auth-footer">
+            Already registered? <a href="{% url 'account_login' %}" class="auth-link">Sign in</a>
         </div>
-    </div>
+    </section>
 </div>
 {% endblock %}

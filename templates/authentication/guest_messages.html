@@ -1,0 +1,85 @@
+{% extends 'guest/guest_base.html' %}
+
+{% block title %}Support Conversations - Cebu Hotel{% endblock %}
+{% block global_messages %}{% endblock %}
+
+{% block content %}
+<div class="guest-page">
+    <section class="guest-page-header">
+        <div>
+            <p class="guest-kicker">Guest Support</p>
+            <h1>Support Conversations</h1>
+            <p>Track your inquiries and replies from Cebu Hotel.</p>
+        </div>
+        <a href="{% url 'auth:contact' %}" class="btn btn-primary">
+            <i class="fas fa-pencil-alt"></i> Start Conversation
+        </a>
+    </section>
+
+    {% if total_count > 0 %}
+    <section class="guest-grid three">
+        <div class="guest-card guest-stat">
+            <span class="guest-stat-icon"><i class="fas fa-envelope"></i></span>
+            <div>
+                <div class="guest-stat-value">{{ total_count }}</div>
+                <div class="guest-stat-label">Total Conversations</div>
+            </div>
+        </div>
+        <div class="guest-card guest-stat">
+            <span class="guest-stat-icon"><i class="fas fa-clock"></i></span>
+            <div>
+                <div class="guest-stat-value">{{ unreplied_count }}</div>
+                <div class="guest-stat-label">Awaiting Response</div>
+            </div>
+        </div>
+        <div class="guest-card guest-stat">
+            <span class="guest-stat-icon"><i class="fas fa-bell"></i></span>
+            <div>
+                <div class="guest-stat-value">{{ unnotified_count }}</div>
+                <div class="guest-stat-label">New Responses</div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <section class="guest-card p-0 overflow-hidden">
+        {% if messages %}
+            <div class="list-group list-group-flush">
+                {% for message in messages %}
+                    <a href="{% url 'auth:guest_message_detail' message.id %}" class="list-group-item list-group-item-action p-4">
+                        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+                            <div>
+                                <h2 class="h5 mb-2">{{ message.subject }}</h2>
+                                <div class="d-flex gap-3 flex-wrap text-muted small">
+                                    <span><i class="fas fa-calendar"></i> {{ message.created_at|date:"M d, Y" }}</span>
+                                    <span><i class="fas fa-eye"></i> {{ message.get_status_display|default:"View details" }}</span>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 flex-wrap">
+                                {% if message.is_replied %}
+                                    <span class="badge bg-success"><i class="fas fa-check-circle"></i> Replied</span>
+                                {% else %}
+                                    <span class="badge bg-info"><i class="fas fa-hourglass-half"></i> Pending</span>
+                                {% endif %}
+                                {% if message.is_replied and not message.notification_sent %}
+                                    <span class="badge bg-warning"><i class="fas fa-bell"></i> New Response</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <p class="text-muted mt-3 mb-0">{{ message.message|truncatewords:30 }}</p>
+                    </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <h3>No Support Conversations Yet</h3>
+                <p>You have not submitted any inquiries to us yet.</p>
+                <a href="{% url 'auth:contact' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-pencil-alt"></i> Start a Conversation
+                </a>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

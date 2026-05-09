@@ -8,5 +8,6 @@ django-otp==1.7.0
 qrcode==8.2
 google-auth-oauthlib==1.2.4
 google-auth==2.48.0
+google-generativeai==0.7.0
 paymongo
 stripe

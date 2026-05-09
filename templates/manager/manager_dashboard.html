@@ -1,85 +1,80 @@
-{% extends 'base.html' %}
+{% extends 'manager/manager_base.html' %}
 {% load static %}
 
 {% block title %}Manager Dashboard{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <h1 class="mb-4">
-                <i class="fas fa-tasks"></i> Manager Dashboard
+<div class="manager-page">
+    <header class="manager-page-header">
+        <div>
+            <p class="manager-page-kicker">Manager Portal</p>
+            <h1 class="manager-page-title">
+                <i class="fas fa-chart-line"></i>
+                Operations Overview
             </h1>
+            <p class="manager-page-subtitle">Monitor guest escalations, refunds, booking activity, and staff coverage.</p>
         </div>
-    </div>
+        <div class="manager-actions">
+            <a href="{% url 'auth:manager_refunds' %}" class="btn btn-outline-primary">
+                <i class="fas fa-money-bill-wave"></i> Refunds
+            </a>
+            <a href="{% url 'auth:manager_complaints' %}" class="btn btn-outline-danger">
+                <i class="fas fa-exclamation-triangle"></i> Complaints
+            </a>
+            <a href="{% url 'auth:manager_staff' %}" class="btn btn-outline-info">
+                <i class="fas fa-users"></i> Staff
+            </a>
+        </div>
+    </header>
 
-    <!-- Statistics Row -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="card-title text-primary">{{ pending_bookings }}</h3>
-                    <p class="card-text">Pending Bookings</p>
-                </div>
+    <section class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-calendar-check"></i>
+                <div class="manager-stat-label">Pending Bookings</div>
+                <div class="manager-stat-value">{{ pending_bookings }}</div>
+                <p class="manager-stat-note">Awaiting review</p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="card-title text-warning">{{ pending_refunds }}</h3>
-                    <p class="card-text">Pending Refunds</p>
-                    <small class="text-muted">₱{{ pending_refunds_total }}</small>
-                </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-money-bill-wave"></i>
+                <div class="manager-stat-label">Pending Refunds</div>
+                <div class="manager-stat-value">{{ pending_refunds }}</div>
+                <p class="manager-stat-note">&#8369;{{ pending_refunds_total }} requested</p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="card-title text-danger">{{ open_complaints }}</h3>
-                    <p class="card-text">Open Complaints</p>
-                </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-exclamation-circle"></i>
+                <div class="manager-stat-label">Open Complaints</div>
+                <div class="manager-stat-value">{{ open_complaints }}</div>
+                <p class="manager-stat-note">Need manager attention</p>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-center">
-                <div class="card-body">
-                    <h3 class="card-title text-info">{{ confirmed_bookings }}</h3>
-                    <p class="card-text">Confirmed Bookings</p>
-                </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-check-circle"></i>
+                <div class="manager-stat-label">Confirmed Bookings</div>
+                <div class="manager-stat-value">{{ confirmed_bookings }}</div>
+                <p class="manager-stat-note">Active confirmed stays</p>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Action Buttons -->
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="btn-group" role="group">
-                <a href="{% url 'auth:manager_refunds' %}" class="btn btn-outline-primary">
-                    <i class="fas fa-money-bill-wave"></i> Refund Requests
-                </a>
-                <a href="{% url 'auth:manager_complaints' %}" class="btn btn-outline-danger">
-                    <i class="fas fa-exclamation-triangle"></i> Guest Complaints
-                </a>
-                <a href="{% url 'auth:manager_staff' %}" class="btn btn-outline-info">
-                    <i class="fas fa-users"></i> Staff Management
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <!-- Pending Refund Requests -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-warning text-dark">
+    <section class="row g-4">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-hourglass-half"></i> Recent Refund Requests
+                        <i class="fas fa-hourglass-half"></i>
+                        Recent Refund Requests
                     </h5>
                 </div>
                 <div class="card-body">
                     {% if pending_refund_requests %}
                     <div class="table-responsive">
-                        <table class="table table-sm table-hover">
+                        <table class="table table-sm table-hover align-middle mb-0">
                             <thead>
                                 <tr>
                                     <th>Booking</th>
@@ -91,8 +86,8 @@
                             <tbody>
                                 {% for refund in pending_refund_requests %}
                                 <tr>
-                                    <td>#{{ refund.booking.id }}</td>
-                                    <td>₱{{ refund.requested_amount }}</td>
+                                    <td><strong>#{{ refund.booking.id }}</strong></td>
+                                    <td>&#8369;{{ refund.requested_amount }}</td>
                                     <td>
                                         <span class="badge badge-warning">{{ refund.get_status_display }}</span>
                                     </td>
@@ -107,90 +102,87 @@
                         </table>
                     </div>
                     {% else %}
-                    <p class="text-muted">No pending refund requests</p>
+                    <p class="manager-empty">No pending refund requests.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
 
-        <!-- Open Complaints -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header bg-danger text-white">
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
                     <h5 class="mb-0">
-                        <i class="fas fa-exclamation-circle"></i> Open Complaints
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Complaint Queue
                     </h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body d-flex flex-column justify-content-between gap-3">
                     {% if open_complaints %}
-                    <div class="alert alert-danger" role="alert">
-                        <strong>{{ open_complaints }}</strong> complaint(s) need attention
+                    <div>
+                        <div class="manager-stat-value">{{ open_complaints }}</div>
+                        <p class="manager-stat-note">complaint(s) currently open and waiting for follow-up.</p>
                     </div>
-                    <a href="{% url 'auth:manager_complaints' %}" class="btn btn-danger">
-                        View All Complaints
+                    <a href="{% url 'auth:manager_complaints' %}" class="btn btn-danger align-self-start">
+                        View Complaints
                     </a>
                     {% else %}
-                    <p class="text-muted">No open complaints</p>
+                    <p class="manager-empty">No open complaints.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Staff Overview -->
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users"></i> Staff Team
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if staff_members %}
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Status</th>
-                                    <th>Joined</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for staff in staff_members %}
-                                <tr>
-                                    <td>{{ staff.get_full_name|default:staff.username }}</td>
-                                    <td>{{ staff.email }}</td>
-                                    <td>
-                                        {% if staff.is_active %}
-                                        <span class="badge badge-success">Active</span>
-                                        {% else %}
-                                        <span class="badge badge-secondary">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ staff.created_at|date:"M d, Y" }}</td>
-                                    <td>
-                                        <a href="{% url 'auth:manager_staff_dashboard' staff.id %}" class="btn btn-sm btn-info">
-                                            Dashboard
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <p class="text-muted">No staff members registered</p>
-                    {% endif %}
-                    <a href="{% url 'auth:manager_register_staff' %}" class="btn btn-primary mt-3">
-                        <i class="fas fa-plus"></i> Register New Staff
-                    </a>
-                </div>
-            </div>
+    <section class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-users"></i>
+                Staff Team
+            </h5>
         </div>
-    </div>
+        <div class="card-body">
+            {% if staff_members %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Joined</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for staff in staff_members %}
+                        <tr>
+                            <td><strong>{{ staff.get_full_name|default:staff.username }}</strong></td>
+                            <td>{{ staff.email }}</td>
+                            <td>
+                                {% if staff.is_active %}
+                                <span class="badge badge-success">Active</span>
+                                {% else %}
+                                <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ staff.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'auth:manager_staff_dashboard' staff.id %}" class="btn btn-sm btn-info">
+                                    Dashboard
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="manager-empty">No staff members registered.</p>
+            {% endif %}
+            <a href="{% url 'auth:manager_register_staff' %}" class="btn btn-primary mt-3">
+                <i class="fas fa-plus"></i> Register Staff
+            </a>
+        </div>
+    </section>
 </div>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'guest/guest_base.html' %}
 {% load static %}
 
 {% block title %}Cancel Booking - Cebu Hotel{% endblock %}
@@ -20,15 +20,15 @@
                     </div>
 
                     <!-- Booking Summary -->
-                    <div class="mb-4 p-3 bg-light rounded">
-                        <h5 class="mb-3">Booking Summary</h5>
+                    <div class="mb-4 p-3 rounded" style="background: #0f1623; border: 1px solid rgba(201,168,76,0.2);">
+                        <h5 class="mb-3" style="color: #ffffff;">Booking Summary</h5>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-6" style="color: #9ca3af;">
                                 <p class="mb-1"><strong>Room:</strong> {{ booking.room.room_number }} ({{ booking.room.get_room_type_display }})</p>
                                 <p class="mb-1"><strong>Check-in:</strong> {{ booking.check_in|date:"F d, Y" }}</p>
                                 <p class="mb-0"><strong>Duration:</strong> {{ booking.get_duration }} night{{ booking.get_duration|pluralize }}</p>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-6" style="color: #9ca3af;">
                                 <p class="mb-1"><strong>Check-out:</strong> {{ booking.check_out|date:"F d, Y" }}</p>
                                 <p class="mb-1"><strong>Status:</strong> {{ booking.get_status_display }}</p>
                                 <p class="mb-0"><strong>Total Amount:</strong> ₱{{ booking.total_price }}</p>

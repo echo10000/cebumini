@@ -15,7 +15,7 @@ from .recommendation_engine import (
 )
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @require_http_methods(["GET"])
 def get_user_recommendations(request):
     """
@@ -55,7 +55,7 @@ def get_user_recommendations(request):
     return JsonResponse(data)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def user_booking_profile(request):
     """View user's booking profile and preferences"""
     user = request.user
@@ -75,7 +75,7 @@ def user_booking_profile(request):
     return render(request, 'recommendations/user_profile.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def room_recommendations_page(request):
     """Dedicated page for viewing all recommendations"""
     user = request.user

@@ -13,6 +13,7 @@ urlpatterns = [
     
     # Redirect allauth login to our custom login
     path('accounts/login/', allauth_login_redirect, name='allauth_login_redirect'),
+    path('accounts/signup/', RedirectView.as_view(pattern_name='auth:register', permanent=False)),
     path('accounts/', include('allauth.urls')),  # Social auth URLs (allauth backend only)
     
     path('auth/', include('authentication.urls')),  # PRIMARY login: /auth/login/
@@ -21,6 +22,7 @@ urlpatterns = [
     path('dashboard/', include('authentication.urls_dashboard')),
     path('recommendations/', include('authentication.urls_recommendations')),
     path('chatbot/', include('authentication.urls_chatbot')),
+    path('', include('authentication.urls_chatbot_test')),  # Includes /api/chat/, /api/chatbot/, etc.
     path('admin-panel/', include('authentication.urls_admin')),
     path('staff/', include('authentication.urls_staff')),
     path('', home_view, name='home'),

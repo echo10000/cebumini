@@ -16,10 +16,37 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg-primary: #0a0f1e;
+            --bg-card: #1a2235;
+            --bg-dark: #0f1623;
+            --gold: #c9a84c;
+            --text-primary: #ffffff;
+            --text-muted: #9ca3af;
+            --border: rgba(201, 168, 76, 0.2);
+        }
+
         body {
             font-family: 'Lato', sans-serif;
             color: #1a1a1a;
             line-height: 1.6;
+            background-color: #0a0f1e;
+        }
+
+        /* Dark Theme Override for Auth Pages */
+        body.dark-theme {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        body.dark-theme main {
+            background-color: var(--bg-primary);
+        }
+
+        /* Main content area dark background */
+        main {
+            background-color: #0a0f1e;
+            min-height: 100vh;
         }
 
         h1, h2, h3, h4, h5, h6 {
@@ -39,15 +66,24 @@
             width: 100%;
             z-index: 1000;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 0.75rem 0;
+            background: #0a0f1e;
+            border-bottom: 1px solid rgba(201,168,76,0.3);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60px;
         }
 
         nav.scrolled {
-            background: rgba(255, 255, 255, 0.98);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
-            padding: 0.5rem 0;
+            background: #0a0f1e;
+            border-bottom: 1px solid rgba(201,168,76,0.3);
+            padding: 1rem 2rem;
+        }
+
+        .nav-transparent {
+            background: #0a0f1e;
+            border-bottom: 1px solid rgba(201,168,76,0.3);
         }
 
         .navbar-brand {
@@ -61,29 +97,32 @@
         }
 
         .nav-brand {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #1a1a1a;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #c9a84c;
             text-decoration: none;
-            letter-spacing: -1px;
+            letter-spacing: -0.5px;
         }
 
         .nav-links {
             display: flex;
             gap: 2rem;
             list-style: none;
+            margin: 0;
+            padding: 0;
         }
 
         .nav-links a {
-            color: #1a1a1a;
+            color: #ffffff;
             text-decoration: none;
             font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
             position: relative;
         }
 
         .nav-links a:hover {
-            color: #666;
+            color: #c9a84c;
         }
 
         .nav-links a::after {
@@ -93,12 +132,17 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: #1a1a1a;
+            background: #c9a84c;
             transition: width 0.3s ease;
         }
 
         .nav-links a:hover::after {
             width: 100%;
+        }
+
+        .nav-links a.active {
+            color: #c9a84c;
+            border-bottom: 2px solid #c9a84c;
         }
 
         /* Page Content */
@@ -132,6 +176,7 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 2rem;
+            background-color: #0a0f1e;
         }
 
         /* Card Styles */
@@ -282,6 +327,403 @@
             border-left-color: #0ea5e9;
         }
 
+        .toast-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 12000;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            max-width: 360px;
+            width: auto;
+        }
+
+        .toast {
+            background: rgba(15, 22, 35, 0.95);
+            border: 1px solid rgba(201, 168, 76, 0.2);
+            color: #f8fafc;
+            box-shadow: 0 24px 45px rgba(0, 0, 0, 0.25);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .toast .toast-body {
+            padding: 1rem 1rem;
+            color: #f8fafc;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .toast .btn-close {
+            filter: invert(1);
+            opacity: 0.75;
+        }
+
+        .toast.text-bg-info {
+            background: rgba(12, 74, 110, 0.95);
+            border-color: rgba(59, 130, 246, 0.25);
+        }
+
+        .toast.text-bg-success {
+            background: rgba(5, 150, 105, 0.95);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+
+        .toast.text-bg-warning {
+            background: rgba(168, 126, 35, 0.95);
+            border-color: rgba(245, 158, 11, 0.25);
+        }
+
+        .toast.text-bg-danger,
+        .toast.text-bg-error {
+            background: rgba(185, 28, 28, 0.95);
+            border-color: rgba(248, 113, 113, 0.25);
+        }
+
+        /* ============================================
+           DARK THEME OVERRIDES FOR AUTH PAGES
+           ============================================ */
+
+        body.dark-theme h1,
+        body.dark-theme h2,
+        body.dark-theme h3,
+        body.dark-theme h4,
+        body.dark-theme h5,
+        body.dark-theme h6 {
+            color: var(--text-primary);
+        }
+
+        body.dark-theme .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            color: var(--text-primary);
+        }
+
+        body.dark-theme .card-header {
+            background: #2563eb;
+            border-bottom: 1px solid rgba(37, 99, 235, 0.3);
+            color: white;
+        }
+
+        body.dark-theme .card-body {
+            color: var(--text-primary);
+        }
+
+        body.dark-theme .card-title {
+            color: var(--text-primary);
+        }
+
+        body.dark-theme .card-text {
+            color: var(--text-muted);
+        }
+
+        body.dark-theme input,
+        body.dark-theme select,
+        body.dark-theme textarea {
+            background-color: var(--bg-dark);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            font-family: 'Lato', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme input::placeholder,
+        body.dark-theme select::placeholder,
+        body.dark-theme textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        body.dark-theme input:focus,
+        body.dark-theme select:focus,
+        body.dark-theme textarea:focus {
+            outline: none;
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+            background-color: var(--bg-dark);
+        }
+
+        body.dark-theme label {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        body.dark-theme table {
+            color: var(--text-primary);
+        }
+
+        body.dark-theme table thead {
+            background: var(--bg-card);
+        }
+
+        body.dark-theme table th {
+            color: var(--gold);
+            border-bottom: 2px solid rgba(201, 168, 76, 0.3);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+
+        body.dark-theme table td {
+            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+            color: var(--text-primary);
+        }
+
+        body.dark-theme table tbody tr:hover {
+            background: rgba(201, 168, 76, 0.05);
+        }
+
+        body.dark-theme .alert {
+            background: rgba(201, 168, 76, 0.1);
+            color: var(--gold);
+            border-left-color: var(--gold);
+        }
+
+        body.dark-theme .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            border-left-color: #10b981;
+        }
+
+        body.dark-theme .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #f87171;
+            border-left-color: #dc2626;
+        }
+
+        body.dark-theme .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: #60a5fa;
+            border-left-color: #3b82f6;
+        }
+
+        body.dark-theme .btn-primary {
+            background: #2563eb;
+            color: white;
+            border: 1.5px solid #2563eb;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme .btn-primary:hover {
+            background: #1d4ed8;
+            border-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
+
+        body.dark-theme .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1.5px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme .btn-secondary:hover {
+            background: rgba(201, 168, 76, 0.1);
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        body.dark-theme .btn-outline-gold {
+            background: transparent;
+            border: 1.5px solid var(--gold);
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme .btn-outline-gold:hover {
+            background: var(--gold);
+            color: var(--bg-primary);
+        }
+
+        body.dark-theme .badge {
+            background: rgba(201, 168, 76, 0.2);
+            color: var(--gold);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        body.dark-theme .badge-success {
+            background: rgba(16, 185, 129, 0.2);
+            color: #6ee7b7;
+        }
+
+        body.dark-theme .badge-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+        }
+
+        body.dark-theme .badge-warning {
+            background: rgba(251, 146, 60, 0.2);
+            color: #fbbf24;
+        }
+
+        body.dark-theme .badge-info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        body.dark-theme .form-control {
+            background-color: var(--bg-dark);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        body.dark-theme .form-control:focus {
+            background-color: var(--bg-dark);
+            border-color: var(--gold);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+        }
+
+        body.dark-theme .form-select {
+            background-color: var(--bg-dark);
+            border: 1.5px solid var(--border);
+            color: var(--text-primary);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c9a84c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+        }
+
+        body.dark-theme .form-select:focus {
+            background-color: var(--bg-dark);
+            border-color: var(--gold);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15);
+        }
+
+        body.dark-theme .form-check-input {
+            background-color: var(--bg-dark);
+            border: 1.5px solid var(--border);
+        }
+
+        body.dark-theme .form-check-input:checked {
+            background-color: var(--gold);
+            border-color: var(--gold);
+        }
+
+        body.dark-theme .form-check-label {
+            color: var(--text-primary);
+        }
+
+        body.dark-theme a {
+            color: var(--gold);
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme a:hover {
+            color: #e8c86d;
+            text-decoration: underline;
+        }
+
+        body.dark-theme .page-header {
+            color: var(--text-primary);
+            margin-bottom: 2rem;
+        }
+
+        body.dark-theme .container {
+            color: var(--text-primary);
+        }
+
+        /* Dark Theme Navigation */
+        body.dark-theme nav {
+            background: rgba(26, 34, 53, 0.98) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        body.dark-theme nav.scrolled {
+            background: rgba(26, 34, 53, 0.99) !important;
+            border-bottom: 1px solid rgba(201, 168, 76, 0.3);
+        }
+
+        body.dark-theme .nav-brand {
+            color: var(--gold) !important;
+        }
+
+        body.dark-theme .navbar-brand {
+            color: var(--gold) !important;
+        }
+
+        /* Override inline nav link styles for dark theme */
+        body.dark-theme nav a {
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme nav a:hover {
+            color: var(--gold) !important;
+        }
+
+        body.dark-theme nav li a {
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme nav li a:hover {
+            color: var(--gold) !important;
+        }
+
+        body.dark-theme .nav-links a {
+            color: var(--text-primary) !important;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-theme .nav-links a:hover {
+            color: var(--gold) !important;
+        }
+
+        body.dark-theme .nav-links a::after {
+            background: var(--gold) !important;
+        }
+
+        body.dark-theme .nav-link {
+            color: var(--text-primary) !important;
+        }
+
+        body.dark-theme .nav-link:hover {
+            color: var(--gold) !important;
+        }
+
+        /* Navbar brand logo styling for dark theme */
+        body.dark-theme nav .flex.items-center.gap-2 div {
+            background: var(--gold) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        body.dark-theme nav .flex.items-center.gap-2 span {
+            color: var(--gold) !important;
+        }
+
+        body.dark-theme nav .btn {
+            background: transparent !important;
+            color: var(--text-primary) !important;
+            border-color: var(--text-primary) !important;
+        }
+
+        body.dark-theme nav .btn:hover {
+            background: var(--text-primary) !important;
+            color: var(--bg-primary) !important;
+        }
+
+        body.dark-theme nav .btn.booking-btn {
+            background: var(--gold) !important;
+            color: var(--bg-primary) !important;
+            border-color: var(--gold) !important;
+        }
+
+        body.dark-theme nav .btn.booking-btn:hover {
+            background: #e0c158 !important;
+            border-color: #e0c158 !important;
+        }
+
+        body.dark-theme .dashboard-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
         /* Footer */
         footer {
             background: #1a1a1a;
@@ -384,54 +826,66 @@
         }
     </style>
 </head>
-<body>
+<body{% block body_class %}{% endblock %}>
     <!-- Navigation -->
     <nav class="nav-transparent" id="navbar">
-        <div class="container">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center gap-2">
-                    <div style="width: 40px; height: 40px; background: #1a1a1a; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.3rem;">C</div>
-                    <span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; color: #1a1a1a;">Cebu Luxury</span>
-                </div>
-                
-                <ul style="display: flex; gap: 3rem; list-style: none; align-items: center;">
-                    <li><a href="/" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">Home</a></li>
-                    <li><a href="{% url 'rooms:list' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">Rooms</a></li>
-                    
-                    {% if user.is_authenticated %}
-                        {% if user.is_manager %}
-                            <li><a href="{% url 'auth:manager_dashboard' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s; font-weight: 700;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">📊 Manager</a></li>
-                            <li><a href="{% url 'auth:manager_refunds' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">Refunds</a></li>
-                            <li><a href="{% url 'auth:manager_complaints' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">Complaints</a></li>
-                        {% elif user.is_staff_member %}
-                            <li><a href="{% url 'auth:dashboard' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s; font-weight: 700;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">👷 Staff</a></li>
-                        {% elif user.is_admin %}
-                            <li><a href="{% url 'auth:dashboard' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s; font-weight: 700;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">⚙️ Admin</a></li>
-                        {% else %}
-                            <li><a href="{% url 'bookings:booking_history' %}" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">My Bookings</a></li>
-                        {% endif %}
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 2rem;">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 40px; height: 40px; background: rgba(26, 34, 53, 0.8); border: 2px solid #c9a84c; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #c9a84c; font-weight: 700; font-size: 1.3rem;">C</div>
+                <span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #c9a84c;">Cebu Luxury</span>
+            </div>
+            
+            <ul style="display: flex; gap: 2rem; list-style: none; align-items: center; margin: 0; padding: 0;">
+                {% if user.is_authenticated %}
+                    {% if user.is_manager %}
+                        <li><a href="{% url 'auth:manager_dashboard' %}" style="color: #c9a84c; text-decoration: none; font-weight: 500; transition: color 0.3s ease; border-bottom: 2px solid #c9a84c; padding-bottom: 3px;">Manager Dashboard</a></li>
+                        <li><a href="{% url 'auth:manager_refunds' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Refunds</a></li>
+                        <li><a href="{% url 'auth:manager_complaints' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Complaints</a></li>
+                        <li><a href="{% url 'staff:guest_services' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Guest Inquiries</a></li>
+                        <li><a href="{% url 'auth:manager_staff' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Staff</a></li>
+                    {% elif user.is_staff_member %}
+                        <li><a href="{% url 'staff:dashboard' %}" style="color: #c9a84c; text-decoration: none; font-weight: 500; transition: color 0.3s ease; border-bottom: 2px solid #c9a84c; padding-bottom: 3px;">Staff Dashboard</a></li>
+                        <li><a href="{% url 'staff:room_status' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Rooms</a></li>
+                        <li><a href="{% url 'staff:guest_services' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Guest Services</a></li>
+                        <li><a href="{% url 'staff:reports' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Reports</a></li>
+                    {% elif user.is_admin %}
+                        <li><a href="{% url 'admin_panel:dashboard' %}" style="color: #c9a84c; text-decoration: none; font-weight: 500; transition: color 0.3s ease; border-bottom: 2px solid #c9a84c; padding-bottom: 3px;">Admin Dashboard</a></li>
+                        <li><a href="{% url 'admin_panel:payment_management' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Payments</a></li>
+                        <li><a href="{% url 'admin_panel:booking_management' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Bookings</a></li>
+                        <li><a href="{% url 'admin_panel:room_management' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Rooms</a></li>
+                        <li><a href="{% url 'staff:guest_services' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Guest Inquiries</a></li>
                     {% else %}
-                        <li><a href="/" style="color: #1a1a1a; text-decoration: none; font-weight: 500; transition: all 0.3s;" onmouseover="this.style.color='#666'" onmouseout="this.style.color='#1a1a1a'">About</a></li>
+                        <li><a href="/" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Home</a></li>
+                        <li><a href="{% url 'rooms:list' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Rooms</a></li>
+                        <li><a href="{% url 'bookings:booking_history' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">My Bookings</a></li>
+                        <li><a href="{% url 'auth:guest_messages' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease; position: relative;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">
+                            <i class="fas fa-headset"></i> Support
+                            {% if guest_unread_replies > 0 %}
+                            <span style="position: absolute; top: -8px; right: -8px; background: #f97316; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">{{ guest_unread_replies }}</span>
+                            {% endif %}
+                        </a></li>
                     {% endif %}
-                </ul>
-                
-                <div style="display: flex; gap: 1rem;">
-                    {% if user.is_authenticated %}
-                        {% if user.is_admin %}
-                            <a href="{% url 'auth:dashboard' %}" class="btn" style="padding: 0.6rem 1.5rem; background: #1a1a1a; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">Admin</a>
-                        {% elif user.is_manager %}
-                            <a href="{% url 'auth:manager_dashboard' %}" class="btn" style="padding: 0.6rem 1.5rem; background: #1a1a1a; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">Manager</a>
-                        {% elif user.is_staff_member %}
-                            <a href="{% url 'auth:dashboard' %}" class="btn" style="padding: 0.6rem 1.5rem; background: #1a1a1a; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">Staff</a>
-                        {% else %}
-                            <a href="{% url 'auth:dashboard' %}" class="btn" style="padding: 0.6rem 1.5rem; background: #1a1a1a; color: white; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#333'" onmouseout="this.style.background='#1a1a1a'">Dashboard</a>
-                        {% endif %}
-                        <a href="{% url 'auth:logout' %}" class="btn" style="padding: 0.6rem 1.5rem; background: transparent; color: #1a1a1a; border: 1px solid #1a1a1a; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#1a1a1a'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#1a1a1a'">Logout</a>
+                {% else %}
+                    <li><a href="/" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Home</a></li>
+                {% endif %}
+            </ul>
+            
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                {% if user.is_authenticated %}
+                    {% if user.is_admin %}
+                        <a href="{% url 'admin_panel:dashboard' %}" style="padding: 0.5rem 1.25rem; background: #c9a84c; color: #0a0f1e; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block; border: none; cursor: pointer;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='#c9a84c'; this.style.color='#0a0f1e'">Dashboard</a>
+                    {% elif user.is_manager %}
+                        <a href="{% url 'auth:manager_dashboard' %}" style="padding: 0.5rem 1.25rem; background: #c9a84c; color: #0a0f1e; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block; border: none; cursor: pointer;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='#c9a84c'; this.style.color='#0a0f1e'">Dashboard</a>
+                    {% elif user.is_staff_member %}
+                        <a href="{% url 'auth:dashboard' %}" style="padding: 0.5rem 1.25rem; background: #c9a84c; color: #0a0f1e; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block; border: none; cursor: pointer;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='#c9a84c'; this.style.color='#0a0f1e'">Dashboard</a>
                     {% else %}
-                        <a href="{% url 'account_login' %}" class="btn" style="padding: 0.6rem 1.5rem; background: transparent; color: #1a1a1a; border: 1px solid #1a1a1a; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#1a1a1a'; this.style.color='white'" onmouseout="this.style.background='transparent'; this.style.color='#1a1a1a'">Login</a>
-                        <a href="{% url 'account_signup' %}" class="btn booking-btn" style="margin: 0; padding: 0.6rem 1.5rem; font-size: 0.95rem;">Sign Up</a>
+                        <a href="{% url 'auth:dashboard' %}" style="padding: 0.5rem 1.25rem; background: #c9a84c; color: #0a0f1e; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block; border: none; cursor: pointer;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='#c9a84c'; this.style.color='#0a0f1e'">Dashboard</a>
                     {% endif %}
-                </div>
+                    <a href="{% url 'auth:logout' %}" style="padding: 0.5rem 1.25rem; background: transparent; color: #c9a84c; border: 1px solid #c9a84c; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='transparent'; this.style.color='#c9a84c'">Logout</a>
+                {% else %}
+                    <a href="{% url 'account_login' %}" style="padding: 0.5rem 1.25rem; background: transparent; color: #c9a84c; border: 1px solid #c9a84c; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='transparent'; this.style.color='#c9a84c'">Login</a>
+                    <a href="{% url 'account_signup' %}" class="btn booking-btn" style="margin: 0; padding: 0.5rem 1.25rem; font-size: 0.95rem;">Sign Up</a>
+                {% endif %}
             </div>
         </div>
     </nav>
@@ -439,13 +893,24 @@
     <!-- Main Content -->
     <main>
         <div class="container py-20">
+            {% block global_messages %}
             {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+                <div class="toast-container" aria-live="polite" aria-atomic="true">
+                    {% for message in messages %}
+                        {% with level=message.tags|default:'info' %}
+                        <div class="toast align-items-center text-bg-{{ level }} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+                            <div class="d-flex">
+                                <div class="toast-body">
+                                    {{ message }}
+                                </div>
+                                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
             {% endif %}
+            {% endblock %}
             {% block content %}{% endblock %}
         </div>
     </main>
@@ -493,11 +958,23 @@
                     <h4>User Account</h4>
                     <ul>
                         {% if user.is_authenticated %}
-                            <li><a href="{% url 'auth:dashboard' %}">Dashboard</a></li>
-                            {% if not user.is_admin and not user.is_staff_member %}
-                            <li><a href="{% url 'bookings:booking_history' %}">My Bookings</a></li>
+                            {% if user.is_manager %}
+                                <li><a href="{% url 'auth:manager_dashboard' %}">Manager Dashboard</a></li>
+                                <li><a href="{% url 'auth:manager_refunds' %}">Refund Requests</a></li>
+                                <li><a href="{% url 'auth:manager_complaints' %}">Complaints</a></li>
+                            {% elif user.is_staff_member %}
+                                <li><a href="{% url 'staff:dashboard' %}">Staff Dashboard</a></li>
+                                <li><a href="{% url 'staff:room_status' %}">Room Status</a></li>
+                                <li><a href="{% url 'staff:guest_services' %}">Guest Services</a></li>
+                            {% elif user.is_admin %}
+                                <li><a href="{% url 'admin_panel:dashboard' %}">Admin Dashboard</a></li>
+                                <li><a href="{% url 'admin_panel:payment_management' %}">Payments</a></li>
+                                <li><a href="{% url 'admin_panel:user_management' %}">Users</a></li>
+                            {% else %}
+                                <li><a href="{% url 'auth:dashboard' %}">Dashboard</a></li>
+                                <li><a href="{% url 'bookings:booking_history' %}">My Bookings</a></li>
+                                <li><a href="{% url 'recommendations:recommendations' %}">Recommendations</a></li>
                             {% endif %}
-                            <li><a href="{% url 'recommendations:recommendations' %}">Recommendations</a></li>
                             <li><a href="{% url 'auth:logout' %}">Logout</a></li>
                         {% else %}
                             <li><a href="{% url 'account_login' %}">Login</a></li>
@@ -558,13 +1035,24 @@
             });
         });
     </script>
-</head>
-<body>
-
+    {% if not user.is_authenticated or not user.is_manager and not user.is_staff_member and not user.is_admin %}
     <!-- Chatbot Widget -->
     {% include 'chatbot/chatbot_widget.html' %}
+    {% endif %}
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastElList = [].slice.call(document.querySelectorAll('.toast'));
+            toastElList.forEach(function (toastEl) {
+                const toast = new bootstrap.Toast(toastEl, {
+                    autohide: true,
+                    delay: 4200
+                });
+                toast.show();
+            });
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

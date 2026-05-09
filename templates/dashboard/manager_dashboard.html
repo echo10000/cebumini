@@ -1,233 +1,187 @@
-{% extends 'base.html' %}
+{% extends 'manager/manager_base.html' %}
 {% load static %}
 {% load custom_filters %}
 
 {% block title %}Manager Dashboard - Cebu Hotel{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col">
-            <h2 class="mb-1">
-                <i class="fas fa-tachometer-alt"></i> Manager Dashboard
-            </h2>
-            <p class="text-muted">Monitor operations, manage staff, and track business metrics.</p>
+<div class="manager-page">
+    <header class="manager-page-header">
+        <div>
+            <p class="manager-page-kicker">Manager Portal</p>
+            <h1 class="manager-page-title">
+                <i class="fas fa-chart-line"></i>
+                Operations Overview
+            </h1>
+            <p class="manager-page-subtitle">Monitor guest escalations, refunds, booking activity, and staff coverage.</p>
         </div>
-    </div>
+        <div class="manager-actions">
+            <a href="{% url 'auth:manager_refunds' %}" class="btn btn-outline-primary">
+                <i class="fas fa-money-bill-wave"></i> Refunds
+            </a>
+            <a href="{% url 'auth:manager_complaints' %}" class="btn btn-outline-danger">
+                <i class="fas fa-exclamation-triangle"></i> Complaints
+            </a>
+            <a href="{% url 'auth:manager_staff' %}" class="btn btn-outline-info">
+                <i class="fas fa-users"></i> Staff
+            </a>
+        </div>
+    </header>
 
-    <!-- Key Metrics - Row 1 -->
-    <div class="row g-3 mb-4">
-        <!-- Pending Bookings -->
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Pending Bookings</p>
-                            <h3 class="mb-0">{{ pending_bookings }}</h3>
-                        </div>
-                        <div class="bg-warning bg-opacity-10 rounded p-2">
-                            <i class="fas fa-hourglass-half text-warning fa-lg"></i>
-                        </div>
+    <section class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-hourglass-half"></i>
+                <div class="manager-stat-label">Pending Bookings</div>
+                <div class="manager-stat-value">{{ pending_bookings }}</div>
+                <p class="manager-stat-note">Awaiting review</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-check-circle"></i>
+                <div class="manager-stat-label">Confirmed Bookings</div>
+                <div class="manager-stat-value">{{ confirmed_bookings }}</div>
+                <p class="manager-stat-note">Confirmed upcoming stays</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-door-open"></i>
+                <div class="manager-stat-label">Active Bookings</div>
+                <div class="manager-stat-value">{{ active_bookings }}</div>
+                <p class="manager-stat-note">Currently checked in</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-money-bill-wave"></i>
+                <div class="manager-stat-label">Pending Refunds</div>
+                <div class="manager-stat-value">{{ pending_refunds }}</div>
+                <p class="manager-stat-note">&#8369;{{ pending_refunds_total|floatformat:2 }} requested</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list"></i>
+                        Recent Bookings
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_bookings %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Booking</th>
+                                    <th>Guest</th>
+                                    <th>Room</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in recent_bookings %}
+                                <tr>
+                                    <td><strong>#{{ booking.id }}</strong></td>
+                                    <td>{{ booking.guest.get_full_name|default:"N/A" }}</td>
+                                    <td>{{ booking.room.room_number }}</td>
+                                    <td>
+                                        <span class="badge badge-warning">{{ booking.get_status_display }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
-                    <a href="{% url 'auth:manager_refunds' %}" class="text-decoration-none text-small">
-                        <i class="fas fa-arrow-right"></i> Needs approval
+                    {% else %}
+                    <div class="manager-empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No pending bookings.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-undo"></i>
+                        Pending Refund Requests
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if pending_refund_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Booking</th>
+                                    <th>Amount</th>
+                                    <th>Requested By</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for refund in pending_refund_requests %}
+                                <tr>
+                                    <td><strong>#{{ refund.booking.id }}</strong></td>
+                                    <td>&#8369;{{ refund.requested_amount|floatformat:2 }}</td>
+                                    <td>{{ refund.requested_by.get_full_name|default:"Guest" }}</td>
+                                    <td>
+                                        <a href="{% url 'auth:manager_approve_refund' refund.id %}" class="btn btn-sm btn-primary">
+                                            Review
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="manager-empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>No pending refunds.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4">
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Complaint Queue
+                    </h5>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-between gap-3">
+                    <div>
+                        <div class="manager-stat-value">{{ open_complaints }}</div>
+                        <p class="manager-stat-note">active escalation(s) currently need manager attention.</p>
+                    </div>
+                    <a href="{% url 'auth:manager_complaints' %}" class="btn btn-outline-danger align-self-start">
+                        View Complaints
                     </a>
                 </div>
             </div>
         </div>
 
-        <!-- Confirmed Bookings -->
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Confirmed Bookings</p>
-                            <h3 class="mb-0">{{ confirmed_bookings }}</h3>
-                        </div>
-                        <div class="bg-success bg-opacity-10 rounded p-2">
-                            <i class="fas fa-check-circle text-success fa-lg"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted">
-                        <i class="fas fa-calendar"></i> Confirmed
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Active Bookings -->
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Active Bookings</p>
-                            <h3 class="mb-0">{{ active_bookings }}</h3>
-                        </div>
-                        <div class="bg-info bg-opacity-10 rounded p-2">
-                            <i class="fas fa-door-open text-info fa-lg"></i>
-                        </div>
-                    </div>
-                    <small class="text-muted">
-                        <i class="fas fa-map-pin"></i> Currently checked in
-                    </small>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Refunds -->
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <p class="text-muted small mb-1">Pending Refunds</p>
-                            <h3 class="mb-0">{{ pending_refunds }}</h3>
-                        </div>
-                        <div class="bg-danger bg-opacity-10 rounded p-2">
-                            <i class="fas fa-money-bill-wave text-danger fa-lg"></i>
-                        </div>
-                    </div>
-                    <small class="text-nowrap text-muted">
-                        <i class="fas fa-rupiah-sign"></i> ₱{{ pending_refunds_total|floatformat:2 }}
-                    </small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Management Sections - Row 2 -->
-    <div class="row g-3 mb-4">
-        <!-- Recent Bookings -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">
-                        <i class="fas fa-list"></i> Recent Bookings
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    {% if recent_bookings %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Booking ID</th>
-                                        <th>Guest</th>
-                                        <th>Room</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for booking in recent_bookings %}
-                                    <tr>
-                                        <td>#{{ booking.id }}</td>
-                                        <td>{{ booking.guest.get_full_name|default:"N/A" }}</td>
-                                        <td>{{ booking.room.room_number }}</td>
-                                        <td>
-                                            <span class="badge bg-warning">{{ booking.get_status_display }}</span>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="p-4 text-center text-muted">
-                            <i class="fas fa-inbox fa-2x mb-2"></i>
-                            <p>No pending bookings</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Refund Requests -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-undo"></i> Pending Refund Requests
-                    </h5>
-                </div>
-                <div class="card-body p-0">
-                    {% if pending_refund_requests %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Booking</th>
-                                        <th>Amount</th>
-                                        <th>Requested By</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for refund in pending_refund_requests %}
-                                    <tr>
-                                        <td>#{{ refund.booking.id }}</td>
-                                        <td>₱{{ refund.requested_amount|floatformat:2 }}</td>
-                                        <td>{{ refund.requested_by.get_full_name|default:"Guest" }}</td>
-                                        <td>
-                                            <a href="{% url 'auth:manager_approve_refund' refund.id %}" class="text-decoration-none text-small">
-                                                Review <i class="fas fa-arrow-right"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="p-4 text-center text-muted">
-                            <i class="fas fa-check-circle fa-2x mb-2 text-success"></i>
-                            <p>No pending refunds</p>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Staff & Support - Row 3 -->
-    <div class="row g-3 mb-4">
-        <!-- Open Complaints -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom">
-                    <h5 class="mb-0">
-                        <i class="fas fa-exclamation-triangle"></i> Open Complaints
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-2">
-                        <div class="col-6">
-                            <div class="p-3 bg-light rounded text-center">
-                                <h4 class="mb-0">{{ open_complaints }}</h4>
-                                <small class="text-muted">Active Escalations</small>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="p-3 bg-light rounded">
-                                <a href="{% url 'auth:manager_complaints' %}" class="btn btn-sm btn-outline-danger w-100">
-                                    <i class="fas fa-arrow-right"></i> View All
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Staff Members -->
-        <div class="col-md-6">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">
-                        <i class="fas fa-users"></i> Staff Members
+                        <i class="fas fa-users"></i>
+                        Staff Members
                     </h5>
                     <a href="{% url 'auth:manager_register_staff' %}" class="btn btn-sm btn-primary">
                         <i class="fas fa-plus"></i> Add
@@ -235,95 +189,134 @@
                 </div>
                 <div class="card-body p-0">
                     {% if staff_members %}
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Email</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for staff in staff_members|slice:":3" %}
-                                    <tr>
-                                        <td>{{ staff.get_full_name|default:staff.username }}</td>
-                                        <td>{{ staff.email }}</td>
-                                        <td>
-                                            {% if staff.is_active %}
-                                                <span class="badge bg-success">Active</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary">Inactive</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="card-footer bg-light border-top">
-                            <a href="{% url 'auth:manager_staff' %}" class="text-decoration-none text-small">
-                                View all staff <i class="fas fa-arrow-right"></i>
-                            </a>
-                        </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for staff in staff_members|slice:":3" %}
+                                <tr>
+                                    <td><strong>{{ staff.get_full_name|default:staff.username }}</strong></td>
+                                    <td>{{ staff.email }}</td>
+                                    <td>
+                                        {% if staff.is_active %}
+                                        <span class="badge badge-success">Active</span>
+                                        {% else %}
+                                        <span class="badge badge-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'auth:manager_staff' %}" class="btn btn-sm btn-outline-info">
+                            View All Staff
+                        </a>
+                    </div>
                     {% else %}
-                        <div class="p-4 text-center text-muted">
-                            <i class="fas fa-users fa-2x mb-2"></i>
-                            <p>No staff members</p>
-                        </div>
+                    <div class="manager-empty-state">
+                        <i class="fas fa-users"></i>
+                        <p>No staff members.</p>
+                    </div>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Quick Actions -->
-    <div class="row g-3">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <h5 class="mb-3">
-                        <i class="fas fa-bolt"></i> Quick Actions
-                    </h5>
-                    <div class="row g-2">
-                        <div class="col-md-auto">
-                            <a href="{% url 'auth:manager_refunds' %}" class="btn btn-outline-primary">
-                                <i class="fas fa-money-bill-wave"></i> Manage Refunds
-                            </a>
-                        </div>
-                        <div class="col-md-auto">
-                            <a href="{% url 'auth:manager_complaints' %}" class="btn btn-outline-danger">
-                                <i class="fas fa-exclamation-triangle"></i> View Complaints
-                            </a>
-                        </div>
-                        <div class="col-md-auto">
-                            <a href="{% url 'auth:manager_staff' %}" class="btn btn-outline-info">
-                                <i class="fas fa-users"></i> Manage Staff
-                            </a>
-                        </div>
-                        <div class="col-md-auto">
-                            <a href="{% url 'auth:manager_register_staff' %}" class="btn btn-outline-success">
-                                <i class="fas fa-user-plus"></i> Register Staff
-                            </a>
-                        </div>
-                    </div>
-                </div>
+    <section class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-bullhorn"></i>
+                Recent Guest Complaints
+            </h5>
+            <a href="{% url 'auth:manager_complaints' %}" class="btn btn-sm btn-outline-danger">
+                View All
+            </a>
+        </div>
+        <div class="card-body p-0">
+            {% if recent_open_complaints %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Booking</th>
+                            <th>Guest</th>
+                            <th>Complaint</th>
+                            <th>Source</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in recent_open_complaints %}
+                        <tr>
+                            <td><strong>#{{ complaint.booking.id }}</strong></td>
+                            <td>{{ complaint.guest.get_full_name|default:complaint.guest.username }}</td>
+                            <td>{{ complaint.complaint_description|truncatewords:8 }}</td>
+                            <td>
+                                {% if complaint.reported_by_staff %}
+                                Staff: {{ complaint.reported_by_staff.get_full_name|default:complaint.reported_by_staff.username }}
+                                {% else %}
+                                Guest Direct
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if complaint.status == 'OPEN' %}
+                                <span class="badge badge-danger">Open</span>
+                                {% else %}
+                                <span class="badge badge-warning">{{ complaint.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'auth:manager_resolve_complaint' complaint.id %}" class="btn btn-sm btn-primary">
+                                    Review
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="manager-empty-state">
+                <i class="fas fa-check-circle"></i>
+                <p>No open complaints right now.</p>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-bolt"></i>
+                Quick Actions
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="manager-actions">
+                <a href="{% url 'auth:manager_refunds' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-money-bill-wave"></i> Manage Refunds
+                </a>
+                <a href="{% url 'auth:manager_complaints' %}" class="btn btn-outline-danger">
+                    <i class="fas fa-exclamation-triangle"></i> View Complaints
+                </a>
+                <a href="{% url 'auth:manager_staff' %}" class="btn btn-outline-info">
+                    <i class="fas fa-users"></i> Manage Staff
+                </a>
+                <a href="{% url 'auth:manager_register_staff' %}" class="btn btn-outline-success">
+                    <i class="fas fa-user-plus"></i> Register Staff
+                </a>
             </div>
         </div>
-    </div>
+    </section>
 </div>
-
-<style>
-    .card {
-        transition: box-shadow 0.3s ease;
-    }
-    
-    .card:hover {
-        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
-    }
-    
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.02);
-    }
-</style>
 {% endblock %}

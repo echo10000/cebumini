@@ -4,7 +4,7 @@ from django.db.models import Q, Sum, Count
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import CustomUser, UserRole, TermsAndConditions, Room, RoomImage, Booking, BookingStatus, RoomType
+from .models import CustomUser, UserRole, TermsAndConditions, Room, RoomImage, Booking, BookingStatus, RoomType, ContactMessage
 import json
 
 
@@ -438,4 +438,90 @@ class BookingAdmin(admin.ModelAdmin):
         if not obj.total_price or obj.total_price == 0:
             obj.total_price = obj.calculate_total_price()
         super().save_model(request, obj, form, change)
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    """Contact Message Admin with notification actions"""
+    list_display = ('subject_preview', 'sender_info', 'status_badge', 'reply_status', 'created_at')
+    list_filter = ('is_read', 'is_replied', 'notification_sent', 'created_at')
+    search_fields = ('name', 'email', 'subject', 'message')
+    readonly_fields = ('created_at', 'updated_at', 'message_preview')
+    ordering = ('-created_at',)
+    actions = ['mark_as_read', 'mark_as_replied_and_notify']
+    
+    fieldsets = (
+        ('Message Info', {'fields': ('name', 'email', 'phone', 'subject')}),
+        ('Content', {'fields': ('message', 'message_preview'), 'classes': ('wide',)}),
+        ('Guest Link', {'fields': ('guest',)}),
+        ('Status', {'fields': ('is_read', 'is_replied')}),
+        ('Staff Response', {'fields': ('staff_response',), 'classes': ('wide',)}),
+        ('Notifications', {'fields': ('notification_sent', 'last_notified_at')}),
+        ('Timestamps', {'fields': ('created_at', 'updated_at')}),
+    )
+
+    def subject_preview(self, obj):
+        """Display subject preview"""
+        return obj.subject[:50] + '...' if len(obj.subject) > 50 else obj.subject
+    subject_preview.short_description = 'Subject'
+
+    def sender_info(self, obj):
+        """Display sender name and email"""
+        return format_html(
+            '{}<br/><small style="color: #666;">{}</small>',
+            obj.name,
+            obj.email
+        )
+    sender_info.short_description = 'From'
+
+    def status_badge(self, obj):
+        """Display read/unread status"""
+        if obj.is_read:
+            return format_html(
+                '<span style="background-color: #d1d5db; color: #374151; padding: 3px 10px; border-radius: 3px;">✓ Read</span>'
+            )
+        return format_html(
+            '<span style="background-color: #fbbf24; color: #78350f; padding: 3px 10px; border-radius: 3px;">Unread</span>'
+        )
+    status_badge.short_description = 'Status'
+
+    def reply_status(self, obj):
+        """Display reply status with notification indicator"""
+        if obj.is_replied:
+            if obj.notification_sent:
+                return format_html(
+                    '<span style="background-color: #d1fae5; color: #065f46; padding: 3px 10px; border-radius: 3px;">✓ Replied & Notified</span>'
+                )
+            else:
+                return format_html(
+                    '<span style="background-color: #dbeafe; color: #0c4a6e; padding: 3px 10px; border-radius: 3px;">⚠ Replied (Not Notified)</span>'
+                )
+        return format_html(
+            '<span style="background-color: #fee2e2; color: #7f1d1d; padding: 3px 10px; border-radius: 3px;">Pending</span>'
+        )
+    reply_status.short_description = 'Reply Status'
+
+    def message_preview(self, obj):
+        """Display full message for readonly"""
+        return obj.message
+    message_preview.short_description = 'Full Message'
+
+    def mark_as_read(self, request, queryset):
+        """Action to mark messages as read"""
+        updated = queryset.update(is_read=True)
+        self.message_user(request, f'{updated} message(s) marked as read.')
+    mark_as_read.short_description = 'Mark selected as read'
+
+    def mark_as_replied_and_notify(self, request, queryset):
+        """Action to mark as replied and send notification email"""
+        count = 0
+        for message in queryset:
+            if message.guest and message.guest.email:
+                message.is_replied = True
+                message.save()
+                message.send_reply_notification()
+                count += 1
+        
+        self.message_user(request, f'{count} message(s) marked as replied and guest notification email(s) sent.')
+    mark_as_replied_and_notify.short_description = 'Mark as replied & send notification email to guest'
 

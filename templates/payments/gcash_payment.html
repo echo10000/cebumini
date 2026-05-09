@@ -1,138 +1,58 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'guest/guest_base.html' %}
 
 {% block title %}GCash Payment - Cebu Hotel{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="guest-page">
+    <section class="guest-page-header">
+        <div>
+            <p class="guest-kicker">Payment</p>
+            <h1>GCash Payment</h1>
+            <p>Send payment through GCash and submit your reference number.</p>
+        </div>
+    </section>
+
     <div class="row justify-content-center">
-        <div class="col-lg-7">
-            <div class="card">
-                <div class="card-header bg-warning text-dark">
-                    <h4 class="mb-0"><i class="fas fa-mobile-alt"></i> GCash Payment</h4>
+        <div class="col-lg-8">
+            <section class="guest-card">
+                <div class="guest-card shadow-none mb-4">
+                    <h2 class="h5">Booking Details</h2>
+                    <p class="mb-1"><strong>Room:</strong> {{ payment.booking.room.room_number }}</p>
+                    <p class="mb-1"><strong>Check-in:</strong> {{ payment.booking.check_in|date:"M d, Y" }}</p>
+                    <p class="mb-1"><strong>Check-out:</strong> {{ payment.booking.check_out|date:"M d, Y" }}</p>
+                    <p class="mb-0"><strong>Amount:</strong> <span class="guest-price">PHP {{ payment.amount }}</span></p>
                 </div>
-                <div class="card-body">
-                    {% if messages %}
-                        <div class="alert alert-dismissible fade show" role="alert">
-                            {% for message in messages %}
-                                <div class="alert alert-{{ message.tags }} alert-dismissible">
-                                    {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                                </div>
-                            {% endfor %}
-                        </div>
+
+                <div class="alert alert-info">
+                    Send <strong>PHP {{ payment.amount }}</strong> to <code>Cebu Hotel Business Account</code>, then enter the GCash reference number below.
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="id_gcash_reference" class="form-label">GCash Reference Number</label>
+                        {{ form.gcash_reference }}
+                        <div class="form-text">Find this in your GCash transaction history.</div>
+                        {% if form.gcash_reference.errors %}
+                            <div class="alert alert-danger mt-2">{{ form.gcash_reference.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
                     {% endif %}
 
-                    <!-- Booking Details -->
-                    <div class="mb-4 p-3 bg-light border rounded">
-                        <h6><strong>Booking Details</strong></h6>
-                        <table class="table table-sm mb-0">
-                            <tr>
-                                <td><strong>Room:</strong></td>
-                                <td>{{ payment.booking.room.name }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Check-in:</strong></td>
-                                <td>{{ payment.booking.check_in_date }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Check-out:</strong></td>
-                                <td>{{ payment.booking.check_out_date }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Amount to Pay:</strong></td>
-                                <td><h6 class="text-warning mb-0">₱ {{ payment.amount }}</h6></td>
-                            </tr>
-                        </table>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check-circle"></i> Verify Payment
+                        </button>
+                        <a href="{% url 'bookings:booking_detail' payment.booking.id %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Choose Different Payment Method
+                        </a>
                     </div>
-
-                    <!-- Step 1: Send Payment -->
-                    <div class="alert alert-info mb-4">
-                        <h6><i class="fas fa-hand-point-right"></i> Step 1: Send Payment via GCash</h6>
-                        <p class="mb-2">Open your GCash app and send the payment amount to our GCash account:</p>
-                        <div class="card mt-3">
-                            <div class="card-body text-center">
-                                <h5 class="card-title">Amount to Send</h5>
-                                <h2 class="text-success">₱ {{ payment.amount }}</h2>
-                                <p class="card-text mb-0 mt-3">
-                                    <strong>To:</strong> <code>Cebu Hotel Business Account</code>
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Step 2: Enter Reference -->
-                    <div class="card border-2 border-warning">
-                        <div class="card-body">
-                            <h5 class="card-title"><i class="fas fa-clipboard-check"></i> Step 2: Enter GCash Reference</h5>
-                            <p class="text-muted mb-4">After you've sent the payment via GCash, you'll receive a reference number. Enter it below:</p>
-
-                            <form method="post">
-                                {% csrf_token %}
-
-                                <div class="mb-3">
-                                    <label for="id_gcash_reference" class="form-label">
-                                        GCash Reference Number
-                                        <span class="badge bg-danger">Required</span>
-                                    </label>
-                                    {{ form.gcash_reference }}
-                                    <small class="form-text text-muted d-block mt-2">
-                                        You can find this in your GCash transaction history after sending the payment.
-                                    </small>
-                                    {% if form.gcash_reference.errors %}
-                                        <div class="alert alert-danger mt-2">{{ form.gcash_reference.errors }}</div>
-                                    {% endif %}
-                                </div>
-
-                                {% if form.non_field_errors %}
-                                    <div class="alert alert-danger mb-3">{{ form.non_field_errors }}</div>
-                                {% endif %}
-
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-success btn-lg">
-                                        <i class="fas fa-check-circle"></i> Verify Payment
-                                    </button>
-                                </div>
-
-                                <a href="{% url 'bookings:booking_detail' payment.booking.id %}" class="btn btn-link w-100 mt-2">
-                                    <i class="fas fa-arrow-left"></i> Choose Different Payment Method
-                                </a>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- Help Section -->
-                    <div class="alert alert-light mt-4" style="border: 1px solid #d3d3d3;">
-                        <h6 style="font-size: 0.9rem;"><i class="fas fa-question-circle"></i> Where to find your GCash Reference?</h6>
-                        <ol style="font-size: 0.85rem; margin: 0;">
-                            <li>Open your GCash app</li>
-                            <li>Go to "My Transactions" or "Transaction History"</li>
-                            <li>Find the payment you just sent to Cebu Hotel</li>
-                            <li>The reference number is shown at the top of the transaction details</li>
-                            <li>Copy and paste it in the box above</li>
-                        </ol>
-                    </div>
-                </div>
-            </div>
+                </form>
+            </section>
         </div>
     </div>
 </div>
-
-<style>
-    #id_gcash_reference {
-        border: 2px solid #ffc107;
-        font-size: 1.1rem;
-        padding: 0.75rem 0.5rem;
-    }
-    #id_gcash_reference:focus {
-        border-color: #ffb300;
-        box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
-    }
-    code {
-        background-color: #f0f0f0;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-family: monospace;
-    }
-</style>
 {% endblock %}

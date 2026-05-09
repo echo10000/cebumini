@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}Connect Accounts - Cebu Luxury{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #0a0f1e;
+        color: #ffffff;
+    }
+
+    main {
+        background-color: #0a0f1e;
+    }
+
+    .luxury-header {
+        background: #0a0f1e;
+        border-bottom: 1px solid rgba(201, 168, 76, 0.3);
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .luxury-header-logo {
+        color: #c9a84c;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+        letter-spacing: 0.5px;
+    }
+
+    .luxury-container {
+        max-width: 600px;
+        margin: 4rem auto;
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        border-radius: 12px;
+        padding: 2.5rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .luxury-heading {
+        color: #ffffff;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-family: 'Playfair Display', serif;
+    }
+
+    .luxury-description {
+        color: #9ca3af;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+    }
+
+    .luxury-button {
+        background: #ffffff;
+        color: #1f2937;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .luxury-button:hover {
+        background: #f3f4f6;
+        transform: scale(1.02);
+    }
+
+    .luxury-button.secondary {
+        background: transparent;
+        color: #c9a84c;
+        border: 1.5px solid #c9a84c;
+    }
+
+    .luxury-button.secondary:hover {
+        background: rgba(201, 168, 76, 0.1);
+        color: #e8c86d;
+        border-color: #e8c86d;
+    }
+
+    .account-card {
+        background: #0f1623;
+        border: 1px solid rgba(201, 168, 76, 0.2);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .account-card h3 {
+        color: #c9a84c;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .account-card p {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 640px) {
+        .luxury-container {
+            margin: 2rem 1rem;
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="luxury-header">
+    <a href="/" class="luxury-header-logo">
+        <i class="fas fa-crown"></i> Cebu Luxury
+    </a>
+</div>
+
+<div class="luxury-container">
+    <h1 class="luxury-heading">Account Connections</h1>
+    <p class="luxury-description">
+        Manage your connected accounts and social integrations.
+    </p>
+
+    {% for connection in connections %}
+        <div class="account-card">
+            <h3>
+                {% if connection.provider == 'google' %}
+                    <i class="fab fa-google"></i> Google
+                {% else %}
+                    {{ connection.get_provider.name }}
+                {% endif %}
+            </h3>
+            <p>{{ connection.display_name }}</p>
+            <a href="{% url 'socialaccount_connections' %}" class="luxury-button secondary" style="font-size: 0.9rem;">
+                <i class="fas fa-unlink"></i> Disconnect
+            </a>
+        </div>
+    {% empty %}
+        <div style="text-align: center; padding: 2rem; color: #9ca3af;">
+            <p><i class="fas fa-link" style="font-size: 2rem; color: #6b7280; margin-bottom: 1rem;"></i></p>
+            <p>No connected accounts found.</p>
+        </div>
+    {% endfor %}
+
+    <div style="text-align: center; margin-top: 2rem;">
+        <a href="{% url 'account_connections' %}" class="luxury-button">
+            <i class="fas fa-plus"></i> Add Account
+        </a>
+    </div>
+</div>
+{% endblock %}

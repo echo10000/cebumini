@@ -16,6 +16,7 @@ urlpatterns = [
     # Room Management
     path('rooms/', views_admin.room_management, name='room_management'),
     path('rooms/<int:room_id>/', views_admin.room_detail_admin, name='room_detail_admin'),
+    path('rooms/<int:room_id>/delete/', views_admin.room_delete_admin, name='room_delete'),
     
     # Booking Management
     path('bookings/', views_admin.booking_management, name='booking_management'),

@@ -1,310 +1,403 @@
-{% extends 'base.html' %}
+{% extends 'staff/staff_base.html' %}
 
-{% block title %}Process Remaining Payment - Staff{% endblock %}
+{% block title %}Process Payment - Cebu Luxury{% endblock %}
+
+{% block extra_css %}
+<style>
+    .payment-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .payment-card {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid var(--guest-line);
+        border-radius: 8px;
+        box-shadow: var(--guest-shadow);
+        overflow: hidden;
+    }
+
+    .payment-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--guest-line);
+        background: rgba(238, 242, 247, 0.7);
+    }
+
+    .payment-card-header h2,
+    .payment-card-header h3 {
+        margin: 0;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--guest-ink);
+    }
+
+    .payment-card-body {
+        padding: 1.25rem;
+    }
+
+    .section-block + .section-block {
+        margin-top: 1.25rem;
+    }
+
+    .section-title {
+        margin: 0 0 0.9rem;
+        font-size: 0.8rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--guest-muted);
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.9rem;
+    }
+
+    .info-tile,
+    .summary-panel,
+    .sidebar-note {
+        background: #f8fbfb;
+        border: 1px solid var(--guest-line);
+        border-radius: 8px;
+    }
+
+    .info-tile {
+        padding: 0.9rem 1rem;
+    }
+
+    .info-tile.full {
+        grid-column: 1 / -1;
+    }
+
+    .tile-label {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--guest-muted);
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .tile-value {
+        color: var(--guest-ink);
+        font-weight: 700;
+    }
+
+    .summary-panel {
+        padding: 1rem;
+    }
+
+    .summary-panel td,
+    .summary-panel strong {
+        color: var(--guest-ink) !important;
+    }
+
+    .summary-panel hr {
+        border-color: var(--guest-line);
+        opacity: 1;
+    }
+
+    .sidebar-stack {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .sidebar-note {
+        padding: 1rem;
+    }
+
+    .sidebar-note p,
+    .sidebar-note li {
+        color: var(--guest-ink);
+    }
+
+    .sidebar-note ol {
+        margin: 0;
+        padding-left: 1.2rem;
+    }
+
+    .input-group-text {
+        background: #eef2f7 !important;
+        border-color: var(--guest-line) !important;
+        color: var(--guest-muted) !important;
+    }
+
+    #reference_number.is-invalid {
+        border-color: #dc2626 !important;
+    }
+
+    @media (max-width: 992px) {
+        .payment-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h1 class="h3 mb-0">Collect Remaining Balance - Booking #{{ booking.id }}</h1>
-                <a href="{% url 'staff:pending_balance' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to Pending Bookings
-                </a>
-            </div>
-        </div>
+    <div class="page-header mb-4">
+        <h1><i class="fas fa-wallet"></i> Collect Remaining Balance</h1>
+        <p>Booking #{{ booking.id }} payment reconciliation and final collection.</p>
     </div>
 
-    <div class="row">
-        <div class="col-md-8">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">Collect Balance Payment</h6>
-                </div>
-                <div class="card-body">
-                    <form method="post">
-                        {% csrf_token %}
-                        
-                        <!-- Booking Information Section -->
-                        <fieldset class="mb-4">
-                            <legend class="font-weight-bold mb-3">Booking Information</legend>
-                            
-                            <div class="form-group">
-                                <label for="guest_name">Guest Name</label>
-                                <input type="text" class="form-control" id="guest_name" value="{{ booking.guest.first_name }} {{ booking.guest.last_name }}" disabled>
-                            </div>
+    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="guest-chip">
+            <i class="fas fa-receipt"></i> Outstanding amount: &#8369;{{ balance_due|floatformat:2 }}
+        </div>
+        <a href="{% url 'staff:pending_balance' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Pending Bookings
+        </a>
+    </div>
 
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="room">Room</label>
-                                    <input type="text" class="form-control" id="room" value="Room {{ booking.room.room_number }} ({{ booking.room.get_room_type_display }})" disabled>
-                                </div>
-                                <div class="form-group col-md-6">
-                                    <label for="dates">Booking Dates</label>
-                                    <input type="text" class="form-control" id="dates" value="{{ booking.check_in|date:'M d' }} - {{ booking.check_out|date:'M d, Y' }}" disabled>
-                                </div>
-                            </div>
-                        </fieldset>
+    <div class="payment-layout">
+        <section class="payment-card">
+            <div class="payment-card-header">
+                <h2>Collect Balance Payment</h2>
+            </div>
+            <div class="payment-card-body">
+                <form method="post">
+                    {% csrf_token %}
 
-                        <!-- Payment Status Section -->
-                        <fieldset class="mb-4">
-                            <legend class="font-weight-bold mb-3">Payment Status</legend>
-                            
-                            <div id="payment-history" class="alert alert-secondary">
-                                <strong>Payment Summary:</strong>
-                                <table class="mt-2 small w-100">
-                                    <tr>
-                                        <td>Total Amount Due:</td>
-                                        <td class="text-right"><strong class="h6">₱{{ booking.total_price|floatformat:2 }}</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Previously Paid:</td>
-                                        <td class="text-right"><strong class="text-success">₱{{ total_paid|floatformat:2 }}</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2"><hr class="my-2"></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge badge-warning">Balance Due:</span></td>
-                                        <td class="text-right"><strong class="text-warning h6">₱{{ balance_due|floatformat:2 }}</strong></td>
-                                    </tr>
-                                </table>
+                    <div class="section-block">
+                        <h3 class="section-title">Booking Information</h3>
+                        <div class="info-grid">
+                            <div class="info-tile">
+                                <span class="tile-label">Guest Name</span>
+                                <div class="tile-value">{{ booking.guest.first_name }} {{ booking.guest.last_name }}</div>
                             </div>
-                        </fieldset>
+                            <div class="info-tile">
+                                <span class="tile-label">Room</span>
+                                <div class="tile-value">Room {{ booking.room.room_number }} ({{ booking.room.get_room_type_display }})</div>
+                            </div>
+                            <div class="info-tile full">
+                                <span class="tile-label">Booking Dates</span>
+                                <div class="tile-value">{{ booking.check_in|date:'M d, Y' }} to {{ booking.check_out|date:'M d, Y' }}</div>
+                            </div>
+                        </div>
+                    </div>
 
-                        <!-- Payment Collection Section -->
-                        <fieldset class="mb-4">
-                            <legend class="font-weight-bold mb-3">Collect Payment</legend>
-                            
-                            <div class="form-group">
-                                <label for="payment_method">Payment Method <span class="text-danger">*</span></label>
-                                <select class="form-control" id="payment_method" name="payment_method" required>
-                                    <option value="">-- Select Payment Method --</option>
-                                    <option value="CASH">💵 Cash</option>
-                                    <option value="STRIPE">💳 Card (Credit/Debit)</option>
-                                    <option value="GCASH">📱 GCash</option>
-                                    <option value="BANK_TRANSFER">🏦 Bank Transfer</option>
+                    <div class="section-block">
+                        <h3 class="section-title">Payment Status</h3>
+                        <div id="payment-history" class="summary-panel">
+                            <strong>Payment Summary</strong>
+                            <table class="mt-3 small w-100">
+                                <tr>
+                                    <td>Total Amount Due</td>
+                                    <td class="text-end"><strong>&#8369;{{ booking.total_price|floatformat:2 }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Previously Paid</td>
+                                    <td class="text-end"><strong class="text-success">&#8369;{{ total_paid|floatformat:2 }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><hr class="my-2"></td>
+                                </tr>
+                                <tr>
+                                    <td><span class="badge bg-warning-subtle text-warning-emphasis">Balance Due</span></td>
+                                    <td class="text-end"><strong class="text-warning">&#8369;{{ balance_due|floatformat:2 }}</strong></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="section-block">
+                        <h3 class="section-title">Collect Payment</h3>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label" for="payment_method">Payment Method <span class="text-danger">*</span></label>
+                                <select class="form-select" id="payment_method" name="payment_method" required>
+                                    <option value="">Select payment method</option>
+                                    <option value="CASH">Cash</option>
+                                    <option value="STRIPE">Card (Credit/Debit)</option>
+                                    <option value="GCASH">GCash</option>
+                                    <option value="BANK_TRANSFER">Bank Transfer</option>
                                 </select>
                             </div>
-
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="payment_amount">Amount Collected <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text">₱</span>
-                                        </div>
-                                        <input type="number" class="form-control" id="payment_amount" name="payment_amount" step="0.01" min="0" required>
-                                    </div>
-                                    <small class="form-text text-muted">Leave empty to auto-fill with balance due (₱{{ balance_due|floatformat:2 }})</small>
+                            <div class="col-md-6">
+                                <label class="form-label" for="payment_amount">Amount Collected <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">&#8369;</span>
+                                    <input type="number" class="form-control" id="payment_amount" name="payment_amount" step="0.01" min="0" required>
                                 </div>
-                                <div class="form-group col-md-6" id="reference_group" style="display:none;">
-                                    <label for="reference_number" id="reference_label">Reference/Receipt Number</label>
-                                    <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="e.g., TRANS123456">
-                                    <small class="form-text text-muted" id="reference_help">Auto-generated if left empty</small>
-                                </div>
+                                <small class="form-text">Defaults to the full balance due.</small>
                             </div>
-
-                            <div id="payment-summary" class="alert alert-secondary">
-                                <strong>Payment Calculation:</strong>
-                                <table class="mt-2 small w-100">
-                                    <tr>
-                                        <td>Balance Due:</td>
-                                        <td class="text-right"><strong id="summary-balance-due">₱{{ balance_due|floatformat:2 }}</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Amount Collected:</td>
-                                        <td class="text-right"><strong id="summary-collected">₱0.00</strong></td>
-                                    </tr>
-                                    <tr>
-                                        <td colspan="2"><hr class="my-2"></td>
-                                    </tr>
-                                    <tr id="remaining-row" style="display:none;">
-                                        <td><span class="badge badge-info">Remaining After Payment:</span></td>
-                                        <td class="text-right"><strong id="summary-remaining" class="text-info">₱0.00</strong></td>
-                                    </tr>
-                                    <tr id="full-paid-row" style="display:none;">
-                                        <td><span class="badge badge-success">Status:</span></td>
-                                        <td class="text-right"><strong id="summary-status" class="text-success">FULLY PAID ✓</strong></td>
-                                    </tr>
-                                </table>
+                            <div class="col-md-6" id="reference_group" style="display:none;">
+                                <label class="form-label" for="reference_number" id="reference_label">Reference / Receipt Number</label>
+                                <input type="text" class="form-control" id="reference_number" name="reference_number" placeholder="e.g. TRANS123456">
+                                <small class="form-text" id="reference_help">Auto-generated if left empty.</small>
                             </div>
-                        </fieldset>
-
-                        <!-- Action Buttons -->
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-save"></i> Collect Balance Payment
-                            </button>
-                            <a href="{% url 'staff:pending_balance' %}" class="btn btn-secondary btn-lg">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
 
-        <!-- Info Sidebar -->
-        <div class="col-md-4">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-info text-white">
-                    <h6 class="m-0 font-weight-bold">Balance Payment Info</h6>
-                </div>
-                <div class="card-body small">
-                    <div class="mb-3">
-                        <strong class="text-success">💵 💳 Cash / Card:</strong>
-                        <p class="mb-2">Reference number is auto-generated. No input needed.</p>
+                        <div id="payment-summary" class="summary-panel mt-3">
+                            <strong>Payment Calculation</strong>
+                            <table class="mt-3 small w-100">
+                                <tr>
+                                    <td>Balance Due</td>
+                                    <td class="text-end"><strong id="summary-balance-due">&#8369;{{ balance_due|floatformat:2 }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Amount Collected</td>
+                                    <td class="text-end"><strong id="summary-collected">&#8369;0.00</strong></td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"><hr class="my-2"></td>
+                                </tr>
+                                <tr id="remaining-row" style="display:none;">
+                                    <td><span class="badge bg-info-subtle text-info-emphasis">Remaining After Payment</span></td>
+                                    <td class="text-end"><strong id="summary-remaining" class="text-info">&#8369;0.00</strong></td>
+                                </tr>
+                                <tr id="full-paid-row" style="display:none;">
+                                    <td><span class="badge bg-success-subtle text-success-emphasis">Status</span></td>
+                                    <td class="text-end"><strong id="summary-status" class="text-success">Fully paid</strong></td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
-                    <div>
-                        <strong class="text-warning">📱 🏦 GCash / Bank Transfer:</strong>
-                        <p class="mb-0">Reference number is <strong>REQUIRED</strong>. Enter the transaction reference from the payment receipt.</p>
-                    </div>
-                </div>
-            </div>
 
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h6 class="m-0 font-weight-bold">Instructions</h6>
-                </div>
-                <div class="card-body small">
-                    <ol class="small mb-0">
-                        <li>Select the payment method</li>
-                        <li>Enter amount collected (auto-fills with balance due)</li>
-                        <li>If GCash/Bank Transfer, enter reference number</li>
-                        <li>Check the payment calculation summary</li>
-                        <li>Click "Collect Balance Payment" to finalize</li>
-                    </ol>
-                </div>
+                    <div class="d-flex gap-3 flex-wrap mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Collect Balance Payment
+                        </button>
+                        <a href="{% url 'staff:pending_balance' %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
-        </div>
+        </section>
+
+        <aside class="sidebar-stack">
+            <section class="payment-card">
+                <div class="payment-card-header">
+                    <h3>Balance Payment Info</h3>
+                </div>
+                <div class="payment-card-body">
+                    <div class="sidebar-note">
+                        <p class="mb-3"><strong>Cash / Card</strong><br>Reference number is generated automatically.</p>
+                        <p class="mb-0"><strong>GCash / Bank Transfer</strong><br>Reference number is required from the payment receipt.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="payment-card">
+                <div class="payment-card-header">
+                    <h3>Instructions</h3>
+                </div>
+                <div class="payment-card-body">
+                    <div class="sidebar-note">
+                        <ol class="small">
+                            <li>Select the payment method.</li>
+                            <li>Confirm the amount collected.</li>
+                            <li>Add a reference number for GCash or bank transfer.</li>
+                            <li>Review the calculation summary before submitting.</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+        </aside>
     </div>
 </div>
 
 <script>
-    // Payment method and reference field handling
     const paymentMethodSelect = document.getElementById('payment_method');
     const referenceNumberInput = document.getElementById('reference_number');
     const referenceGroup = document.getElementById('reference_group');
     const referenceLabel = document.getElementById('reference_label');
     const referenceHelp = document.getElementById('reference_help');
     const paymentAmountInput = document.getElementById('payment_amount');
-    
+
     const BALANCE_DUE = {{ balance_due|floatformat:2 }};
-    
-    // Payment methods that require external reference
     const REFERENCE_REQUIRED_METHODS = ['GCASH', 'BANK_TRANSFER'];
     const REFERENCE_AUTO_METHODS = ['CASH', 'STRIPE'];
-    
+
     function updateReferenceFieldState() {
         const selectedMethod = paymentMethodSelect.value;
-        
+
         if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
-            // Show field for GCash and Bank Transfer
             referenceGroup.style.display = 'block';
             referenceNumberInput.required = true;
             referenceNumberInput.classList.add('is-invalid');
-            
-            // Update label and help text based on payment method
+
             if (selectedMethod === 'GCASH') {
                 referenceLabel.innerHTML = 'GCash Reference Number <span class="text-danger">*</span>';
-                referenceHelp.textContent = 'Enter the GCash reference number from the transaction receipt (e.g., G123456789ABC)';
-                referenceNumberInput.placeholder = 'e.g., G123456789ABC';
-            } else if (selectedMethod === 'BANK_TRANSFER') {
-                referenceLabel.innerHTML = 'Bank Transfer Reference/Confirmation Code <span class="text-danger">*</span>';
-                referenceHelp.textContent = 'Enter the bank transfer reference number or confirmation code for verification';
-                referenceNumberInput.placeholder = 'e.g., TRANSFER123456';
+                referenceHelp.textContent = 'Enter the GCash transaction reference.';
+                referenceNumberInput.placeholder = 'e.g. G123456789ABC';
+            } else {
+                referenceLabel.innerHTML = 'Bank Transfer Reference Code <span class="text-danger">*</span>';
+                referenceHelp.textContent = 'Enter the transfer confirmation code.';
+                referenceNumberInput.placeholder = 'e.g. TRANSFER123456';
             }
         } else if (REFERENCE_AUTO_METHODS.includes(selectedMethod)) {
-            // Hide field for Cash and Card - will be auto-generated
             referenceGroup.style.display = 'none';
             referenceNumberInput.required = false;
             referenceNumberInput.classList.remove('is-invalid');
-            referenceNumberInput.value = ''; // Clear the field
-            referenceLabel.innerHTML = 'Reference/Receipt Number';
-            referenceHelp.textContent = 'Auto-generated if left empty';
+            referenceNumberInput.value = '';
+            referenceLabel.innerHTML = 'Reference / Receipt Number';
+            referenceHelp.textContent = 'Auto-generated if left empty.';
         } else {
-            // Default: hide field
             referenceGroup.style.display = 'none';
             referenceNumberInput.required = false;
             referenceNumberInput.classList.remove('is-invalid');
         }
     }
-    
+
     function updatePaymentSummary() {
         const collected = parseFloat(paymentAmountInput.value) || 0;
         const remaining = BALANCE_DUE - collected;
-        
-        document.getElementById('summary-collected').textContent = '₱' + collected.toFixed(2);
-        
+
+        document.getElementById('summary-collected').textContent = `₱${collected.toFixed(2)}`;
+
         const remainingRow = document.getElementById('remaining-row');
         const fullPaidRow = document.getElementById('full-paid-row');
-        
+
         if (collected >= BALANCE_DUE) {
             remainingRow.style.display = 'none';
             fullPaidRow.style.display = 'table-row';
-            document.getElementById('summary-status').textContent = 'FULLY PAID ✓';
-            document.getElementById('summary-status').className = 'text-success';
         } else if (collected > 0) {
             remainingRow.style.display = 'table-row';
             fullPaidRow.style.display = 'none';
-            document.getElementById('summary-remaining').textContent = '₱' + remaining.toFixed(2);
+            document.getElementById('summary-remaining').textContent = `₱${remaining.toFixed(2)}`;
             document.getElementById('summary-remaining').className = 'text-info';
         } else {
             remainingRow.style.display = 'table-row';
             fullPaidRow.style.display = 'none';
-            document.getElementById('summary-remaining').textContent = '₱' + BALANCE_DUE.toFixed(2);
+            document.getElementById('summary-remaining').textContent = `₱${BALANCE_DUE.toFixed(2)}`;
             document.getElementById('summary-remaining').className = 'text-danger';
         }
     }
-    
-    // Event listeners
+
     paymentMethodSelect.addEventListener('change', updateReferenceFieldState);
     paymentAmountInput.addEventListener('input', updatePaymentSummary);
-    
-    // Set default amount to balance due
+
     paymentAmountInput.value = BALANCE_DUE.toFixed(2);
     updatePaymentSummary();
-    
-    // Validate form submission
-    document.querySelector('form').addEventListener('submit', function(e) {
+
+    document.querySelector('form').addEventListener('submit', function (event) {
         const selectedMethod = paymentMethodSelect.value;
-        
-        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod)) {
-            if (!referenceNumberInput.value.trim()) {
-                e.preventDefault();
-                referenceNumberInput.classList.add('is-invalid');
-                alert(`Reference number is required for ${selectedMethod === 'GCASH' ? 'GCash' : 'Bank Transfer'} payments.`);
-                referenceNumberInput.focus();
-                return false;
-            }
-        }
-        
         const collected = parseFloat(paymentAmountInput.value) || 0;
+
+        if (REFERENCE_REQUIRED_METHODS.includes(selectedMethod) && !referenceNumberInput.value.trim()) {
+            event.preventDefault();
+            referenceNumberInput.classList.add('is-invalid');
+            alert(`Reference number is required for ${selectedMethod === 'GCASH' ? 'GCash' : 'Bank Transfer'} payments.`);
+            referenceNumberInput.focus();
+            return;
+        }
+
         if (collected > BALANCE_DUE) {
-            e.preventDefault();
-            alert(`Payment amount cannot exceed balance due (₱${BALANCE_DUE.toFixed(2)})`);
+            event.preventDefault();
+            alert(`Payment amount cannot exceed the balance due (₱${BALANCE_DUE.toFixed(2)}).`);
             paymentAmountInput.focus();
-            return false;
         }
     });
 </script>
-
-<style>
-    .text-danger { color: #e74c3c; }
-    fieldset { border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
-    legend { font-size: 14px; }
-    
-    #reference_group {
-        transition: all 0.3s ease-in-out;
-    }
-    
-    #reference_number.is-invalid {
-        border-color: #e74c3c;
-    }
-    
-    #reference_number:focus {
-        box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
-    }
-</style>
 {% endblock %}

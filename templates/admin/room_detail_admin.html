@@ -55,7 +55,8 @@
     }
     
     .luxury-info-header {
-        background: #2563eb;
+        background: #111827;
+        border-left: 4px solid #f59e0b;
         padding: 1rem 1.5rem;
         color: #ffffff;
         font-family: 'Playfair Display', serif;
@@ -67,6 +68,7 @@
     }
     
     .luxury-info-header i {
+        color: #c9a84c;
         font-size: 1.5rem;
     }
     
@@ -336,9 +338,11 @@
                         <a href="{% url 'rooms:edit' room.id %}" class="btn-action btn-edit">
                             <i class="fas fa-edit"></i> Edit
                         </a>
-                        <form method="POST" action="{% url 'rooms:delete' room.id %}" style="display: inline;"
+                        <form method="POST" action="{% url 'admin_panel:room_delete' room.id %}" style="display: inline;"
                               onsubmit="return confirm('Are you sure you want to delete this room?');">
                             {% csrf_token %}
+                            <input type="hidden" name="next_success" value="{% url 'admin_panel:room_management' %}">
+                            <input type="hidden" name="next_error" value="{% url 'admin_panel:room_detail_admin' room.id %}">
                             <button type="submit" class="btn-action btn-delete">
                                 <i class="fas fa-trash"></i> Delete
                             </button>

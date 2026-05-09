@@ -21,7 +21,7 @@ from .decorators import manager_required, manager_or_admin_required
 from .utils import log_audit
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def manager_dashboard_view(request):
     """Manager Dashboard with staff, bookings, and escalations overview"""
@@ -50,6 +50,9 @@ def manager_dashboard_view(request):
         'open_complaints': GuestComplaintEscalation.objects.filter(
             status__in=['OPEN', 'IN_PROGRESS']
         ).count(),
+        'recent_open_complaints': GuestComplaintEscalation.objects.filter(
+            status__in=['OPEN', 'IN_PROGRESS']
+        ).select_related('booking', 'guest', 'reported_by_staff').order_by('-created_at')[:5],
         
         # Recent bookings requiring approval
         'recent_bookings': Booking.objects.filter(
@@ -68,7 +71,7 @@ def manager_dashboard_view(request):
     return render(request, 'dashboard/manager_dashboard.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def manager_refund_requests_view(request):
     """View all refund requests for manager approval"""
@@ -91,7 +94,7 @@ def manager_refund_requests_view(request):
     return render(request, 'manager/refund_requests.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def approve_refund_request_view(request, refund_request_id):
     """Manager approves or rejects a refund request"""
@@ -171,7 +174,7 @@ def approve_refund_request_view(request, refund_request_id):
     return render(request, 'manager/refund_detail.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def complaints_escalations_view(request):
     """View all escalated guest complaints"""
@@ -193,7 +196,7 @@ def complaints_escalations_view(request):
     return render(request, 'manager/complaints_escalations.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def resolve_complaint_escalation_view(request, escalation_id):
     """Manager resolves an escalated complaint"""
@@ -253,7 +256,7 @@ def resolve_complaint_escalation_view(request, escalation_id):
     return render(request, 'manager/complaint_detail.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def staff_members_view(request):
     """Manage staff members under this manager"""
@@ -269,7 +272,7 @@ def staff_members_view(request):
     return render(request, 'manager/staff_members.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def register_staff_view(request):
     """Manager registers new staff members"""
@@ -337,7 +340,7 @@ def register_staff_view(request):
     return render(request, 'manager/register_staff.html')
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @manager_or_admin_required
 def deactivate_staff_view(request, staff_id):
     """Manager deactivates a staff member"""
@@ -362,7 +365,31 @@ def deactivate_staff_view(request, staff_id):
     return redirect('auth:manager_staff')
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
+@manager_or_admin_required
+def reactivate_staff_view(request, staff_id):
+    """Manager reactivates a staff member"""
+    staff_user = get_object_or_404(CustomUser, id=staff_id, role=UserRole.STAFF)
+
+    staff_user.is_active = True
+    staff_user.save(update_fields=['is_active'])
+
+    log_audit(
+        request,
+        request.user,
+        'STAFF_REACTIVATED',
+        'CustomUser',
+        staff_user.id,
+        affected_user=staff_user,
+        description=f'Manager reactivated staff member: {staff_user.email}',
+        changes={'is_active': True}
+    )
+
+    messages.success(request, f'Staff member {staff_user.username} reactivated.')
+    return redirect('auth:manager_staff')
+
+
+@login_required(login_url='auth:login')
 @manager_required
 def staff_dashboard_view(request, staff_id):
     """Manager can view individual staff member dashboards"""

@@ -2,6 +2,219 @@
 
 {% block title %}{{ title }} - Cebu Hotel{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* ============================================
+       COMPREHENSIVE DARK LUXURY THEME
+       ============================================ */
+    
+    /* Page background */
+    body {
+        background-color: #0a0f1e !important;
+    }
+
+    .dashboard-container {
+        background-color: #0a0f1e !important;
+        color: #ffffff !important;
+    }
+
+    .container {
+        background-color: transparent !important;
+    }
+
+    /* AGGRESSIVE CARD STYLING */
+    .card {
+        background-color: #1a2235 !important;
+        border: 1px solid rgba(201, 168, 76, 0.2) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .card-body {
+        background-color: #1a2235 !important;
+        color: #ffffff !important;
+    }
+
+    /* Override Bootstrap card defaults */
+    div.card {
+        background-color: #1a2235 !important;
+    }
+
+    div.card-body {
+        background-color: #1a2235 !important;
+    }
+
+    /* Target all form inputs and selects */
+    input.form-control,
+    select.form-control,
+    textarea.form-control,
+    .form-control,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="password"],
+    input[type="file"],
+    select,
+    textarea {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        border: 1.5px solid #374151 !important;
+        border-radius: 6px !important;
+        padding: 0.75rem 1rem !important;
+    }
+
+    input.form-control:focus,
+    select.form-control:focus,
+    textarea.form-control:focus,
+    .form-control:focus,
+    .form-select:focus,
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    input[type="password"]:focus,
+    input[type="file"]:focus,
+    select:focus,
+    textarea:focus {
+        background-color: #1a2235 !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.25) !important;
+        color: #ffffff !important;
+    }
+
+    /* Form labels */
+    .form-label {
+        color: #e5e7eb !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    /* Text color overrides */
+    h1, h2, h3, h4, h5, h6 {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    h1 {
+        font-size: 2rem !important;
+    }
+
+    legend {
+        color: #c9a84c !important;
+        font-weight: 700 !important;
+        font-size: 1.2rem !important;
+        letter-spacing: 0.5px !important;
+    }
+
+    /* Fieldset */
+    fieldset {
+        border-color: rgba(201, 168, 76, 0.2) !important;
+        background-color: transparent !important;
+    }
+
+    /* General text readability */
+    p, span, label, div {
+        font-size: 1rem !important;
+        line-height: 1.6 !important;
+    }
+
+    /* Buttons */
+    .btn-secondary {
+        background-color: #374151 !important;
+        border-color: #4b5563 !important;
+        color: #ffffff !important;
+    }
+
+    .btn-secondary:hover {
+        background-color: #4b5563 !important;
+        border-color: #5a6574 !important;
+    }
+
+    .btn-primary {
+        background-color: #c9a84c !important;
+        border-color: #c9a84c !important;
+        color: #0a0f1e !important;
+    }
+
+    .btn-primary:hover {
+        background-color: #b8963d !important;
+        border-color: #b8963d !important;
+    }
+
+    /* Error text */
+    .text-danger {
+        color: #ef4444 !important;
+    }
+
+    /* Inline form check styling */
+    .form-check-input {
+        background-color: #111827 !important;
+        border: 1.5px solid #374151 !important;
+        accent-color: #c9a84c !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #c9a84c !important;
+        border-color: #c9a84c !important;
+    }
+
+    .form-check-label {
+        color: #e5e7eb !important;
+    }
+
+    /* Specific field styling with ID selectors */
+    #id_room_number,
+    #id_room_type,
+    #id_description,
+    #id_price_per_night,
+    #id_capacity,
+    #id_image,
+    #id_amenities {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        border: 1.5px solid #374151 !important;
+    }
+
+    #id_room_number:focus,
+    #id_room_type:focus,
+    #id_description:focus,
+    #id_price_per_night:focus,
+    #id_capacity:focus,
+    #id_image:focus,
+    #id_amenities:focus {
+        background-color: #1a2235 !important;
+        border-color: #c9a84c !important;
+    }
+
+    /* Row styling */
+    .row {
+        background-color: transparent !important;
+    }
+
+    .col-md-8,
+    .col-md-6,
+    .col-12 {
+        background-color: transparent !important;
+    }
+
+    .mb-3,
+    .mb-4 {
+        background-color: transparent !important;
+    }
+
+    /* Small text (help text, errors) */
+    small,
+    .small {
+        color: #9ca3af !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-container">
     <div class="container">

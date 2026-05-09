@@ -1,0 +1,126 @@
+{% extends 'staff/staff_base.html' %}
+
+{% block title %}Refund Details - Cebu Luxury{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="mb-4">
+                <i class="fas fa-money-bill-wave"></i> Refund Request Details
+            </h1>
+
+            <!-- Booking Information Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Booking Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
+                            <p><strong>Guest:</strong> {{ booking.guest.get_full_name }}</p>
+                            <p><strong>Email:</strong> {{ booking.guest.email }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Room:</strong> {{ booking.room.room_number }}</p>
+                            <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
+                            <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                    <p><strong>Total Booking Price:</strong> <span class="text-success">₱{{ booking.total_price }}</span></p>
+                </div>
+            </div>
+
+            <!-- Refund Request Details Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">Refund Request Details</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Status:</strong>
+                                {% if refund.status == 'REQUESTED' %}
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                {% elif refund.status == 'APPROVED' %}
+                                    <span class="badge bg-success">Approved</span>
+                                {% elif refund.status == 'REJECTED' %}
+                                    <span class="badge bg-danger">Rejected</span>
+                                {% elif refund.status == 'ISSUED' %}
+                                    <span class="badge bg-info">Issued</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Requested:</strong> {{ refund.created_at|date:"M d, Y H:i" }}</p>
+                        </div>
+                    </div>
+
+                    <p><strong>Requested Amount:</strong> <span class="text-danger">₱{{ refund.requested_amount }}</span></p>
+
+                    {% if refund.approved_amount %}
+                    <p><strong>Approved Amount:</strong> <span class="text-success">₱{{ refund.approved_amount }}</span></p>
+                    {% endif %}
+
+                    <p><strong>Reason for Refund:</strong></p>
+                    <div class="border p-3 bg-light">
+                        {{ refund.reason }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manager Decision -->
+            {% if refund.status != 'REQUESTED' %}
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Manager Decision</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Approved by Manager:</strong> {{ refund.approved_by.get_full_name|default:"N/A" }}</p>
+                    <p><strong>Decision Date:</strong> {{ refund.approved_at|date:"M d, Y H:i"|default:"N/A" }}</p>
+                    
+                    {% if refund.status == 'APPROVED' %}
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle"></i> Your refund request has been <strong>APPROVED</strong> for ₱{{ refund.approved_amount }}
+                    </div>
+                    {% elif refund.status == 'REJECTED' %}
+                    <div class="alert alert-danger" role="alert">
+                        <i class="fas fa-times-circle"></i> Your refund request has been <strong>REJECTED</strong>
+                    </div>
+                    {% elif refund.status == 'ISSUED' %}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-check-circle"></i> The refund of ₱{{ refund.approved_amount }} has been <strong>ISSUED</strong>
+                    </div>
+                    {% endif %}
+
+                    <p><strong>Manager Notes:</strong></p>
+                    <div class="border p-3 bg-light">
+                        {{ refund.manager_notes|default:"<em>No notes provided</em>" }}
+                    </div>
+
+                    {% if refund.issued_at %}
+                    <hr>
+                    <p><strong>Issued by Admin:</strong> {{ refund.issued_by.get_full_name|default:"N/A" }}</p>
+                    <p><strong>Issued Date:</strong> {{ refund.issued_at|date:"M d, Y H:i" }}</p>
+                    <p><strong>Transaction ID:</strong> <code>{{ refund.refund_transaction_id|default:"Pending" }}</code></p>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info" role="alert">
+                <i class="fas fa-info-circle"></i> This refund request is awaiting manager approval.
+            </div>
+            {% endif %}
+
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a href="{% url 'staff:requested_refunds' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to My Refunds
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

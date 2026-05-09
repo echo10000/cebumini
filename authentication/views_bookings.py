@@ -3,11 +3,15 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db.models import Q
+from django.db import IntegrityError
 from django.core.paginator import Paginator
 from datetime import datetime
 from decimal import Decimal
 
-from .models import Booking, Room, BookingStatus, Payment, PaymentStatus
+from .models import (
+    Booking, Room, BookingStatus, Payment, PaymentStatus,
+    GuestComplaintEscalation, RefundRequest, RefundRequestStatus
+)
 from .forms_bookings import (
     BookingForm, BookingFilterForm, BookingConfirmationForm, CancelBookingForm
 )
@@ -17,7 +21,7 @@ from .decorators import guest_required, admin_required
 
 # ==================== GUEST VIEWS ====================
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 @guest_required
 def create_booking_view(request, room_id):
     """Create a new booking for a room"""
@@ -65,7 +69,7 @@ def create_booking_view(request, room_id):
     return render(request, 'bookings/create_booking.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def confirm_booking_view(request):
     """Confirm booking before finalizing"""
     booking_data = request.session.get('booking_data')
@@ -140,7 +144,7 @@ def confirm_booking_view(request):
     return render(request, 'bookings/confirm_booking.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def booking_detail_view(request, booking_id):
     """View booking details"""
     booking = get_object_or_404(Booking, id=booking_id)
@@ -168,7 +172,8 @@ def booking_detail_view(request, booking_id):
     return render(request, 'bookings/booking_detail.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
+@guest_required
 def booking_history_view(request):
     """View guest's booking history"""
     bookings = Booking.objects.filter(guest=request.user).order_by('-created_at')
@@ -192,7 +197,7 @@ def booking_history_view(request):
     return render(request, 'bookings/booking_history.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def cancel_booking_view(request, booking_id):
     """Cancel a booking with refund processing"""
     booking = get_object_or_404(Booking, id=booking_id)
@@ -273,7 +278,7 @@ def cancel_booking_view(request, booking_id):
 
 # ==================== ADMIN VIEWS ====================
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def admin_bookings_view(request):
     """Admin view: list all bookings with filtering"""
     if not request.user.is_admin():
@@ -345,7 +350,7 @@ def admin_bookings_view(request):
     return render(request, 'bookings/admin_bookings.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def admin_cancel_booking_view(request, booking_id):
     """Admin: cancel a booking"""
     if not request.user.is_admin():
@@ -371,7 +376,7 @@ def admin_cancel_booking_view(request, booking_id):
     return render(request, 'bookings/admin_cancel_booking.html', context)
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def admin_confirm_booking_view(request, booking_id):
     """Admin: confirm a pending booking"""
     if not request.user.is_admin():
@@ -394,7 +399,7 @@ def admin_confirm_booking_view(request, booking_id):
     return redirect('bookings:admin_bookings')
 
 
-@login_required(login_url='login')
+@login_required(login_url='auth:login')
 def download_invoice_view(request, booking_id):
     """Guest or Admin can download booking invoice/receipt as PDF"""
     from django.http import FileResponse, HttpResponse
@@ -626,3 +631,234 @@ def download_invoice_view(request, booking_id):
         </html>
         """
         return HttpResponse(html_content, content_type='text/html')
+
+
+# ==================== GUEST COMPLAINT & REFUND VIEWS ====================
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_submit_complaint_view(request, booking_id):
+    """Guest submits a complaint for their booking"""
+    from .models import GuestComplaintEscalation
+    from .utils import log_audit
+    
+    booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
+    
+    if request.method == 'POST':
+        complaint_description = (request.POST.get('complaint_description') or '').strip()
+        
+        if not complaint_description:
+            messages.error(request, 'Complaint description is required.')
+            return redirect('bookings:booking_detail', booking_id=booking_id)
+        
+        # Create complaint visible to manager complaint queue
+        complaint = GuestComplaintEscalation.objects.create(
+            booking=booking,
+            guest=request.user,
+            complaint_description=complaint_description,
+            status='OPEN'
+        )
+        
+        # Log audit
+        log_audit(
+            request,
+            request.user,
+            'COMPLAINT_SUBMITTED',
+            'GuestComplaintEscalation',
+            complaint.id,
+            description=f'Guest submitted complaint for Booking {booking.id}',
+            changes={'status': 'OPEN'}
+        )
+        
+        messages.success(request, 'Your complaint has been submitted. Our management team will review it shortly.')
+        return redirect('bookings:booking_detail', booking_id=booking_id)
+    
+    context = {
+        'booking': booking,
+    }
+    
+    return render(request, 'bookings/submit_complaint.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_my_complaints_view(request):
+    """View all complaints submitted by guest"""
+    from .models import GuestComplaintEscalation
+    
+    complaints = GuestComplaintEscalation.objects.filter(
+        guest=request.user
+    ).select_related('booking', 'reported_by_staff').order_by('-created_at')
+    
+    # Filter by status
+    status_filter = request.GET.get('status', 'all')
+    if status_filter != 'all':
+        complaints = complaints.filter(status=status_filter)
+    
+    context = {
+        'complaints': complaints,
+        'status_filter': status_filter,
+        'statuses': dict(GuestComplaintEscalation._meta.get_field('status').choices),
+    }
+    
+    return render(request, 'bookings/my_complaints.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_complaint_detail_view(request, complaint_id):
+    """View detail of a specific complaint"""
+    from .models import GuestComplaintEscalation
+    
+    complaint = get_object_or_404(
+        GuestComplaintEscalation,
+        id=complaint_id,
+        guest=request.user
+    )
+    
+    context = {
+        'complaint': complaint,
+        'booking': complaint.booking,
+    }
+    
+    return render(request, 'bookings/complaint_detail.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_request_refund_view(request, booking_id):
+    """Guest requests a refund for their booking"""
+    from decimal import Decimal
+    from .models import RefundRequest, RefundRequestStatus, Payment, PaymentStatus
+    from .utils import log_audit
+    
+    booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
+    
+    # Resolve payment safely even if historical duplicates exist.
+    payment = (
+        Payment.objects
+        .filter(booking=booking, status=PaymentStatus.COMPLETED)
+        .order_by('-completed_at', '-created_at')
+        .first()
+    )
+    if payment is None:
+        payment = (
+            Payment.objects
+            .filter(booking=booking)
+            .order_by('-created_at')
+            .first()
+        )
+    if payment is None:
+        messages.error(request, 'No payment found for this booking.')
+        return redirect('bookings:booking_detail', booking_id=booking_id)
+
+    # Prevent duplicate request for same booking (RefundRequest is OneToOne with Booking)
+    existing_refund = RefundRequest.objects.filter(booking=booking).first()
+    if existing_refund:
+        messages.info(
+            request,
+            f'You already submitted a refund request for this booking (status: {existing_refund.get_status_display()}).'
+        )
+        return redirect('bookings:refund_detail', refund_id=existing_refund.id)
+    
+    if request.method == 'POST':
+        refund_amount = request.POST.get('refund_amount')
+        reason = (request.POST.get('reason') or '').strip()
+        
+        if not refund_amount or not reason:
+            messages.error(request, 'Refund amount and reason are required.')
+            return redirect('bookings:booking_detail', booking_id=booking_id)
+        
+        try:
+            refund_amount = Decimal(refund_amount)
+            if refund_amount <= 0 or refund_amount > payment.amount:
+                messages.error(request, 'Invalid refund amount.')
+                return redirect('bookings:booking_detail', booking_id=booking_id)
+        except (ValueError, TypeError):
+            messages.error(request, 'Invalid refund amount.')
+            return redirect('bookings:booking_detail', booking_id=booking_id)
+        
+        # Create refund request visible to manager refund queue
+        try:
+            refund_request = RefundRequest.objects.create(
+                booking=booking,
+                requested_by=request.user,
+                status=RefundRequestStatus.REQUESTED,
+                reason=reason,
+                requested_amount=refund_amount
+            )
+        except IntegrityError:
+            # Handles race condition if duplicate request submitted quickly
+            existing_refund = RefundRequest.objects.filter(booking=booking).first()
+            if existing_refund:
+                messages.info(
+                    request,
+                    f'You already submitted a refund request for this booking (status: {existing_refund.get_status_display()}).'
+                )
+                return redirect('bookings:refund_detail', refund_id=existing_refund.id)
+            raise
+        
+        # Log audit
+        log_audit(
+            request,
+            request.user,
+            'REFUND_REQUESTED_BY_GUEST',
+            'RefundRequest',
+            refund_request.id,
+            description=f'Guest requested refund of ₱{refund_amount} for Booking {booking.id}',
+            changes={'status': 'REQUESTED', 'requested_amount': str(refund_amount)}
+        )
+        
+        messages.success(request, 'Your refund request has been submitted. Our management team will review it shortly.')
+        return redirect('bookings:booking_detail', booking_id=booking_id)
+    
+    context = {
+        'booking': booking,
+        'payment': payment,
+    }
+    
+    return render(request, 'bookings/request_refund.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_my_refund_requests_view(request):
+    """View all refund requests submitted by guest"""
+    from .models import RefundRequest
+    
+    refunds = RefundRequest.objects.filter(
+        requested_by=request.user
+    ).select_related('booking', 'approved_by').order_by('-created_at')
+    
+    # Filter by status
+    status_filter = request.GET.get('status', 'all')
+    if status_filter != 'all':
+        refunds = refunds.filter(status=status_filter)
+    
+    context = {
+        'refunds': refunds,
+        'status_filter': status_filter,
+        'statuses': RefundRequestStatus.choices,
+    }
+    
+    return render(request, 'bookings/my_refunds.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_refund_detail_view(request, refund_id):
+    """View detail of a specific refund request"""
+    from .models import RefundRequest
+    
+    refund = get_object_or_404(
+        RefundRequest,
+        id=refund_id,
+        requested_by=request.user
+    )
+    
+    context = {
+        'refund': refund,
+        'booking': refund.booking,
+    }
+    
+    return render(request, 'bookings/refund_detail.html', context)

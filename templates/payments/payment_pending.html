@@ -1,134 +1,64 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'guest/guest_base.html' %}
 
 {% block title %}Payment Pending Verification - Cebu Hotel{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="guest-page">
+    <section class="guest-page-header">
+        <div>
+            <p class="guest-kicker">Payment Status</p>
+            <h1>Payment Pending</h1>
+            <p>Your payment is awaiting verification by our admin team.</p>
+        </div>
+        <span class="badge bg-warning">Pending Verification</span>
+    </section>
+
     <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card border-warning">
-                <div class="card-header bg-warning text-dark text-center py-4">
-                    <h1><i class="fas fa-hourglass-half"></i></h1>
-                    <h3 class="mt-2">Payment Pending</h3>
+        <div class="col-lg-8">
+            <section class="guest-card">
+                <div class="text-center mb-4">
+                    <div class="display-2 text-warning"><i class="fas fa-hourglass-half"></i></div>
+                    <h2 class="h4">We are verifying your payment</h2>
+                    <p class="text-muted">You will receive an email once your payment is confirmed.</p>
                 </div>
-                <div class="card-body">
-                    <div class="alert alert-warning">
-                        <p class="mb-0"><strong>Your payment is awaiting verification by our admin team.</strong></p>
-                    </div>
 
-                    <!-- Booking Details -->
-                    <div class="mb-4 p-3 bg-light border rounded">
-                        <h5>Booking Information</h5>
-                        <table class="table table-sm mb-0">
-                            <tr>
-                                <td><strong>Booking ID:</strong></td>
-                                <td><span class="badge bg-primary">#{{ booking.id }}</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Room:</strong></td>
-                                <td>{{ booking.room.name }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Check-in:</strong></td>
-                                <td>{{ booking.check_in_date }}</td>
-                            </tr>
-                            <tr>
-                                <td><strong>Check-out:</strong></td>
-                                <td>{{ booking.check_out_date }}</td>
-                            </tr>
-                        </table>
+                <div class="guest-grid two mb-4">
+                    <div class="guest-card shadow-none">
+                        <h3 class="h5">Booking Information</h3>
+                        <p class="mb-1"><strong>Booking ID:</strong> {{ booking.id|default:"N/A" }}</p>
+                        <p class="mb-1"><strong>Room:</strong> Room {{ booking.room.room_number|default:"N/A" }}</p>
+                        <p class="mb-1"><strong>Check-in:</strong> {{ booking.check_in|date:"M d, Y"|default:"N/A" }}</p>
+                        <p class="mb-0"><strong>Check-out:</strong> {{ booking.check_out|date:"M d, Y"|default:"N/A" }}</p>
                     </div>
-
-                    <!-- Payment Details -->
-                    <div class="mb-4 p-3 bg-light border rounded">
-                        <h5>Payment Information</h5>
-                        <table class="table table-sm mb-0">
-                            <tr>
-                                <td><strong>Amount:</strong></td>
-                                <td><strong class="text-success">₱ {{ payment.amount }}</strong></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Payment Method:</strong></td>
-                                <td><span class="badge bg-secondary">{{ payment.payment_method }}</span></td>
-                            </tr>
-                            <tr>
-                                <td><strong>Status:</strong></td>
-                                <td><span class="badge bg-warning">Pending Verification</span></td>
-                            </tr>
-                            {% if payment.reference_number %}
-                            <tr>
-                                <td><strong>Reference Number:</strong></td>
-                                <td><code>{{ payment.reference_number }}</code></td>
-                            </tr>
-                            {% endif %}
-                        </table>
-                    </div>
-
-                    <!-- Who Confirms Payment -->
-                    <div class="alert alert-info">
-                        <h6><i class="fas fa-badge-check"></i> <strong>Who Confirms Payments?</strong></h6>
-                        <p class="mb-2">Our <strong>Admin Team</strong> manually verifies all pending payments:</p>
-                        <ul class="mb-0">
-                            <li><strong>Bank Transfers:</strong> Verified within 24-48 hours by checking bank records</li>
-                            <li><strong>GCash Payments:</strong> Verified within 2-4 hours by confirming transaction reference</li>
-                            <li><strong>Stripe Payments:</strong> Instant automatic confirmation (processed immediately)</li>
-                        </ul>
-                    </div>
-
-                    <!-- What to Expect -->
-                    <div class="alert alert-success">
-                        <h6><i class="fas fa-hourglass-half"></i> <strong>Timeline:</strong></h6>
-                        <ol class="mb-0">
-                            <li><strong>Within 2-4 hours</strong> for GCash transfers after reference verification</li>
-                            <li><strong>Within 24-48 hours</strong> for Bank Transfers after receipt confirmation</li>
-                            <li>You'll receive an email notification immediately upon confirmation</li>
-                            <li>Your booking will be automatically confirmed upon successful verification</li>
-                            <li>In case of any issues, we'll contact you directly</li>
-                        </ol>
-                    </div>
-
-                    <!-- Important -->
-                    <div class="alert alert-secondary">
-                        <h6><i class="fas fa-exclamation-triangle"></i> Important Notes:</h6>
-                        <ul class="mb-0">
-                            <li>Keep your payment reference number (bank/GCash receipt)</li>
-                            <li>Do not attempt to pay again - we check all transactions</li>
-                            <li>Your room reservation is temporarily held during verification</li>
-                            <li>Ensure the transfer amount matches exactly: <strong>₱{{ payment.amount }}</strong></li>
-                            <li>Admin team reviews payments daily during business hours (8 AM - 6 PM, Mon-Fri)</li>
-                        </ul>
-                    </div>
-
-                    <!-- Action Buttons -->
-                    <div class="d-grid gap-2">
-                        <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-eye"></i> View Booking Details
-                        </a>
-                        <a href="{% url 'bookings:booking_history' %}" class="btn btn-outline-primary">
-                            <i class="fas fa-history"></i> View All Bookings
-                        </a>
-                    </div>
-
-                    <!-- Support -->
-                    <div class="alert alert-light mt-4" style="border: 1px solid #d3d3d3;">
-                        <h6 style="font-size: 0.9rem;"><i class="fas fa-headset"></i> Questions?</h6>
-                        <p style="font-size: 0.85rem; margin: 0;">
-                            Contact our support team at <strong>support@cebuhotel.com</strong> or call <strong>(032) 123-4567</strong>.
-                        </p>
+                    <div class="guest-card shadow-none">
+                        <h3 class="h5">Payment Information</h3>
+                        <p class="mb-1"><strong>Amount:</strong> PHP {{ payment.amount|default:"N/A" }}</p>
+                        <p class="mb-1"><strong>Payment Method:</strong> {{ payment.payment_method|default:"N/A" }}</p>
+                        <p class="mb-1"><strong>Status:</strong> Pending Verification</p>
+                        {% if payment.reference_number %}
+                            <p class="mb-0"><strong>Reference:</strong> <code>{{ payment.reference_number }}</code></p>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
+
+                <div class="alert alert-info">
+                    <strong>Timeline:</strong> Manual verification usually completes within 24-48 hours. Keep your payment reference number for support.
+                </div>
+
+                <div class="d-grid gap-2">
+                    <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-eye"></i> View Booking Details
+                    </a>
+                    <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary">
+                        <i class="fas fa-history"></i> View All Bookings
+                    </a>
+                </div>
+
+                <div class="alert alert-light mt-4 mb-0">
+                    <strong>Questions?</strong> Contact support@cebuhotel.com or call (032) 123-4567.
+                </div>
+            </section>
         </div>
     </div>
 </div>
-
-<style>
-    code {
-        background-color: #f0f0f0;
-        padding: 2px 6px;
-        border-radius: 3px;
-        font-family: monospace;
-    }
-</style>
 {% endblock %}

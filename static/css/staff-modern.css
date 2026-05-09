@@ -1,0 +1,607 @@
+:root {
+    --staff-bg: var(--guest-bg);
+    --staff-surface: var(--guest-surface);
+    --staff-surface-alt: var(--guest-surface-alt);
+    --staff-ink: var(--guest-ink);
+    --staff-muted: var(--guest-muted);
+    --staff-line: var(--guest-line);
+    --staff-brand: var(--guest-brand);
+    --staff-brand-dark: var(--guest-brand-dark);
+    --staff-accent: var(--guest-accent);
+    --staff-radius: var(--guest-radius);
+    --staff-shadow: var(--guest-shadow);
+}
+
+body {
+    background:
+        linear-gradient(180deg, rgba(15, 118, 110, 0.08), rgba(15, 118, 110, 0) 280px),
+        var(--staff-bg) !important;
+    color: var(--staff-ink) !important;
+}
+
+.staff-navbar {
+    height: 76px !important;
+    padding: 0 28px !important;
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-bottom: 1px solid rgba(217, 225, 236, 0.9) !important;
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06) !important;
+}
+
+.staff-navbar .nav-link a {
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+.staff-navbar .btn-logout {
+    text-transform: none !important;
+}
+
+.staff-navbar .user-avatar {
+    text-transform: uppercase;
+}
+
+.portal-main {
+    margin-left: auto !important;
+    min-height: calc(100vh - 76px) !important;
+}
+
+.container,
+.container-fluid {
+    max-width: 1280px !important;
+    padding: 0 !important;
+}
+
+.container.mt-4,
+.container-fluid.py-4 {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.page-header {
+    margin-bottom: 1.5rem !important;
+    padding: 0.25rem 0 0.5rem !important;
+}
+
+.page-header h1,
+.page-header h2 {
+    color: var(--staff-ink) !important;
+    font-family: "DM Sans", system-ui, sans-serif !important;
+    font-size: clamp(1.8rem, 3vw, 2.7rem) !important;
+    font-weight: 850 !important;
+    line-height: 1.08;
+    letter-spacing: 0 !important;
+    margin: 0 0 0.45rem !important;
+}
+
+.page-header h1 i,
+.page-header h2 i,
+.section-header i,
+.quick-actions-header i {
+    color: var(--staff-brand) !important;
+}
+
+.page-header p,
+.page-header .subtitle,
+.breadcrumb-trail,
+.breadcrumb-trail a,
+.breadcrumb-trail .separator {
+    color: var(--staff-muted) !important;
+}
+
+.breadcrumb-trail .active,
+.breadcrumb-trail a:hover {
+    color: var(--staff-brand-dark) !important;
+}
+
+.stats-grid,
+.stat-cards-grid {
+    gap: 1rem !important;
+}
+
+.stat-card-luxury,
+.stat-card,
+.quick-actions-section,
+.checkins-checkouts-card,
+.occupied-rooms-section,
+.table-section,
+.filters-section,
+.filter-section,
+.report-card,
+.info-box,
+.room-card,
+.status-card,
+.service-card,
+.message-card,
+.refund-card,
+.complaint-card,
+.detail-card,
+.payment-card {
+    background: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid var(--staff-line) !important;
+    border-radius: var(--staff-radius) !important;
+    box-shadow: var(--staff-shadow) !important;
+    color: var(--staff-ink) !important;
+}
+
+.stat-card-luxury,
+.report-card {
+    border-left: 4px solid var(--staff-brand) !important;
+}
+
+.stat-card-luxury:hover,
+.stat-card:hover,
+.room-card:hover,
+.service-card:hover,
+.message-card:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12) !important;
+    border-color: rgba(15, 118, 110, 0.35) !important;
+}
+
+.stat-icon,
+.stat-card-icon,
+.stat-value,
+.stat-card-value,
+.guest-count-number,
+.info-box-value,
+.room-number,
+.report-card .stat-value {
+    color: var(--staff-brand-dark) !important;
+    font-family: "DM Sans", system-ui, sans-serif !important;
+    text-shadow: none !important;
+}
+
+.stat-label,
+.stat-card-label,
+.stat-description,
+.guest-count-label,
+.info-box-label,
+.room-type,
+.occupied-room-checkout,
+.text-muted,
+.form-text {
+    color: var(--staff-muted) !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.quick-actions-header h3,
+.section-header h3,
+.report-card h5,
+.occupied-room-guest,
+.occupied-room-details,
+.card-title,
+h1, h2, h3, h4, h5, h6,
+.text-white {
+    color: var(--staff-ink) !important;
+    font-family: "DM Sans", system-ui, sans-serif !important;
+    text-shadow: none !important;
+}
+
+.quick-actions-container .btn,
+.occupied-room-action,
+.filter-button,
+.table .btn,
+.room-action-btn,
+.action-btn,
+.btn-primary,
+.btn-success {
+    background: var(--staff-brand) !important;
+    border-color: var(--staff-brand) !important;
+    color: #fff !important;
+    border-radius: var(--staff-radius) !important;
+    box-shadow: none !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+}
+
+.quick-actions-container .btn:hover,
+.occupied-room-action:hover,
+.filter-button:hover,
+.table .btn:hover,
+.room-action-btn:hover,
+.action-btn:hover,
+.btn-primary:hover,
+.btn-success:hover {
+    background: var(--staff-brand-dark) !important;
+    border-color: var(--staff-brand-dark) !important;
+    color: #fff !important;
+    transform: translateY(-1px) !important;
+}
+
+.btn-secondary,
+.btn-outline-secondary,
+.btn-outline-gold {
+    background: #fff !important;
+    border: 1px solid var(--staff-line) !important;
+    color: var(--staff-ink) !important;
+}
+
+.btn-secondary:hover,
+.btn-outline-secondary:hover,
+.btn-outline-gold:hover {
+    background: var(--staff-surface-alt) !important;
+    color: var(--staff-ink) !important;
+}
+
+.checkin-header,
+.checkout-header,
+.room-card-header,
+.table-section .section-header,
+.card-header,
+.card-header.bg-primary,
+.card-header.bg-info,
+.card-header.bg-secondary {
+    background: transparent !important;
+    border-color: var(--staff-line) !important;
+    color: var(--staff-ink) !important;
+}
+
+.room-card-header {
+    border-bottom: 1px solid var(--staff-line) !important;
+}
+
+.room-card-body,
+.guest-info,
+.checkout-time,
+.modal-body p {
+    background: transparent !important;
+    color: var(--staff-ink) !important;
+}
+
+.room-number {
+    font-size: 1.4rem !important;
+}
+
+.room-type,
+.checkout-time .label,
+.checkout-time .date,
+.guest-name {
+    color: var(--staff-ink) !important;
+}
+
+.guest-name {
+    font-weight: 800;
+}
+
+.action-buttons {
+    gap: 0.75rem !important;
+}
+
+.filter-input,
+.form-control,
+.form-select,
+select,
+textarea,
+input[type="text"],
+input[type="number"],
+input[type="date"],
+input[type="email"],
+input[type="password"],
+input[type="tel"] {
+    background: #fff !important;
+    border: 1px solid var(--staff-line) !important;
+    color: var(--staff-ink) !important;
+    border-radius: var(--staff-radius) !important;
+}
+
+.filter-input::placeholder,
+.form-control::placeholder {
+    color: var(--staff-muted) !important;
+}
+
+.filter-input:focus,
+.form-control:focus,
+.form-select:focus,
+select:focus,
+textarea:focus,
+input:focus {
+    border-color: var(--staff-brand) !important;
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.13) !important;
+}
+
+.table,
+.table tbody,
+.table tbody tr,
+.table tbody td,
+.table thead,
+.table thead th,
+.table-light,
+.table-light th,
+.table-light td {
+    background: transparent !important;
+    color: var(--staff-ink) !important;
+    border-color: var(--staff-line) !important;
+}
+
+.table thead th,
+.table > thead > tr > th {
+    background: var(--staff-surface-alt) !important;
+    color: var(--staff-muted) !important;
+}
+
+.table tbody tr:nth-child(even),
+.table tbody tr:nth-child(odd),
+.table-striped > tbody > tr:nth-of-type(odd),
+.table-striped > tbody > tr:nth-of-type(even) {
+    background: transparent !important;
+}
+
+.table-hover tbody tr:hover,
+.table tbody tr:hover {
+    background: rgba(15, 118, 110, 0.06) !important;
+}
+
+.table-section .table-responsive {
+    padding: 0 1.25rem 1.25rem !important;
+}
+
+.table-empty,
+.empty-state {
+    color: var(--staff-muted) !important;
+    background: #fff !important;
+    border-color: var(--staff-line) !important;
+}
+
+.info-box {
+    background: #eef6f5 !important;
+    box-shadow: none !important;
+}
+
+.stat-row,
+.section-header,
+.occupied-room-item {
+    border-color: var(--staff-line) !important;
+}
+
+.badge,
+.status-badge,
+.room-status-badge,
+.badge-pill {
+    border-radius: 999px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0 !important;
+}
+
+.badge-available,
+.badge.bg-success,
+.status-available,
+.status-completed,
+.status-resolved {
+    background: #dcfce7 !important;
+    color: var(--guest-success) !important;
+    border-color: #bbf7d0 !important;
+}
+
+.badge-pending,
+.badge.bg-warning,
+.status-pending,
+.status-open {
+    background: #fef3c7 !important;
+    color: var(--guest-warning) !important;
+    border-color: #fde68a !important;
+}
+
+.badge-occupied,
+.badge.bg-info,
+.status-occupied,
+.status-processing {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+    border-color: #bfdbfe !important;
+}
+
+.status-badge.status-occupied {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+    border-color: #bfdbfe !important;
+}
+
+.status-badge.status-available {
+    background: #dcfce7 !important;
+    color: var(--guest-success) !important;
+    border-color: #bbf7d0 !important;
+}
+
+.status-badge.status-maintenance {
+    background: #fef3c7 !important;
+    color: var(--guest-warning) !important;
+    border-color: #fde68a !important;
+}
+
+.badge-cancelled,
+.badge.bg-danger,
+.status-maintenance,
+.status-cancelled,
+.status-escalated {
+    background: #fee2e2 !important;
+    color: var(--guest-danger) !important;
+    border-color: #fecaca !important;
+}
+
+.alert,
+.alert-info,
+.alert-secondary {
+    background: #fff !important;
+    border: 1px solid var(--staff-line) !important;
+    border-left: 4px solid var(--staff-brand) !important;
+    color: var(--staff-ink) !important;
+}
+
+.alert-warning {
+    border-left-color: var(--guest-warning) !important;
+}
+
+.alert-danger {
+    border-left-color: var(--guest-danger) !important;
+}
+
+.alert-success {
+    border-left-color: var(--guest-success) !important;
+}
+
+.modal-content,
+.modal-header,
+.modal-body,
+.modal-footer {
+    background: #fff !important;
+    color: var(--staff-ink) !important;
+    border-color: var(--staff-line) !important;
+}
+
+.modal-chat-container,
+.chat-container {
+    background: var(--staff-surface-alt) !important;
+    border-color: var(--staff-line) !important;
+}
+
+.chat-container::-webkit-scrollbar-thumb,
+.modal-chat-container::-webkit-scrollbar-thumb {
+    background: var(--staff-brand) !important;
+}
+
+/* Guest inquiries page still ships legacy dark component CSS; this late pass keeps it aligned. */
+.portal-main .breadcrumb-trail,
+.portal-main .breadcrumb-trail a {
+    color: var(--staff-muted) !important;
+}
+
+.portal-main .breadcrumb-trail .active,
+.portal-main .breadcrumb-trail a i {
+    color: var(--staff-brand-dark) !important;
+}
+
+.portal-main .page-header h2,
+.portal-main .page-header h3,
+.portal-main .page-header h4,
+.portal-main .empty-state h4 {
+    color: var(--staff-ink) !important;
+}
+
+.portal-main .page-header h2 i {
+    color: var(--staff-brand-dark) !important;
+}
+
+.portal-main .page-header .subtitle {
+    color: var(--staff-muted) !important;
+}
+
+.portal-main .stat-cards-grid {
+    gap: 1rem !important;
+}
+
+.portal-main .stat-card,
+.portal-main .filter-section,
+.portal-main .messages-table,
+.portal-main .empty-state {
+    background: rgba(255, 255, 255, 0.94) !important;
+    border: 1px solid var(--staff-line) !important;
+    border-radius: var(--staff-radius) !important;
+    box-shadow: var(--staff-shadow) !important;
+    color: var(--staff-ink) !important;
+}
+
+.portal-main .stat-card-icon {
+    color: var(--staff-brand-dark) !important;
+}
+
+.portal-main .stat-card-value,
+.portal-main .sender-name,
+.portal-main .message-subject {
+    color: var(--staff-ink) !important;
+}
+
+.portal-main .stat-card-label,
+.portal-main .sender-email,
+.portal-main .message-preview,
+.portal-main .message-date {
+    color: var(--staff-muted) !important;
+}
+
+.portal-main .filter-input {
+    background: #fff !important;
+    border: 1px solid var(--staff-line) !important;
+    border-radius: var(--staff-radius) !important;
+    color: var(--staff-ink) !important;
+}
+
+.portal-main .filter-input:focus {
+    border-color: var(--staff-brand) !important;
+    box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.13) !important;
+}
+
+.portal-main .filter-button,
+.portal-main .btn-view {
+    background: var(--staff-brand) !important;
+    border: 1px solid var(--staff-brand) !important;
+    border-radius: var(--staff-radius) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
+}
+
+.portal-main .filter-button:hover,
+.portal-main .btn-view:hover {
+    background: var(--staff-brand-dark) !important;
+    border-color: var(--staff-brand-dark) !important;
+}
+
+.portal-main .messages-table table,
+.portal-main .messages-table tbody tr,
+.portal-main .messages-table tbody td {
+    background: #fff !important;
+    color: var(--staff-ink) !important;
+    border-color: var(--staff-line) !important;
+}
+
+.portal-main .messages-table thead th {
+    background: var(--staff-surface-alt) !important;
+    color: var(--staff-muted) !important;
+    border-color: var(--staff-line) !important;
+    letter-spacing: 0 !important;
+}
+
+.portal-main .messages-table tbody tr:hover {
+    background: rgba(15, 118, 110, 0.045) !important;
+    transform: none !important;
+}
+
+.portal-main .messages-table tbody tr:hover td {
+    background: rgba(15, 118, 110, 0.045) !important;
+}
+
+.portal-main .badge-replied {
+    background: #dcfce7 !important;
+    color: var(--guest-success) !important;
+    border: 1px solid #bbf7d0 !important;
+}
+
+.portal-main .badge-unread,
+.portal-main .badge-pending {
+    background: #fef3c7 !important;
+    color: var(--guest-warning) !important;
+    border: 1px solid #fde68a !important;
+}
+
+.portal-main .btn-delete {
+    background: var(--guest-danger) !important;
+    color: #fff !important;
+}
+
+@media (max-width: 1100px) {
+    .container,
+    .container-fluid {
+        max-width: 100% !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .staff-navbar {
+        height: 68px !important;
+        padding: 0 1rem !important;
+    }
+
+    .portal-main {
+        min-height: calc(100vh - 68px) !important;
+    }
+}

@@ -15,37 +15,45 @@ class RoomForm(forms.ModelForm):
             'room_number': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Room number (e.g., 101, 102)',
+                'style': 'background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; border-radius: 6px !important; padding: 0.75rem 1rem !important;',
             }),
             'room_type': forms.Select(attrs={
                 'class': 'form-control',
+                'style': 'background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; border-radius: 6px !important; padding: 0.75rem 1rem !important;',
             }),
             'description': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 4,
                 'placeholder': 'Room description',
+                'style': 'background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; border-radius: 6px !important; padding: 0.75rem 1rem !important; min-height: 120px !important;',
             }),
             'price_per_night': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Price per night',
                 'step': '0.01',
                 'min': '0',
+                'style': 'background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; border-radius: 6px !important; padding: 0.75rem 1rem !important;',
             }),
             'capacity': forms.NumberInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Guest capacity',
                 'min': '1',
+                'style': 'background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; border-radius: 6px !important; padding: 0.75rem 1rem !important;',
             }),
             'is_available': forms.CheckboxInput(attrs={
                 'class': 'form-check-input',
+                'style': 'background-color: #111827 !important; border: 1.5px solid #374151 !important; accent-color: #c9a84c !important;',
             }),
             'amenities': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
                 'placeholder': 'Amenities (comma-separated)\nExample: WiFi, TV, AC, Minibar',
+                'style': 'background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; border-radius: 6px !important; padding: 0.75rem 1rem !important; min-height: 100px !important;',
             }),
             'image': forms.FileInput(attrs={
                 'class': 'form-control',
                 'accept': 'image/*',
+                'style': 'background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; border-radius: 6px !important; padding: 0.75rem 1rem !important;',
             }),
         }
 

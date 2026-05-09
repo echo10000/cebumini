@@ -1,354 +1,869 @@
-{% extends 'base.html' %}
+{% extends 'staff/staff_base.html' %}
 {% load static %}
 
-{% block title %}Staff Dashboard - Cebu Hotel{% endblock %}
+{% block title %}Staff Dashboard - Cebu Luxury{% endblock %}
 
-{% block content %}
+{% block extra_css %}
 <style>
-    .staff-nav {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* ============================================
+       BOOTSTRAP OVERRIDES
+       ============================================ */
+    
+    .card-header {
+        background: #0f1623 !important;
+        border-bottom: 1px solid rgba(201, 168, 76, 0.15) !important;
+        color: #c9a84c !important;
+    }
+    
+    .card {
+        background: #1a2235 !important;
+        border: 1px solid rgba(201, 168, 76, 0.15) !important;
+        color: #ffffff !important;
+    }
+    
+    .alert-info {
+        background: rgba(13, 115, 119, 0.1) !important;
+        border: 1px solid rgba(13, 115, 119, 0.3) !important;
+        color: #ffffff !important;
+    }
+    
+    .table-light {
+        background: #1a2235 !important;
+    }
+    
+    .table-light thead th {
+        background: #0f1623 !important;
+        color: #c9a84c !important;
+    }
+
+    /* ============================================
+       PAGE LAYOUT
+       ============================================ */
+    
+    .container-fluid {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    /* ============================================
+       PAGE HEADER STYLING
+       ============================================ */
+    
+    .page-header {
+        padding: 0 0 2rem 0;
+        margin-bottom: 0;
+    }
+    
+    .page-header h1 {
+        color: #ffffff;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .page-header h1 i {
+        color: #c9a84c;
+    }
+    
+    .page-header p {
+        color: #9ca3af;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    /* ============================================
+       STAT CARDS GRID
+       ============================================ */
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
         margin-bottom: 2rem;
     }
     
-    .stat-card {
-        background: white;
-        border-left: 4px solid #667eea;
+    .stat-card-luxury {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-left: 4px solid #c9a84c;
+        border-radius: 8px;
         padding: 1.5rem;
-        margin-bottom: 1rem;
-        border-radius: 0.5rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        min-height: 140px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
     }
     
-    .stat-card h5 {
-        color: #666;
+    .stat-card-luxury:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(201, 168, 76, 0.15);
+    }
+    
+    .stat-card-luxury .stat-icon {
+        font-size: 2.5rem;
+        color: #c9a84c;
+        margin-bottom: 0.75rem;
+    }
+    
+    .stat-card-luxury .stat-label {
+        color: #9ca3af;
+        font-size: 0.85rem;
         font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         margin-bottom: 0.5rem;
     }
     
-    .stat-card .number {
+    .stat-card-luxury .stat-value {
+        color: #c9a84c;
         font-size: 2rem;
-        color: #667eea;
-        font-weight: bold;
-    }
-    
-    .section-title {
-        color: #333;
         font-weight: 700;
-        margin-top: 2rem;
-        margin-bottom: 1.5rem;
-        border-bottom: 2px solid #667eea;
-        padding-bottom: 0.5rem;
+        line-height: 1;
     }
     
-    .booking-card {
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 0.5rem;
-        padding: 1rem;
+    .stat-card-luxury .stat-description {
+        color: #6b7280;
+        font-size: 0.8rem;
+        margin-top: auto;
+        padding-top: 0.75rem;
+    }
+
+    /* ============================================
+       QUICK ACTIONS SECTION
+       ============================================ */
+    
+    .quick-actions-section {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-actions-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
         margin-bottom: 1rem;
-        transition: transform 0.2s;
     }
     
-    .booking-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    .quick-actions-header i {
+        font-size: 1.3rem;
+        color: #c9a84c;
     }
     
-    .booking-card .guest-name {
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 0.3rem;
-    }
-    
-    .booking-card .room-info {
-        color: #667eea;
-        font-weight: 600;
-        margin-bottom: 0.3rem;
-    }
-    
-    .booking-card .time-info {
-        color: #999;
-        font-size: 0.9rem;
-    }
-    
-    .action-btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.85rem;
-        margin-top: 0.5rem;
-    }
-    
-    .staff-nav .navbar-brand {
-        color: white;
+    .quick-actions-header h3 {
+        color: #ffffff;
+        font-size: 1.1rem;
         font-weight: 700;
+        margin: 0;
     }
     
-    .staff-nav .nav-link {
-        color: rgba(255,255,255,0.8);
-        margin-right: 1rem;
+    .quick-actions-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-top: 1rem;
     }
     
-    .staff-nav .nav-link:hover {
+    .quick-actions-container .btn {
+        background: #3b82f6;
         color: white;
-    }
-    
-    .status-badge {
-        display: inline-block;
-        padding: 0.3rem 0.8rem;
-        border-radius: 2rem;
-        font-size: 0.85rem;
+        border: none;
+        padding: 0.6rem 1.25rem;
+        border-radius: 6px;
         font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
-    .status-checkin {
-        background-color: #d4edda;
-        color: #155724;
+    .quick-actions-container .btn:hover {
+        background: #2563eb;
+        transform: scale(1.02);
+    }
+
+    /* ============================================
+       TODAY'S CHECK-INS & CHECK-OUTS SECTION
+       ============================================ */
+    
+    .checkins-checkouts-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
     }
     
-    .status-checkout {
-        background-color: #fff3cd;
-        color: #856404;
+    .checkins-checkouts-card {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-radius: 8px;
+        overflow: hidden;
+        min-height: 200px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .checkin-header,
+    .checkout-header {
+        color: white;
+        padding: 1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .checkin-header {
+        background: #0d7377;
+    }
+    
+    .checkout-header {
+        background: #374151;
+    }
+    
+    .checkin-header i,
+    .checkout-header i {
+        font-size: 1.2rem;
+    }
+    
+    .checkins-checkouts-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        flex: 1;
+    }
+    
+    .guest-count-number {
+        font-size: 2.5rem;
+        color: #c9a84c;
+        font-weight: 700;
+        line-height: 1;
+    }
+    
+    .guest-count-label {
+        color: #9ca3af;
+        font-size: 0.9rem;
+        margin-top: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .verify-checkins-link {
+        background: #0d7377;
+        color: #ffffff;
+        border: none;
+        padding: 0.6rem 1rem;
+        border-radius: 6px;
+        font-weight: 700;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .verify-checkins-link:hover {
+        background: #0a5c60;
+        color: #ffffff;
+    }
+
+    .reference-code {
+        display: inline-block;
+        color: #c9a84c;
+        background: rgba(201, 168, 76, 0.12);
+        border: 1px solid rgba(201, 168, 76, 0.25);
+        border-radius: 6px;
+        padding: 0.35rem 0.6rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+    }
+
+    /* ============================================
+       CURRENTLY OCCUPIED ROOMS SECTION
+       ============================================ */
+    
+    .occupied-rooms-section {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+    }
+    
+    .section-header i {
+        color: #c9a84c;
+        font-size: 1.3rem;
+    }
+    
+    .section-header h3 {
+        color: #ffffff;
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .occupied-room-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+    }
+    
+    .occupied-room-item:last-child {
+        border-bottom: none;
+    }
+    
+    .occupied-room-info {
+        flex: 1;
+    }
+    
+    .occupied-room-guest {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .occupied-room-details {
+        color: #c9a84c;
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.25rem;
+    }
+    
+    .occupied-room-checkout {
+        color: #6b7280;
+        font-size: 0.8rem;
+    }
+    
+    .occupied-room-checkout-date {
+        color: #9ca3af;
+        font-size: 0.85rem;
+        text-align: right;
+        min-width: 140px;
+        margin: 0 1rem;
+    }
+    
+    .occupied-room-action {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.3s ease;
+    }
+    
+    .occupied-room-action:hover {
+        background: #2563eb;
+    }
+
+    /* ============================================
+       TABLE SECTION HEADER
+       ============================================ */
+    
+    .table-section .section-header {
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
+        border-bottom: 2px solid rgba(201, 168, 76, 0.15);
+        background: #0f1623;
+    }
+    
+    .table-section .section-header h3 {
+        color: #ffffff;
+        margin: 0;
+    }
+
+    /* ============================================
+       TABLE STYLING
+       ============================================ */
+    
+    .table-section {
+        background: #1a2235;
+        border: 1px solid rgba(201, 168, 76, 0.15);
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .table-section .table-responsive {
+        margin: 0;
+        padding: 0 1.5rem 1.5rem 1.5rem;
+    }
+    
+    .table-responsive {
+        margin: 0;
+    }
+    
+    .table {
+        margin: 0;
+        color: #ffffff !important;
+        background: #1a2235 !important;
+        width: 100%;
+    }
+    
+    .table thead {
+        background: #0f1623 !important;
+        border-bottom: 2px solid rgba(201, 168, 76, 0.2) !important;
+        position: sticky;
+        top: 0;
+    }
+    
+    .table thead th {
+        color: #c9a84c !important;
+        font-weight: 700;
+        font-size: 0.85rem;
+        padding: 1rem;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border: none !important;
+        background: #0f1623 !important;
+    }
+    
+    .table tbody {
+        background: #1a2235 !important;
+    }
+    
+    .table tbody tr {
+        background: #1a2235 !important;
+        border-bottom: 1px solid rgba(201, 168, 76, 0.1) !important;
+        transition: background 0.2s ease;
+    }
+    
+    .table tbody tr:nth-child(even) {
+        background: #111827 !important;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(201, 168, 76, 0.05) !important;
+    }
+    
+    .table tbody td {
+        color: #ffffff !important;
+        padding: 1rem;
+        font-size: 0.95rem;
+        border: none !important;
+        vertical-align: middle;
+        background: inherit !important;
+    }
+    
+    .table-striped > tbody > tr:nth-of-type(odd) {
+        background: #1a2235 !important;
+    }
+    
+    .table-striped > tbody > tr:nth-of-type(even) {
+        background: #111827 !important;
+    }
+    
+    .table-hover tbody tr:hover {
+        background: rgba(201, 168, 76, 0.05) !important;
+        color: #ffffff !important;
+    }
+    
+    .table .btn {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .table .btn:hover {
+        background: #2563eb;
+    }
+    
+    .table-empty {
+        text-align: center;
+        padding: 2rem;
+        color: #9ca3af;
+        font-size: 0.95rem;
+    }
+
+    /* ============================================
+       RESPONSIVE DESIGN - TABLET (768px)
+       ============================================ */
+    
+    @media (max-width: 768px) {
+        .container-fluid {
+            padding: 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 1.4rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card-luxury {
+            padding: 1.25rem;
+            min-height: 120px;
+        }
+        
+        .stat-card-luxury .stat-icon {
+            font-size: 2rem;
+        }
+        
+        .stat-card-luxury .stat-value {
+            font-size: 1.6rem;
+        }
+        
+        .quick-actions-section {
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .quick-actions-container .btn {
+            flex: 1;
+            min-width: 120px;
+            justify-content: center;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .checkins-checkouts-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .checkins-checkouts-card {
+            min-height: 140px;
+        }
+        
+        .occupied-room-item {
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 0.75rem 0;
+        }
+        
+        .occupied-room-checkout-date {
+            text-align: left;
+            width: 100%;
+            min-width: auto;
+            margin: 0.5rem 0 0 0;
+            order: 2;
+        }
+        
+        .occupied-room-action {
+            width: 100%;
+            text-align: center;
+            margin-top: 0.5rem;
+            order: 3;
+        }
+        
+        .table {
+            font-size: 0.85rem;
+        }
+        
+        .table thead th,
+        .table tbody td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .section-header {
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+        }
+    }
+
+    /* ============================================
+       RESPONSIVE DESIGN - MOBILE (480px)
+       ============================================ */
+    
+    @media (max-width: 480px) {
+        .container-fluid {
+            padding: 1rem;
+        }
+        
+        .page-header {
+            padding: 0 0 1.5rem 0;
+        }
+        
+        .page-header h1 {
+            font-size: 1.2rem;
+        }
+        
+        .page-header p {
+            font-size: 0.85rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card-luxury {
+            padding: 1rem;
+            min-height: 110px;
+        }
+        
+        .stat-card-luxury .stat-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card-luxury .stat-value {
+            font-size: 1.4rem;
+        }
+        
+        .stat-card-luxury .stat-label {
+            font-size: 0.75rem;
+        }
+        
+        .quick-actions-section {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .quick-actions-header h3 {
+            font-size: 1rem;
+        }
+        
+        .quick-actions-container {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .quick-actions-container .btn {
+            width: 100%;
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+        
+        .checkins-checkouts-card {
+            min-height: 120px;
+        }
+        
+        .guest-count-number {
+            font-size: 2rem;
+        }
+        
+        .table {
+            font-size: 0.75rem;
+        }
+        
+        .table thead th,
+        .table tbody td {
+            padding: 0.5rem 0.25rem;
+        }
+        
+        .table .btn {
+            padding: 0.3rem 0.6rem;
+            font-size: 0.7rem;
+        }
     }
 </style>
+{% endblock %}
 
-<nav class="navbar navbar-expand-lg navbar-dark staff-nav">
-    <div class="container">
-        <a class="navbar-brand" href="{% url 'staff:dashboard' %}">
-            <i class="fas fa-users-cog"></i> Staff Dashboard
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#staffNav">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="staffNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:dashboard' %}">
-                        <i class="fas fa-chart-line"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:room_status' %}">
-                        <i class="fas fa-door-open"></i> Rooms
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:manual_booking' %}">
-                        <i class="fas fa-plus-circle"></i> Manual Booking
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:guest_services' %}">
-                        <i class="fas fa-headset"></i> Guest Services
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'staff:reports' %}">
-                        <i class="fas fa-file-alt"></i> Reports
-                    </a>
-                </li>
-            </ul>
-        </div>
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1><i class="fas fa-chart-line"></i> Staff Dashboard</h1>
+        <p>Room occupation and check-in overview</p>
     </div>
-</nav>
-
-<div class="container-fluid py-4">
-    {% if messages %}
-    <div class="row mb-3">
-        <div class="col-12">
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
     
-    <!-- Statistics Row -->
-    <div class="row mb-4">
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Total Rooms</h5>
-                <div class="number">{{ total_rooms }}</div>
-            </div>
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-door-open"></i></div>
+            <div class="stat-label">Total Rooms</div>
+            <div class="stat-value">{{ total_rooms }}</div>
+            <div class="stat-description">Available in hotel</div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Occupied</h5>
-                <div class="number" style="color: #28a745;">{{ occupied_rooms }}</div>
-            </div>
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-label">Occupied</div>
+            <div class="stat-value">{{ occupied_rooms }}</div>
+            <div class="stat-description">Currently occupied</div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Available</h5>
-                <div class="number" style="color: #667eea;">{{ available_rooms }}</div>
-            </div>
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-key"></i></div>
+            <div class="stat-label">Available</div>
+            <div class="stat-value">{{ available_rooms }}</div>
+            <div class="stat-description">Ready for guests</div>
         </div>
-        <div class="col-md-3">
-            <div class="stat-card">
-                <h5>Check-Ins Today</h5>
-                <div class="number" style="color: #ffc107;">{{ today_check_ins.count }}</div>
-            </div>
+        <div class="stat-card-luxury">
+            <div class="stat-icon"><i class="fas fa-arrow-right-to-bracket"></i></div>
+            <div class="stat-label">Check-Ins Today</div>
+            <div class="stat-value">{{ today_check_ins.count }}</div>
+            <div class="stat-description">Expected arrivals</div>
         </div>
     </div>
 
     <!-- Quick Actions Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card shadow" style="border-left: 5px solid #667eea; background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);">
-                <div class="card-body py-3">
-                    <h6 class="card-title mb-0" style="color: #333; font-weight: bold;">
-                        <i class="fas fa-bolt"></i> Quick Actions
-                    </h6>
-                </div>
-                <div class="card-footer bg-transparent border-0 pt-0">
-                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <a href="{% url 'staff:manual_booking' %}" class="btn btn-success" style="flex: 1; min-width: 150px;">
-                            <i class="fas fa-plus-circle"></i> New Walk-in Booking
-                        </a>
-                        <a href="{% url 'staff:room_status' %}" class="btn btn-primary" style="flex: 1; min-width: 150px;">
-                            <i class="fas fa-door-open"></i> View All Rooms
-                        </a>
-                        <a href="{% url 'staff:pending_balance' %}" class="btn btn-warning" style="flex: 1; min-width: 150px;">
-                            <i class="fas fa-money-bill-wave"></i> Collect Balance
-                        </a>
+    <div class="quick-actions-section">
+        <div class="quick-actions-header">
+            <i class="fas fa-bolt"></i>
+            <h3>Quick Actions</h3>
+        </div>
+        <div class="quick-actions-container">
+            <a href="{% url 'staff:manual_booking' %}" class="btn">
+                <i class="fas fa-plus-circle"></i> New Walk-in Booking
+            </a>
+            <a href="{% url 'staff:room_status' %}" class="btn">
+                <i class="fas fa-door-open"></i> View All Rooms
+            </a>
+            <a href="{% url 'staff:pending_balance' %}" class="btn">
+                <i class="fas fa-money-bill-wave"></i> Collect Balance
+            </a>
+        </div>
+    </div>
+    
+    <!-- Today's Check-ins & Check-outs -->
+    <div class="checkins-checkouts-grid">
+        <!-- Check-ins Card -->
+        <div class="checkins-checkouts-card">
+            <div class="checkin-header">
+                <i class="fas fa-sign-in-alt"></i>
+                Today's Check-Ins ({{ today_check_ins.count }})
+            </div>
+            <div class="checkins-checkouts-content">
+                {% if today_check_ins.count > 0 %}
+                    <div class="guest-count-number">{{ today_check_ins.count }}</div>
+                    <div class="guest-count-label">Expected arrivals today</div>
+                    <a href="{% url 'staff:check_in_checkout' %}" class="verify-checkins-link">
+                        <i class="fas fa-shield-alt"></i> Verify Check-Ins
+                    </a>
+                {% else %}
+                    <div style="text-align: center; color: #9ca3af; padding: 1.5rem;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                        No check-ins scheduled
                     </div>
-                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Check-outs Card -->
+        <div class="checkins-checkouts-card">
+            <div class="checkout-header">
+                <i class="fas fa-sign-out-alt"></i>
+                Today's Check-Outs ({{ today_check_outs.count }})
+            </div>
+            <div class="checkins-checkouts-content">
+                {% if today_check_outs.count > 0 %}
+                    <div class="guest-count-number">{{ today_check_outs.count }}</div>
+                    <div class="guest-count-label">Expected departures today</div>
+                {% else %}
+                    <div style="text-align: center; color: #9ca3af; padding: 1.5rem;">
+                        <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                        No check-outs scheduled
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
     
-    <!-- Today's Check-ins -->
-    <div class="row">
-        <div class="col-lg-6">
-            <h3 class="section-title">
-                <i class="fas fa-sign-in-alt"></i> Today's Check-Ins ({{ today_check_ins.count }})
-            </h3>
-            
-            {% if today_check_ins %}
-                {% for booking in today_check_ins %}
-                <div class="booking-card">
-                    <div class="guest-name">{{ booking.guest.get_full_name|default:booking.guest.username }}</div>
-                    <div class="room-info">Room {{ booking.room.room_number }} - {{ booking.room.get_room_type_display }}</div>
-                    <div class="time-info">
-                        <i class="fas fa-calendar"></i> {{ booking.check_in|date:"M d, Y" }}
-                    </div>
-                    <div class="time-info">
-                        <i class="fas fa-phone"></i> {{ booking.guest.phone_number|default:"N/A" }}
-                    </div>
-                    <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-primary action-btn">
-                        <i class="fas fa-eye"></i> View Room
-                    </a>
-                </div>
-                {% endfor %}
-            {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> No check-ins scheduled for today
-                </div>
-            {% endif %}
+    <!-- Currently Occupied Rooms Section -->
+    <div class="occupied-rooms-section">
+        <div class="section-header">
+            <i class="fas fa-key"></i>
+            <h3>Currently Occupied Rooms ({{ current_bookings.count }})</h3>
         </div>
         
-        <!-- Today's Check-outs -->
-        <div class="col-lg-6">
-            <h3 class="section-title">
-                <i class="fas fa-sign-out-alt"></i> Today's Check-Outs ({{ today_check_outs.count }})
-            </h3>
-            
-            {% if today_check_outs %}
-                {% for booking in today_check_outs %}
-                <div class="booking-card">
-                    <div class="guest-name">{{ booking.guest.get_full_name|default:booking.guest.username }}</div>
-                    <div class="room-info">Room {{ booking.room.room_number }} - {{ booking.room.get_room_type_display }}</div>
-                    <div class="time-info">
-                        <i class="fas fa-calendar"></i> {{ booking.check_out|date:"M d, Y" }}
-                    </div>
-                    <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-warning action-btn">
-                        <i class="fas fa-eye"></i> View Room
-                    </a>
+        {% if current_bookings %}
+            {% for booking in current_bookings %}
+            <div class="occupied-room-item">
+                <div class="occupied-room-info">
+                    <div class="occupied-room-guest">{{ booking.guest.get_full_name|default:booking.guest.username }}</div>
+                    <div class="occupied-room-details">Room {{ booking.room.room_number }} - {{ booking.room.get_room_type_display }}</div>
+                    <div class="occupied-room-checkout">Check-out: {{ booking.check_out|date:"M d" }}</div>
                 </div>
-                {% endfor %}
-            {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> No check-outs scheduled for today
+                <div class="occupied-room-checkout-date">
+                    {{ booking.check_out|date:"M d, Y" }}
                 </div>
-            {% endif %}
-        </div>
+                <a href="{% url 'staff:room_detail' booking.room.id %}" class="occupied-room-action">
+                    <i class="fas fa-eye"></i> View Details
+                </a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="table-empty">
+                <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                No rooms currently occupied
+            </div>
+        {% endif %}
     </div>
     
-    <!-- Current Bookings -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <h3 class="section-title">
-                <i class="fas fa-key"></i> Currently Occupied Rooms ({{ current_bookings.count }})
-            </h3>
-            
-            {% if current_bookings %}
-                <div class="row">
-                    {% for booking in current_bookings %}
-                    <div class="col-md-4 col-lg-3">
-                        <div class="booking-card">
-                            <div class="room-info">Room {{ booking.room.room_number }}</div>
-                            <div class="guest-name">{{ booking.guest.get_full_name|default:booking.guest.username }}</div>
-                            <div class="time-info">
-                                <i class="fas fa-arrow-right"></i> Check-out: {{ booking.check_out|date:"M d" }}
-                            </div>
-                            <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-primary action-btn w-100">
-                                <i class="fas fa-eye"></i> View Details
-                            </a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> No rooms currently occupied
-                </div>
-            {% endif %}
-        </div>
-    </div>
-    
-    <!-- Upcoming Check-ins -->
-    <div class="row mt-4">
-        <div class="col-12">
-            <h3 class="section-title">
-                <i class="fas fa-calendar-plus"></i> Upcoming Check-Ins (Next 7 Days)
-            </h3>
-            
-            {% if upcoming_check_ins %}
-                <div class="table-responsive">
-                    <table class="table table-sm table-hover">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Date</th>
-                                <th>Guest Name</th>
-                                <th>Room</th>
-                                <th>Phone</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for booking in upcoming_check_ins %}
-                            <tr>
-                                <td><strong>{{ booking.check_in|date:"M d, Y" }}</strong></td>
-                                <td>{{ booking.guest.get_full_name|default:booking.guest.username }}</td>
-                                <td>Room {{ booking.room.room_number }}</td>
-                                <td>{{ booking.guest.phone_number|default:"N/A" }}</td>
-                                <td>
-                                    <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-xs btn-primary">
-                                        View
-                                    </a>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> No upcoming check-ins in the next 7 days
-                </div>
-            {% endif %}
-        </div>
+    <!-- Upcoming Check-ins Table -->
+    <div class="table-section">
+        <h3 class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <i class="fas fa-calendar-plus"></i>
+            Upcoming Check-Ins (Next 7 Days)
+        </h3>
+        
+        {% if upcoming_check_ins %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Guest Name</th>
+                            <th>Reference</th>
+                            <th>Room</th>
+                            <th>Phone</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in upcoming_check_ins %}
+                        <tr>
+                            <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                            <td>{{ booking.guest.get_full_name|default:booking.guest.username }}</td>
+                            <td><span class="reference-code">{{ booking.booking_reference }}</span></td>
+                            <td>Room {{ booking.room.room_number }}</td>
+                            <td>{{ booking.guest.phone_number|default:"N/A" }}</td>
+                            <td>
+                                <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="table-empty">
+                <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                No upcoming check-ins in the next 7 days
+            </div>
+        {% endif %}
     </div>
 </div>
 

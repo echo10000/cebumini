@@ -1,5 +1,8 @@
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
+from allauth.exceptions import ImmediateHttpResponse
 from django.contrib.auth import get_user_model
+from django.shortcuts import redirect
 import uuid
 
 User = get_user_model()
@@ -48,5 +51,75 @@ class CustomAccountAdapter(DefaultAccountAdapter):
                 user.terms_accepted_at = __import__('django.utils.timezone', fromlist=['now']).now()
                 user.terms_version = '1.0'
         
+        # Set role for new users (GUEST for social logins)
+        if sociallogin and not user.role:
+            user.role = 'GUEST'
+        
         user.save()
+        return user
+
+    def get_login_redirect_url(self, request):
+        """
+        Redirect to dashboard after successful login/signup
+        """
+        path = super().get_login_redirect_url(request)
+        return '/auth/dashboard/'
+
+
+class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
+    """
+    Custom adapter for social account handling (OAuth providers)
+    """
+    
+    def pre_social_login(self, request, sociallogin):
+        """
+        Handle any pre-login logic for social accounts.
+        If the existing account has 2FA enabled, redirect through the OTP verification flow.
+        """
+        email = sociallogin.account.extra_data.get('email') or sociallogin.user.email
+        if not email:
+            return
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            return
+
+        try:
+            from .models import TwoFactorAuth
+            if user.two_factor_auth.is_enabled:
+                if user.two_factor_auth.method == 'EMAIL':
+                    from .otp_utils import send_otp_email
+                    send_otp_email(user)
+                    request.session['email_otp_user_id'] = user.id
+                    request.session['email_otp_remember_me'] = False
+                    raise ImmediateHttpResponse(redirect('auth:verify_otp'))
+                elif user.two_factor_auth.method == 'TOTP' and user.two_factor_auth.is_verified:
+                    request.session['2fa_user_id'] = user.id
+                    request.session['2fa_remember_me'] = False
+                    raise ImmediateHttpResponse(redirect('auth:verify_2fa_login'))
+        except TwoFactorAuth.DoesNotExist:
+            pass
+
+        if sociallogin.is_existing:
+            return
+
+        try:
+            sociallogin.connect(request, user)
+        except Exception:
+            pass
+
+    def populate_user(self, request, sociallogin, data):
+        """
+        Populate user instance from social provider data
+        """
+        user = super().populate_user(request, sociallogin, data)
+        
+        # Set role to GUEST for new social auth users
+        if not user.id:  # New user
+            user.role = 'GUEST'
+        
+        # Mark email as verified for OAuth users
+        user.is_email_verified = True
+        
         return user

@@ -11,13 +11,13 @@
     .stat-value { font-size: 2rem; color: #ffffff; font-weight: 700; font-family: 'Playfair Display', serif; }
     .stat-description { font-size: 0.9rem; color: #d1d5db; margin-top: 0.5rem; }
     .luxury-card { background: #1a2235; border-radius: 12px; overflow: hidden; margin-bottom: 2rem; }
-    .luxury-card-header { background: #2563eb; padding: 1rem 1.5rem; color: #ffffff; font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; }
+    .luxury-card-header { background: #111827; border-left: 4px solid #f59e0b; padding: 1rem 1.5rem; color: #ffffff; font-family: 'Playfair Display', serif; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 0.75rem; }
     .luxury-card-body { padding: 1.5rem; }
     .filter-label { color: #c9a84c; font-weight: 600; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 0.5rem; }
     .filter-select { background: #111827 !important; border: 1.5px solid #374151 !important; color: #ffffff !important; border-radius: 6px; transition: all 0.3s ease; }
     .filter-select:focus { border-color: #c9a84c !important; box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1); }
-    .btn-filter { background: #2563eb; color: #ffffff; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease; }
-    .btn-filter:hover { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3); }
+    .btn-filter { background: #f59e0b; color: #0a0f1e; border: none; padding: 0.6rem 1.5rem; border-radius: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; transition: all 0.3s ease; }
+    .btn-filter:hover { background: #d97706; transform: translateY(-2px); box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3); }
     .admin-table { overflow-x: auto; }
     .admin-table table { width: 100%; border-collapse: collapse; }
     .admin-table th { background: rgba(201, 168, 76, 0.1); color: #c9a84c; padding: 1rem; text-align: left; font-weight: 600; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 0.5px; border-bottom: 2px solid rgba(201, 168, 76, 0.2); }
@@ -139,6 +139,8 @@
                                     <span class="badge-pill badge-confirmed">Confirmed</span>
                                 {% elif booking.status == 'CHECKED_IN' %}
                                     <span class="badge-pill badge-checked">Checked In</span>
+                                {% elif booking.status == 'CHECKED_OUT' %}
+                                    <span class="badge-pill badge-checked">Checked Out</span>
                                 {% else %}
                                     <span class="badge-pill badge-cancelled">Cancelled</span>
                                 {% endif %}
@@ -146,7 +148,7 @@
                             <td>
                                 <div style="display: flex; gap: 0.5rem;">
                                     <a href="{% url 'admin_panel:booking_detail' booking.id %}" class="btn-view" title="View"><i class="fas fa-eye"></i></a>
-                                    <a href="{% url 'admin_panel:booking_edit' booking.id %}" class="btn-view" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a href="{% url 'admin_panel:booking_detail' booking.id %}" class="btn-view" title="Edit"><i class="fas fa-edit"></i></a>
                                 </div>
                             </td>
                         </tr>

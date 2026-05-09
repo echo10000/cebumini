@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+import secrets
+import string
 
 class UserRole(models.TextChoices):
     GUEST = 'GUEST', 'Guest'
@@ -163,6 +165,8 @@ class BookingStatus(models.TextChoices):
     """Booking status choices"""
     PENDING = 'PENDING', 'Pending Confirmation'
     CONFIRMED = 'CONFIRMED', 'Confirmed'
+    CHECKED_IN = 'CHECKED_IN', 'Checked In'
+    CHECKED_OUT = 'CHECKED_OUT', 'Checked Out'
     CANCELLED = 'CANCELLED', 'Cancelled'
 
 
@@ -175,6 +179,9 @@ class CancellationPolicy(models.TextChoices):
 
 class Booking(models.Model):
     """Booking Model"""
+    REFERENCE_PREFIX = 'CEBU'
+    REFERENCE_ALPHABET = string.ascii_uppercase + string.digits
+
     room = models.ForeignKey(
         Room,
         on_delete=models.PROTECT,
@@ -213,6 +220,28 @@ class Booking(models.Model):
         choices=BookingStatus.choices,
         default=BookingStatus.PENDING
     )
+    booking_reference = models.CharField(
+        max_length=16,
+        unique=True,
+        db_index=True,
+        blank=True,
+        null=True,
+        help_text="Random guest-facing reference code used during check-in verification"
+    )
+    reference_verified = models.BooleanField(default=False)
+    id_verified = models.BooleanField(default=False)
+    contact_verified = models.BooleanField(default=False)
+    payment_verified = models.BooleanField(default=False)
+    verified_by = models.ForeignKey(
+        'CustomUser',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='verified_bookings',
+        help_text="Staff member who completed check-in verification"
+    )
+    verified_at = models.DateTimeField(null=True, blank=True)
+    verification_notes = models.TextField(blank=True)
     special_requests = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -229,6 +258,19 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"Booking {self.id} - Room {self.room.room_number} ({self.check_in} to {self.check_out})"
+
+    @classmethod
+    def generate_booking_reference(cls):
+        """Generate a random, guest-facing booking reference."""
+        return f"{cls.REFERENCE_PREFIX}-{''.join(secrets.choice(cls.REFERENCE_ALPHABET) for _ in range(6))}"
+
+    @classmethod
+    def create_unique_booking_reference(cls):
+        """Generate a booking reference that is not already in use."""
+        reference = cls.generate_booking_reference()
+        while cls.objects.filter(booking_reference=reference).exists():
+            reference = cls.generate_booking_reference()
+        return reference
 
     def get_duration(self):
         """Calculate booking duration in days"""
@@ -253,6 +295,44 @@ class Booking(models.Model):
         """Check if booking can be cancelled"""
         today = timezone.now().date()
         return self.status != BookingStatus.CANCELLED and self.check_in > today
+
+    def complete_check_in_verification(self, staff_user, submitted_reference, checklist, notes=''):
+        """
+        Validate front-desk proof and check the guest in.
+        Returns a list of error messages; an empty list means success.
+        """
+        errors = []
+        submitted_reference = (submitted_reference or '').strip().upper()
+
+        if self.status != BookingStatus.CONFIRMED:
+            errors.append('Only confirmed bookings can be checked in.')
+
+        if submitted_reference != (self.booking_reference or '').upper():
+            errors.append('Booking reference does not match this reservation.')
+
+        required_checks = {
+            'reference_verified': 'booking confirmation/reference',
+            'id_verified': 'valid ID matching the guest name',
+            'contact_verified': 'email or phone number matching the account',
+            'payment_verified': 'payment status or collection requirement',
+        }
+        for field, label in required_checks.items():
+            if not checklist.get(field):
+                errors.append(f'Please verify the {label}.')
+
+        if errors:
+            return errors
+
+        self.reference_verified = True
+        self.id_verified = True
+        self.contact_verified = True
+        self.payment_verified = True
+        self.verified_by = staff_user
+        self.verified_at = timezone.now()
+        self.verification_notes = notes or ''
+        self.status = BookingStatus.CHECKED_IN
+        self.save()
+        return []
 
     def get_refund_amount(self):
         """
@@ -285,10 +365,45 @@ class Booking(models.Model):
                 return (Decimal('0'), 0, f'Late cancellation - no refund ({days_until_checkin} days before check-in)')
 
     def save(self, *args, **kwargs):
-        """Override save to calculate total price"""
+        """Override save to calculate total price and assign a reference code."""
         if not self.total_price or self.total_price == 0:
             self.total_price = self.calculate_total_price()
+        if not self.booking_reference:
+            self.booking_reference = self.create_unique_booking_reference()
         super().save(*args, **kwargs)
+
+    def send_confirmation_email(self):
+        """Send booking confirmation email to the guest."""
+        import logging
+        from django.conf import settings
+        from django.core.mail import EmailMultiAlternatives
+        from django.template.loader import render_to_string
+
+        logger = logging.getLogger(__name__)
+        subject = f'Booking Confirmation #{self.id} - {self.room.room_number}'
+        host = settings.ALLOWED_HOSTS[0] if getattr(settings, 'ALLOWED_HOSTS', None) else 'localhost:8000'
+        context = {
+            'booking': self,
+            'guest': self.guest,
+            'room': self.room,
+            'booking_url': f'https://{host}/bookings/{self.id}/',
+        }
+
+        text_content = render_to_string('account/email/booking_confirmation_email.txt', context)
+        html_content = render_to_string('account/email/booking_confirmation_email.html', context)
+
+        from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Cebu Hotel <support@cebuhotel.com>')
+        recipient_list = [self.guest.email]
+
+        try:
+            email = EmailMultiAlternatives(subject, text_content, from_email, recipient_list)
+            email.attach_alternative(html_content, 'text/html')
+            email.send(fail_silently=False)
+            logger.info(f"Booking confirmation sent for booking {self.id} to {self.guest.email}")
+            return True
+        except Exception as e:
+            logger.error(f"Error sending booking confirmation email for booking {self.id}: {e}")
+            return False
 
     @staticmethod
     def check_availability(room_id, check_in, check_out, exclude_booking_id=None):
@@ -331,6 +446,7 @@ class PaymentStatus(models.TextChoices):
     PENDING = 'PENDING', 'Pending'
     COMPLETED = 'COMPLETED', 'Completed'
     FAILED = 'FAILED', 'Failed'
+    REFUND_PENDING = 'REFUND_PENDING', 'Refund Pending'
     REFUNDED = 'REFUNDED', 'Refunded'
     PARTIALLY_REFUNDED = 'PARTIALLY_REFUNDED', 'Partially Refunded'
 
@@ -459,9 +575,14 @@ class ContactMessage(models.Model):
     phone = models.CharField(max_length=20, blank=True)
     subject = models.CharField(max_length=200)
     message = models.TextField()
+    guest = models.ForeignKey('CustomUser', on_delete=models.CASCADE, null=True, blank=True, related_name='contact_messages')
     is_read = models.BooleanField(default=False)
     is_replied = models.BooleanField(default=False)
+    staff_response = models.TextField(blank=True, help_text="Staff's response message")
+    notification_sent = models.BooleanField(default=False, help_text="Has guest been notified of reply?")
+    last_notified_at = models.DateTimeField(null=True, blank=True, help_text="When was guest last notified?")
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'contact_messages'
@@ -471,6 +592,129 @@ class ContactMessage(models.Model):
 
     def __str__(self):
         return f"{self.name} - {self.subject}"
+    
+    def send_confirmation_email(self):
+        """Send confirmation email to guest when message is submitted"""
+        from django.core.mail import send_mail
+        
+        subject = f"We received your message: {self.subject}"
+        message = f"""Dear {self.name},
+
+Thank you for contacting Cebu Hotel!
+
+We have received your message regarding "{self.subject}" and our team will review it shortly.
+
+You can expect a response from us within 24 hours.
+
+If you need immediate assistance, please call us at +63 (32) 412-3456.
+
+Best regards,
+Cebu Hotel Team
+---
+Message Reference ID: {self.id}
+Date Submitted: {self.created_at.strftime('%B %d, %Y at %I:%M %p')}
+"""
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                'support@cebuhotel.com',
+                [self.email],
+                fail_silently=False,
+            )
+            return True
+        except Exception as e:
+            print(f"Error sending email to {self.email}: {str(e)}")
+            return False
+    
+    def send_reply_notification(self):
+        """Send email to guest when staff marks message as replied"""
+        from django.core.mail import send_mail
+        from django.utils import timezone
+        
+        if self.is_replied and not self.notification_sent:
+            subject = f"Response to your message: {self.subject}"
+            message = f"""Dear {self.name},
+
+Thank you for your inquiry regarding "{self.subject}".
+
+Our team has reviewed your message and will be in touch with you shortly.
+
+"""
+            
+            if self.staff_response:
+                message += f"Here's a response from our team:\n\n{self.staff_response}\n\n"
+            
+            message += """If you have any additional questions or concerns, please don't hesitate to contact us.
+
+You can reach us by:
+- Phone: +63 (32) 412-3456 (Mon-Fri 9AM-6PM, Sat-Sun 10AM-5PM)
+- Email: support@cebuhotel.com
+- Live Chat: Available on our website
+
+Best regards,
+Cebu Hotel Team
+---
+Message Reference ID: {self.id}
+"""
+            
+            try:
+                send_mail(
+                    subject,
+                    message,
+                    'support@cebuhotel.com',
+                    [self.email],
+                    fail_silently=False,
+                )
+                self.notification_sent = True
+                self.last_notified_at = timezone.now()
+                self.save()
+                return True
+            except Exception as e:
+                print(f"Error sending notification to {self.email}: {str(e)}")
+                return False
+        
+        return False
+
+
+class MessageReply(models.Model):
+    """Replies to Contact Messages"""
+    class SenderType(models.TextChoices):
+        GUEST = 'guest', 'Guest'
+        STAFF = 'staff', 'Staff'
+        SYSTEM = 'system', 'System'
+
+    contact_message = models.ForeignKey(
+        ContactMessage,
+        on_delete=models.CASCADE,
+        related_name='replies'
+    )
+    staff_member = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='sent_replies'
+    )
+    sender_type = models.CharField(
+        max_length=10,
+        choices=SenderType.choices,
+        default=SenderType.STAFF,
+        db_index=True,
+    )
+    reply_text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'message_replies'
+        verbose_name = 'Message Reply'
+        verbose_name_plural = 'Message Replies'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f"Reply to {self.contact_message.name} on {self.created_at.date()}"
 
 
 class TwoFactorAuth(models.Model):
@@ -521,6 +765,31 @@ class TwoFactorAuth(models.Model):
             self.save()
             return True
         return False
+
+
+class EmailOTP(models.Model):
+    """One-time passcodes sent by email."""
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='email_otps'
+    )
+    otp_code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_used = models.BooleanField(default=False)
+    expires_at = models.DateTimeField()
+
+    class Meta:
+        db_table = 'email_otps'
+        verbose_name = 'Email OTP'
+        verbose_name_plural = 'Email OTPs'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"OTP for {self.user.email} ({self.otp_code})"
+
+    def is_valid(self):
+        return not self.is_used and self.expires_at > timezone.now()
 
 
 class LoginSession(models.Model):

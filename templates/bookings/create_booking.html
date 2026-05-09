@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'guest/guest_base.html' %}
 {% load static %}
 
 {% block title %}Create Booking - Cebu Hotel{% endblock %}
@@ -85,8 +85,8 @@
         <!-- Room Info Sidebar -->
         <div class="col-lg-4">
             <div class="card shadow mb-3">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Room Information</h5>
+                <div class="card-header" style="background: #1a2235; border-bottom: 1px solid rgba(201,168,76,0.15);">
+                    <h5 class="mb-0" style="color: #ffffff;">Room Information</h5>
                 </div>
                 <div class="card-body">
                     {% if room.image %}
@@ -125,8 +125,8 @@
 
             {% if occupied_dates %}
                 <div class="card shadow">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">Occupied Dates</h5>
+                    <div class="card-header" style="background: #1a2235; border-bottom: 1px solid rgba(201,168,76,0.15);">
+                        <h5 class="mb-0" style="color: #ffffff;">Occupied Dates</h5>
                     </div>
                     <div class="card-body">
                         <p class="text-muted small">These dates are not available for booking:</p>

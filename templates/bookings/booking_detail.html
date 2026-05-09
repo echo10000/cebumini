@@ -1,215 +1,166 @@
-{% extends 'base.html' %}
+{% extends 'guest/guest_base.html' %}
 {% load static %}
 
 {% block title %}Booking Details - Cebu Hotel{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row">
+<div class="guest-page">
+    <section class="guest-page-header">
+        <div>
+            <p class="guest-kicker">Reservation</p>
+            <h1>Booking #{{ booking.id }}</h1>
+            <p>Created {{ booking.created_at|date:"F d, Y g:i A" }}</p>
+        </div>
+        <span class="badge {% if booking.status == 'CONFIRMED' %}bg-success{% elif booking.status == 'PENDING' %}bg-warning{% else %}bg-danger{% endif %}">
+            {{ booking.get_status_display }}
+        </span>
+    </section>
+
+    <div class="row g-4">
         <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header bg-primary text-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">Booking #{{ booking.id }}</h4>
-                        <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% else %}danger{% endif %}">
-                            {{ booking.get_status_display }}
-                        </span>
+            <section class="guest-card">
+                <div class="alert alert-info">
+                    <strong>Status:</strong> {{ booking.get_status_display }}
+                    <span class="ms-2"><strong>Booking Date:</strong> {{ booking.created_at|date:"F d, Y g:i A" }}</span>
+                </div>
+
+                <div class="alert alert-success">
+                    <strong>Check-in Reference:</strong> {{ booking.booking_reference }}
+                    <span class="d-block small mt-1">Show this code and a valid ID at the front desk.</span>
+                </div>
+
+                <h2 class="h4 mb-3"><i class="fas fa-door-open"></i> Room Information</h2>
+                <div class="guest-grid three mb-4">
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Room Number</div>
+                        <div class="detail-value">{{ booking.room.room_number }}</div>
+                    </div>
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Room Type</div>
+                        <div class="detail-value">{{ booking.room.get_room_type_display }}</div>
+                    </div>
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Capacity</div>
+                        <div class="detail-value">{{ booking.room.capacity }} guest{{ booking.room.capacity|pluralize }}</div>
                     </div>
                 </div>
-                <div class="card-body">
-                    <!-- Booking Status -->
-                    <div class="alert alert-info mb-4">
-                        <p class="mb-1"><strong>Status:</strong> {{ booking.get_status_display }}</p>
-                        <p class="mb-0"><strong>Booking Date:</strong> {{ booking.created_at|date:"F d, Y g:i A" }}</p>
+
+                <h2 class="h4 mb-3"><i class="fas fa-calendar-alt"></i> Stay Duration</h2>
+                <div class="guest-grid two mb-2">
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Check-in</div>
+                        <div class="detail-value fs-5">{{ booking.check_in|date:"F d, Y" }}</div>
                     </div>
-
-                    <!-- Room Information -->
-                    <div class="mb-4">
-                        <h5 class="mb-3">
-                            <i class="fas fa-door-open"></i> Room Information
-                        </h5>
-                        <div class="p-3 bg-light rounded">
-                            <p class="mb-2"><strong>Room Number:</strong> {{ booking.room.room_number }}</p>
-                            <p class="mb-2"><strong>Room Type:</strong> {{ booking.room.get_room_type_display }}</p>
-                            <p class="mb-0"><strong>Capacity:</strong> {{ booking.room.capacity }} guests</p>
-                        </div>
+                    <div class="guest-card shadow-none">
+                        <div class="guest-stat-label">Check-out</div>
+                        <div class="detail-value fs-5">{{ booking.check_out|date:"F d, Y" }}</div>
                     </div>
+                </div>
+                <p class="text-muted mb-4">Duration: <strong>{{ booking.get_duration }} night{{ booking.get_duration|pluralize }}</strong></p>
 
-                    <!-- Check-in / Check-out -->
-                    <div class="mb-4">
-                        <h5 class="mb-3">
-                            <i class="fas fa-calendar-alt"></i> Stay Duration
-                        </h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded">
-                                    <p class="text-muted mb-1">Check-in</p>
-                                    <p class="h5 mb-0">{{ booking.check_in|date:"F d, Y" }}</p>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="p-3 bg-light rounded">
-                                    <p class="text-muted mb-1">Check-out</p>
-                                    <p class="h5 mb-0">{{ booking.check_out|date:"F d, Y" }}</p>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-muted mt-2 mb-0">Duration: <strong>{{ booking.get_duration }} night{{ booking.get_duration|pluralize }}</strong></p>
+                {% if booking.special_requests %}
+                <h2 class="h4 mb-3"><i class="fas fa-sticky-note"></i> Special Requests</h2>
+                <div class="guest-card shadow-none mb-4">{{ booking.special_requests|linebreaks }}</div>
+                {% endif %}
+
+                <h2 class="h4 mb-3"><i class="fas fa-receipt"></i> Price Breakdown</h2>
+                <div class="guest-card shadow-none mb-4">
+                    <div class="d-flex justify-content-between gap-3 mb-2">
+                        <span>{{ booking.get_duration }} night{{ booking.get_duration|pluralize }} x PHP {{ booking.room.price_per_night }}</span>
+                        <strong>PHP {{ booking.calculate_total_price }}</strong>
                     </div>
-
-                    <!-- Special Requests -->
-                    {% if booking.special_requests %}
-                        <div class="mb-4">
-                            <h5 class="mb-2">
-                                <i class="fas fa-sticky-note"></i> Special Requests
-                            </h5>
-                            <div class="p-3 bg-light rounded">
-                                {{ booking.special_requests|linebreaks }}
-                            </div>
-                        </div>
-                    {% endif %}
-
-                    <!-- Price Breakdown -->
-                    <div class="mb-4">
-                        <h5 class="mb-3">
-                            <i class="fas fa-receipt"></i> Price Breakdown
-                        </h5>
-                        <div class="p-3 bg-light rounded">
-                            <div class="row mb-2">
-                                <div class="col-8">
-                                    <p class="mb-0">{{ booking.get_duration }} night{{ booking.get_duration|pluralize }} × ₱{{ booking.room.price_per_night }}</p>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <p class="mb-0">₱{{ booking.calculate_total_price }}</p>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-8">
-                                    <strong>Total Amount</strong>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <h5 class="text-primary mb-0">₱{{ booking.total_price }}</h5>
-                                </div>
-                            </div>
-                        </div>
+                    <hr>
+                    <div class="d-flex justify-content-between gap-3">
+                        <strong>Total Amount</strong>
+                        <strong class="guest-price fs-4">PHP {{ booking.total_price }}</strong>
                     </div>
+                </div>
 
-                    <!-- Guest Information -->
-                    <div class="mb-4">
-                        <h5 class="mb-3">
-                            <i class="fas fa-user"></i> Guest Information
-                        </h5>
-                        <div class="p-3 bg-light rounded">
-                            <p class="mb-1"><strong>Name:</strong> {{ booking.guest.get_full_name|default:booking.guest.username }}</p>
-                            <p class="mb-1"><strong>Email:</strong> {{ booking.guest.email }}</p>
-                            <p class="mb-0"><strong>Phone:</strong> {{ booking.guest.phone_number|default:"Not provided" }}</p>
-                        </div>
-                    </div>
+                <h2 class="h4 mb-3"><i class="fas fa-user"></i> Guest Information</h2>
+                <div class="guest-card shadow-none mb-4">
+                    <p class="mb-1"><strong>Name:</strong> {{ booking.guest.get_full_name|default:booking.guest.username }}</p>
+                    <p class="mb-1"><strong>Email:</strong> {{ booking.guest.email }}</p>
+                    <p class="mb-0"><strong>Phone:</strong> {{ booking.guest.phone_number|default:"Not provided" }}</p>
+                </div>
 
-                    <!-- Actions -->
-                    <div class="d-flex gap-2 flex-wrap">
-                        {% if can_cancel %}
-                            <a href="{% url 'bookings:cancel_booking' booking.id %}" class="btn btn-danger">
-                                <i class="fas fa-times-circle"></i> Cancel Booking
-                            </a>
-                        {% endif %}
-                        <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Back to History
+                <div class="d-flex gap-2 flex-wrap">
+                    {% if can_cancel %}
+                        <a href="{% url 'bookings:cancel_booking' booking.id %}" class="btn btn-danger">
+                            <i class="fas fa-times-circle"></i> Cancel Booking
                         </a>
+                    {% endif %}
+                    <a href="{% url 'bookings:request_refund' booking.id %}" class="btn btn-secondary"><i class="fas fa-money-bill-wave"></i> Request Refund</a>
+                    <a href="{% url 'bookings:submit_complaint' booking.id %}" class="btn btn-secondary"><i class="fas fa-exclamation-triangle"></i> Submit Complaint</a>
+                    <a href="{% url 'bookings:my_refunds' %}" class="btn btn-secondary"><i class="fas fa-list"></i> My Refunds</a>
+                    <a href="{% url 'bookings:my_complaints' %}" class="btn btn-secondary"><i class="fas fa-comments"></i> My Complaints</a>
+                    <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to History</a>
+                </div>
+            </section>
+
+            {% if booking.room.image or booking.room.images.all %}
+            <section class="guest-card mt-4">
+                <h2 class="h4 mb-3"><i class="fas fa-image"></i> Room Gallery</h2>
+                {% if booking.room.image %}
+                    <img src="{{ booking.room.image.url }}" alt="Room {{ booking.room.room_number }}" class="img-fluid rounded mb-3">
+                {% endif %}
+                {% if booking.room.images.all %}
+                    <div class="guest-grid two">
+                        {% for image in booking.room.images.all|slice:":4" %}
+                            <div>
+                                <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="img-fluid rounded">
+                                {% if image.caption %}<p class="small text-muted mt-2">{{ image.caption }}</p>{% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
-                </div>
-            </div>
+                {% endif %}
+            </section>
+            {% endif %}
 
-            <!-- Related Room Info -->
-            <div class="card shadow">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-image"></i> Room Gallery
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if booking.room.image %}
-                        <img src="{{ booking.room.image.url }}" alt="{{ booking.room.room_number }}" class="img-fluid rounded mb-3">
-                    {% endif %}
-                    
-                    {% if booking.room.images.all %}
-                        <div class="row g-2">
-                            {% for image in booking.room.images.all|slice:":4" %}
-                                <div class="col-md-6">
-                                    <img src="{{ image.image.url }}" alt="{{ image.caption }}" class="img-fluid rounded">
-                                    {% if image.caption %}<p class="small text-muted mt-1">{{ image.caption }}</p>{% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Recommended Rooms Section -->
             {% if has_recommendations %}
-                <div class="card shadow mt-4">
-                    <div class="card-header bg-light">
-                        <h5 class="mb-0">
-                            <i class="fas fa-star"></i> Other Rooms You Might Like
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        {% include 'recommendations/recommendations_widget.html' with recommendations=recommendations %}
-                    </div>
-                </div>
+                <section class="guest-card mt-4">
+                    <h2 class="h4 mb-3"><i class="fas fa-star"></i> Other Rooms You Might Like</h2>
+                    {% include 'recommendations/recommendations_widget.html' with recommendations=recommendations %}
+                </section>
             {% endif %}
         </div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Booking Status Card -->
-            <div class="card shadow mb-3">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Status</h5>
-                </div>
-                <div class="card-body text-center">
-                    <div class="display-1 mb-3">
-                        {% if booking.status == 'CONFIRMED' %}
-                            <i class="fas fa-check-circle text-success"></i>
-                        {% elif booking.status == 'PENDING' %}
-                            <i class="fas fa-clock text-warning"></i>
-                        {% else %}
-                            <i class="fas fa-ban text-danger"></i>
-                        {% endif %}
-                    </div>
-                    <p class="h5 mb-2">{{ booking.get_status_display }}</p>
-                    {% if booking.status == 'PENDING' %}
-                        <p class="text-muted small">Your booking is awaiting confirmation. You will receive an email when it's confirmed.</p>
-                    {% elif booking.status == 'CONFIRMED' %}
-                        <p class="text-success small"><i class="fas fa-check"></i> Your booking is confirmed!</p>
+        <aside class="col-lg-4">
+            <div class="guest-card text-center mb-4">
+                <div class="display-1 mb-3">
+                    {% if booking.status == 'CONFIRMED' %}
+                        <i class="fas fa-check-circle text-success"></i>
+                    {% elif booking.status == 'PENDING' %}
+                        <i class="fas fa-clock text-warning"></i>
                     {% else %}
-                        <p class="text-danger small">This booking has been cancelled.</p>
+                        <i class="fas fa-ban text-danger"></i>
                     {% endif %}
                 </div>
+                <h2 class="h4">{{ booking.get_status_display }}</h2>
+                {% if booking.status == 'PENDING' %}
+                    <p class="text-muted mb-0">Your booking is awaiting confirmation.</p>
+                {% elif booking.status == 'CONFIRMED' %}
+                    <p class="text-success mb-0">Your booking is confirmed.</p>
+                {% else %}
+                    <p class="text-danger mb-0">This booking has been cancelled.</p>
+                {% endif %}
             </div>
 
-            <!-- Important Info -->
-            <div class="card shadow">
-                <div class="card-header bg-light">
-                    <h5 class="mb-0">Important Information</h5>
+            <div class="guest-card">
+                <h2 class="h5">Important Information</h2>
+                <div class="mt-3">
+                    <strong>Check-in Time:</strong>
+                    <p class="text-muted">2:00 PM</p>
                 </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong>Check-in Time:</strong>
-                        <p class="text-muted">2:00 PM</p>
-                    </div>
-                    <div class="mb-3">
-                        <strong>Check-out Time:</strong>
-                        <p class="text-muted">11:00 AM</p>
-                    </div>
-                    <div>
-                        <strong>Need Help?</strong>
-                        <p class="text-muted small">Contact our support team at support@cebuhotel.com or call +63 2 1234 5678</p>
-                    </div>
+                <div>
+                    <strong>Check-out Time:</strong>
+                    <p class="text-muted">11:00 AM</p>
+                </div>
+                <div>
+                    <strong>Need Help?</strong>
+                    <p class="text-muted small mb-0">Contact support@cebuhotel.com or call +63 2 1234 5678.</p>
                 </div>
             </div>
-        </div>
+        </aside>
     </div>
 </div>
 {% endblock %}

@@ -1,0 +1,154 @@
+{% load i18n %}<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f3f4f6;
+            color: #111827;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 640px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+        }
+        .header {
+            background-color: #0a0f1e;
+            color: #f8fafc;
+            padding: 28px 32px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 8px 0 0;
+            color: #9ca3af;
+        }
+        .content {
+            padding: 32px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #111827;
+        }
+        .details {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 24px 0;
+        }
+        .details td {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .details td:first-child {
+            color: #6b7280;
+            width: 36%;
+            font-weight: 600;
+        }
+        .details td:last-child {
+            color: #111827;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        .button {
+            background-color: #0a0f1e;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 999px;
+            display: inline-block;
+            font-weight: 700;
+        }
+        .note-box {
+            background-color: #f8fafc;
+            border-left: 4px solid #c9a84c;
+            padding: 18px 20px;
+            border-radius: 8px;
+            color: #374151;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+        .footer {
+            padding: 24px 32px;
+            background-color: #f9fafb;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.7;
+            text-align: center;
+        }
+        .footer a {
+            color: #0a0f1e;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Booking Confirmed</h1>
+            <p>Your reservation at Cebu Hotel is now official.</p>
+        </div>
+        <div class="content">
+            <p>Dear {{ guest.first_name|default:guest.username }},</p>
+            <p>Thank you for booking with Cebu Hotel. Your reservation has been confirmed and we are excited to welcome you.</p>
+
+            <div class="section-title">Booking Details</div>
+            <table class="details">
+                <tr>
+                    <td>Booking ID</td>
+                    <td>#{{ booking.id }}</td>
+                </tr>
+                <tr>
+                    <td>Check-in Reference</td>
+                    <td><strong>{{ booking.booking_reference }}</strong></td>
+                </tr>
+                <tr>
+                    <td>Room</td>
+                    <td>{{ room.room_number }}{% if room.get_room_type_display %} ({{ room.get_room_type_display }}){% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Check-in</td>
+                    <td>{{ booking.check_in }}</td>
+                </tr>
+                <tr>
+                    <td>Check-out</td>
+                    <td>{{ booking.check_out }}</td>
+                </tr>
+                <tr>
+                    <td>Stay Duration</td>
+                    <td>{{ booking.number_of_nights }} night{% if booking.number_of_nights != 1 %}s{% endif %}</td>
+                </tr>
+                <tr>
+                    <td>Total Paid</td>
+                    <td>PHP {{ booking.total_price }}</td>
+                </tr>
+            </table>
+
+            <div class="button-container">
+                <a href="{{ booking_url }}" class="button">View Your Booking</a>
+            </div>
+
+            <div class="note-box">
+                <p><strong>Need help?</strong> Please reply to this email or contact our support team at <a href="mailto:support@cebuhotel.com">support@cebuhotel.com</a>.</p>
+                <p>At check-in, please show your reference code and a valid ID matching the booking name.</p>
+                <p>If you want to update your reservation, you can do so from your Cebu Hotel account dashboard.</p>
+            </div>
+        </div>
+        <div class="footer">
+            <p><strong>Cebu Hotel</strong> | <a href="mailto:support@cebuhotel.com">support@cebuhotel.com</a></p>
+            <p>This is an automated confirmation email. Please do not reply directly to this message.</p>
+        </div>
+    </div>
+</body>
+</html>

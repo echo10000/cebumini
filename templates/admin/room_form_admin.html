@@ -5,6 +5,53 @@
 {% block extra_css %}
 <style>
     /* ============================================
+       COMPREHENSIVE BOOTSTRAP OVERRIDE
+       ============================================ */
+    
+    /* Target all Bootstrap form-control inputs */
+    input.form-control,
+    select.form-control,
+    textarea.form-control,
+    .form-control,
+    .form-select,
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="password"],
+    input[type="file"],
+    select,
+    textarea {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        border: 1.5px solid #374151 !important;
+        border-radius: 6px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem !important;
+    }
+
+    input.form-control:focus,
+    select.form-control:focus,
+    textarea.form-control:focus,
+    .form-control:focus,
+    .form-select:focus,
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    input[type="password"]:focus,
+    input[type="file"]:focus,
+    select:focus,
+    textarea:focus {
+        background-color: #1a2235 !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.25) !important;
+        color: #ffffff !important;
+    }
+
+    /* ============================================
        LUXURY ROOM FORM PAGE
        ============================================ */
     
@@ -55,7 +102,8 @@
     }
     
     .form-section-header {
-        background: #2563eb;
+        background: #111827;
+        border-left: 4px solid #f59e0b;
         padding: 1rem 1.5rem;
         color: #ffffff;
         font-family: 'Playfair Display', serif;
@@ -67,6 +115,7 @@
     }
     
     .form-section-header i {
+        color: #c9a84c;
         font-size: 1.5rem;
     }
     
@@ -98,25 +147,25 @@
     
     .form-control {
         width: 100%;
-        padding: 0.75rem 1rem;
-        background: #111827;
-        border: 1.5px solid #374151;
-        border-radius: 6px;
-        color: #ffffff;
-        font-size: 1rem;
-        font-family: 'DM Sans', sans-serif;
-        transition: all 0.3s ease;
+        padding: 0.75rem 1rem !important;
+        background: #111827 !important;
+        border: 1.5px solid #374151 !important;
+        border-radius: 6px !important;
+        color: #ffffff !important;
+        font-size: 1rem !important;
+        font-family: 'DM Sans', sans-serif !important;
+        transition: all 0.3s ease !important;
     }
     
     .form-control:focus {
-        outline: none;
-        border-color: #c9a84c;
-        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
-        background: #1a2235;
+        outline: none !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1) !important;
+        background: #1a2235 !important;
     }
     
     .form-control::placeholder {
-        color: #6b7280;
+        color: #6b7280 !important;
     }
     
     select.form-control {
@@ -137,6 +186,90 @@
     .form-control option {
         background: #1a2235;
         color: #ffffff;
+    }
+    
+    /* Django form field styling */
+    input[type="text"],
+    input[type="email"],
+    input[type="number"],
+    input[type="date"],
+    input[type="time"],
+    input[type="password"],
+    textarea,
+    select {
+        width: 100%;
+        padding: 0.75rem 1rem !important;
+        background: #111827 !important;
+        border: 1.5px solid #374151 !important;
+        border-radius: 6px !important;
+        color: #ffffff !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="time"]:focus,
+    input[type="password"]:focus,
+    textarea:focus,
+    select:focus {
+        outline: none !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1) !important;
+        background: #1a2235 !important;
+    }
+
+    /* Bootstrap form-control override */
+    .form-control {
+        background: #111827 !important;
+        border: 1.5px solid #374151 !important;
+        color: #ffffff !important;
+    }
+
+    .form-control:focus {
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.25) !important;
+        background: #1a2235 !important;
+    }
+
+    .form-control::placeholder {
+        color: #6b7280 !important;
+    }
+
+    .form-select {
+        background-color: #111827 !important;
+        border-color: #374151 !important;
+        color: #ffffff !important;
+    }
+
+    .form-select:focus {
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.25rem rgba(201, 168, 76, 0.25) !important;
+        background-color: #1a2235 !important;
+    }
+
+    /* Multiple select styling */
+    .form-select option {
+        background: #1a2235 !important;
+        color: #ffffff !important;
+    }
+
+    /* Checkbox styling */
+    .form-check-input {
+        background-color: #111827 !important;
+        border-color: #374151 !important;
+    }
+
+    .form-check-input:checked {
+        background-color: #c9a84c !important;
+        border-color: #c9a84c !important;
+    }
+
+    .form-check-input:focus {
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.25rem rgba(201, 168, 76, 0.25) !important;
     }
     
     .form-help-text {
@@ -204,8 +337,8 @@
     
     .btn-submit {
         padding: 0.75rem 2rem;
-        background: #2563eb;
-        color: #ffffff;
+        background: #f59e0b;
+        color: #0a0f1e;
         border: none;
         border-radius: 6px;
         font-weight: 600;
@@ -220,8 +353,8 @@
     }
     
     .btn-submit:hover {
-        background: #1d4ed8;
-        box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+        background: #d97706;
+        box-shadow: 0 8px 16px rgba(245, 158, 11, 0.3);
         transform: translateY(-2px);
     }
     
@@ -292,67 +425,448 @@
             justify-content: center;
         }
     }
+
+    /* ============================================
+       DARK LUXURY THEME OVERRIDES
+       ============================================ */
+
+    .container-fluid {
+        background: #0a0f1e !important;
+        min-height: 100vh;
+    }
+
+    .form-page-header {
+        background: transparent;
+        border: none;
+        padding: 0 !important;
+        margin-bottom: 2rem !important;
+    }
+
+    .form-page-header h2 {
+        color: #ffffff !important;
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .back-link {
+        background: transparent !important;
+        border: 1px solid #c9a84c !important;
+        color: #c9a84c !important;
+        padding: 0.6rem 1.25rem !important;
+        border-radius: 6px !important;
+        text-decoration: none !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+
+    .back-link:hover {
+        background: #c9a84c !important;
+        color: #0a0f1e !important;
+    }
+
+    .luxury-form-card {
+        background: #1a2235 !important;
+        border: 1px solid rgba(201, 168, 76, 0.2) !important;
+        border-radius: 10px !important;
+        padding: 0 !important;
+        margin-bottom: 2rem !important;
+        overflow: hidden !important;
+    }
+
+    .form-section-header {
+        background: #111827 !important;
+        border-left: 4px solid #f59e0b !important;
+        padding: 1rem 1.5rem !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 1.05rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 0.75rem !important;
+        margin: 0 !important;
+    }
+
+    .form-section-header i {
+        color: #c9a84c !important;
+        font-size: 1.25rem !important;
+    }
+
+    .form-body {
+        padding: 2rem !important;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0 !important;
+    }
+
+    .form-label {
+        display: block !important;
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    .form-label i {
+        color: #c9a84c !important;
+        margin-right: 0.5rem !important;
+    }
+
+    .form-control {
+        background: #0f1623 !important;
+        border: 1px solid rgba(201, 168, 76, 0.3) !important;
+        color: #ffffff !important;
+        padding: 0.75rem 1rem !important;
+        border-radius: 6px !important;
+        font-size: 0.95rem !important;
+    }
+
+    .form-control:focus {
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1) !important;
+        background: #0f1623 !important;
+    }
+
+    .form-control::placeholder {
+        color: #6b7280 !important;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 120px;
+    }
+
+    .form-select {
+        background: #0f1623 url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23c9a84c' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.75rem center !important;
+        background-size: 1.5em 1.5em !important;
+        border: 1px solid rgba(201, 168, 76, 0.3) !important;
+        color: #ffffff !important;
+        padding-right: 2.5rem !important;
+    }
+
+    .form-select:focus {
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.25rem rgba(201, 168, 76, 0.25) !important;
+    }
+
+    .form-select option {
+        background: #0f1623 !important;
+        color: #ffffff !important;
+    }
+
+    .checkbox-group,
+    .radio-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .checkbox-item,
+    .radio-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #ffffff;
+    }
+
+    .checkbox-item span,
+    .radio-item span {
+        color: #ffffff;
+    }
+
+    .form-check-input {
+        background: #0f1623 !important;
+        border: 1.5px solid rgba(201, 168, 76, 0.3) !important;
+        width: 1.25em !important;
+        height: 1.25em !important;
+        cursor: pointer !important;
+        accent-color: #c9a84c !important;
+    }
+
+    .form-check-input:checked {
+        background: #c9a84c !important;
+        border-color: #c9a84c !important;
+    }
+
+    .form-check-input:focus {
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.25rem rgba(201, 168, 76, 0.25) !important;
+    }
+
+    .form-help-text {
+        color: #6b7280 !important;
+        font-size: 0.85rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    .two-column {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .two-column {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-buttons {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(201, 168, 76, 0.15);
+        flex-wrap: wrap;
+    }
+
+    .btn-submit {
+        background: #c9a84c !important;
+        color: #0a0f1e !important;
+        border: none !important;
+        padding: 0.75rem 1.75rem !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .btn-submit:hover {
+        background: #b8963d !important;
+        transform: scale(1.02) !important;
+    }
+
+    .btn-cancel {
+        background: transparent !important;
+        border: 1px solid #6b7280 !important;
+        color: #9ca3af !important;
+        padding: 0.75rem 1.75rem !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        text-decoration: none !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 0.5rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .btn-cancel:hover {
+        border-color: #c9a84c !important;
+        color: #c9a84c !important;
+    }
+
+    .btn-delete {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        border: none !important;
+        padding: 0.75rem 1.75rem !important;
+        border-radius: 6px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+        transition: all 0.3s ease !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        font-size: 0.9rem !important;
+    }
+
+    .btn-delete:hover {
+        background: #991b1b !important;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0;
+    }
+
+    .errorlist li {
+        background: rgba(220, 38, 38, 0.1);
+        border-left: 3px solid #dc2626;
+        color: #fca5a5;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        font-size: 0.85rem;
+    }
+
+    .form-control.is-invalid {
+        border-color: #dc2626 !important;
+    }
+
+    .success-message {
+        background: #064e3b !important;
+        border: 1px solid #10b981 !important;
+        color: #ffffff !important;
+        padding: 1rem 1.5rem !important;
+        border-radius: 8px !important;
+        margin-bottom: 1.5rem !important;
+    }
+
+    /* ============================================
+       NUCLEAR OPTION - GLOBAL OVERRIDES
+       ============================================ */
+    
+    /* Override Bootstrap defaults aggressively */
+    input[type="text"].form-control,
+    input[type="email"].form-control,
+    input[type="number"].form-control,
+    input[type="date"].form-control,
+    input[type="password"].form-control,
+    textarea.form-control,
+    select.form-control,
+    .form-control,
+    .form-select {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        border: 1.5px solid #374151 !important;
+        border-radius: 6px !important;
+        padding: 0.75rem 1rem !important;
+    }
+
+    input[type="text"].form-control:focus,
+    input[type="email"].form-control:focus,
+    input[type="number"].form-control:focus,
+    input[type="date"].form-control:focus,
+    input[type="password"].form-control:focus,
+    textarea.form-control:focus,
+    select.form-control:focus,
+    .form-control:focus,
+    .form-select:focus {
+        background-color: #1a2235 !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.25) !important;
+        color: #ffffff !important;
+    }
+
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <!-- Header -->
-    <div class="form-page-header">
-        <h2>{% if form.instance.pk %}Edit Room #{{ form.instance.room_number }}{% else %}Add New Room{% endif %}</h2>
-        <a href="{% url 'admin_panel:room_management' %}" class="back-link">
-            <i class="fas fa-arrow-left"></i> Back
-        </a>
-    </div>
+<style>
+    /* GLOBAL AGGRESSIVE OVERRIDES FOR THIS PAGE ONLY */
+    #id_room_number,
+    #id_room_type,
+    #id_capacity,
+    #id_floor,
+    #id_price_per_night,
+    #id_description,
+    #id_image,
+    #id_amenities {
+        background-color: #111827 !important;
+        color: #ffffff !important;
+        border: 1.5px solid #374151 !important;
+        border-radius: 6px !important;
+        padding: 0.75rem 1rem !important;
+    }
+    
+    #id_room_number:focus,
+    #id_room_type:focus,
+    #id_capacity:focus,
+    #id_floor:focus,
+    #id_price_per_night:focus,
+    #id_description:focus,
+    #id_image:focus,
+    #id_amenities:focus {
+        background-color: #1a2235 !important;
+        border-color: #c9a84c !important;
+        box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.25) !important;
+    }
+    
+    /* Generic overrides as backup */
+    .form-control { background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; }
+    .form-control:focus { background-color: #1a2235 !important; border-color: #c9a84c !important; }
+    .form-select { background-color: #111827 !important; color: #ffffff !important; border: 1.5px solid #374151 !important; }
+    .form-select:focus { background-color: #1a2235 !important; border-color: #c9a84c !important; }
+    
+    /* Override Bootstrap wrappers */
+    .mb-3 { background: transparent !important; }
+    div[style*="margin-bottom"] { background: transparent !important; }
+</style>
+<div class="container-fluid py-4" style="background: #0a0f1e; min-height: 100vh;">
+    <div style="max-width: 900px; margin: 0 auto;">
+        
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert success-message" style="background: #064e3b; border: 1px solid #10b981; color: white; padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                    ✓ {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
 
-    <!-- Form -->
-    <form method="POST" enctype="multipart/form-data" class="luxury-form-card" style="margin-bottom: 3rem;">
-        {% csrf_token %}
+        <!-- Header -->
+        <div class="form-page-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h1 style="color: white; font-size: 1.3rem; font-weight: 700; margin: 0;">
+                📝 {% if form.instance.pk %}Edit Room #{{ form.instance.room_number }}{% else %}Add New Room{% endif %}
+            </h1>
+            <a href="{% url 'admin_panel:room_management' %}" class="back-link" style="background: transparent; border: 1px solid #c9a84c; color: #c9a84c; padding: 0.6rem 1.25rem; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s ease;">
+                ← Back to Rooms
+            </a>
+        </div>
 
-        <!-- Basic Information Section -->
-        <div class="luxury-form-card">
-            <div class="form-section-header">
-                <i class="fas fa-info-circle"></i>
-                Basic Information
-            </div>
-            <div class="form-body">
-                <div class="two-column">
-                    <!-- Room Number -->
-                    <div class="form-group">
-                        <label for="id_room_number" class="form-label">
-                            <i class="fas fa-door-open"></i> Room Number
-                        </label>
-                        {{ form.room_number }}
-                        {{ form.room_number.errors }}
-                        {% if form.room_number.help_text %}
-                            <p class="form-help-text">{{ form.room_number.help_text }}</p>
-                        {% endif %}
-                    </div>
 
-                    <!-- Room Type -->
-                    <div class="form-group">
-                        <label for="id_room_type" class="form-label">
-                            <i class="fas fa-bed"></i> Room Type
+        <!-- Form -->
+        <form method="POST" enctype="multipart/form-data" style="background: #1a2235; border: 1px solid rgba(201,168,76,0.2); border-radius: 10px; padding: 0; box-shadow: 0 4px 16px rgba(0,0,0,0.3);">
+            {% csrf_token %}
+
+            <!-- BASIC INFORMATION SECTION -->
+            <section style="border-bottom: 1px solid rgba(201,168,76,0.1); padding: 2rem;">
+                <h2 style="color: #c9a84c; font-size: 1.05rem; font-weight: 700; border-bottom: 2px solid rgba(201,168,76,0.15); padding-bottom: 0.75rem; margin: 0 0 1.5rem 0;">
+                    🏠 Basic Information
+                </h2>
+
+                <!-- Room Number -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: block; color: white; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                        Room Number
+                    </label>
+                    {{ form.room_number }}
+                    <style>
+                        #id_room_number {
+                            background-color: #111827 !important;
+                            color: #ffffff !important;
+                            border: 1.5px solid #374151 !important;
+                            border-radius: 6px !important;
+                            padding: 0.75rem 1rem !important;
+                            font-size: 1rem !important;
+                            width: 100% !important;
+                        }
+                        #id_room_number:focus {
+                            background-color: #1a2235 !important;
+                            border-color: #c9a84c !important;
+                            box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.25) !important;
+                            outline: none !important;
+                        }
+                    </style>
+                    {{ form.room_number.errors }}
+                </div>
+
+                <!-- Room Type & Guest Capacity (2 columns) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+                    <div>
+                        <label style="display: block; color: white; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                            Room Type
                         </label>
                         {{ form.room_type }}
                         {{ form.room_type.errors }}
                     </div>
-                </div>
-
-                <div class="two-column">
-                    <!-- Floor -->
-                    <div class="form-group">
-                        <label for="id_floor" class="form-label">
-                            <i class="fas fa-layer-group"></i> Floor
-                        </label>
-                        {{ form.floor }}
-                        {{ form.floor.errors }}
-                    </div>
-
-                    <!-- Capacity -->
-                    <div class="form-group">
-                        <label for="id_capacity" class="form-label">
-                            <i class="fas fa-users"></i> Guest Capacity
+                    <div>
+                        <label style="display: block; color: white; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                            Guest Capacity
                         </label>
                         {{ form.capacity }}
                         {{ form.capacity.errors }}
@@ -360,88 +874,58 @@
                 </div>
 
                 <!-- Description -->
-                <div class="form-group">
-                    <label for="id_description" class="form-label">
-                        <i class="fas fa-align-left"></i> Description
+                <div style="margin-bottom: 0;">
+                    <label style="display: block; color: white; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                        Description
                     </label>
                     {{ form.description }}
                     {{ form.description.errors }}
-                    <p class="form-help-text">Provide a detailed description of the room.</p>
+                    <p style="color: #6b7280; font-size: 0.85rem; margin-top: 0.5rem;">Provide a detailed description of the room.</p>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- Pricing & Availability Section -->
-        <div class="luxury-form-card">
-            <div class="form-section-header">
-                <i class="fas fa-tag"></i>
-                Pricing & Availability
-            </div>
-            <div class="form-body">
-                <div class="two-column">
-                    <!-- Price Per Night -->
-                    <div class="form-group">
-                        <label for="id_price_per_night" class="form-label">
-                            <i class="fas fa-peso-sign"></i> Price Per Night (₱)
+            <!-- PRICING & AVAILABILITY SECTION -->
+            <section style="border-bottom: 1px solid rgba(201,168,76,0.1); padding: 2rem;">
+                <h2 style="color: #c9a84c; font-size: 1.05rem; font-weight: 700; border-bottom: 2px solid rgba(201,168,76,0.15); padding-bottom: 0.75rem; margin: 0 0 1.5rem 0;">
+                    💰 Pricing & Availability
+                </h2>
+
+                <!-- Price & Status (2 columns) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <div>
+                        <label style="display: block; color: white; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                            Price per Night (₱)
                         </label>
                         {{ form.price_per_night }}
                         {{ form.price_per_night.errors }}
                     </div>
-
-                    <!-- Is Available -->
-                    <div class="form-group">
-                        <label class="form-label">
-                            <i class="fas fa-check-circle"></i> Availability
-                        </label>
-                        <div class="radio-group" style="margin-top: 0.5rem;">
-                            <label class="radio-item">
-                                <input type="radio" name="is_available" value="True" 
-                                       {% if form.instance.is_available %}checked{% endif %}>
-                                <span>Available</span>
-                            </label>
-                            <label class="radio-item">
-                                <input type="radio" name="is_available" value="False" 
-                                       {% if not form.instance.is_available %}checked{% endif %}>
-                                <span>Not Available</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Is Maintenance -->
-                <div class="form-group">
-                    <label class="form-label">
-                        <i class="fas fa-tools"></i> Maintenance Status
-                    </label>
-                    <div class="checkbox-group" style="margin-top: 0.5rem;">
-                        <label class="checkbox-item">
-                            <input type="checkbox" name="is_maintenance" value="True"
-                                   {% if form.instance.is_maintenance %}checked{% endif %}>
-                            <span>Currently Under Maintenance</span>
+                    <div style="display: flex; align-items: flex-end;">
+                        <label style="display: flex; align-items: center; color: white; font-weight: 600; cursor: pointer;">
+                            {{ form.is_available }}
+                            <span style="margin-left: 0.75rem;">Mark as Available</span>
                         </label>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- Amenities & Image Section -->
-        <div class="luxury-form-card">
-            <div class="form-section-header">
-                <i class="fas fa-star"></i>
-                Amenities & Image
-            </div>
-            <div class="form-body">
+            <!-- AMENITIES & IMAGE SECTION -->
+            {% if form.amenities or form.image %}
+            <section style="padding: 2rem;">
+                <h2 style="color: #c9a84c; font-size: 1.05rem; font-weight: 700; border-bottom: 2px solid rgba(201,168,76,0.15); padding-bottom: 0.75rem; margin: 0 0 1.5rem 0;">
+                    ⭐ Amenities & Image
+                </h2>
+
                 <!-- Amenities -->
                 {% if form.amenities %}
-                    <div class="form-group">
-                        <label for="id_amenities" class="form-label">
-                            <i class="fas fa-list"></i> Select Amenities
+                    <div style="margin-bottom: 1.5rem;">
+                        <label style="display: block; color: white; font-weight: 600; margin-bottom: 0.75rem; font-size: 0.95rem;">
+                            Select Amenities
                         </label>
-                        <div class="checkbox-group" style="max-height: 200px; overflow-y: auto; padding: 0.5rem; background: #111827; border-radius: 6px; border: 1.5px solid #374151;">
-                            {% for choice in form.amenities %}
-                                <label class="checkbox-item" style="padding: 0.25rem 0;">
-                                    {{ choice.tag }}
-                                    <span style="color: #d1d5db;">{{ choice.choice_label }}</span>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+                            {% for field in form.amenities %}
+                                <label style="display: flex; align-items: center; color: white; cursor: pointer;">
+                                    {{ field.tag }}
+                                    <span style="margin-left: 0.5rem; color: #d1d5db;">{{ field.choice_label }}</span>
                                 </label>
                             {% endfor %}
                         </div>
@@ -451,35 +935,66 @@
 
                 <!-- Image -->
                 {% if form.image %}
-                    <div class="form-group" style="margin-top: 1.5rem;">
-                        <label for="id_image" class="form-label">
-                            <i class="fas fa-image"></i> Room Image
+                    <div style="margin-bottom: 0;">
+                        <label style="display: block; color: white; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.95rem;">
+                            Room Image
                         </label>
                         {{ form.image }}
+                        <style>
+                            #id_image {
+                                background-color: #111827 !important;
+                                color: #ffffff !important;
+                                border: 1.5px solid #374151 !important;
+                                border-radius: 6px !important;
+                                padding: 0.75rem 1rem !important;
+                                font-size: 1rem !important;
+                                width: 100% !important;
+                            }
+                            #id_image::file-selector-button {
+                                background-color: #c9a84c !important;
+                                color: #0a0f1e !important;
+                                border: none !important;
+                                padding: 0.5rem 1rem !important;
+                                border-radius: 4px !important;
+                                font-weight: 600 !important;
+                                cursor: pointer !important;
+                            }
+                        </style>
                         {{ form.image.errors }}
-                        <p class="form-help-text">Upload a high-quality image of the room.</p>
+                        <p style="color: #6b7280; font-size: 0.85rem; margin-top: 0.5rem;">Upload a high-quality image of the room (JPG, PNG - Max 5MB).</p>
                         
                         {% if form.instance.image %}
-                            <div style="margin-top: 1rem;">
-                                <p style="color: #d1d5db; font-size: 0.9rem; margin-bottom: 0.5rem;">Current Image:</p>
-                                <img src="{{ form.instance.image.url }}" alt="Room Image" style="max-width: 300px; height: auto; border-radius: 6px; border: 1.5px solid #c9a84c;">
+                            <div style="margin-top: 1.5rem;">
+                                <p style="color: #d1d5db; font-size: 0.9rem; margin-bottom: 0.75rem;">Current Image:</p>
+                                <img src="{{ form.instance.image.url }}" alt="Room Image" style="max-width: 300px; height: auto; border-radius: 6px; border: 1.5px solid #c9a84c; display: block;">
                             </div>
                         {% endif %}
                     </div>
                 {% endif %}
-            </div>
-        </div>
+            </section>
+            {% endif %}
 
-        <!-- Form Actions -->
-        <div class="form-buttons">
-            <button type="submit" class="btn-submit">
-                <i class="fas fa-save"></i> 
-                {% if form.instance.pk %}Update Room{% else %}Create Room{% endif %}
-            </button>
-            <a href="{% url 'admin_panel:room_management' %}" class="btn-cancel">
-                <i class="fas fa-times"></i> Cancel
-            </a>
-        </div>
-    </form>
+            <!-- BUTTONS -->
+            <div style="display: flex; gap: 1rem; margin-top: 2rem; padding: 2rem; border-top: 1px solid rgba(201,168,76,0.15); flex-wrap: wrap;">
+                <button type="submit" style="background: #c9a84c; color: #0a0f1e; border: none; padding: 0.75rem 1.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.9rem;">
+                    ✓ {% if form.instance.pk %}Update Room{% else %}Create Room{% endif %}
+                </button>
+                <button type="button" onclick="history.back()" style="background: transparent; border: 1px solid #6b7280; color: #9ca3af; padding: 0.75rem 1.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.9rem;">
+                    ✕ Cancel
+                </button>
+            </div>
+        </form>
+        {% if form.instance.pk %}
+            <form method="POST" action="{% url 'admin_panel:room_delete' form.instance.id %}" style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 1rem;">
+                {% csrf_token %}
+                <input type="hidden" name="next_success" value="{% url 'admin_panel:room_management' %}">
+                <input type="hidden" name="next_error" value="{% url 'admin_panel:room_detail_admin' form.instance.id %}">
+                <button type="submit" onclick="return confirm('Are you sure you want to delete this room?');" style="background: #dc2626; color: white; border: none; padding: 0.75rem 1.75rem; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5rem; font-size: 0.9rem;">
+                    🗑️ Delete Room
+                </button>
+            </form>
+        {% endif %}
+    </div>
 </div>
 {% endblock %}
+
