@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Your Complaint Has Been Resolved - Cebu Mini Hotel</title>
+</head>
+<body style="margin: 0; padding: 0; background: #f7fbfb; font-family: Arial, sans-serif; color: #1f2937;">
+    <div style="max-width: 620px; margin: 0 auto; padding: 28px 16px;">
+        <div style="background: #ffffff; border: 1px solid #d9e2e7; border-radius: 8px; overflow: hidden;">
+            <div style="background: #0f766e; color: #ffffff; padding: 22px 26px;">
+                <h1 style="margin: 0; font-size: 24px;">Complaint resolved</h1>
+                <p style="margin: 8px 0 0;">Thank you for letting Cebu Mini Hotel help.</p>
+            </div>
+            <div style="padding: 26px;">
+                <p style="font-size: 16px;">Hi {{ guest_name }},</p>
+                <p style="line-height: 1.6;">
+                    Your complaint "{{ complaint.subject }}" has been marked as resolved.
+                </p>
+
+                <table style="width: 100%; border-collapse: collapse; margin: 22px 0;">
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5edf0; color: #4b5563;">Complaint</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5edf0; text-align: right;">#{{ complaint.id }}</td>
+                    </tr>
+                    {% if booking %}
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5edf0; color: #4b5563;">Booking</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5edf0; text-align: right;">#{{ booking.id }}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5edf0; color: #4b5563;">Room</td>
+                        <td style="padding: 10px; border-bottom: 1px solid #e5edf0; text-align: right;">{{ room.room_number }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <td style="padding: 10px; color: #4b5563;">Status</td>
+                        <td style="padding: 10px; text-align: right;">Resolved</td>
+                    </tr>
+                </table>
+
+                {% if complaint.resolution_notes %}
+                    <p style="line-height: 1.6;"><strong>Resolution notes:</strong></p>
+                    <div style="background: #f1fafa; border-left: 4px solid #0f766e; padding: 14px 16px; line-height: 1.6;">
+                        {{ complaint.resolution_notes|linebreaksbr }}
+                    </div>
+                {% endif %}
+
+                <p style="line-height: 1.6;">
+                    Thank you for giving us the chance to address this. If you still need help, please contact our front desk or submit a new complaint from your guest account.
+                </p>
+                <p style="margin-bottom: 0;">Regards,<br>Cebu Mini Hotel</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

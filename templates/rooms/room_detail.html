@@ -2,6 +2,79 @@
 
 {% block title %}{{ room.room_number }} - Cebu Hotel{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .availability-calendar-card { border-color: rgba(15, 118, 110, 0.35) !important; }
+    .availability-calendar-card .card-header { background: #0f766e; color: #ffffff; }
+    .availability-calendar-input { position: absolute; opacity: 0; pointer-events: none; }
+    .availability-calendar .flatpickr-calendar {
+        background: #ffffff;
+        border: 1px solid rgba(15, 118, 110, 0.18);
+        box-shadow: none;
+        width: 100%;
+    }
+    .availability-calendar .flatpickr-innerContainer,
+    .availability-calendar .flatpickr-rContainer,
+    .availability-calendar .flatpickr-days,
+    .availability-calendar .dayContainer {
+        width: 100%;
+        max-width: none;
+    }
+    .availability-calendar .flatpickr-day {
+        color: #0f172a;
+        border-radius: 6px;
+    }
+    .availability-calendar .flatpickr-day:not(.flatpickr-disabled):not(.selected):not(.startRange):not(.endRange) {
+        background: #ffffff;
+        border-color: #d1fae5;
+        color: #0f172a;
+    }
+    .availability-calendar .flatpickr-day.flatpickr-disabled,
+    .availability-calendar .flatpickr-day.flatpickr-disabled:hover {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #6b7280;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+    .availability-calendar .flatpickr-day.selected,
+    .availability-calendar .flatpickr-day.startRange,
+    .availability-calendar .flatpickr-day.endRange,
+    .availability-calendar .flatpickr-day.inRange {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #ffffff;
+        box-shadow: none;
+    }
+    .availability-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        font-size: 0.875rem;
+    }
+    .availability-legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .availability-legend i {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 3px;
+        display: inline-block;
+    }
+    .availability-summary {
+        background: #f8fffe;
+        border: 1px solid rgba(15, 118, 110, 0.22);
+        border-radius: 8px;
+        color: #0f172a;
+        display: none;
+    }
+    .availability-summary strong { color: #0f766e; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="dashboard-container">
     <div class="container">
@@ -21,6 +94,37 @@
             </div>
             {% endif %}
         </div>
+
+        <section class="card availability-calendar-card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-calendar-days"></i> Room Availability</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Choose your arrival date first, then your departure date. Booked nights are disabled.</p>
+                <input
+                    id="room-availability-calendar"
+                    class="availability-calendar-input"
+                    type="text"
+                    data-booking-url="{% url 'bookings:create_booking' room.id %}"
+                    aria-label="Room availability calendar"
+                >
+                <div id="room-availability-calendar-inline" class="availability-calendar"></div>
+                <div class="availability-legend mt-3">
+                    <span><i style="background:#ffffff; border:1px solid #d1fae5;"></i> Available</span>
+                    <span><i style="background:#fee2e2; border:1px solid #fecaca;"></i> Booked</span>
+                    <span><i style="background:#0f766e;"></i> Selected</span>
+                </div>
+                <div id="availability-summary" class="availability-summary mt-3 p-3">
+                    <div class="d-flex flex-wrap justify-content-between gap-2">
+                        <span><strong id="availability-nights">0</strong> night(s)</span>
+                        <span>Total: <strong>PHP <span id="availability-total">0.00</span></strong></span>
+                    </div>
+                    <a id="availability-book-link" href="{% url 'bookings:create_booking' room.id %}" class="btn btn-success mt-3">
+                        Continue Booking
+                    </a>
+                </div>
+            </div>
+        </section>
 
         <!-- Main Content -->
         <div class="row">
@@ -257,4 +361,57 @@
         opacity: 0.8;
     }
 </style>
+{{ booked_dates|json_script:"booked-dates-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarInput = document.getElementById('room-availability-calendar');
+    const calendarContainer = document.getElementById('room-availability-calendar-inline');
+    const summary = document.getElementById('availability-summary');
+    const nightsOutput = document.getElementById('availability-nights');
+    const totalOutput = document.getElementById('availability-total');
+    const bookingLink = document.getElementById('availability-book-link');
+    const bookedDates = JSON.parse(document.getElementById('booked-dates-data').textContent);
+    const pricePerNight = Number('{{ room.price_per_night|floatformat:2 }}');
+
+    if (typeof flatpickr === 'undefined') {
+        calendarContainer.innerHTML = '<p class="text-muted mb-0">Availability calendar could not load. Please use the Book Now button to select dates.</p>';
+        return;
+    }
+
+    flatpickr(calendarInput, {
+        mode: 'range',
+        inline: true,
+        appendTo: calendarContainer,
+        minDate: 'today',
+        dateFormat: 'Y-m-d',
+        disable: bookedDates,
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length !== 2) {
+                summary.style.display = 'none';
+                return;
+            }
+
+            const checkIn = instance.formatDate(selectedDates[0], 'Y-m-d');
+            const checkOut = instance.formatDate(selectedDates[1], 'Y-m-d');
+            const nights = Math.round((selectedDates[1] - selectedDates[0]) / 86400000);
+            if (nights < 1) {
+                summary.style.display = 'none';
+                return;
+            }
+
+            const bookingUrl = new URL(calendarInput.dataset.bookingUrl, window.location.origin);
+            bookingUrl.searchParams.set('check_in', checkIn);
+            bookingUrl.searchParams.set('check_out', checkOut);
+            nightsOutput.textContent = nights;
+            totalOutput.textContent = (nights * pricePerNight).toFixed(2);
+            bookingLink.href = bookingUrl.toString();
+            summary.style.display = 'block';
+        }
+    });
+});
+</script>
 {% endblock %}

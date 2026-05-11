@@ -258,19 +258,25 @@
                     <tbody>
                         {% for complaint in recent_open_complaints %}
                         <tr>
-                            <td><strong>#{{ complaint.booking.id }}</strong></td>
-                            <td>{{ complaint.guest.get_full_name|default:complaint.guest.username }}</td>
-                            <td>{{ complaint.complaint_description|truncatewords:8 }}</td>
                             <td>
-                                {% if complaint.reported_by_staff %}
-                                Staff: {{ complaint.reported_by_staff.get_full_name|default:complaint.reported_by_staff.username }}
+                                {% if complaint.booking %}
+                                <strong>#{{ complaint.booking.id }}</strong>
+                                {% else %}
+                                -
+                                {% endif %}
+                            </td>
+                            <td>{{ complaint.guest.get_full_name|default:complaint.guest.username }}</td>
+                            <td>{{ complaint.description|truncatewords:8 }}</td>
+                            <td>
+                                {% if complaint.assigned_to %}
+                                Staff: {{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.username }}
                                 {% else %}
                                 Guest Direct
                                 {% endif %}
                             </td>
                             <td>
-                                {% if complaint.status == 'OPEN' %}
-                                <span class="badge badge-danger">Open</span>
+                                {% if complaint.status == 'escalated' %}
+                                <span class="badge badge-danger">Escalated</span>
                                 {% else %}
                                 <span class="badge badge-warning">{{ complaint.get_status_display }}</span>
                                 {% endif %}

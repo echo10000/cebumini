@@ -284,6 +284,53 @@
             margin-bottom: 1rem;
         }
 
+        .testimonial-summary {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.58rem 0.85rem;
+            border-radius: var(--guest-radius);
+            background: #e0f2f1;
+            color: var(--guest-brand-dark);
+            font-weight: 850;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .testimonial-card {
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .testimonial-stars {
+            color: #ca8a04;
+            letter-spacing: 0.08em;
+            font-size: 1.05rem;
+            margin-bottom: 0.85rem;
+        }
+
+        .testimonial-content {
+            color: var(--guest-muted);
+            line-height: 1.65;
+        }
+
+        .testimonial-author {
+            color: var(--guest-ink);
+            font-weight: 850;
+            margin: 1rem 0 0.2rem;
+        }
+
+        .testimonial-date {
+            color: var(--guest-muted);
+            font-size: 0.88rem;
+        }
+
         .contact-layout {
             display: grid;
             grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
@@ -363,6 +410,7 @@
             .proof-grid,
             .room-grid,
             .amenity-grid,
+            .testimonial-grid,
             .contact-layout,
             .footer-grid {
                 grid-template-columns: 1fr 1fr;
@@ -388,6 +436,7 @@
             .proof-grid,
             .room-grid,
             .amenity-grid,
+            .testimonial-grid,
             .contact-layout,
             .footer-grid {
                 grid-template-columns: 1fr;
@@ -585,6 +634,48 @@
                     </div>
                 </div>
             </section>
+
+            {% if testimonials %}
+            <section class="section-band" id="testimonials">
+                <div class="landing-container">
+                    <div class="section-heading">
+                        <div>
+                            <p class="guest-kicker">Testimonials</p>
+                            <h2>Guest Reviews</h2>
+                        </div>
+                        <div class="testimonial-summary">
+                            <i class="fas fa-star"></i>
+                            <span>{{ average_rating|floatformat:1 }} based on guest reviews</span>
+                        </div>
+                    </div>
+
+                    <div class="testimonial-grid">
+                        {% for testimonial in testimonials %}
+                            <article class="guest-card testimonial-card">
+                                <div>
+                                    <div class="testimonial-stars" aria-label="{{ testimonial.rating }} out of 5 stars">
+                                        {% for _ in "12345" %}
+                                            {% if forloop.counter <= testimonial.rating %}<i class="fas fa-star"></i>{% else %}<i class="far fa-star"></i>{% endif %}
+                                        {% endfor %}
+                                    </div>
+                                    <p class="testimonial-content">"{{ testimonial.display_content }}"</p>
+                                </div>
+                                <div>
+                                    <p class="testimonial-author">
+                                        {% if testimonial.guest and testimonial.guest.first_name %}
+                                            {{ testimonial.guest.first_name }}
+                                        {% else %}
+                                            {{ testimonial.guest_name }}
+                                        {% endif %}
+                                    </p>
+                                    <div class="testimonial-date">{{ testimonial.created_at|date:"M d, Y" }}</div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+            {% endif %}
 
             <section class="section-band" id="contact">
                 <div class="landing-container">

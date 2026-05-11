@@ -1,60 +1,127 @@
-{% extends 'guest/guest_base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Payment Failed - Cebu Hotel{% endblock %}
+{% block title %}Payment Failed - Cebu Mini Hotel{% endblock %}
+
+{% block extra_css %}
+<style>
+    body,
+    main,
+    main > .container {
+        background: #f7fbfb !important;
+        color: #1f2937;
+    }
+
+    .payment-result {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 2rem 0 3rem;
+    }
+
+    .result-panel {
+        background: #ffffff;
+        border: 1px solid #d9e2e7;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .result-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        background: #fef2f2;
+        color: #dc2626;
+        font-size: 2.25rem;
+    }
+
+    .payment-result h1 {
+        color: #111827;
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: 0;
+    }
+
+    .result-copy {
+        color: #4b5563;
+        margin-bottom: 1.5rem;
+    }
+
+    .result-note {
+        border: 1px solid #d9e2e7;
+        border-left: 4px solid #dc2626;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        background: #ffffff;
+        color: #374151;
+        text-align: left;
+    }
+
+    .result-note strong {
+        color: #111827;
+    }
+
+    .result-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem;
+    }
+
+    .result-actions .btn {
+        border-radius: 6px;
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+    }
+
+    .result-actions .btn-primary {
+        background: #008080;
+        border-color: #008080;
+    }
+
+    .result-actions .btn-primary:hover {
+        background: #006f6f;
+        border-color: #006f6f;
+    }
+
+    @media (max-width: 640px) {
+        .result-panel {
+            padding: 1.4rem;
+        }
+
+        .result-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="guest-page">
-    <section class="guest-page-header">
-        <div>
-            <p class="guest-kicker">Payment Status</p>
-            <h1>Payment Failed</h1>
-            <p>Your payment could not be processed.</p>
+<div class="payment-result">
+    <section class="result-panel">
+        <div class="result-icon">
+            <i class="fas fa-times"></i>
         </div>
-        <span class="badge bg-danger">Failed</span>
+        <h1>Payment Failed</h1>
+        <p class="result-copy">Your payment was not completed.</p>
+
+        <div class="result-note">
+            <strong>Booking Reference:</strong> #{{ booking.id }}<br>
+            You can try the PayMongo checkout again when you are ready.
+        </div>
+
+        <div class="result-actions">
+            <a href="{% url 'bookings:paymongo_payment' booking.id %}" class="btn btn-primary">
+                <i class="fas fa-redo"></i> Try Again
+            </a>
+            <a href="{% url 'auth:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Go to Dashboard
+            </a>
+        </div>
     </section>
-
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <section class="guest-card">
-                <div class="text-center mb-4">
-                    <div class="display-2 text-danger"><i class="fas fa-exclamation-circle"></i></div>
-                    <h2 class="h4">Payment was not completed</h2>
-                    <p class="text-muted">You can try again or return to your booking details.</p>
-                </div>
-
-                {% if payment.notes %}
-                    <div class="alert alert-danger"><strong>Reason:</strong> {{ payment.notes }}</div>
-                {% endif %}
-
-                <div class="guest-card shadow-none mb-4">
-                    <h3 class="h5">Booking Information</h3>
-                    <p class="mb-1"><strong>Booking ID:</strong> #{{ booking.id }}</p>
-                    <p class="mb-1"><strong>Room:</strong> {{ booking.room.room_number }}</p>
-                    <p class="mb-1"><strong>Amount:</strong> <span class="guest-price">PHP {{ payment.amount }}</span></p>
-                    <p class="mb-0"><strong>Payment Status:</strong> <span class="badge bg-danger">{{ payment.status }}</span></p>
-                </div>
-
-                <div class="alert alert-info">
-                    Check your balance, payment details, and network connection before trying again.
-                </div>
-
-                <div class="d-grid gap-2">
-                    <a href="{% url 'bookings:paymongo_payment' payment.booking.id %}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-redo"></i> Try Payment Again
-                    </a>
-                    <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left"></i> Back to Booking
-                    </a>
-                    <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary">
-                        <i class="fas fa-history"></i> View All Bookings
-                    </a>
-                </div>
-
-                <div class="alert alert-light mt-4 mb-0">
-                    Need help? Contact support@cebuhotel.com or call (032) 123-4567.
-                </div>
-            </section>
-        </div>
-    </div>
 </div>
 {% endblock %}

@@ -3,6 +3,73 @@
 
 {% block title %}Create Booking - Cebu Hotel{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .booking-calendar-shell {
+        background: #f8fffe;
+        border: 1px solid rgba(15, 118, 110, 0.2);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+    .booking-calendar-shell .flatpickr-calendar {
+        background: #ffffff;
+        border: 1px solid rgba(15, 118, 110, 0.18);
+        box-shadow: none;
+        width: 100%;
+    }
+    .booking-calendar-shell .flatpickr-innerContainer,
+    .booking-calendar-shell .flatpickr-rContainer,
+    .booking-calendar-shell .flatpickr-days,
+    .booking-calendar-shell .dayContainer {
+        width: 100%;
+        max-width: none;
+    }
+    .booking-calendar-shell .flatpickr-day {
+        border-radius: 6px;
+        color: #0f172a;
+    }
+    .booking-calendar-shell .flatpickr-day:not(.flatpickr-disabled):not(.selected):not(.startRange):not(.endRange) {
+        background: #ffffff;
+        border-color: #d1fae5;
+    }
+    .booking-calendar-shell .flatpickr-day.flatpickr-disabled,
+    .booking-calendar-shell .flatpickr-day.flatpickr-disabled:hover {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #6b7280;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+    .booking-calendar-shell .flatpickr-day.selected,
+    .booking-calendar-shell .flatpickr-day.startRange,
+    .booking-calendar-shell .flatpickr-day.endRange,
+    .booking-calendar-shell .flatpickr-day.inRange {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #ffffff;
+        box-shadow: none;
+    }
+    .booking-range-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+    .booking-date-fields {
+        display: none;
+    }
+    .booking-price-summary {
+        background: #ffffff;
+        border: 1px solid rgba(15, 118, 110, 0.2);
+        border-radius: 8px;
+        display: none;
+    }
+    .booking-price-summary strong {
+        color: #0f766e;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container py-5">
     <div class="row">
@@ -17,7 +84,26 @@
                     <form method="post" class="needs-validation" novalidate>
                         {% csrf_token %}
 
-                        <div class="row mb-4">
+                        <div class="mb-4">
+                            <label for="booking-date-range" class="form-label fw-bold">
+                                Check-in and Check-out Dates
+                            </label>
+                            <input id="booking-date-range" class="booking-range-input" type="text" aria-label="Booking date range">
+                            <div id="booking-calendar-inline" class="booking-calendar-shell"></div>
+                            <div class="d-flex flex-wrap gap-3 small text-muted mt-2">
+                                <span><i class="fas fa-square" style="color:#ffffff; -webkit-text-stroke:1px #d1fae5;"></i> Available</span>
+                                <span><i class="fas fa-square" style="color:#fee2e2;"></i> Booked</span>
+                                <span><i class="fas fa-square" style="color:#0f766e;"></i> Selected</span>
+                            </div>
+                            <div id="booking-price-summary" class="booking-price-summary mt-3 p-3">
+                                <div class="d-flex flex-wrap justify-content-between gap-2">
+                                    <span><strong id="booking-nights">0</strong> night(s)</span>
+                                    <span>Total: <strong>PHP <span id="booking-total">0.00</span></strong></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4 booking-date-fields">
                             <div class="col-md-6">
                                 <label for="{{ form.check_in.id_for_label }}" class="form-label fw-bold">
                                     Check-in Date
@@ -142,32 +228,60 @@
     </div>
 </div>
 
+{{ booked_date_ranges|json_script:"booked-date-ranges-data" }}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
-    
-    // Set minimum date for both fields
-    document.getElementById('{{ form.check_in.id_for_label }}').setAttribute('min', today);
-    document.getElementById('{{ form.check_out.id_for_label }}').setAttribute('min', today);
-    
-    // Update checkout min date when checkin changes
     const checkInInput = document.getElementById('{{ form.check_in.id_for_label }}');
     const checkOutInput = document.getElementById('{{ form.check_out.id_for_label }}');
-    
-    checkInInput.addEventListener('change', function() {
-        if (this.value) {
-            checkOutInput.setAttribute('min', this.value);
+    const rangeInput = document.getElementById('booking-date-range');
+    const calendarContainer = document.getElementById('booking-calendar-inline');
+    const summary = document.getElementById('booking-price-summary');
+    const nightsOutput = document.getElementById('booking-nights');
+    const totalOutput = document.getElementById('booking-total');
+    const bookedRanges = JSON.parse(document.getElementById('booked-date-ranges-data').textContent);
+    const pricePerNight = Number('{{ room.price_per_night|floatformat:2 }}');
+
+    if (typeof flatpickr === 'undefined') {
+        document.querySelector('.booking-date-fields').style.display = 'flex';
+        calendarContainer.innerHTML = '<p class="text-muted mb-0">Calendar could not load. Please enter dates below.</p>';
+        return;
+    }
+
+    flatpickr(rangeInput, {
+        mode: 'range',
+        inline: true,
+        appendTo: calendarContainer,
+        minDate: 'today',
+        dateFormat: 'Y-m-d',
+        disable: bookedRanges,
+        defaultDate: [checkInInput.value, checkOutInput.value].filter(Boolean),
+        onChange: function(selectedDates, dateStr, instance) {
+            if (selectedDates.length !== 2) {
+                summary.style.display = 'none';
+                return;
+            }
+
+            const checkIn = instance.formatDate(selectedDates[0], 'Y-m-d');
+            const checkOut = instance.formatDate(selectedDates[1], 'Y-m-d');
+            const nights = Math.round((selectedDates[1] - selectedDates[0]) / 86400000);
+            checkInInput.value = checkIn;
+            checkOutInput.value = checkOut;
+
+            if (nights < 1) {
+                summary.style.display = 'none';
+                return;
+            }
+
+            nightsOutput.textContent = nights;
+            totalOutput.textContent = (nights * pricePerNight).toFixed(2);
+            summary.style.display = 'block';
         }
     });
 });
 </script>
-
-<style>
-.date-badges {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-}
-</style>
 {% endblock %}

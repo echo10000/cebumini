@@ -384,6 +384,124 @@
     }
 
     /* ============================================
+       OCCUPANCY VISUALS
+       ============================================ */
+
+    .occupancy-visual-section {
+        background: #1a2235;
+        border: 1px solid rgba(13, 115, 119, 0.35);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .occupancy-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+        gap: 1.25rem;
+        align-items: stretch;
+    }
+
+    .occupancy-room-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+    }
+
+    .occupancy-room-card {
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 130px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .occupancy-room-card.available { background: rgba(22, 163, 74, 0.18); border-color: rgba(34, 197, 94, 0.42); }
+    .occupancy-room-card.confirmed { background: rgba(202, 138, 4, 0.2); border-color: rgba(250, 204, 21, 0.42); }
+    .occupancy-room-card.checked-in { background: rgba(37, 99, 235, 0.24); border-color: rgba(96, 165, 250, 0.42); }
+    .occupancy-room-card.checked-out { background: rgba(107, 114, 128, 0.24); border-color: rgba(156, 163, 175, 0.42); }
+    .occupancy-room-card.maintenance { background: rgba(185, 28, 28, 0.24); border-color: rgba(248, 113, 113, 0.48); }
+
+    .occupancy-room-number {
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 1.1rem;
+    }
+
+    .occupancy-room-type,
+    .occupancy-room-guest {
+        color: #d1d5db;
+        font-size: 0.86rem;
+        margin-top: 0.25rem;
+    }
+
+    .occupancy-status-pill {
+        color: #ffffff;
+        background: rgba(15, 22, 35, 0.45);
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
+        width: fit-content;
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-top: 0.8rem;
+    }
+
+    .occupancy-side-panel {
+        display: grid;
+        grid-template-rows: auto minmax(220px, 1fr);
+        gap: 1rem;
+    }
+
+    .occupancy-ring-card,
+    .occupancy-chart-card {
+        background: #111827;
+        border: 1px solid rgba(13, 115, 119, 0.28);
+        border-radius: 8px;
+        padding: 1.2rem;
+    }
+
+    .occupancy-ring {
+        --occupancy-percent: 0%;
+        width: 150px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        background: conic-gradient(#0d7377 var(--occupancy-percent), rgba(75, 85, 99, 0.55) 0);
+        display: grid;
+        place-items: center;
+        position: relative;
+    }
+
+    .occupancy-ring::before {
+        content: '';
+        width: 108px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: #111827;
+        position: absolute;
+    }
+
+    .occupancy-ring-value {
+        color: #2dd4bf;
+        font-size: 1.65rem;
+        font-weight: 800;
+        position: relative;
+    }
+
+    .occupancy-ring-label {
+        color: #d1d5db;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .occupancy-chart-wrap {
+        height: 240px;
+        position: relative;
+    }
+
+    /* ============================================
        TABLE SECTION HEADER
        ============================================ */
     
@@ -501,12 +619,109 @@
     .table .btn:hover {
         background: #2563eb;
     }
+
+    .table .btn-confirm-cash {
+        background: #0d7377;
+    }
+
+    .table .btn-confirm-cash:hover {
+        background: #0a5c60;
+    }
+
+    .table .btn-no-show {
+        background: #7f1d1d;
+    }
+
+    .table .btn-no-show:hover {
+        background: #dc2626;
+    }
+
+    .inline-confirm-form {
+        display: inline-block;
+        margin: 0 0.35rem 0 0;
+    }
     
     .table-empty {
         text-align: center;
         padding: 2rem;
         color: #9ca3af;
         font-size: 0.95rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.3rem 0.65rem;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #ffffff;
+        background: #4b5563;
+    }
+
+    .status-badge.clean,
+    .status-badge.completed {
+        background: #15803d;
+    }
+
+    .status-badge.dirty,
+    .status-badge.pending {
+        background: #a16207;
+    }
+
+    .status-badge.maintenance {
+        background: #b91c1c;
+    }
+
+    .status-badge.occupied,
+    .status-badge.in_progress {
+        background: #2563eb;
+    }
+
+    .status-badge.escalated {
+        background: #7c3aed;
+    }
+
+    .room-status-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
+        padding: 0 1.5rem 1.5rem;
+    }
+
+    .room-status-card {
+        background: #111827;
+        border: 1px solid rgba(201, 168, 76, 0.16);
+        border-radius: 8px;
+        padding: 1rem;
+    }
+
+    .room-status-title {
+        color: #ffffff;
+        font-weight: 800;
+        margin-bottom: 0.25rem;
+    }
+
+    .room-status-type {
+        color: #9ca3af;
+        font-size: 0.85rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .room-status-form {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.6rem;
+        margin-top: 0.9rem;
+    }
+
+    .room-status-form select {
+        background: #0f1623;
+        border: 1px solid rgba(201, 168, 76, 0.28);
+        border-radius: 6px;
+        color: #ffffff;
+        min-width: 0;
+        padding: 0.45rem 0.55rem;
     }
 
     /* ============================================
@@ -558,6 +773,18 @@
             grid-template-columns: 1fr;
             gap: 1rem;
             margin-bottom: 1.5rem;
+        }
+
+        .occupancy-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .occupancy-room-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .room-status-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
         
         .checkins-checkouts-card {
@@ -668,6 +895,18 @@
         .checkins-checkouts-card {
             min-height: 120px;
         }
+
+        .occupancy-room-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .room-status-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .room-status-form {
+            grid-template-columns: 1fr;
+        }
         
         .guest-count-number {
             font-size: 2rem;
@@ -725,6 +964,42 @@
             <div class="stat-description">Expected arrivals</div>
         </div>
     </div>
+
+    <section class="occupancy-visual-section">
+        <div class="section-header">
+            <i class="fas fa-chart-pie"></i>
+            <h3>Room Occupancy Today</h3>
+        </div>
+        <div class="occupancy-layout">
+            <div class="occupancy-room-grid">
+                {% for card in occupancy_room_cards %}
+                    <article class="occupancy-room-card {{ card.status_key }}">
+                        <div>
+                            <div class="occupancy-room-number">Room {{ card.room.room_number }}</div>
+                            <div class="occupancy-room-type">{{ card.room.get_room_type_display }}</div>
+                            {% if card.guest_name %}
+                                <div class="occupancy-room-guest"><i class="fas fa-user"></i> {{ card.guest_name }}</div>
+                            {% endif %}
+                        </div>
+                        <span class="occupancy-status-pill">{{ card.status_label }}</span>
+                    </article>
+                {% endfor %}
+            </div>
+            <div class="occupancy-side-panel">
+                <div class="occupancy-ring-card">
+                    <div class="occupancy-ring" style="--occupancy-percent: {{ occupancy_rate_percent|floatformat:0 }}%;">
+                        <div class="occupancy-ring-value">{{ occupancy_rate_percent|floatformat:0 }}%</div>
+                    </div>
+                    <div class="occupancy-ring-label">{{ occupancy_occupied_today }} of {{ occupancy_total_rooms }} rooms occupied today</div>
+                </div>
+                <div class="occupancy-chart-card">
+                    <div class="occupancy-chart-wrap">
+                        <canvas id="staffWeeklyOccupancyChart" aria-label="Weekly occupancy chart" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- Quick Actions Section -->
     <div class="quick-actions-section">
@@ -789,6 +1064,326 @@
         </div>
     </div>
     
+    <!-- Today's Arrivals -->
+    <div class="table-section">
+        <h3 class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <i class="fas fa-suitcase-rolling"></i>
+            Today's Arrivals ({{ todays_arrivals|length }})
+        </h3>
+
+        {% if todays_arrivals %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Guest Name</th>
+                            <th>Room</th>
+                            <th>Check-in Date</th>
+                            <th>Payment Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in todays_arrivals %}
+                            <tr>
+                                <td>#{{ booking.id }}</td>
+                                <td>{{ booking.guest.get_full_name|default:booking.guest.username }}</td>
+                                <td>Room {{ booking.room.room_number }}</td>
+                                <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                                <td>
+                                    {% if booking.dashboard_payment %}
+                                        <span class="status-badge {{ booking.dashboard_payment.status|lower }}">
+                                            {{ booking.dashboard_payment.get_status_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="status-badge">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="post" action="{% url 'staff:dashboard_check_in' booking.id %}" class="inline-confirm-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-confirm-cash">
+                                            <i class="fas fa-sign-in-alt"></i> Check In
+                                        </button>
+                                    </form>
+                                    <form method="post" action="{% url 'staff:dashboard_no_show' booking.id %}" class="inline-confirm-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-no-show">
+                                            <i class="fas fa-user-slash"></i> No Show
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="table-empty">
+                <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                No confirmed arrivals for today
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Active Guests -->
+    <div class="table-section">
+        <h3 class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <i class="fas fa-bed"></i>
+            Active Guests ({{ active_guests.count }})
+        </h3>
+
+        {% if active_guests %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Guest Name</th>
+                            <th>Room</th>
+                            <th>Check-in Date</th>
+                            <th>Check-out Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for booking in active_guests %}
+                            <tr>
+                                <td>{{ booking.guest.get_full_name|default:booking.guest.username }}</td>
+                                <td>Room {{ booking.room.room_number }}</td>
+                                <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                                <td>{{ booking.check_out|date:"M d, Y" }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'staff:dashboard_check_out' booking.id %}" class="inline-confirm-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn">
+                                            <i class="fas fa-sign-out-alt"></i> Check Out
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="table-empty">
+                <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                No active checked-in guests
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Pending Onsite Cash Payments -->
+    <div class="table-section">
+        <h3 class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <i class="fas fa-cash-register"></i>
+            Pending Onsite Cash Payments ({{ pending_onsite_payments.count }})
+        </h3>
+
+        {% if pending_onsite_payments %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Guest Name</th>
+                            <th>Room</th>
+                            <th>Check-in</th>
+                            <th>Check-out</th>
+                            <th>Total Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in pending_onsite_payments %}
+                            <tr>
+                                <td>{{ payment.booking.guest.get_full_name|default:payment.booking.guest.username }}</td>
+                                <td>Room {{ payment.booking.room.room_number }}</td>
+                                <td>{{ payment.booking.check_in|date:"M d, Y" }}</td>
+                                <td>{{ payment.booking.check_out|date:"M d, Y" }}</td>
+                                <td>PHP {{ payment.amount|floatformat:2 }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'staff:confirm_onsite_payment' payment.id %}" class="inline-confirm-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-confirm-cash">
+                                            <i class="fas fa-check"></i> Confirm Cash Payment
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="table-empty">
+                <i class="fas fa-inbox" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                No pending onsite cash payments
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Active Complaints -->
+    <div class="table-section">
+        <h3 class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <i class="fas fa-comments"></i>
+            Active Complaints ({{ active_complaints.count }})
+        </h3>
+
+        {% if active_complaints %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Guest</th>
+                            <th>Room</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Assigned</th>
+                            <th>Created</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complaint in active_complaints %}
+                            <tr>
+                                <td>{{ complaint.guest.get_full_name|default:complaint.guest.username }}</td>
+                                <td>
+                                    {% if complaint.booking and complaint.booking.room %}
+                                        Room {{ complaint.booking.room.room_number }}
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="{% url 'staff:complaint_detail' complaint.id %}" style="color: #c9a84c;">
+                                        {{ complaint.subject }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <span class="status-badge {{ complaint.status }}">
+                                        {{ complaint.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if complaint.assigned_to %}
+                                        {{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.username }}
+                                    {% else %}
+                                        Unassigned
+                                    {% endif %}
+                                </td>
+                                <td>{{ complaint.created_at|date:"M d, Y g:i A" }}</td>
+                                <td>
+                                    <form method="post" action="{% url 'staff:escalate_complaint' complaint.id %}" class="inline-confirm-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-no-show">
+                                            <i class="fas fa-level-up-alt"></i> Escalate to Manager
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                No active complaints assigned
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Housekeeping Tasks -->
+    <div class="table-section">
+        <h3 class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <i class="fas fa-broom"></i>
+            Housekeeping ({{ housekeeping_tasks.count }})
+        </h3>
+
+        {% if housekeeping_tasks %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Room</th>
+                            <th>Task Type</th>
+                            <th>Status</th>
+                            <th>Due Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for task in housekeeping_tasks %}
+                            <tr>
+                                <td>Room {{ task.room.room_number }}</td>
+                                <td>{{ task.get_task_type_display }}</td>
+                                <td>
+                                    <span class="status-badge {{ task.status }}">
+                                        {{ task.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>{{ task.due_date|date:"M d, Y g:i A" }}</td>
+                                <td>
+                                    {% if task.status != 'completed' %}
+                                        <form method="post" action="{% url 'staff:complete_housekeeping_task' task.id %}" class="inline-confirm-form">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-confirm-cash">
+                                                <i class="fas fa-check"></i> Mark Complete
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="status-badge completed">Completed</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="table-empty">
+                <i class="fas fa-check-circle" style="font-size: 1.5rem; margin-bottom: 0.5rem; display: block; opacity: 0.5;"></i>
+                No housekeeping tasks assigned
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Room Status -->
+    <div class="table-section">
+        <h3 class="section-header" style="margin-bottom: 0; padding-bottom: 0; border-bottom: none;">
+            <i class="fas fa-door-open"></i>
+            Room Status
+        </h3>
+
+        <div class="room-status-grid">
+            {% for room in rooms %}
+                <article class="room-status-card">
+                    <div class="room-status-title">Room {{ room.room_number }}</div>
+                    <div class="room-status-type">{{ room.get_room_type_display }}</div>
+                    <span class="status-badge {{ room.status|lower }}">{{ room.get_status_display }}</span>
+
+                    {% if room.status == 'OCCUPIED' %}
+                        <div class="room-status-type" style="margin-top: 0.9rem;">Occupied is managed by check-in/check-out.</div>
+                    {% else %}
+                        <form method="post" action="{% url 'staff:update_room_status' %}" class="room-status-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="room_id" value="{{ room.id }}">
+                            <select name="new_status" aria-label="New status for room {{ room.room_number }}">
+                                {% for value, label in room_status_choices %}
+                                    <option value="{{ value }}" {% if room.status == value %}selected{% endif %}>{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn">
+                                Update
+                            </button>
+                        </form>
+                    {% endif %}
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+
     <!-- Currently Occupied Rooms Section -->
     <div class="occupied-rooms-section">
         <div class="section-header">
@@ -872,5 +1467,51 @@
     setTimeout(function() {
         location.reload();
     }, 300000);
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('staffWeeklyOccupancyChart');
+    if (!canvas || typeof Chart === 'undefined') {
+        return;
+    }
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: {{ weekly_occupancy_labels_json|safe }},
+            datasets: [{
+                label: 'Occupied rooms',
+                data: {{ weekly_occupancy_values_json|safe }},
+                backgroundColor: 'rgba(13, 115, 119, 0.88)',
+                borderColor: '#2dd4bf',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    ticks: { color: '#d1d5db' },
+                    grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { color: '#d1d5db', precision: 0, stepSize: 1 },
+                    grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#e5e7eb' }
+                }
+            }
+        }
+    });
+});
 </script>
 {% endblock %}

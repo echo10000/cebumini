@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from decimal import Decimal
 import secrets
 import string
@@ -89,6 +89,14 @@ class RoomType(models.TextChoices):
     SUITE = 'SUITE', 'Suite Room'
 
 
+class RoomStatus(models.TextChoices):
+    """Housekeeping room status choices"""
+    CLEAN = 'CLEAN', 'Clean'
+    DIRTY = 'DIRTY', 'Dirty'
+    OCCUPIED = 'OCCUPIED', 'Occupied'
+    MAINTENANCE = 'MAINTENANCE', 'Under Maintenance'
+
+
 class Room(models.Model):
     """Room Model"""
     room_number = models.CharField(max_length=10, unique=True)
@@ -108,6 +116,12 @@ class Room(models.Model):
         validators=[MinValueValidator(1)]
     )
     is_available = models.BooleanField(default=True)
+    status = models.CharField(
+        max_length=20,
+        choices=RoomStatus.choices,
+        default=RoomStatus.CLEAN,
+        db_index=True
+    )
     amenities = models.TextField(
         blank=True,
         help_text="Comma-separated list of amenities"
@@ -167,6 +181,7 @@ class BookingStatus(models.TextChoices):
     CONFIRMED = 'CONFIRMED', 'Confirmed'
     CHECKED_IN = 'CHECKED_IN', 'Checked In'
     CHECKED_OUT = 'CHECKED_OUT', 'Checked Out'
+    NO_SHOW = 'NO_SHOW', 'No Show'
     CANCELLED = 'CANCELLED', 'Cancelled'
 
 
@@ -241,6 +256,8 @@ class Booking(models.Model):
         help_text="Staff member who completed check-in verification"
     )
     verified_at = models.DateTimeField(null=True, blank=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
+    checked_out_at = models.DateTimeField(null=True, blank=True)
     verification_notes = models.TextField(blank=True)
     special_requests = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -293,8 +310,7 @@ class Booking(models.Model):
 
     def can_be_cancelled(self):
         """Check if booking can be cancelled"""
-        today = timezone.now().date()
-        return self.status != BookingStatus.CANCELLED and self.check_in > today
+        return self.status in [BookingStatus.PENDING, BookingStatus.CONFIRMED]
 
     def complete_check_in_verification(self, staff_user, submitted_reference, checklist, notes=''):
         """
@@ -329,6 +345,7 @@ class Booking(models.Model):
         self.payment_verified = True
         self.verified_by = staff_user
         self.verified_at = timezone.now()
+        self.checked_in_at = self.verified_at
         self.verification_notes = notes or ''
         self.status = BookingStatus.CHECKED_IN
         self.save()
@@ -413,10 +430,10 @@ class Booking(models.Model):
         """
         from django.db.models import Q
         
-        # Exclude cancelled bookings
+        # Only confirmed stays and guests already checked in hold availability.
         query = Booking.objects.filter(
             room_id=room_id,
-            status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED]
+            status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
         )
         
         # Exclude current booking if editing
@@ -444,6 +461,8 @@ class PaymentMethod(models.TextChoices):
 class PaymentStatus(models.TextChoices):
     """Payment status choices"""
     PENDING = 'PENDING', 'Pending'
+    PENDING_ONSITE = 'pending_onsite', 'Pending Onsite'
+    CANCELLED = 'CANCELLED', 'Cancelled'
     COMPLETED = 'COMPLETED', 'Completed'
     FAILED = 'FAILED', 'Failed'
     REFUND_PENDING = 'REFUND_PENDING', 'Refund Pending'
@@ -528,8 +547,42 @@ class Payment(models.Model):
         return self.status == PaymentStatus.COMPLETED
 
 
+class ActivityLog(models.Model):
+    """Simple staff activity log for manager oversight."""
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='activity_logs'
+    )
+    action = models.CharField(max_length=100)
+    target = models.CharField(max_length=200)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'activity_logs'
+        verbose_name = 'Activity Log'
+        verbose_name_plural = 'Activity Logs'
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['user', '-timestamp']),
+            models.Index(fields=['-timestamp']),
+        ]
+
+    def __str__(self):
+        username = self.user.get_username() if self.user else 'System'
+        return f"{username} - {self.action} - {self.target}"
+
+
 class Testimonial(models.Model):
     """Customer Testimonials/Reviews"""
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        APPROVED = 'approved', 'Approved'
+        REJECTED = 'rejected', 'Rejected'
+
     RATING_CHOICES = [
         (5, '⭐⭐⭐⭐⭐ Excellent'),
         (4, '⭐⭐⭐⭐ Very Good'),
@@ -547,10 +600,29 @@ class Testimonial(models.Model):
     )
     guest_name = models.CharField(max_length=100)
     guest_email = models.EmailField()
-    rating = models.IntegerField(choices=RATING_CHOICES, default=5)
+    rating = models.IntegerField(
+        choices=RATING_CHOICES,
+        default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(5)]
+    )
     title = models.CharField(max_length=200)
     comment = models.TextField()
+    content = models.TextField(blank=True)
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING,
+        db_index=True
+    )
     is_approved = models.BooleanField(default=False)
+    reviewed_by = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        related_name='reviewed_testimonials',
+        null=True,
+        blank=True
+    )
+    reviewed_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -563,9 +635,27 @@ class Testimonial(models.Model):
     def __str__(self):
         return f"{self.guest_name} - {self.get_rating_display()}"
 
+    def save(self, *args, **kwargs):
+        if self.comment and not self.content:
+            self.content = self.comment
+        elif self.content and not self.comment:
+            self.comment = self.content
+
+        if self.status == self.Status.APPROVED:
+            self.is_approved = True
+        elif self.is_approved and self.status == self.Status.PENDING:
+            self.status = self.Status.APPROVED
+        else:
+            self.is_approved = False
+
+        super().save(*args, **kwargs)
+
     def get_rating_stars(self):
         """Return rating as stars"""
         return '⭐' * self.rating
+    @property
+    def display_content(self):
+        return self.content or self.comment
 
 
 class ContactMessage(models.Model):
@@ -928,13 +1018,6 @@ class RefundRequest(models.Model):
         return self.status == RefundRequestStatus.APPROVED and not self.issued_by
 
 
-class RoomStatus(models.TextChoices):
-    """Housekeeping room status choices"""
-    CLEAN = 'CLEAN', 'Clean'
-    DIRTY = 'DIRTY', 'Dirty'
-    MAINTENANCE = 'MAINTENANCE', 'Under Maintenance'
-
-
 class RoomHousekeepingLog(models.Model):
     """Track room status changes for housekeeping management"""
     room = models.ForeignKey(
@@ -981,6 +1064,129 @@ class RoomHousekeepingLog(models.Model):
 
     def __str__(self):
         return f"{self.room.room_number} - {self.current_status} on {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+
+
+class HousekeepingTaskType(models.TextChoices):
+    """Housekeeping task type choices."""
+    CLEAN = 'clean', 'Clean'
+    INSPECT = 'inspect', 'Inspect'
+    MAINTENANCE = 'maintenance', 'Maintenance'
+
+
+class HousekeepingTaskStatus(models.TextChoices):
+    """Housekeeping task workflow status choices."""
+    PENDING = 'pending', 'Pending'
+    IN_PROGRESS = 'in_progress', 'In Progress'
+    COMPLETED = 'completed', 'Completed'
+
+
+class HousekeepingTask(models.Model):
+    """Assign housekeeping work to staff for a room."""
+    room = models.ForeignKey(
+        Room,
+        on_delete=models.CASCADE,
+        related_name='housekeeping_tasks'
+    )
+    assigned_to = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        limit_choices_to={'role': UserRole.STAFF},
+        related_name='housekeeping_tasks'
+    )
+    task_type = models.CharField(
+        max_length=20,
+        choices=HousekeepingTaskType.choices,
+        default=HousekeepingTaskType.CLEAN
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=HousekeepingTaskStatus.choices,
+        default=HousekeepingTaskStatus.PENDING,
+        db_index=True
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    due_date = models.DateTimeField()
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'housekeeping_tasks'
+        verbose_name = 'Housekeeping Task'
+        verbose_name_plural = 'Housekeeping Tasks'
+        ordering = ['status', 'due_date', '-created_at']
+        indexes = [
+            models.Index(fields=['room', 'status']),
+            models.Index(fields=['assigned_to', 'status']),
+        ]
+
+    def __str__(self):
+        return f"{self.get_task_type_display()} task for Room {self.room.room_number}"
+
+
+class ComplaintStatus(models.TextChoices):
+    """Guest complaint workflow statuses."""
+    PENDING = 'pending', 'Pending'
+    IN_PROGRESS = 'in_progress', 'In Progress'
+    ESCALATED = 'escalated', 'Escalated'
+    RESOLVED = 'resolved', 'Resolved'
+
+
+class Complaint(models.Model):
+    """Guest-submitted complaint tracked by staff."""
+    guest = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='complaints'
+    )
+    booking = models.ForeignKey(
+        Booking,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='complaints'
+    )
+    subject = models.CharField(max_length=200)
+    description = models.TextField()
+    status = models.CharField(
+        max_length=20,
+        choices=ComplaintStatus.choices,
+        default=ComplaintStatus.PENDING,
+        db_index=True
+    )
+    assigned_to = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='assigned_complaints',
+        limit_choices_to={'role': UserRole.STAFF},
+    )
+    escalated_to = models.ForeignKey(
+        CustomUser,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='manager_complaints',
+        limit_choices_to={'role': UserRole.MANAGER},
+    )
+    staff_notes = models.TextField(blank=True)
+    resolution_notes = models.TextField(blank=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'complaints'
+        verbose_name = 'Complaint'
+        verbose_name_plural = 'Complaints'
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['guest', '-created_at']),
+            models.Index(fields=['status', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"Complaint #{self.id} - {self.subject}"
 
 
 class GuestComplaintEscalation(models.Model):
@@ -1063,12 +1269,18 @@ class AuditLog(models.Model):
     
     ACTION_CHOICES = [
         ('BOOKING_CREATED', 'Booking Created'),
+        ('BOOKING_CONFIRMED', 'Booking Confirmed'),
         ('BOOKING_APPROVED', 'Booking Approved'),
         ('BOOKING_CANCELLED', 'Booking Cancelled'),
+        ('BOOKING_CHECKED_IN', 'Booking Checked In'),
+        ('BOOKING_CHECKED_OUT', 'Booking Checked Out'),
+        ('PAYMENT_COMPLETED', 'Payment Completed'),
         ('PAYMENT_APPROVED', 'Payment Approved'),
         ('PAYMENT_REJECTED', 'Payment Rejected'),
         ('REFUND_REQUESTED', 'Refund Requested'),
+        ('REFUND_REQUESTED_BY_GUEST', 'Refund Requested by Guest'),
         ('REFUND_APPROVED', 'Refund Approved'),
+        ('REFUND_REJECTED', 'Refund Rejected'),
         ('REFUND_ISSUED', 'Refund Issued'),
         ('ROOM_CREATED', 'Room Created'),
         ('ROOM_UPDATED', 'Room Updated'),
@@ -1077,13 +1289,23 @@ class AuditLog(models.Model):
         ('ROOM_STATUS_CHANGED', 'Room Status Changed'),
         ('STAFF_REGISTERED', 'Staff Member Registered'),
         ('STAFF_DEACTIVATED', 'Staff Member Deactivated'),
+        ('STAFF_REACTIVATED', 'Staff Member Reactivated'),
+        ('USER_CREATED', 'User Created'),
+        ('USER_UPDATED', 'User Updated'),
+        ('USER_DEACTIVATED', 'User Deactivated'),
         ('USER_ROLE_CHANGED', 'User Role Changed'),
         ('COMPLAINT_ESCALATED', 'Guest Complaint Escalated'),
+        ('COMPLAINT_SUBMITTED', 'Guest Complaint Submitted'),
         ('COMPLAINT_RESOLVED', 'Guest Complaint Resolved'),
         ('GUEST_PROFILE_VIEWED', 'Guest Profile Viewed'),
         ('LOGIN_SUCCESSFUL', 'Login Successful'),
         ('LOGIN_FAILED', 'Login Failed'),
+        ('LOGOUT', 'Logout'),
         ('PASSWORD_CHANGED', 'Password Changed'),
+        ('TWO_FACTOR_ENABLED', '2FA Enabled'),
+        ('TWO_FACTOR_DISABLED', '2FA Disabled'),
+        ('TESTIMONIAL_APPROVED', 'Testimonial Approved'),
+        ('TESTIMONIAL_REJECTED', 'Testimonial Rejected'),
     ]
     
     actor = models.ForeignKey(
@@ -1154,6 +1376,26 @@ class AuditLog(models.Model):
 
     def __str__(self):
         return f"{self.get_action_display()} by {self.actor.email if self.actor else 'Unknown'} on {self.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+
+    @property
+    def user(self):
+        """Compatibility alias for the requested audit-log user field."""
+        return self.actor
+
+    @property
+    def model_affected(self):
+        """Compatibility alias for the requested audit-log model field."""
+        return self.affected_entity_type
+
+    @property
+    def object_id(self):
+        """Compatibility alias for the requested audit-log object id field."""
+        return self.affected_entity_id
+
+    @property
+    def timestamp(self):
+        """Compatibility alias for the requested audit-log timestamp field."""
+        return self.created_at
 
     @staticmethod
     def log_action(actor, action, affected_entity_type, affected_entity_id=None, 

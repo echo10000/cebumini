@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
 from django.http import JsonResponse
+from django.db import IntegrityError
+from django.db.models import Avg
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -40,25 +42,33 @@ def terms_view(request):
 @require_http_methods(["GET", "POST"])
 def register_view(request):
     """User registration view"""
+    from allauth.socialaccount.models import SocialApp
+
     if request.user.is_authenticated:
         return redirect('auth:dashboard')
+
+    google_oauth_configured = SocialApp.objects.filter(provider='google').exists()
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            # Explicitly set first_name and last_name before saving
-            user.first_name = form.cleaned_data.get('first_name', '')
-            user.last_name = form.cleaned_data.get('last_name', '')
-            user.role = 'GUEST'  # New users are guests by default
-            user.save()
-            
-            # Record T&C acceptance
-            if form.cleaned_data.get('accept_terms'):
-                user.accept_terms(version='1.0')
-            
-            messages.success(request, 'Registration successful! Please log in.')
-            return redirect('auth:login')
+            try:
+                user = form.save(commit=False)
+                # Explicitly set first_name and last_name before saving
+                user.first_name = form.cleaned_data.get('first_name', '')
+                user.last_name = form.cleaned_data.get('last_name', '')
+                user.role = 'GUEST'  # New users are guests by default
+                user.save()
+
+                # Record T&C acceptance
+                if form.cleaned_data.get('agree_to_terms'):
+                    user.accept_terms(version='1.0')
+
+                messages.success(request, 'Registration successful! Please log in.')
+                return redirect('auth:login')
+            except IntegrityError:
+                form.add_error('email', 'This email is already registered.')
+                messages.error(request, 'email: This email is already registered.')
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -66,7 +76,7 @@ def register_view(request):
     else:
         form = RegisterForm()
 
-    context = {'form': form}
+    context = {'form': form, 'google_oauth_configured': google_oauth_configured}
     return render(request, 'authentication/register.html', context)
 
 
@@ -237,8 +247,14 @@ def dashboard_view(request):
         return redirect('auth:manager_dashboard')
     
     # Get available rooms for guest dashboard
-    from .models import Room
+    from .models import Booking, Room
     rooms = Room.objects.filter(is_available=True)[:6]  # Show 6 featured rooms
+    guest_bookings = (
+        Booking.objects
+        .filter(guest=request.user)
+        .select_related('room')
+        .order_by('-created_at')[:5]
+    )
     
     # Regular guest dashboard
     try:
@@ -250,6 +266,7 @@ def dashboard_view(request):
         'user': request.user,
         'is_admin': False,
         'rooms': rooms,
+        'guest_bookings': guest_bookings,
         'two_fa': two_fa,
     }
     return render(request, 'authentication/dashboard.html', context)
@@ -316,6 +333,7 @@ def contact_form_api(request):
 def home_view(request):
     """Home page - Modern luxury hotel landing page"""
     from .forms_bookings import ContactForm
+    from .models import Testimonial
     
     if request.method == 'POST':
         form = ContactForm(request.POST)
@@ -330,9 +348,13 @@ def home_view(request):
         form = ContactForm()
     
     featured_rooms = Room.objects.filter(is_available=True).order_by('room_number')[:3]
+    approved_testimonials = Testimonial.objects.filter(status=Testimonial.Status.APPROVED).select_related('guest').order_by('-created_at')[:6]
+    average_rating = Testimonial.objects.filter(status=Testimonial.Status.APPROVED).aggregate(avg=Avg('rating'))['avg'] or 0
     context = {
         'form': form,
         'featured_rooms': featured_rooms,
+        'testimonials': approved_testimonials,
+        'average_rating': average_rating,
     }
     return render(request, 'hotel_landing.html', context)
 
@@ -396,6 +418,7 @@ def setup_2fa(request):
                 two_fa.is_verified = True
                 two_fa.method = 'TOTP'
                 two_fa.save()
+                request.session['2fa_verified_user_id'] = request.user.id
                 
                 messages.success(request, '2FA has been enabled successfully!')
                 return redirect('auth:2fa_backup_codes')
@@ -454,6 +477,9 @@ def verify_2fa_login(request):
                 if totp.verify(code):
                     # Valid code
                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    request.session['2fa_verified_user_id'] = user.id
+                    if request.session.get('2fa_remember_me'):
+                        request.session.set_expiry(86400 * 30)
                     
                     # Log the session
                     LoginSession.objects.create(
@@ -464,12 +490,16 @@ def verify_2fa_login(request):
                     )
                     
                     del request.session['2fa_user_id']
+                    request.session.pop('2fa_remember_me', None)
                     request.session['otp_verified_notice'] = 'Two-factor authentication verified successfully. Redirecting you to your dashboard.'
                     return redirect('auth:otp_success')
                 
                 # Check backup codes
                 elif two_fa.use_backup_code(code):
                     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+                    request.session['2fa_verified_user_id'] = user.id
+                    if request.session.get('2fa_remember_me'):
+                        request.session.set_expiry(86400 * 30)
                     LoginSession.objects.create(
                         user=user,
                         ip_address=get_client_ip(request),
@@ -478,6 +508,7 @@ def verify_2fa_login(request):
                     )
                     
                     del request.session['2fa_user_id']
+                    request.session.pop('2fa_remember_me', None)
                     request.session['otp_verified_notice'] = 'Backup code verified. Redirecting you to the 2FA setup page to manage your backup codes.'
                     return redirect('auth:otp_success')
                 else:
@@ -505,6 +536,7 @@ def verify_otp_view(request):
         otp_code = request.POST.get('otp_code', '').strip()
         if verify_otp(user, otp_code):
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+            request.session['2fa_verified_user_id'] = user.id
             if request.session.get('email_otp_remember_me'):
                 request.session.set_expiry(86400 * 30)
             request.session.pop('email_otp_user_id', None)
@@ -543,6 +575,7 @@ def setup_email_2fa(request):
         two_fa.is_verified = True
         two_fa.method = 'EMAIL'
         two_fa.save()
+        request.session['2fa_verified_user_id'] = request.user.id
         messages.success(request, 'Email OTP two-factor authentication has been enabled.')
         return redirect('auth:dashboard')
 
@@ -584,6 +617,10 @@ def otp_success_view(request):
 @require_http_methods(["POST"])
 def toggle_2fa_view(request):
     """Enable or disable email OTP 2FA from the dashboard."""
+    if request.user.is_admin() or request.user.is_manager():
+        messages.error(request, '2FA is required for admin and manager accounts and cannot be disabled.')
+        return redirect('auth:dashboard')
+
     try:
         two_fa = request.user.two_factor_auth
     except TwoFactorAuth.DoesNotExist:
@@ -593,6 +630,7 @@ def toggle_2fa_view(request):
         two_fa.is_enabled = False
         two_fa.is_verified = False
         two_fa.save()
+        request.session.pop('2fa_verified_user_id', None)
         messages.success(request, 'Two-factor authentication has been disabled.')
     else:
         two_fa.is_enabled = True
@@ -609,6 +647,10 @@ def toggle_2fa_view(request):
 def disable_2fa(request):
     """Disable 2FA"""
     from .models import TwoFactorAuth
+
+    if request.user.is_admin() or request.user.is_manager():
+        messages.error(request, '2FA is required for admin and manager accounts and cannot be disabled.')
+        return redirect('auth:setup_2fa')
     
     try:
         two_fa = request.user.two_factor_auth
@@ -617,6 +659,7 @@ def disable_2fa(request):
         two_fa.secret_key = ''
         two_fa.backup_codes = []
         two_fa.save()
+        request.session.pop('2fa_verified_user_id', None)
         
         messages.success(request, '2FA has been disabled.')
     except TwoFactorAuth.DoesNotExist:

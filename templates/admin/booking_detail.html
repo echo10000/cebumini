@@ -307,6 +307,19 @@
         box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
         transform: translateY(-2px);
     }
+
+    .btn-refund {
+        background: #7f1d1d;
+        color: #fca5a5;
+        border: 1px solid #dc2626;
+    }
+
+    .btn-refund:hover {
+        background: #dc2626;
+        color: #ffffff;
+        box-shadow: 0 8px 16px rgba(239, 68, 68, 0.3);
+        transform: translateY(-2px);
+    }
     
     .btn-back {
         background: transparent;
@@ -573,6 +586,22 @@
                         <span class="info-label">Method:</span>
                         <span class="info-value">{{ payment.get_payment_method_display }}</span>
                     </div>
+                    {% if payment.status == 'COMPLETED' %}
+                    <div class="info-row">
+                        <span class="info-label">Refund:</span>
+                        <span class="info-value">
+                            <form method="post"
+                                  action="{% url 'admin_panel:refund_paymongo_payment' %}"
+                                  onsubmit="return confirm('Are you sure you want to refund PHP {{ payment.amount|floatformat:2 }}?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="booking_id" value="{{ booking.id }}">
+                                <button type="submit" class="btn-action btn-refund">
+                                    <i class="fas fa-undo"></i> Refund
+                                </button>
+                            </form>
+                        </span>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
             {% endif %}

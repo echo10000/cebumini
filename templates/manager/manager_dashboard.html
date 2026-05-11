@@ -15,6 +15,10 @@
             <p class="manager-page-subtitle">Monitor guest escalations, refunds, booking activity, and staff coverage.</p>
         </div>
         <div class="manager-actions">
+            <a href="{% url 'auth:setup_2fa' %}" class="btn {% if two_fa and two_fa.is_enabled and two_fa.is_verified %}btn-outline-success{% else %}btn-outline-warning{% endif %}">
+                <i class="fas fa-shield-alt"></i>
+                2FA Status: {% if two_fa and two_fa.is_enabled and two_fa.is_verified %}✅ Enabled{% else %}⚠️ Not Set Up{% endif %}
+            </a>
             <a href="{% url 'auth:manager_refunds' %}" class="btn btn-outline-primary">
                 <i class="fas fa-money-bill-wave"></i> Refunds
             </a>
@@ -58,6 +62,90 @@
                 <div class="manager-stat-label">Confirmed Bookings</div>
                 <div class="manager-stat-value">{{ confirmed_bookings }}</div>
                 <p class="manager-stat-note">Active confirmed stays</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-coins"></i>
+                <div class="manager-stat-label">Total Revenue</div>
+                <div class="manager-stat-value">&#8369;{{ total_revenue|floatformat:2 }}</div>
+                <p class="manager-stat-note">Completed payments</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-calendar-day"></i>
+                <div class="manager-stat-label">This Month</div>
+                <div class="manager-stat-value">&#8369;{{ month_revenue|floatformat:2 }}</div>
+                <p class="manager-stat-note">Completed this month</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-receipt"></i>
+                <div class="manager-stat-label">Avg. Booking/Payment</div>
+                <div class="manager-stat-value">&#8369;{{ average_payment_value|floatformat:2 }}</div>
+                <p class="manager-stat-note">Completed value average</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="manager-stat-card">
+                <i class="manager-stat-icon fas fa-bed"></i>
+                <div class="manager-stat-label">Active Bookings</div>
+                <div class="manager-stat-value">{{ active_bookings }}</div>
+                <p class="manager-stat-note">Stays covering today</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-4">
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-column"></i>
+                        Revenue Trend
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="managerRevenueChart" height="130" aria-label="Revenue by month" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-list-check"></i>
+                        Bookings by Status
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th class="text-end">Count</th>
+                                    <th class="text-end">Share</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for status in booking_status_breakdown %}
+                                <tr>
+                                    <td>{{ status.label }}</td>
+                                    <td class="text-end">{{ status.count }}</td>
+                                    <td class="text-end">{{ status.percentage|floatformat:1 }}%</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -133,6 +221,167 @@
         </div>
     </section>
 
+    <section class="row g-4">
+        <div class="col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-broom"></i>
+                        Assign Housekeeping
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if not housekeeping_task_model_available %}
+                    <div class="alert alert-warning mb-3">
+                        Housekeeping task storage is not available yet. Run the model migration before assigning tasks.
+                    </div>
+                    {% endif %}
+                    <form method="post" class="d-grid gap-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="assign_housekeeping">
+
+                        <div>
+                            <label for="room_id" class="form-label">Room</label>
+                            <select name="room_id" id="room_id" class="form-select" required {% if not housekeeping_task_model_available %}disabled{% endif %}>
+                                <option value="">Select room</option>
+                                {% for room in housekeeping_rooms %}
+                                <option value="{{ room.id }}">Room {{ room.room_number }} - {{ room.get_room_type_display }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="staff_id" class="form-label">Staff</label>
+                            <select name="staff_id" id="staff_id" class="form-select" required {% if not housekeeping_task_model_available %}disabled{% endif %}>
+                                <option value="">Select staff</option>
+                                {% for staff in staff_members %}
+                                <option value="{{ staff.id }}">{{ staff.get_full_name|default:staff.username }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="task_type" class="form-label">Task Type</label>
+                            <select name="task_type" id="task_type" class="form-select" required {% if not housekeeping_task_model_available %}disabled{% endif %}>
+                                <option value="">Select task</option>
+                                {% for value, label in housekeeping_task_type_choices %}
+                                <option value="{{ value }}">{{ label }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <input type="date" name="due_date" id="due_date" class="form-control" min="{{ today|date:'Y-m-d' }}" required {% if not housekeeping_task_model_available %}disabled{% endif %}>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" {% if not housekeeping_task_model_available %}disabled{% endif %}>
+                            <i class="fas fa-plus"></i> Assign Task
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-list"></i>
+                        Recent Housekeeping Tasks
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_housekeeping_tasks %}
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Room</th>
+                                    <th>Staff</th>
+                                    <th>Task</th>
+                                    <th>Due</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for task in recent_housekeeping_tasks %}
+                                <tr>
+                                    <td>
+                                        {% if task.room %}
+                                        Room {{ task.room.room_number }}
+                                        {% else %}
+                                        -
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if task.staff %}
+                                        {{ task.staff.get_full_name|default:task.staff.username }}
+                                        {% else %}
+                                        Unassigned
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ task.task_type|default:"-" }}</td>
+                                    <td>{{ task.due_date|date:"M d, Y"|default:"-" }}</td>
+                                    <td>{{ task.status|default:"Pending" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="manager-empty p-3">No housekeeping tasks assigned yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-clock-rotate-left"></i>
+                Staff Activity
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if recent_activity_logs %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Staff</th>
+                            <th>Action</th>
+                            <th>Target</th>
+                            <th>When</th>
+                            <th>IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in recent_activity_logs %}
+                        <tr>
+                            <td>
+                                {% if activity.user %}
+                                <strong>{{ activity.user.get_full_name|default:activity.user.username }}</strong>
+                                {% else %}
+                                <strong>System</strong>
+                                {% endif %}
+                            </td>
+                            <td>{{ activity.action }}</td>
+                            <td>{{ activity.target }}</td>
+                            <td>{{ activity.timestamp|date:"M d, Y g:i A" }}</td>
+                            <td>{{ activity.ip_address|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="manager-empty p-3">No staff activity recorded yet.</div>
+            {% endif %}
+        </div>
+    </section>
+
     <section class="card">
         <div class="card-header">
             <h5 class="mb-0">
@@ -185,4 +434,63 @@
         </div>
     </section>
 </div>
+{{ revenue_chart_data|json_script:"manager-revenue-chart-data" }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const chartElement = document.getElementById('managerRevenueChart');
+        const dataElement = document.getElementById('manager-revenue-chart-data');
+
+        if (!chartElement || !dataElement || typeof Chart === 'undefined') {
+            return;
+        }
+
+        const revenueData = JSON.parse(dataElement.textContent);
+
+        new Chart(chartElement, {
+            type: 'bar',
+            data: {
+                labels: revenueData.labels,
+                datasets: [{
+                    label: 'Completed payment revenue',
+                    data: revenueData.values,
+                    backgroundColor: 'rgba(20, 184, 166, 0.78)',
+                    borderColor: '#0f766e',
+                    borderWidth: 1,
+                    borderRadius: 6,
+                    maxBarThickness: 42
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return 'Revenue: PHP ' + Number(context.parsed.y || 0).toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2
+                                });
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return 'PHP ' + Number(value).toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

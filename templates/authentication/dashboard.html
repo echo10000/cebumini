@@ -88,7 +88,7 @@
             {% if two_fa and two_fa.is_enabled and two_fa.method == 'EMAIL' %}
                 <form method="post" action="{% url 'auth:toggle_2fa' %}" id="dashboard-disable-2fa-form">
                     {% csrf_token %}
-                    <button type="button" class="btn btn-danger" onclick="openConfirmDialog('Disabling 2FA will make your account less secure. Are you sure you want to continue?', 'dashboard-disable-2fa-form')">
+                    <button type="button" class="btn btn-danger" onclick="openConfirmDialog('Disable Two-Factor Authentication', 'Disabling 2FA will make your account less secure. Are you sure you want to continue?', 'dashboard-disable-2fa-form', 'Yes, disable 2FA')">
                         <i class="fas fa-shield-alt"></i> Disable 2FA
                     </button>
                 </form>
@@ -113,6 +113,50 @@
             <a href="{% url 'recommendations:recommendations' %}" class="btn btn-secondary"><i class="fas fa-star"></i> Recommendations</a>
         </div>
     </section>
+
+    {% if guest_bookings %}
+    <section class="guest-card">
+        <div class="guest-page-header">
+            <div>
+                <p class="guest-kicker">Reservations</p>
+                <h2>Recent Bookings</h2>
+            </div>
+            <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary">View all bookings</a>
+        </div>
+        <div class="guest-grid two">
+            {% for booking in guest_bookings %}
+                <article class="guest-card shadow-none">
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div>
+                            <h3 class="h5 mb-1">Booking #{{ booking.id }}</h3>
+                            <p class="text-muted mb-0">Room {{ booking.room.room_number }} · {{ booking.check_in|date:"M d, Y" }} to {{ booking.check_out|date:"M d, Y" }}</p>
+                        </div>
+                        <span class="badge {% if booking.status == 'CONFIRMED' %}bg-success{% elif booking.status == 'PENDING' %}bg-warning{% elif booking.status == 'CANCELLED' %}bg-danger{% else %}bg-secondary{% endif %}">
+                            {{ booking.get_status_display }}
+                        </span>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> View Details
+                        </a>
+                        {% if booking.can_be_cancelled %}
+                            <form method="post" action="{% url 'bookings:cancel_booking' booking.id %}" id="dashboard-cancel-booking-form-{{ booking.id }}">
+                                {% csrf_token %}
+                                <button
+                                    type="button"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="openConfirmDialog('Cancel Booking', 'Cancel Booking #{{ booking.id }} for Room {{ booking.room.room_number|escapejs }}? This cannot be undone.', 'dashboard-cancel-booking-form-{{ booking.id }}', 'Confirm Cancellation')"
+                                >
+                                    <i class="fas fa-times-circle"></i> Cancel Booking
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </article>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
 
     {% if rooms %}
     <section class="guest-card">
@@ -154,7 +198,7 @@
         <p id="confirmModalMessage">Disabling 2FA will make your account less secure. Do you want to continue?</p>
         <div class="confirm-modal-actions">
             <button type="button" class="confirm-cancel" onclick="closeConfirmDialog()">Cancel</button>
-            <button type="button" class="confirm-submit" onclick="submitConfirmForm()">Yes, disable 2FA</button>
+            <button type="button" class="confirm-submit" id="confirmModalSubmit" onclick="submitConfirmForm()">Yes, disable 2FA</button>
         </div>
     </div>
 </div>
@@ -162,9 +206,11 @@
 <script>
     let confirmTargetForm = null;
 
-    function openConfirmDialog(message, formId) {
+    function openConfirmDialog(title, message, formId, confirmText) {
         confirmTargetForm = formId;
+        document.getElementById('confirmModalTitle').textContent = title;
         document.getElementById('confirmModalMessage').textContent = message;
+        document.getElementById('confirmModalSubmit').textContent = confirmText;
         document.getElementById('confirmModalBackdrop').classList.add('show');
         document.getElementById('confirmModalBackdrop').setAttribute('aria-hidden', 'false');
     }

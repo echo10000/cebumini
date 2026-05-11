@@ -4,7 +4,7 @@ from django.db.models import Q, Sum, Count
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import CustomUser, UserRole, TermsAndConditions, Room, RoomImage, Booking, BookingStatus, RoomType, ContactMessage
+from .models import CustomUser, UserRole, TermsAndConditions, Room, RoomImage, Booking, BookingStatus, RoomType, ContactMessage, HousekeepingTask
 import json
 
 
@@ -332,6 +332,17 @@ class RoomImageAdmin(admin.ModelAdmin):
             )
         return '(No image)'
     image_preview.short_description = 'Preview'
+
+
+@admin.register(HousekeepingTask)
+class HousekeepingTaskAdmin(admin.ModelAdmin):
+    """Housekeeping task assignments."""
+    list_display = ('room', 'assigned_to', 'task_type', 'status', 'due_date', 'completed_at', 'created_at')
+    list_filter = ('task_type', 'status', 'due_date', 'created_at')
+    search_fields = ('room__room_number', 'assigned_to__username', 'assigned_to__email', 'notes')
+    readonly_fields = ('created_at',)
+    autocomplete_fields = ('room', 'assigned_to')
+    ordering = ('status', 'due_date', '-created_at')
 
 
 @admin.register(Booking)

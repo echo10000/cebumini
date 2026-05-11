@@ -3,7 +3,7 @@ Utility functions for authentication, audit logging, and role management
 """
 
 from django.utils import timezone
-from .models import AuditLog
+from .models import ActivityLog, AuditLog
 
 
 def get_client_ip(request):
@@ -50,6 +50,185 @@ def log_audit(request, actor, action, affected_entity_type, affected_entity_id=N
         ip_address=ip_address,
         user_agent=user_agent
     )
+
+
+def log_activity(user, action, target, request=None):
+    """Create a manager-visible staff activity entry."""
+    return ActivityLog.objects.create(
+        user=user if getattr(user, 'is_authenticated', False) else None,
+        action=action,
+        target=target,
+        ip_address=get_client_ip(request) if request else None,
+    )
+
+
+def user_requires_2fa(user):
+    """Return True when this user's role must have verified 2FA."""
+    return (
+        getattr(user, 'is_authenticated', False)
+        and (user.is_admin() or user.is_manager())
+    )
+
+
+def get_two_fa_status(user):
+    """Return the user's 2FA object if enabled and verified, otherwise None."""
+    if not user_requires_2fa(user):
+        return None
+
+    try:
+        two_fa = user.two_factor_auth
+    except Exception:
+        return None
+
+    if two_fa.is_enabled and two_fa.is_verified:
+        return two_fa
+    return None
+
+
+def is_two_fa_configured(user):
+    """Check whether a privileged user has completed 2FA setup."""
+    return get_two_fa_status(user) is not None
+
+
+def confirm_booking_after_completed_payment(payment, send_email=True):
+    """
+    Confirm a booking only after its payment has been marked completed.
+    Returns True when the booking moved to confirmed, False when already confirmed.
+    """
+    from .models import BookingStatus, PaymentStatus
+
+    if payment.status != PaymentStatus.COMPLETED:
+        raise ValueError('Payment must be completed before confirming the booking.')
+
+    booking = payment.booking
+    if booking.status == BookingStatus.CONFIRMED:
+        return False
+
+    booking.status = BookingStatus.CONFIRMED
+    booking.save(update_fields=['status', 'updated_at'])
+
+    if send_email:
+        booking.send_confirmation_email()
+
+    return True
+
+
+def get_occupancy_chart_context(today=None):
+    """Build shared room occupancy data for staff/admin dashboards."""
+    from datetime import timedelta
+    import json
+
+    from .models import (
+        Booking,
+        BookingStatus,
+        PaymentStatus,
+        Room,
+        RoomHousekeepingLog,
+        RoomStatus,
+    )
+
+    today = today or timezone.now().date()
+    rooms = list(Room.objects.order_by('room_number'))
+    total_rooms = len(rooms)
+
+    checked_in_bookings = (
+        Booking.objects
+        .filter(
+            status=BookingStatus.CHECKED_IN,
+            check_in__lte=today,
+            check_out__gte=today,
+        )
+        .select_related('guest', 'room')
+        .order_by('-checked_in_at', '-created_at')
+    )
+    checked_in_by_room = {booking.room_id: booking for booking in checked_in_bookings}
+
+    checked_out_today = (
+        Booking.objects
+        .filter(status=BookingStatus.CHECKED_OUT, check_out=today)
+        .select_related('guest', 'room')
+        .order_by('-checked_out_at', '-updated_at')
+    )
+    checked_out_by_room = {booking.room_id: booking for booking in checked_out_today}
+
+    confirmed_paid_bookings = (
+        Booking.objects
+        .filter(
+            status=BookingStatus.CONFIRMED,
+            check_in=today,
+            payments__status=PaymentStatus.COMPLETED,
+        )
+        .select_related('guest', 'room')
+        .order_by('check_in', 'created_at')
+        .distinct()
+    )
+    confirmed_by_room = {booking.room_id: booking for booking in confirmed_paid_bookings}
+
+    room_cards = []
+    for room in rooms:
+        booking = None
+        if room.id in checked_in_by_room:
+            booking = checked_in_by_room[room.id]
+            status_key = 'checked-in'
+            status_label = 'Checked In'
+        elif room.id in checked_out_by_room:
+            booking = checked_out_by_room[room.id]
+            status_key = 'checked-out'
+            status_label = 'Checked Out Today'
+        elif room.id in confirmed_by_room:
+            booking = confirmed_by_room[room.id]
+            status_key = 'confirmed'
+            status_label = 'Confirmed'
+        elif getattr(room, 'status', RoomStatus.CLEAN) == RoomStatus.MAINTENANCE:
+            status_key = 'maintenance'
+            status_label = 'Under Maintenance'
+        elif getattr(room, 'status', RoomStatus.CLEAN) == RoomStatus.DIRTY:
+            status_key = 'checked-out'
+            status_label = 'Dirty'
+        else:
+            status_key = 'available'
+            status_label = 'Available'
+
+        room_cards.append({
+            'room': room,
+            'status_key': status_key,
+            'status_label': status_label,
+            'guest_name': (
+                booking.guest.get_full_name()
+                or booking.guest.username
+                if booking else ''
+            ),
+        })
+
+    occupied_today_count = len(checked_in_by_room)
+    occupancy_rate = (occupied_today_count / total_rooms * 100) if total_rooms else 0
+
+    weekly_labels = []
+    weekly_values = []
+    for offset in range(6, -1, -1):
+        day = today - timedelta(days=offset)
+        occupied_count = (
+            Booking.objects
+            .filter(
+                status__in=[BookingStatus.CHECKED_IN, BookingStatus.CHECKED_OUT],
+                check_in__lte=day,
+                check_out__gt=day,
+            )
+            .values('room')
+            .distinct()
+            .count()
+        )
+        weekly_labels.append(day.strftime('%b %d'))
+        weekly_values.append(occupied_count)
+
+    return {
+        'occupancy_room_cards': room_cards,
+        'occupancy_total_rooms': total_rooms,
+        'occupancy_occupied_today': occupied_today_count,
+        'occupancy_rate_percent': occupancy_rate,
+        'weekly_occupancy_labels_json': json.dumps(weekly_labels),
+        'weekly_occupancy_values_json': json.dumps(weekly_values),
+    }
 
 
 def can_manager_register_staff(manager_user):

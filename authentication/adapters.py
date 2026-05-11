@@ -1,6 +1,7 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
-from allauth.exceptions import ImmediateHttpResponse
+from allauth.core.exceptions import ImmediateHttpResponse
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
 import uuid
@@ -77,6 +78,11 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         If the existing account has 2FA enabled, redirect through the OTP verification flow.
         """
         email = sociallogin.account.extra_data.get('email') or sociallogin.user.email
+        email_verified = sociallogin.account.extra_data.get('email_verified', True)
+        if email and email_verified is False:
+            messages.error(request, 'Google did not verify this email address. Please use a verified Google account.')
+            raise ImmediateHttpResponse(redirect('auth:login'))
+
         if not email:
             return
 
@@ -84,6 +90,10 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return
+
+        if not sociallogin.is_existing and not user.is_guest():
+            messages.error(request, 'Google sign-in is only available for guest accounts with a verified Google email.')
+            raise ImmediateHttpResponse(redirect('auth:login'))
 
         try:
             from .models import TwoFactorAuth
@@ -119,7 +129,7 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         if not user.id:  # New user
             user.role = 'GUEST'
         
-        # Mark email as verified for OAuth users
-        user.is_email_verified = True
+        # Mark email as verified only when Google reports a verified email.
+        user.is_email_verified = sociallogin.account.extra_data.get('email_verified', True) is not False
         
         return user

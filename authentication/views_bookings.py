@@ -5,18 +5,21 @@ from django.utils import timezone
 from django.db.models import Q
 from django.db import IntegrityError
 from django.core.paginator import Paginator
+from django.http import HttpResponse, HttpResponseForbidden
+from django.views.decorators.http import require_GET, require_POST
 from datetime import datetime
 from decimal import Decimal
 
 from .models import (
     Booking, Room, BookingStatus, Payment, PaymentStatus,
-    GuestComplaintEscalation, RefundRequest, RefundRequestStatus
+    Complaint, ComplaintStatus, GuestComplaintEscalation, RefundRequest, RefundRequestStatus
 )
 from .forms_bookings import (
-    BookingForm, BookingFilterForm, BookingConfirmationForm, CancelBookingForm
+    BookingForm, BookingFilterForm, BookingConfirmationForm
 )
 from .views_recommendations import get_recommendations_context
 from .decorators import guest_required, admin_required
+from .emails import send_cancellation_email
 
 
 # ==================== GUEST VIEWS ====================
@@ -47,15 +50,26 @@ def create_booking_view(request, room_id):
             
             return redirect('bookings:confirm_booking')
     else:
-        form = BookingForm(room=room)
+        form = BookingForm(
+            room=room,
+            initial={
+                'check_in': request.GET.get('check_in') or None,
+                'check_out': request.GET.get('check_out') or None,
+            }
+        )
     
-    # Get available dates (occupied dates for calendar display)
+    # Get unavailable date ranges for flatpickr and occupied dates for fallback display.
     occupied_dates = []
+    booked_date_ranges = []
     bookings = Booking.objects.filter(
         room=room,
-        status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED]
+        status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
     )
     for booking in bookings:
+        booked_date_ranges.append({
+            'from': booking.check_in.isoformat(),
+            'to': (booking.check_out - timezone.timedelta(days=1)).isoformat(),
+        })
         current_date = booking.check_in
         while current_date < booking.check_out:
             occupied_dates.append(current_date.isoformat())
@@ -65,6 +79,7 @@ def create_booking_view(request, room_id):
         'form': form,
         'room': room,
         'occupied_dates': occupied_dates,
+        'booked_date_ranges': booked_date_ranges,
     }
     return render(request, 'bookings/create_booking.html', context)
 
@@ -198,82 +213,240 @@ def booking_history_view(request):
 
 
 @login_required(login_url='auth:login')
+@guest_required
+@require_POST
 def cancel_booking_view(request, booking_id):
-    """Cancel a booking with refund processing"""
-    booking = get_object_or_404(Booking, id=booking_id)
-    
-    # Check authorization
-    if request.user != booking.guest and not request.user.is_admin():
-        messages.error(request, 'You do not have permission to cancel this booking.')
-        return redirect('rooms:list')
-    
-    # Check if booking can be cancelled
+    """Cancel a guest booking and flag completed payments for refund review."""
+    booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
+
     if not booking.can_be_cancelled():
         messages.error(request, 'This booking cannot be cancelled.')
         return redirect('bookings:booking_detail', booking_id=booking_id)
-    
-    if request.method == 'POST':
-        cancel_form = CancelBookingForm(request.POST)
-        
-        if cancel_form.is_valid():
-            # Calculate refund amount
-            refund_amount, refund_percent, refund_policy = booking.get_refund_amount()
-            
-            # Get the most recent payment record
-            try:
-                payment = booking.payments.latest('created_at')
-            except:
-                payment = None
-            
-            # Update booking
-            booking.status = BookingStatus.CANCELLED
-            booking.cancellation_reason = cancel_form.cleaned_data.get('reason', '')
-            booking.cancelled_at = timezone.now()
-            booking.save()
-            
-            # Update payment if exists
-            if payment and payment.status == PaymentStatus.COMPLETED:
-                if refund_amount > 0:
-                    payment.refund_amount = refund_amount
-                    payment.refund_reason = f'{refund_policy} - Booking cancelled by {request.user.email}'
-                    if refund_amount >= payment.amount:
-                        payment.status = PaymentStatus.REFUNDED
-                    else:
-                        payment.status = PaymentStatus.PARTIALLY_REFUNDED
-                    payment.refunded_at = timezone.now()
-                    payment.save()
-                    
-                    messages.success(
-                        request,
-                        f'Booking #{booking.id} cancelled. Refund: PHP {refund_amount:.2f} ({refund_percent}%) - {refund_policy}'
-                    )
-                else:
-                    messages.warning(
-                        request,
-                        f'Booking #{booking.id} cancelled. No refund available - {refund_policy}'
-                    )
-            else:
-                messages.success(
-                    request,
-                    f'Booking #{booking.id} has been cancelled successfully.'
-                )
-            
-            return redirect('bookings:booking_history')
-    else:
-        cancel_form = CancelBookingForm()
-    
-    # Calculate refund info for display
-    refund_amount, refund_percent, refund_policy = booking.get_refund_amount()
-    
-    context = {
-        'booking': booking,
-        'cancel_form': cancel_form,
-        'refund_amount': refund_amount,
-        'refund_percent': refund_percent,
-        'refund_policy': refund_policy,
-        'cancellation_policy': booking.get_cancellation_policy_display(),
-    }
-    return render(request, 'bookings/cancel_booking.html', context)
+
+    payment = (
+        booking.payments.filter(status=PaymentStatus.COMPLETED).order_by('-completed_at', '-created_at').first()
+        or booking.payments.order_by('-created_at').first()
+    )
+    booking.status = BookingStatus.CANCELLED
+    booking.cancellation_reason = 'Cancelled by guest'
+    booking.cancelled_at = timezone.now()
+    booking.save(update_fields=['status', 'cancellation_reason', 'cancelled_at', 'updated_at'])
+
+    if payment and payment.status == PaymentStatus.COMPLETED:
+        payment.status = PaymentStatus.REFUND_PENDING
+        payment.notes = 'Guest requested cancellation - refund pending review'
+        payment.save(update_fields=['status', 'notes', 'updated_at'])
+    elif payment and payment.status == PaymentStatus.PENDING:
+        payment.status = PaymentStatus.CANCELLED
+        payment.save(update_fields=['status', 'updated_at'])
+
+    send_cancellation_email(booking, payment=payment)
+    messages.success(request, f'Booking #{booking.id} has been cancelled successfully.')
+    return redirect('auth:dashboard')
+
+
+@login_required(login_url='auth:login')
+@guest_required
+@require_GET
+def booking_pdf(request, booking_id):
+    """Generate a guest-owned booking confirmation PDF."""
+    from io import BytesIO
+
+    booking = get_object_or_404(
+        Booking.objects.select_related('guest', 'room').prefetch_related('payments'),
+        id=booking_id,
+    )
+
+    if booking.guest_id != request.user.id:
+        return HttpResponseForbidden('You do not have permission to download this booking confirmation.')
+
+    try:
+        import qrcode
+        from reportlab.lib import colors
+        from reportlab.lib.enums import TA_CENTER
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.lib.units import inch
+        from reportlab.platypus import (
+            Image,
+            Paragraph,
+            SimpleDocTemplate,
+            Spacer,
+            Table,
+            TableStyle,
+        )
+    except ImportError as exc:
+        return HttpResponse(
+            f'PDF generation dependency is missing: {exc.name}. Please install reportlab and qrcode.',
+            status=500,
+            content_type='text/plain',
+        )
+
+    completed_payments = booking.payments.filter(status=PaymentStatus.COMPLETED)
+    total_paid = sum((payment.amount for payment in completed_payments), Decimal('0'))
+    payment = (
+        completed_payments.order_by('-completed_at', '-created_at').first()
+        or booking.payments.order_by('-created_at').first()
+    )
+    payment_method = payment.get_payment_method_display() if payment else 'N/A'
+    payment_date = (
+        (payment.completed_at or payment.updated_at or payment.created_at).strftime('%B %d, %Y')
+        if payment else 'N/A'
+    )
+    guest_name = booking.guest.get_full_name() or booking.guest.username
+    booking_reference = booking.booking_reference or f'BOOKING-{booking.id}'
+
+    qr_buffer = BytesIO()
+    qr = qrcode.QRCode(version=1, box_size=6, border=2)
+    qr.add_data(str(booking.id))
+    qr.make(fit=True)
+    qr_image = qr.make_image(fill_color='#0f766e', back_color='white')
+    qr_image.save(qr_buffer, format='PNG')
+    qr_buffer.seek(0)
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=0.55 * inch,
+        leftMargin=0.55 * inch,
+        topMargin=0.55 * inch,
+        bottomMargin=0.55 * inch,
+        title=f'Cebu Mini Hotel Booking {booking.id}',
+    )
+
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CebuTitle',
+        parent=styles['Title'],
+        textColor=colors.HexColor('#0f766e'),
+        fontName='Helvetica-Bold',
+        fontSize=22,
+        leading=26,
+        alignment=TA_CENTER,
+        spaceAfter=4,
+    )
+    subtitle_style = ParagraphStyle(
+        'CebuSubtitle',
+        parent=styles['Normal'],
+        textColor=colors.HexColor('#475569'),
+        fontSize=10,
+        alignment=TA_CENTER,
+        spaceAfter=16,
+    )
+    section_style = ParagraphStyle(
+        'CebuSection',
+        parent=styles['Heading2'],
+        textColor=colors.HexColor('#0f766e'),
+        fontName='Helvetica-Bold',
+        fontSize=13,
+        leading=16,
+        spaceBefore=12,
+        spaceAfter=8,
+    )
+    footer_style = ParagraphStyle(
+        'CebuFooter',
+        parent=styles['Normal'],
+        textColor=colors.HexColor('#0f766e'),
+        fontName='Helvetica-Bold',
+        alignment=TA_CENTER,
+        fontSize=10,
+    )
+
+    logo_table = Table(
+        [[Paragraph('<b>CMH</b>', ParagraphStyle(
+            'LogoText',
+            parent=styles['Normal'],
+            textColor=colors.white,
+            fontName='Helvetica-Bold',
+            fontSize=14,
+            alignment=TA_CENTER,
+        ))]],
+        colWidths=[0.8 * inch],
+        rowHeights=[0.42 * inch],
+        hAlign='CENTER',
+    )
+    logo_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#0f766e')),
+        ('BOX', (0, 0), (-1, -1), 0, colors.HexColor('#0f766e')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+
+    def details_table(rows):
+        table = Table(rows, colWidths=[2.15 * inch, 4.2 * inch], hAlign='LEFT')
+        table.setStyle(TableStyle([
+            ('BACKGROUND', (0, 0), (-1, -1), colors.white),
+            ('BOX', (0, 0), (-1, -1), 0.6, colors.HexColor('#d9e2e7')),
+            ('INNERGRID', (0, 0), (-1, -1), 0.4, colors.HexColor('#e5edf0')),
+            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#334155')),
+            ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#111827')),
+            ('FONTSIZE', (0, 0), (-1, -1), 9.5),
+            ('LEADING', (0, 0), (-1, -1), 12),
+            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+            ('LEFTPADDING', (0, 0), (-1, -1), 10),
+            ('RIGHTPADDING', (0, 0), (-1, -1), 10),
+            ('TOPPADDING', (0, 0), (-1, -1), 8),
+            ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ]))
+        return table
+
+    elements = [
+        logo_table,
+        Spacer(1, 0.12 * inch),
+        Paragraph('Cebu Mini Hotel', title_style),
+        Paragraph('Booking Confirmation', subtitle_style),
+        details_table([
+            ['Booking Reference Number', booking_reference],
+            ['Booking ID', f'#{booking.id}'],
+            ['Booking Status', booking.get_status_display()],
+        ]),
+        Paragraph('Guest Details', section_style),
+        details_table([
+            ['Full Name', guest_name],
+            ['Email', booking.guest.email],
+        ]),
+        Paragraph('Stay Details', section_style),
+        details_table([
+            ['Room', f'Room {booking.room.room_number} - {booking.room.get_room_type_display()}'],
+            ['Check-in Date', booking.check_in.strftime('%B %d, %Y')],
+            ['Check-out Date', booking.check_out.strftime('%B %d, %Y')],
+            ['Number of Nights', str(booking.get_duration())],
+        ]),
+        Paragraph('Payment Details', section_style),
+        details_table([
+            ['Total Amount Paid', f'PHP {total_paid:.2f}'],
+            ['Payment Method', payment_method],
+            ['Payment Date', payment_date],
+        ]),
+        Paragraph('Arrival QR Code', section_style),
+    ]
+
+    qr_table = Table(
+        [[Image(qr_buffer, width=1.4 * inch, height=1.4 * inch),
+          Paragraph('Staff may scan this QR code on arrival. It contains the booking ID for front desk verification.', styles['Normal'])]],
+        colWidths=[1.65 * inch, 4.7 * inch],
+    )
+    qr_table.setStyle(TableStyle([
+        ('BOX', (0, 0), (-1, -1), 0.6, colors.HexColor('#d9e2e7')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 12),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
+        ('TOPPADDING', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
+    ]))
+    elements.extend([
+        qr_table,
+        Spacer(1, 0.28 * inch),
+        Paragraph('Thank you for choosing Cebu Mini Hotel', footer_style),
+    ])
+
+    doc.build(elements)
+    buffer.seek(0)
+
+    response = HttpResponse(buffer.getvalue(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="CebuMiniHotel_Booking_{booking.id}.pdf"'
+    return response
 
 
 # ==================== ADMIN VIEWS ====================
@@ -387,6 +560,10 @@ def admin_confirm_booking_view(request, booking_id):
     
     if booking.status != BookingStatus.PENDING:
         messages.warning(request, 'This booking is already confirmed or cancelled.')
+        return redirect('bookings:admin_bookings')
+
+    if not booking.payments.filter(status=PaymentStatus.COMPLETED).exists():
+        messages.error(request, 'This booking cannot be confirmed until payment is completed.')
         return redirect('bookings:admin_bookings')
     
     booking.status = BookingStatus.CONFIRMED
@@ -637,29 +814,109 @@ def download_invoice_view(request, booking_id):
 
 @login_required(login_url='auth:login')
 @guest_required
-def guest_submit_complaint_view(request, booking_id):
-    """Guest submits a complaint for their booking"""
-    from .models import GuestComplaintEscalation
+def guest_submit_complaint_view(request, booking_id=None):
+    """Guest submits a complaint, optionally linked to one of their bookings."""
+    selected_booking = None
+    if booking_id:
+        selected_booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
+
+    guest_bookings = (
+        Booking.objects
+        .filter(guest=request.user)
+        .select_related('room')
+        .order_by('-created_at')
+    )
+
+    if request.method == 'POST':
+        subject = (request.POST.get('subject') or '').strip()
+        description = (request.POST.get('description') or '').strip()
+        posted_booking_id = request.POST.get('booking')
+
+        if posted_booking_id:
+            selected_booking = get_object_or_404(Booking, id=posted_booking_id, guest=request.user)
+
+        if not subject or not description:
+            messages.error(request, 'Subject and description are required.')
+        else:
+            Complaint.objects.create(
+                guest=request.user,
+                booking=selected_booking,
+                subject=subject,
+                description=description,
+                status=ComplaintStatus.PENDING,
+            )
+            messages.success(request, 'Your complaint has been submitted successfully.')
+            return redirect('bookings:my_complaints')
+
+    context = {
+        'booking': selected_booking,
+        'guest_bookings': guest_bookings,
+    }
+
+    return render(request, 'bookings/submit_complaint.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_my_complaints_view(request):
+    """View all complaints submitted by guest."""
+    complaints = Complaint.objects.filter(
+        guest=request.user
+    ).select_related('booking__room').order_by('-created_at')
+
+    status_filter = request.GET.get('status', 'all')
+    if status_filter != 'all':
+        complaints = complaints.filter(status=status_filter)
+
+    context = {
+        'complaints': complaints,
+        'status_filter': status_filter,
+        'statuses': ComplaintStatus.choices,
+    }
+
+    return render(request, 'bookings/my_complaints.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_complaint_detail_view(request, complaint_id):
+    """View detail of a specific guest complaint."""
+    complaint = get_object_or_404(
+        Complaint.objects.select_related('booking__room'),
+        id=complaint_id,
+        guest=request.user
+    )
+
+    context = {
+        'complaint': complaint,
+        'booking': complaint.booking,
+    }
+
+    return render(request, 'bookings/complaint_detail.html', context)
+
+
+@login_required(login_url='auth:login')
+@guest_required
+def guest_submit_escalation_view(request, booking_id):
+    """Legacy guest escalation flow retained for compatibility."""
     from .utils import log_audit
-    
+
     booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
-    
+
     if request.method == 'POST':
         complaint_description = (request.POST.get('complaint_description') or '').strip()
-        
+
         if not complaint_description:
             messages.error(request, 'Complaint description is required.')
             return redirect('bookings:booking_detail', booking_id=booking_id)
-        
-        # Create complaint visible to manager complaint queue
+
         complaint = GuestComplaintEscalation.objects.create(
             booking=booking,
             guest=request.user,
             complaint_description=complaint_description,
             status='OPEN'
         )
-        
-        # Log audit
+
         log_audit(
             request,
             request.user,
@@ -669,59 +926,15 @@ def guest_submit_complaint_view(request, booking_id):
             description=f'Guest submitted complaint for Booking {booking.id}',
             changes={'status': 'OPEN'}
         )
-        
+
         messages.success(request, 'Your complaint has been submitted. Our management team will review it shortly.')
         return redirect('bookings:booking_detail', booking_id=booking_id)
-    
+
     context = {
         'booking': booking,
     }
-    
+
     return render(request, 'bookings/submit_complaint.html', context)
-
-
-@login_required(login_url='auth:login')
-@guest_required
-def guest_my_complaints_view(request):
-    """View all complaints submitted by guest"""
-    from .models import GuestComplaintEscalation
-    
-    complaints = GuestComplaintEscalation.objects.filter(
-        guest=request.user
-    ).select_related('booking', 'reported_by_staff').order_by('-created_at')
-    
-    # Filter by status
-    status_filter = request.GET.get('status', 'all')
-    if status_filter != 'all':
-        complaints = complaints.filter(status=status_filter)
-    
-    context = {
-        'complaints': complaints,
-        'status_filter': status_filter,
-        'statuses': dict(GuestComplaintEscalation._meta.get_field('status').choices),
-    }
-    
-    return render(request, 'bookings/my_complaints.html', context)
-
-
-@login_required(login_url='auth:login')
-@guest_required
-def guest_complaint_detail_view(request, complaint_id):
-    """View detail of a specific complaint"""
-    from .models import GuestComplaintEscalation
-    
-    complaint = get_object_or_404(
-        GuestComplaintEscalation,
-        id=complaint_id,
-        guest=request.user
-    )
-    
-    context = {
-        'complaint': complaint,
-        'booking': complaint.booking,
-    }
-    
-    return render(request, 'bookings/complaint_detail.html', context)
 
 
 @login_required(login_url='auth:login')

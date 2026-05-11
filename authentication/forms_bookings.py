@@ -310,16 +310,19 @@ class TestimonialForm(forms.Form):
         label='Your Review'
     )
     
-    def save(self):
+    def save(self, guest=None):
         """Save testimonial to database"""
         from .models import Testimonial
         
         testimonial = Testimonial(
+            guest=guest,
             guest_name=self.cleaned_data['name'],
             guest_email=self.cleaned_data['email'],
             rating=int(self.cleaned_data['rating']),
             title=self.cleaned_data['title'],
             comment=self.cleaned_data['comment'],
+            content=self.cleaned_data['comment'],
+            status=Testimonial.Status.PENDING,
             is_approved=False,
         )
         testimonial.save()

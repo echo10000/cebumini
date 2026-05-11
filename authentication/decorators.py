@@ -9,6 +9,38 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from functools import wraps
 
+from .utils import get_two_fa_status, is_two_fa_configured, user_requires_2fa
+
+
+def _redirect_if_2fa_required(request):
+    if user_requires_2fa(request.user) and not is_two_fa_configured(request.user):
+        from django.contrib import messages
+        messages.warning(request, 'Two-factor authentication is required for admin and manager accounts.')
+        return redirect(reverse('auth:setup_2fa'))
+
+    two_fa = get_two_fa_status(request.user)
+    if two_fa and request.session.get('2fa_verified_user_id') != request.user.id:
+        if two_fa.method == 'EMAIL':
+            from .otp_utils import send_otp_email
+            send_otp_email(request.user)
+            request.session['email_otp_user_id'] = request.user.id
+            request.session['email_otp_remember_me'] = False
+            return redirect(reverse('auth:verify_otp'))
+        request.session['2fa_user_id'] = request.user.id
+        request.session['2fa_remember_me'] = False
+        return redirect(reverse('auth:verify_2fa_login'))
+    return None
+
+
+class Require2FAMixin:
+    """Require completed 2FA setup for admin and manager class-based views."""
+
+    def dispatch(self, request, *args, **kwargs):
+        response = _redirect_if_2fa_required(request)
+        if response:
+            return response
+        return super().dispatch(request, *args, **kwargs)
+
 
 def admin_required(view_func):
     """
@@ -24,6 +56,10 @@ def admin_required(view_func):
             from django.contrib import messages
             messages.error(request, 'You do not have permission to access this page.')
             return redirect(reverse('home'))
+
+        two_fa_response = _redirect_if_2fa_required(request)
+        if two_fa_response:
+            return two_fa_response
         
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -198,6 +234,10 @@ def manager_required(view_func):
         # Check if manager has accepted T&C
         if not request.user.has_accepted_terms():
             return redirect(reverse('auth:accept_terms'))
+
+        two_fa_response = _redirect_if_2fa_required(request)
+        if two_fa_response:
+            return two_fa_response
         
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -246,6 +286,10 @@ def manager_or_admin_required(view_func):
         # Check if manager/admin has accepted T&C
         if not request.user.has_accepted_terms():
             return redirect(reverse('auth:accept_terms'))
+
+        two_fa_response = _redirect_if_2fa_required(request)
+        if two_fa_response:
+            return two_fa_response
         
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -269,6 +313,10 @@ def staff_manager_or_admin_required(view_func):
         # Check if staff/manager/admin has accepted T&C
         if not request.user.has_accepted_terms():
             return redirect(reverse('auth:accept_terms'))
+
+        two_fa_response = _redirect_if_2fa_required(request)
+        if two_fa_response:
+            return two_fa_response
         
         return view_func(request, *args, **kwargs)
     return wrapper

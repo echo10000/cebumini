@@ -3,6 +3,88 @@
 {% block title %}Rooms - Cebu Hotel{% endblock %}
 {% block body_class %} rooms-page{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+    .room-availability {
+        border-top: 1px solid rgba(15, 118, 110, 0.16);
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+
+    .room-availability-label {
+        color: #0f766e;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 0.65rem;
+    }
+
+    .room-availability-input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+    }
+
+    .room-availability-calendar .flatpickr-calendar {
+        background: #ffffff;
+        border: 1px solid rgba(15, 118, 110, 0.16);
+        box-shadow: none;
+        width: 100%;
+        font-size: 0.82rem;
+    }
+
+    .room-availability-calendar .flatpickr-months .flatpickr-month {
+        height: 34px;
+    }
+
+    .room-availability-calendar .flatpickr-current-month {
+        padding-top: 4px;
+        font-size: 0.95rem;
+    }
+
+    .room-availability-calendar .flatpickr-innerContainer,
+    .room-availability-calendar .flatpickr-rContainer,
+    .room-availability-calendar .flatpickr-days,
+    .room-availability-calendar .dayContainer {
+        width: 100%;
+        min-width: 100%;
+        max-width: none;
+    }
+
+    .room-availability-calendar .flatpickr-day {
+        border-radius: 5px;
+        color: #0f172a;
+        height: 32px;
+        line-height: 32px;
+    }
+
+    .room-availability-calendar .flatpickr-day:not(.flatpickr-disabled):not(.selected):not(.startRange):not(.endRange) {
+        background: #ecfdf5;
+        border-color: #bbf7d0;
+        color: #065f46;
+    }
+
+    .room-availability-calendar .flatpickr-day.flatpickr-disabled,
+    .room-availability-calendar .flatpickr-day.flatpickr-disabled:hover {
+        background: #fee2e2;
+        border-color: #fecaca;
+        color: #6b7280;
+        cursor: not-allowed;
+        text-decoration: line-through;
+    }
+
+    .room-availability-calendar .flatpickr-day.selected,
+    .room-availability-calendar .flatpickr-day.startRange,
+    .room-availability-calendar .flatpickr-day.endRange,
+    .room-availability-calendar .flatpickr-day.inRange {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #ffffff;
+        box-shadow: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="guest-page">
     <section class="guest-page-header">
@@ -122,6 +204,20 @@
                                 <i class="fas fa-check-circle"></i> {{ room.get_amenities_list|slice:":3"|join:", " }}
                             </p>
                         {% endif %}
+                        <div class="room-availability">
+                            <div class="room-availability-label">
+                                <i class="fas fa-calendar-days"></i> Availability
+                            </div>
+                            <input
+                                id="room-calendar-{{ room.id }}"
+                                class="room-availability-input js-room-calendar"
+                                type="text"
+                                data-room-id="{{ room.id }}"
+                                data-booking-url="{% url 'bookings:create_booking' room.id %}"
+                                aria-label="Availability calendar for room {{ room.room_number }}"
+                            >
+                            <div id="room-calendar-inline-{{ room.id }}" class="room-availability-calendar"></div>
+                        </div>
                     </div>
 
                     <div class="card-footer">
@@ -177,4 +273,45 @@
         </section>
     {% endif %}
 </div>
+{{ room_booked_dates|json_script:"room-booked-dates-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bookedDatesByRoom = JSON.parse(document.getElementById('room-booked-dates-data').textContent);
+
+    document.querySelectorAll('.js-room-calendar').forEach(function(calendarInput) {
+        const roomId = calendarInput.dataset.roomId;
+        const calendarContainer = document.getElementById('room-calendar-inline-' + roomId);
+
+        if (typeof flatpickr === 'undefined') {
+            calendarContainer.innerHTML = '<p class="text-muted small mb-0">Availability calendar could not load.</p>';
+            return;
+        }
+
+        flatpickr(calendarInput, {
+            mode: 'range',
+            inline: true,
+            appendTo: calendarContainer,
+            minDate: 'today',
+            dateFormat: 'Y-m-d',
+            disable: bookedDatesByRoom[roomId] || [],
+            onChange: function(selectedDates, dateStr, instance) {
+                if (selectedDates.length !== 2) {
+                    return;
+                }
+
+                const checkIn = instance.formatDate(selectedDates[0], 'Y-m-d');
+                const checkOut = instance.formatDate(selectedDates[1], 'Y-m-d');
+                const bookingUrl = new URL(calendarInput.dataset.bookingUrl, window.location.origin);
+                bookingUrl.searchParams.set('check_in', checkIn);
+                bookingUrl.searchParams.set('check_out', checkOut);
+                window.location.href = bookingUrl.toString();
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

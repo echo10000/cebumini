@@ -1,60 +1,201 @@
-{% extends 'guest/guest_base.html' %}
+{% extends 'base.html' %}
 
-{% block title %}Payment Successful - Cebu Hotel{% endblock %}
+{% block title %}Payment Successful - Cebu Mini Hotel{% endblock %}
+
+{% block extra_css %}
+<style>
+    body,
+    main,
+    main > .container {
+        background: #f7fbfb !important;
+        color: #1f2937;
+    }
+
+    .payment-result {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 0 3rem;
+    }
+
+    .result-panel {
+        background: #ffffff;
+        border: 1px solid #d9e2e7;
+        border-radius: 8px;
+        padding: 2rem;
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .result-hero {
+        text-align: center;
+        margin-bottom: 1.75rem;
+    }
+
+    .result-icon {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        background: #e8f7ef;
+        color: #15803d;
+        font-size: 2.25rem;
+    }
+
+    .payment-result h1,
+    .payment-result h2 {
+        color: #111827;
+        letter-spacing: 0;
+    }
+
+    .payment-result h1 {
+        font-size: 2rem;
+        margin-bottom: 0.4rem;
+    }
+
+    .result-copy {
+        color: #4b5563;
+        margin-bottom: 0;
+    }
+
+    .booking-reference {
+        border: 1px solid #b8d8d8;
+        border-left: 4px solid #008080;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 1.5rem;
+        background: #f2fbfb;
+    }
+
+    .booking-reference span {
+        display: block;
+        color: #4b5563;
+        font-size: 0.9rem;
+    }
+
+    .booking-reference strong {
+        color: #008080;
+        font-size: 1.35rem;
+    }
+
+    .summary-table {
+        width: 100%;
+        margin-bottom: 1.5rem;
+        border: 1px solid #d9e2e7;
+        border-radius: 8px;
+        overflow: hidden;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .summary-table th,
+    .summary-table td {
+        padding: 0.9rem 1rem;
+        border-bottom: 1px solid #e5edf0;
+        background: #ffffff;
+        color: #1f2937;
+    }
+
+    .summary-table tr:last-child th,
+    .summary-table tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .summary-table th {
+        width: 42%;
+        color: #4b5563;
+        font-weight: 600;
+    }
+
+    .summary-amount {
+        color: #008080;
+        font-weight: 700;
+    }
+
+    .result-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.8rem;
+    }
+
+    .result-actions .btn {
+        border-radius: 6px;
+        padding: 0.8rem 1rem;
+        font-weight: 700;
+    }
+
+    .result-actions .btn-primary {
+        background: #008080;
+        border-color: #008080;
+    }
+
+    .result-actions .btn-primary:hover {
+        background: #006f6f;
+        border-color: #006f6f;
+    }
+
+    @media (max-width: 640px) {
+        .result-panel {
+            padding: 1.4rem;
+        }
+
+        .result-actions {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="guest-page">
-    <section class="guest-page-header">
-        <div>
-            <p class="guest-kicker">Payment Status</p>
+<div class="payment-result">
+    <section class="result-panel">
+        <div class="result-hero">
+            <div class="result-icon">
+                <i class="fas fa-check"></i>
+            </div>
             <h1>Payment Successful</h1>
-            <p>Your booking has been confirmed.</p>
+            <p class="result-copy">Your PayMongo payment was completed and your booking is confirmed.</p>
         </div>
-        <span class="badge bg-success">Confirmed</span>
+
+        <div class="booking-reference">
+            <span>Booking Reference Number</span>
+            <strong>#{{ booking.id }}</strong>
+        </div>
+
+        <h2 class="h5 mb-3">Booking Summary</h2>
+        <table class="summary-table">
+            <tbody>
+                <tr>
+                    <th>Room Number</th>
+                    <td>{{ booking.room.room_number }}</td>
+                </tr>
+                <tr>
+                    <th>Check-in</th>
+                    <td>{{ booking.check_in|date:"M d, Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Check-out</th>
+                    <td>{{ booking.check_out|date:"M d, Y" }}</td>
+                </tr>
+                <tr>
+                    <th>Total Amount</th>
+                    <td><span class="summary-amount">PHP {{ booking.total_price|floatformat:2 }}</span></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="result-actions">
+            <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-primary">
+                <i class="fas fa-eye"></i> View My Booking
+            </a>
+            <a href="{% url 'bookings:booking_pdf' booking.id %}" class="btn btn-primary">
+                <i class="fas fa-file-pdf"></i> Download Confirmation
+            </a>
+            <a href="{% url 'auth:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-home"></i> Go to Dashboard
+            </a>
+        </div>
     </section>
-
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <section class="guest-card">
-                <div class="text-center mb-4">
-                    <div class="display-2 text-success"><i class="fas fa-check-circle"></i></div>
-                    <h2 class="h4">Your booking is confirmed</h2>
-                    <p class="text-muted">A confirmation email has been sent to {{ booking.guest.email }}.</p>
-                </div>
-
-                <div class="guest-grid two mb-4">
-                    <div class="guest-card shadow-none">
-                        <h3 class="h5">Booking Confirmation</h3>
-                        <p class="mb-1"><strong>Booking ID:</strong> #{{ booking.id }}</p>
-                        <p class="mb-1"><strong>Room:</strong> {{ booking.room.room_number }}</p>
-                        <p class="mb-1"><strong>Check-in:</strong> {{ booking.check_in|date:"M d, Y" }}</p>
-                        <p class="mb-0"><strong>Check-out:</strong> {{ booking.check_out|date:"M d, Y" }}</p>
-                    </div>
-                    <div class="guest-card shadow-none">
-                        <h3 class="h5">Payment Information</h3>
-                        <p class="mb-1"><strong>Amount Paid:</strong> <span class="guest-price">PHP {{ payment.amount }}</span></p>
-                        <p class="mb-1"><strong>Payment Method:</strong> {{ payment.payment_method }}</p>
-                        <p class="mb-0"><strong>Status:</strong> <span class="badge bg-success">{{ payment.status }}</span></p>
-                    </div>
-                </div>
-
-                <div class="alert alert-info">
-                    You can view and manage this booking from your booking history.
-                </div>
-
-                <div class="d-grid gap-2">
-                    <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-primary btn-lg">
-                        <i class="fas fa-eye"></i> View Booking Details
-                    </a>
-                    <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary">
-                        <i class="fas fa-history"></i> View All Bookings
-                    </a>
-                    <a href="{% url 'rooms:list' %}" class="btn btn-secondary">
-                        <i class="fas fa-door-open"></i> Browse More Rooms
-                    </a>
-                </div>
-            </section>
-        </div>
-    </div>
 </div>
 {% endblock %}

@@ -117,8 +117,14 @@
                     <div class="list-group">
                         {% for complaint in escalated_complaints %}
                         <div class="list-group-item">
-                            <h6 class="mb-1">Booking #{{ complaint.booking.id }}</h6>
-                            <p class="mb-1 small">{{ complaint.complaint_description|truncatewords:10 }}</p>
+                            <h6 class="mb-1">
+                                {% if complaint.booking %}
+                                    Booking #{{ complaint.booking.id }}
+                                {% else %}
+                                    Complaint #{{ complaint.id }}
+                                {% endif %}
+                            </h6>
+                            <p class="mb-1 small">{{ complaint.description|truncatewords:10 }}</p>
                             <small class="text-muted">
                                 <strong>Status:</strong> {{ complaint.get_status_display }}
                             </small>

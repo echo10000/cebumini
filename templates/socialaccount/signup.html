@@ -193,6 +193,14 @@
         Your Google account has been authenticated successfully. Please complete the information below to finalize your Cebu Luxury account.
     </p>
 
+    {% if messages %}
+        {% for message in messages %}
+            <div class="luxury-error">
+                <i class="fas fa-info-circle"></i> {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <!-- Signup Form -->
     <form method="post" class="luxury-form">
         {% csrf_token %}

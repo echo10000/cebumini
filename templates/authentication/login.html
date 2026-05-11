@@ -24,7 +24,7 @@
         <p class="auth-subtitle">Use your email or username to continue to the right dashboard for your role.</p>
 
         {% if google_oauth_configured %}
-            <a href="{% provider_login_url 'google' %}" class="auth-button secondary">
+            <a href="{% provider_login_url 'google' %}" class="auth-button secondary auth-google-button">
                 <i class="fab fa-google"></i>
                 Continue with Google
             </a>

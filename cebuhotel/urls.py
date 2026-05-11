@@ -6,6 +6,7 @@ from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic.base import RedirectView
+from authentication import views_admin
 from authentication.views import home_view, allauth_login_redirect
 
 urlpatterns = [
@@ -24,6 +25,7 @@ urlpatterns = [
     path('chatbot/', include('authentication.urls_chatbot')),
     path('', include('authentication.urls_chatbot_test')),  # Includes /api/chat/, /api/chatbot/, etc.
     path('admin-panel/', include('authentication.urls_admin')),
+    path('admin-dashboard/reports/', views_admin.admin_reports, name='admin_dashboard_reports'),
     path('staff/', include('authentication.urls_staff')),
     path('', home_view, name='home'),
 ]

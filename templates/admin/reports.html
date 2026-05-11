@@ -1,250 +1,479 @@
 {% extends 'admin/admin_base.html' %}
 
-{% block title %}Reports - Cebu Luxury{% endblock %}
+{% block title %}Reports & Analytics - Cebu Mini Hotel{% endblock %}
 
 {% block content %}
-<!-- Page Header -->
 <div class="page-header">
     <h1>Reports & Analytics</h1>
-    <p>View comprehensive reports and business analytics</p>
-</div>
-
-<!-- Reports Overview -->
-<div class="row mb-4 g-4">
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card-luxury">
-            <div class="stat-icon">
-                <i class="fas fa-file-invoice-dollar"></i>
-            </div>
-            <div class="stat-label">Revenue Report</div>
-            <div class="stat-value">₱{{ total_revenue|floatformat:0 }}</div>
-            <div class="stat-description">Total revenue this period</div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card-luxury">
-            <div class="stat-icon">
-                <i class="fas fa-calendar-days"></i>
-            </div>
-            <div class="stat-label">Bookings</div>
-            <div class="stat-value">{{ total_bookings }}</div>
-            <div class="stat-description">Total bookings made</div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card-luxury">
-            <div class="stat-icon">
-                <i class="fas fa-user-friends"></i>
-            </div>
-            <div class="stat-label">Guests</div>
-            <div class="stat-value">{{ total_guests }}</div>
-            <div class="stat-description">Unique guest count</div>
-        </div>
-    </div>
-    <div class="col-md-6 col-lg-3">
-        <div class="stat-card-luxury">
-            <div class="stat-icon">
-                <i class="fas fa-percent"></i>
-            </div>
-            <div class="stat-label">Occupancy</div>
-            <div class="stat-value">{{ avg_occupancy|floatformat:1 }}%</div>
-            <div class="stat-description">Average occupancy rate</div>
-        </div>
+    <p>Operational performance, revenue, bookings, and room demand.</p>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+        <a href="{% url 'admin_panel:export_bookings_csv' %}" class="btn btn-primary">
+            <i class="fas fa-file-csv"></i> Export Bookings CSV
+        </a>
+        <a href="{% url 'admin_panel:export_payments_csv' %}" class="btn btn-primary">
+            <i class="fas fa-file-csv"></i> Export Payments CSV
+        </a>
+        <a href="{% url 'admin_panel:export_guests_csv' %}" class="btn btn-primary">
+            <i class="fas fa-file-csv"></i> Export Guests CSV
+        </a>
     </div>
 </div>
 
-<!-- Monthly Revenue Report -->
-<div class="admin-card mb-4">
+<section class="reports-summary-grid">
+    <article class="report-stat-card">
+        <span class="report-stat-icon"><i class="fas fa-calendar-check"></i></span>
+        <div class="report-stat-label">Total Bookings</div>
+        <div class="report-stat-value">{{ total_bookings }}</div>
+        <div class="report-stat-note">All time</div>
+    </article>
+    <article class="report-stat-card">
+        <span class="report-stat-icon"><i class="fas fa-peso-sign"></i></span>
+        <div class="report-stat-label">Total Revenue</div>
+        <div class="report-stat-value">PHP {{ total_revenue|floatformat:2 }}</div>
+        <div class="report-stat-note">Completed payments</div>
+    </article>
+    <article class="report-stat-card">
+        <span class="report-stat-icon"><i class="fas fa-bed"></i></span>
+        <div class="report-stat-label">Occupancy Today</div>
+        <div class="report-stat-value">{{ occupancy_rate_today|floatformat:1 }}%</div>
+        <div class="report-stat-note">{{ checked_in_rooms }} of {{ total_rooms }} rooms checked in</div>
+    </article>
+    <article class="report-stat-card">
+        <span class="report-stat-icon"><i class="fas fa-users"></i></span>
+        <div class="report-stat-label">Registered Guests</div>
+        <div class="report-stat-value">{{ total_guests }}</div>
+        <div class="report-stat-note">Guest accounts</div>
+    </article>
+</section>
+
+<section class="admin-card mb-4">
+    <div class="admin-card-header">
+        <h5><i class="fas fa-chart-pie"></i> Room Occupancy</h5>
+    </div>
+    <div class="admin-card-body">
+        <div class="occupancy-layout">
+            <div class="occupancy-room-grid">
+                {% for card in occupancy_room_cards %}
+                    <article class="occupancy-room-card {{ card.status_key }}">
+                        <div>
+                            <div class="occupancy-room-number">Room {{ card.room.room_number }}</div>
+                            <div class="occupancy-room-type">{{ card.room.get_room_type_display }}</div>
+                            {% if card.guest_name %}
+                                <div class="occupancy-room-guest"><i class="fas fa-user"></i> {{ card.guest_name }}</div>
+                            {% endif %}
+                        </div>
+                        <span class="occupancy-status-pill">{{ card.status_label }}</span>
+                    </article>
+                {% endfor %}
+            </div>
+            <div class="occupancy-side-panel">
+                <div class="occupancy-ring-card">
+                    <div class="occupancy-ring" style="--occupancy-percent: {{ occupancy_rate_percent|floatformat:0 }}%;">
+                        <div class="occupancy-ring-value">{{ occupancy_rate_percent|floatformat:0 }}%</div>
+                    </div>
+                    <div class="occupancy-ring-label">{{ occupancy_occupied_today }} of {{ occupancy_total_rooms }} rooms occupied today</div>
+                </div>
+                <div class="occupancy-chart-card">
+                    <div class="occupancy-chart-wrap">
+                        <canvas id="weeklyOccupancyChart" aria-label="Weekly occupancy chart" role="img"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="admin-card mb-4">
     <div class="admin-card-header">
         <h5><i class="fas fa-chart-column"></i> Monthly Revenue</h5>
     </div>
     <div class="admin-card-body">
-        {% if monthly_revenue %}
-            <div class="admin-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Month</th>
-                            <th>Revenue</th>
-                            <th>Bookings</th>
-                            <th>Avg Occupancy</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for month_data in monthly_revenue %}
-                        <tr>
-                            <td>{{ month_data.month|date:"F Y" }}</td>
-                            <td><strong style="color: var(--gold);">₱{{ month_data.revenue|floatformat:2 }}</strong></td>
-                            <td>{{ month_data.bookings }}</td>
-                            <td>{{ month_data.occupancy|floatformat:1 }}%</td>
-                            <td>
-                                {% if month_data.revenue > 500000 %}
-                                    <span class="badge-notification" style="background: #10b981;">Excellent</span>
-                                {% elif month_data.revenue > 300000 %}
-                                    <span class="badge-notification" style="background: #3b82f6;">Good</span>
-                                {% else %}
-                                    <span class="badge-notification" style="background: #f59e0b;">Fair</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
-                <i class="fas fa-chart-line" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                No data available yet.
-            </div>
-        {% endif %}
+        <div class="report-chart-wrap">
+            <canvas id="monthlyRevenueChart" aria-label="Monthly revenue chart" role="img"></canvas>
+        </div>
     </div>
-</div>
+</section>
 
-<!-- Room Type Performance -->
-<div class="admin-card mb-4">
+<section class="admin-card mb-4">
     <div class="admin-card-header">
-        <h5><i class="fas fa-door-open"></i> Room Type Performance</h5>
+        <h5><i class="fas fa-list-check"></i> Bookings by Status</h5>
     </div>
     <div class="admin-card-body">
-        {% if room_performance %}
-            <div class="admin-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Room Type</th>
-                            <th>Total Rooms</th>
-                            <th>Bookings</th>
-                            <th>Revenue</th>
-                            <th>Occupancy</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for room_data in room_performance %}
-                        <tr>
-                            <td>{{ room_data.room_type }}</td>
-                            <td>{{ room_data.total_rooms }}</td>
-                            <td>{{ room_data.bookings }}</td>
-                            <td><strong style="color: var(--gold);">₱{{ room_data.revenue|floatformat:2 }}</strong></td>
-                            <td>{{ room_data.occupancy|floatformat:1 }}%</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        {% else %}
-            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
-                <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                No room data available.
-            </div>
-        {% endif %}
+        <div class="admin-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Status</th>
+                        <th>Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in booking_status_rows %}
+                    <tr>
+                        <td>{{ row.status }}</td>
+                        <td><strong>{{ row.count }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+</section>
 
-<!-- Payment Status Report -->
-<div class="admin-card">
+<section class="admin-card mb-4">
     <div class="admin-card-header">
-        <h5><i class="fas fa-credit-card"></i> Payment Status Overview</h5>
+        <h5><i class="fas fa-clock-rotate-left"></i> Recent Bookings</h5>
     </div>
     <div class="admin-card-body">
-        {% if payment_summary %}
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
-                <div style="background: rgba(201, 168, 76, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #c9a84c;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Total Transactions</div>
-                    <div style="font-size: 1.75rem; font-weight: 700; color: #c9a84c; font-family: 'Playfair Display', serif;">{{ payment_summary.total }}</div>
-                </div>
-                <div style="background: rgba(16, 185, 129, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #10b981;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Completed</div>
-                    <div style="font-size: 1.75rem; font-weight: 700; color: #10b981; font-family: 'Playfair Display', serif;">{{ payment_summary.completed }}</div>
-                </div>
-                <div style="background: rgba(245, 158, 11, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #f59e0b;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Pending</div>
-                    <div style="font-size: 1.75rem; font-weight: 700; color: #f59e0b; font-family: 'Playfair Display', serif;">{{ payment_summary.pending }}</div>
-                </div>
-                <div style="background: rgba(220, 38, 38, 0.1); padding: 1.5rem; border-radius: 8px; border-left: 4px solid #dc2626;">
-                    <div style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0.5rem;">Failed</div>
-                    <div style="font-size: 1.75rem; font-weight: 700; color: #dc2626; font-family: 'Playfair Display', serif;">{{ payment_summary.failed }}</div>
-                </div>
-            </div>
-        {% else %}
-            <div style="padding: 2rem; text-align: center; color: var(--text-muted);">
-                <i class="fas fa-credit-card" style="font-size: 2rem; margin-bottom: 1rem; display: block;"></i>
-                No payment data available.
-            </div>
-        {% endif %}
+        <div class="admin-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Guest</th>
+                        <th>Room</th>
+                        <th>Check-in</th>
+                        <th>Check-out</th>
+                        <th>Payment Status</th>
+                        <th>Booking Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in recent_bookings %}
+                    <tr>
+                        <td>#{{ item.booking.id }}</td>
+                        <td>{{ item.booking.guest.get_full_name|default:item.booking.guest.username }}</td>
+                        <td>Room {{ item.booking.room.room_number }}</td>
+                        <td>{{ item.booking.check_in|date:"M d, Y" }}</td>
+                        <td>{{ item.booking.check_out|date:"M d, Y" }}</td>
+                        <td>{{ item.payment_status }}</td>
+                        <td>{{ item.booking.get_status_display }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No bookings yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+</section>
+
+<section class="admin-card">
+    <div class="admin-card-header">
+        <h5><i class="fas fa-ranking-star"></i> Top Rooms</h5>
+    </div>
+    <div class="admin-card-body">
+        <div class="admin-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Room Number</th>
+                        <th>Total Bookings</th>
+                        <th>Total Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for room in top_rooms %}
+                    <tr>
+                        <td>Room {{ room.room_number }}</td>
+                        <td>{{ room.total_bookings }}</td>
+                        <td><strong>PHP {{ room.total_revenue|default:0|floatformat:2 }}</strong></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">No room booking data yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
 
 <style>
-    .stat-card-luxury {
+    .reports-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .report-stat-card {
         background: #1a2235;
-        border-left: 4px solid #c9a84c;
-        border-radius: 12px;
-        padding: 1.75rem;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(15, 118, 110, 0.38);
+        border-left: 4px solid #0f766e;
+        border-radius: 8px;
+        padding: 1.35rem;
+        min-height: 155px;
+    }
+
+    .report-stat-icon {
+        width: 42px;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 8px;
+        background: rgba(15, 118, 110, 0.16);
+        color: #2dd4bf;
+        margin-bottom: 0.9rem;
+    }
+
+    .report-stat-label {
+        color: #d1d5db;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        font-weight: 700;
+        margin-bottom: 0.35rem;
+    }
+
+    .report-stat-value {
+        color: #2dd4bf;
+        font-size: 1.8rem;
+        line-height: 1.15;
+        font-weight: 800;
+        font-family: 'Playfair Display', serif;
+        word-break: break-word;
+    }
+
+    .report-stat-note {
+        color: #9ca3af;
+        font-size: 0.86rem;
+        margin-top: 0.45rem;
+    }
+
+    .report-chart-wrap {
+        height: 360px;
         position: relative;
-        overflow: hidden;
+    }
+
+    .occupancy-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.7fr);
+        gap: 1.25rem;
+        align-items: stretch;
+    }
+
+    .occupancy-room-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+    }
+
+    .occupancy-room-card {
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 130px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
     }
 
-    .stat-card-luxury::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        width: 150px;
-        height: 150px;
-        background: radial-gradient(circle, rgba(201, 168, 76, 0.05) 0%, transparent 70%);
-        border-radius: 50%;
-        pointer-events: none;
-    }
+    .occupancy-room-card.available { background: rgba(22, 163, 74, 0.18); border-color: rgba(34, 197, 94, 0.42); }
+    .occupancy-room-card.confirmed { background: rgba(202, 138, 4, 0.2); border-color: rgba(250, 204, 21, 0.42); }
+    .occupancy-room-card.checked-in { background: rgba(37, 99, 235, 0.24); border-color: rgba(96, 165, 250, 0.42); }
+    .occupancy-room-card.checked-out { background: rgba(107, 114, 128, 0.24); border-color: rgba(156, 163, 175, 0.42); }
+    .occupancy-room-card.maintenance { background: rgba(185, 28, 28, 0.24); border-color: rgba(248, 113, 113, 0.48); }
 
-    .stat-card-luxury:hover {
-        border-left-color: #e6c76e;
-        transform: translateY(-8px);
-        box-shadow: 0 20px 40px rgba(201, 168, 76, 0.25),
-                    0 0 30px rgba(201, 168, 76, 0.15);
-    }
-
-    .stat-card-luxury .stat-icon {
-        font-size: 2.5rem;
-        color: #c9a84c;
-        margin-bottom: 1rem;
-        line-height: 1;
-        position: relative;
-        z-index: 1;
-        width: 50px;
-    }
-
-    .stat-card-luxury .stat-label {
-        font-size: 0.9rem;
+    .occupancy-room-number {
         color: #ffffff;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.75rem;
-        position: relative;
-        z-index: 1;
+        font-weight: 800;
+        font-size: 1.1rem;
     }
 
-    .stat-card-luxury .stat-value {
-        font-size: 2.25rem;
+    .occupancy-room-type,
+    .occupancy-room-guest {
+        color: #d1d5db;
+        font-size: 0.86rem;
+        margin-top: 0.25rem;
+    }
+
+    .occupancy-status-pill {
+        color: #ffffff;
+        background: rgba(15, 22, 35, 0.45);
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
+        width: fit-content;
+        font-size: 0.78rem;
         font-weight: 700;
-        color: #c9a84c;
-        margin-bottom: 0.5rem;
-        line-height: 1.2;
-        font-family: 'Playfair Display', serif;
-        position: relative;
-        z-index: 1;
+        margin-top: 0.8rem;
     }
 
-    .stat-card-luxury .stat-description {
-        font-size: 0.85rem;
-        color: #9ca3af;
-        line-height: 1.4;
+    .occupancy-side-panel {
+        display: grid;
+        grid-template-rows: auto minmax(220px, 1fr);
+        gap: 1rem;
+    }
+
+    .occupancy-ring-card,
+    .occupancy-chart-card {
+        background: #111827;
+        border: 1px solid rgba(15, 118, 110, 0.28);
+        border-radius: 8px;
+        padding: 1.2rem;
+    }
+
+    .occupancy-ring {
+        --occupancy-percent: 0%;
+        width: 150px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        background: conic-gradient(#0f766e var(--occupancy-percent), rgba(75, 85, 99, 0.55) 0);
+        display: grid;
+        place-items: center;
         position: relative;
-        z-index: 1;
+    }
+
+    .occupancy-ring::before {
+        content: '';
+        width: 108px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: #111827;
+        position: absolute;
+    }
+
+    .occupancy-ring-value {
+        color: #2dd4bf;
+        font-size: 1.65rem;
+        font-weight: 800;
+        position: relative;
+    }
+
+    .occupancy-ring-label {
+        color: #d1d5db;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .occupancy-chart-wrap {
+        height: 240px;
+        position: relative;
+    }
+
+    @media (max-width: 1100px) {
+        .reports-summary-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .occupancy-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .reports-summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .occupancy-room-grid {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const labels = {{ monthly_revenue_labels_json|safe }};
+    const values = {{ monthly_revenue_values_json|safe }};
+    const canvas = document.getElementById('monthlyRevenueChart');
+    const weeklyOccupancyCanvas = document.getElementById('weeklyOccupancyChart');
+
+    if (typeof Chart === 'undefined') {
+        return;
+    }
+
+    if (canvas) {
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Revenue (PHP)',
+                    data: values,
+                    backgroundColor: 'rgba(15, 118, 110, 0.82)',
+                    borderColor: '#2dd4bf',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { color: '#d1d5db' },
+                        grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            color: '#d1d5db',
+                            callback: function(value) {
+                                return 'PHP ' + value.toLocaleString();
+                            }
+                        },
+                        grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#e5e7eb' }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'PHP ' + Number(context.raw || 0).toLocaleString();
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    if (weeklyOccupancyCanvas) {
+        new Chart(weeklyOccupancyCanvas, {
+            type: 'bar',
+            data: {
+                labels: {{ weekly_occupancy_labels_json|safe }},
+                datasets: [{
+                    label: 'Occupied rooms',
+                    data: {{ weekly_occupancy_values_json|safe }},
+                    backgroundColor: 'rgba(15, 118, 110, 0.88)',
+                    borderColor: '#2dd4bf',
+                    borderWidth: 1,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        ticks: { color: '#d1d5db' },
+                        grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#d1d5db', precision: 0, stepSize: 1 },
+                        grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: { color: '#e5e7eb' }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
 {% endblock %}

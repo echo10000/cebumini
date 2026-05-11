@@ -38,6 +38,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'authentication.middleware.CurrentRequestMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -58,6 +59,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'authentication.context_processors.guest_notifications',
+                'authentication.context_processors.echo_chatbot_context',
             ],
         },
     },
@@ -174,7 +176,7 @@ OTP_LOGIN_URL = '/auth/login/'
 
 # 2FA Settings
 TWO_FACTOR_ENABLED = True
-TWO_FACTOR_REQUIRED = False
+TWO_FACTOR_REQUIRED = True
 OTP_EMAIL_SENDER = 'noreply@cebu-luxury.com'
 OTP_EMAIL_SUBJECT = 'Your Cebu Luxury Verification Code'
 OTP_EMAIL_TOKEN_VALIDITY = 300  # 5 minutes
@@ -186,6 +188,7 @@ STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_01234567890')
 # PayMongo Test Keys (LOCAL PH PAYMENTS)
 PAYMONGO_PUBLIC_KEY = config('PAYMONGO_PUBLIC_KEY', default='pk_test_xyz123456789')
 PAYMONGO_SECRET_KEY = config('PAYMONGO_SECRET_KEY', default='sk_test_xyz123456789')
+PAYMONGO_WEBHOOK_SECRET = config('PAYMONGO_WEBHOOK_SECRET', default='')
 PAYMONGO_TEST_MODE = config('PAYMONGO_TEST_MODE', default=True, cast=bool)  # Set to False for production
 
 # GCash Test Configuration

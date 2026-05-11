@@ -1,17 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponseForbidden
+from django.conf import settings
+from django.core.mail import send_mail
+from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
-from django.db.models import Q, Sum, Count
+from django.db.models import Q, Sum, Count, Prefetch
 from django.utils import timezone
 from datetime import timedelta
-from .models import Payment, PaymentStatus, Booking, BookingStatus, Room, CustomUser, UserRole
+from .models import Payment, PaymentStatus, Booking, BookingStatus, Room, CustomUser, UserRole, AuditLog, Testimonial
 from .forms_admin import PaymentApprovalForm
 from .views_rooms import room_delete_view
-from .utils import log_audit
+from .utils import confirm_booking_after_completed_payment, get_occupancy_chart_context, is_two_fa_configured, log_audit
 import json
+import csv
 
 
 def admin_required(view_func):
@@ -26,6 +29,10 @@ def admin_required(view_func):
         # Check if admin has accepted terms
         if not request.user.has_accepted_terms():
             return redirect('auth:accept_terms')
+
+        if not is_two_fa_configured(request.user):
+            messages.warning(request, 'Two-factor authentication is required for admin accounts.')
+            return redirect('auth:setup_2fa')
         
         return view_func(request, *args, **kwargs)
     return wrapper
@@ -36,6 +43,7 @@ def admin_required(view_func):
 def admin_dashboard(request):
     """Admin Dashboard with overview statistics"""
     today = timezone.now().date()
+    audit_action_filter = request.GET.get('audit_action', '').strip()
     
     # Basic stats
     total_bookings = Booking.objects.count()
@@ -74,6 +82,13 @@ def admin_dashboard(request):
     pending_payments = Payment.objects.select_related('booking__room', 'booking__guest').filter(
         status=PaymentStatus.PENDING
     ).order_by('-created_at')[:5]
+    pending_testimonials = Testimonial.objects.select_related('guest').filter(
+        status=Testimonial.Status.PENDING
+    ).order_by('created_at')[:10]
+
+    audit_logs = AuditLog.objects.select_related('actor', 'affected_user').order_by('-created_at')
+    if audit_action_filter:
+        audit_logs = audit_logs.filter(action=audit_action_filter)
     
     context = {
         'total_bookings': total_bookings,
@@ -87,9 +102,59 @@ def admin_dashboard(request):
         'total_rooms': total_rooms,
         'recent_bookings': recent_bookings,
         'pending_payments': pending_payments,
+        'recent_audit_logs': audit_logs[:50],
+        'audit_action_filter': audit_action_filter,
+        'audit_action_choices': AuditLog.ACTION_CHOICES,
+        'pending_testimonials': pending_testimonials,
+        'two_fa': request.user.two_factor_auth,
     }
+    context.update(get_occupancy_chart_context(today))
     
     return render(request, 'admin/dashboard.html', context)
+
+
+def _send_testimonial_approval_email(testimonial):
+    recipient = testimonial.guest.email if testimonial.guest and testimonial.guest.email else testimonial.guest_email
+    if not recipient:
+        return False
+
+    send_mail(
+        'Your Cebu Mini Hotel review is published',
+        'Your review has been published on Cebu Mini Hotel!',
+        settings.DEFAULT_FROM_EMAIL,
+        [recipient],
+        fail_silently=True,
+    )
+    return True
+
+
+@login_required
+@admin_required
+@require_http_methods(["POST"])
+def approve_testimonial(request, testimonial_id):
+    testimonial = get_object_or_404(Testimonial, id=testimonial_id, status=Testimonial.Status.PENDING)
+    testimonial.status = Testimonial.Status.APPROVED
+    testimonial.is_approved = True
+    testimonial.reviewed_by = request.user
+    testimonial.reviewed_at = timezone.now()
+    testimonial.save(update_fields=['status', 'is_approved', 'reviewed_by', 'reviewed_at', 'updated_at'])
+    _send_testimonial_approval_email(testimonial)
+    messages.success(request, f'Testimonial from {testimonial.guest_name} approved.')
+    return redirect('admin_panel:dashboard')
+
+
+@login_required
+@admin_required
+@require_http_methods(["POST"])
+def reject_testimonial(request, testimonial_id):
+    testimonial = get_object_or_404(Testimonial, id=testimonial_id, status=Testimonial.Status.PENDING)
+    testimonial.status = Testimonial.Status.REJECTED
+    testimonial.is_approved = False
+    testimonial.reviewed_by = request.user
+    testimonial.reviewed_at = timezone.now()
+    testimonial.save(update_fields=['status', 'is_approved', 'reviewed_by', 'reviewed_at', 'updated_at'])
+    messages.success(request, f'Testimonial from {testimonial.guest_name} rejected.')
+    return redirect('admin_panel:dashboard')
 
 
 @login_required
@@ -384,9 +449,11 @@ def booking_edit(request, booking_id):
         
         if action == 'confirm':
             if booking.status == BookingStatus.PENDING:
-                booking.status = BookingStatus.CONFIRMED
-                booking.save()
-                booking.send_confirmation_email()
+                completed_payment = booking.payments.filter(status=PaymentStatus.COMPLETED).order_by('-completed_at', '-created_at').first()
+                if not completed_payment:
+                    messages.error(request, 'Booking cannot be confirmed until payment is completed.')
+                    return redirect('admin_panel:booking_detail', booking_id=booking.id)
+                confirm_booking_after_completed_payment(completed_payment)
                 messages.success(request, 'Booking has been confirmed and the guest has been notified.')
             else:
                 messages.error(request, 'Only pending bookings can be confirmed.')
@@ -599,105 +666,227 @@ def user_management(request):
 @login_required
 @admin_required
 def admin_reports(request):
-    """Generate and view reports"""
-    from django.db.models import Count, Sum
-    from datetime import timedelta
-    
+    """Admin reports and analytics dashboard."""
     today = timezone.now().date()
-    
-    # ========================================
-    # REVENUE & BOOKING STATS
-    # ========================================
-    all_bookings = Booking.objects.all()
-    all_payments = Payment.objects.filter(status=PaymentStatus.COMPLETED)
-    total_revenue = all_payments.aggregate(Sum('amount'))['amount__sum'] or 0
-    total_bookings = all_bookings.count()
-    total_guests = all_bookings.values('guest').distinct().count()
-    
-    # Calculate average occupancy
     total_rooms = Room.objects.count()
-    confirmed_bookings = all_bookings.filter(status=BookingStatus.CONFIRMED).count()
-    avg_occupancy = (confirmed_bookings / total_rooms * 100) if total_rooms > 0 else 0
-    
-    # ========================================
-    # MONTHLY REVENUE DATA (Last 6 months)
-    # ========================================
-    monthly_revenue = []
+    checked_in_rooms = Booking.objects.filter(
+        status=BookingStatus.CHECKED_IN
+    ).values('room').distinct().count()
+    occupancy_rate_today = (checked_in_rooms / total_rooms * 100) if total_rooms else 0
+
+    completed_payments = Payment.objects.filter(status=PaymentStatus.COMPLETED)
+    total_revenue = completed_payments.aggregate(total=Sum('amount'))['total'] or 0
+    total_bookings = Booking.objects.count()
+    total_guests = CustomUser.objects.filter(role=UserRole.GUEST).count()
+    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+
+    def add_months(date_value, offset):
+        month_index = date_value.month - 1 + offset
+        year = date_value.year + month_index // 12
+        month = month_index % 12 + 1
+        return date_value.replace(year=year, month=month, day=1)
+
+    current_month = today.replace(day=1)
+    monthly_revenue_labels = []
+    monthly_revenue_values = []
     for i in range(5, -1, -1):
-        month_date = today - timedelta(days=30*i)
-        first_day = month_date.replace(day=1)
-        if month_date.month == 12:
-            last_day = first_day.replace(year=first_day.year + 1, month=1, day=1) - timedelta(days=1)
-        else:
-            last_day = first_day.replace(month=first_day.month + 1, day=1) - timedelta(days=1)
-        
-        month_bookings = all_bookings.filter(
-            created_at__date__gte=first_day,
-            created_at__date__lte=last_day
-        )
-        month_payments = all_payments.filter(
+        first_day = add_months(current_month, -i)
+        next_month = add_months(first_day, 1)
+        revenue = completed_payments.filter(
             completed_at__date__gte=first_day,
-            completed_at__date__lte=last_day
+            completed_at__date__lt=next_month,
+        ).aggregate(total=Sum('amount'))['total'] or 0
+        monthly_revenue_labels.append(first_day.strftime('%b %Y'))
+        monthly_revenue_values.append(float(revenue))
+
+    booking_status_rows = []
+    for status, label in [
+        (BookingStatus.PENDING, 'Pending'),
+        (BookingStatus.CONFIRMED, 'Confirmed'),
+        (BookingStatus.CHECKED_IN, 'Checked In'),
+        (BookingStatus.CHECKED_OUT, 'Checked Out'),
+        (BookingStatus.CANCELLED, 'Cancelled'),
+    ]:
+        booking_status_rows.append({
+            'status': label,
+            'count': Booking.objects.filter(status=status).count(),
+        })
+
+    recent_bookings_queryset = (
+        Booking.objects
+        .select_related('guest', 'room')
+        .prefetch_related(Prefetch('payments', queryset=Payment.objects.order_by('-created_at'), to_attr='recent_payments'))
+        .order_by('-created_at')[:10]
+    )
+    recent_bookings = []
+    for booking in recent_bookings_queryset:
+        payment = booking.recent_payments[0] if booking.recent_payments else None
+        recent_bookings.append({
+            'booking': booking,
+            'payment_status': payment.get_status_display() if payment else 'No payment',
+        })
+
+    top_rooms = (
+        Room.objects
+        .annotate(
+            total_bookings=Count('bookings', distinct=True),
+            total_revenue=Sum(
+                'bookings__payments__amount',
+                filter=Q(bookings__payments__status=PaymentStatus.COMPLETED)
+            ),
         )
-        month_rev = month_payments.aggregate(Sum('amount'))['amount__sum'] or 0
-        month_occupancy = (month_bookings.filter(status=BookingStatus.CONFIRMED).count() / total_rooms * 100) if total_rooms > 0 else 0
-        
-        monthly_revenue.append({
-            'month': first_day,
-            'revenue': month_rev,
-            'bookings': month_bookings.count(),
-            'occupancy': month_occupancy
-        })
-    
-    # ========================================
-    # ROOM TYPE PERFORMANCE
-    # ========================================
-    room_types = Room.objects.values_list('room_type', flat=True).distinct()
-    room_performance = []
-    for room_type in room_types:
-        rooms_of_type = Room.objects.filter(room_type=room_type)
-        total_rooms_type = rooms_of_type.count()
-        
-        bookings_type = all_bookings.filter(room__room_type=room_type)
-        bookings_count = bookings_type.count()
-        
-        payments_type = all_payments.filter(booking__room__room_type=room_type)
-        revenue_type = payments_type.aggregate(Sum('amount'))['amount__sum'] or 0
-        
-        occupancy_type = (bookings_type.filter(status=BookingStatus.CONFIRMED).count() / total_rooms_type * 100) if total_rooms_type > 0 else 0
-        
-        room_performance.append({
-            'room_type': room_type or 'Standard',
-            'total_rooms': total_rooms_type,
-            'bookings': bookings_count,
-            'revenue': revenue_type,
-            'occupancy': occupancy_type
-        })
-    
-    # ========================================
-    # PAYMENT STATUS SUMMARY
-    # ========================================
-    total_payments = Payment.objects.count()
-    completed_payments = Payment.objects.filter(status=PaymentStatus.COMPLETED).count()
-    pending_payments = Payment.objects.filter(status=PaymentStatus.PENDING).count()
-    failed_payments = Payment.objects.filter(status=PaymentStatus.FAILED).count()
-    
-    payment_summary = {
-        'total': total_payments,
-        'completed': completed_payments,
-        'pending': pending_payments,
-        'failed': failed_payments
-    }
-    
+        .order_by('-total_bookings', 'room_number')[:10]
+    )
+
     context = {
-        'total_revenue': total_revenue,
         'total_bookings': total_bookings,
+        'total_revenue': total_revenue,
+        'occupancy_rate_today': occupancy_rate_today,
+        'checked_in_rooms': checked_in_rooms,
+        'total_rooms': total_rooms,
         'total_guests': total_guests,
-        'avg_occupancy': avg_occupancy,
-        'monthly_revenue': monthly_revenue,
-        'room_performance': room_performance,
-        'payment_summary': payment_summary,
-        'pending_payments_count': pending_payments,
+        'monthly_revenue_labels_json': json.dumps(monthly_revenue_labels),
+        'monthly_revenue_values_json': json.dumps(monthly_revenue_values),
+        'booking_status_rows': booking_status_rows,
+        'recent_bookings': recent_bookings,
+        'top_rooms': top_rooms,
+        'pending_payments_count': pending_payments_count,
     }
-    
+    context.update(get_occupancy_chart_context(today))
+
     return render(request, 'admin/reports.html', context)
+
+
+def _csv_response(filename):
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
+
+
+def _user_display_name(user):
+    return user.get_full_name() or user.username
+
+
+def _format_datetime(value):
+    if not value:
+        return ''
+    return timezone.localtime(value).strftime('%Y-%m-%d %H:%M:%S')
+
+
+@login_required
+@admin_required
+def export_bookings_csv(request):
+    response = _csv_response('bookings.csv')
+    writer = csv.writer(response)
+    writer.writerow([
+        'Booking ID',
+        'Guest Name',
+        'Email',
+        'Room',
+        'Check-in',
+        'Check-out',
+        'Nights',
+        'Total Amount',
+        'Payment Status',
+        'Booking Status',
+        'Created At',
+    ])
+
+    bookings = (
+        Booking.objects
+        .select_related('guest', 'room')
+        .prefetch_related(Prefetch('payments', queryset=Payment.objects.order_by('-created_at'), to_attr='recent_payments'))
+        .order_by('-created_at')
+    )
+    for booking in bookings:
+        payment = booking.recent_payments[0] if booking.recent_payments else None
+        writer.writerow([
+            booking.id,
+            _user_display_name(booking.guest),
+            booking.guest.email,
+            f'Room {booking.room.room_number}',
+            booking.check_in.isoformat(),
+            booking.check_out.isoformat(),
+            booking.number_of_nights,
+            booking.total_price,
+            payment.get_status_display() if payment else 'No payment',
+            booking.get_status_display(),
+            _format_datetime(booking.created_at),
+        ])
+
+    return response
+
+
+@login_required
+@admin_required
+def export_payments_csv(request):
+    response = _csv_response('payments.csv')
+    writer = csv.writer(response)
+    writer.writerow([
+        'Payment ID',
+        'Booking ID',
+        'Guest Name',
+        'Amount',
+        'Method',
+        'Status',
+        'Transaction ID',
+        'Completed At',
+    ])
+
+    payments = (
+        Payment.objects
+        .select_related('booking__guest')
+        .order_by('-created_at')
+    )
+    for payment in payments:
+        writer.writerow([
+            payment.id,
+            payment.booking_id,
+            _user_display_name(payment.booking.guest),
+            payment.amount,
+            payment.get_payment_method_display(),
+            payment.get_status_display(),
+            payment.transaction_id or payment.reference_number or '',
+            _format_datetime(payment.completed_at),
+        ])
+
+    return response
+
+
+@login_required
+@admin_required
+def export_guests_csv(request):
+    response = _csv_response('guests.csv')
+    writer = csv.writer(response)
+    writer.writerow([
+        'User ID',
+        'Full Name',
+        'Email',
+        'Date Joined',
+        'Total Bookings',
+        'Total Spent',
+    ])
+
+    guests = (
+        CustomUser.objects
+        .filter(role=UserRole.GUEST)
+        .annotate(
+            total_bookings=Count('bookings', distinct=True),
+            total_spent=Sum(
+                'bookings__payments__amount',
+                filter=Q(bookings__payments__status=PaymentStatus.COMPLETED),
+            ),
+        )
+        .order_by('-date_joined')
+    )
+    for guest in guests:
+        writer.writerow([
+            guest.id,
+            _user_display_name(guest),
+            guest.email,
+            _format_datetime(guest.date_joined),
+            guest.total_bookings,
+            guest.total_spent or 0,
+        ])
+
+    return response

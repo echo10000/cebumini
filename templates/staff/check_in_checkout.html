@@ -144,7 +144,7 @@
                                         <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#confirmCheckOutModal" data-booking-id="{{ booking.id }}">
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#confirmCheckOutModal" data-booking-id="{{ booking.id }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:dashboard_check_out' booking.id %}">
                                             <i class="fas fa-check"></i> Confirm
                                         </button>
                                     </div>
@@ -265,17 +265,20 @@
 <div class="modal fade" id="confirmCheckOutModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Confirm Check-Out</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Confirm guest check-out? This will mark the room as available for cleaning.</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-warning" data-bs-dismiss="modal">Confirm</button>
-            </div>
+            <form method="post" id="checkOutForm">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Check-Out</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Confirm <strong id="checkOutGuestName">this guest</strong> check-out? This will send the checkout receipt email.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Confirm</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -287,6 +290,9 @@
     const checkInForm = document.getElementById('checkInVerificationForm');
     const checkInGuestName = document.getElementById('checkInGuestName');
     const expectedReferenceCode = document.getElementById('expectedReferenceCode');
+    const checkOutModal = document.getElementById('confirmCheckOutModal');
+    const checkOutForm = document.getElementById('checkOutForm');
+    const checkOutGuestName = document.getElementById('checkOutGuestName');
 
     if (checkInModal && checkInForm) {
         checkInModal.addEventListener('show.bs.modal', event => {
@@ -295,6 +301,14 @@
             checkInForm.reset();
             checkInGuestName.textContent = button.dataset.guestName || 'this guest';
             expectedReferenceCode.textContent = button.dataset.bookingReference || '';
+        });
+    }
+
+    if (checkOutModal && checkOutForm) {
+        checkOutModal.addEventListener('show.bs.modal', event => {
+            const button = event.relatedTarget;
+            checkOutForm.action = button.dataset.actionUrl;
+            checkOutGuestName.textContent = button.dataset.guestName || 'this guest';
         });
     }
 </script>

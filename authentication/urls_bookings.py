@@ -3,6 +3,7 @@ from .views_bookings import (
     create_booking_view,
     confirm_booking_view,
     booking_detail_view,
+    booking_pdf,
     booking_history_view,
     cancel_booking_view,
     admin_bookings_view,
@@ -33,6 +34,7 @@ urlpatterns = [
     path('<int:room_id>/create/', create_booking_view, name='create_booking'),
     path('confirm/', confirm_booking_view, name='confirm_booking'),
     path('<int:booking_id>/', booking_detail_view, name='booking_detail'),
+    path('<int:booking_id>/confirmation.pdf/', booking_pdf, name='booking_pdf'),
     path('history/', booking_history_view, name='booking_history'),
     path('<int:booking_id>/cancel/', cancel_booking_view, name='cancel_booking'),
     
@@ -51,6 +53,7 @@ urlpatterns = [
     
     # Guest complaint URLs
     path('<int:booking_id>/complaint/submit/', guest_submit_complaint_view, name='submit_complaint'),
+    path('complaints/submit/', guest_submit_complaint_view, name='submit_complaint_general'),
     path('complaints/', guest_my_complaints_view, name='my_complaints'),
     path('complaints/<int:complaint_id>/', guest_complaint_detail_view, name='complaint_detail'),
     

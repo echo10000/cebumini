@@ -5,10 +5,33 @@ from django.views.decorators.http import require_http_methods
 from django.db.models import Q, ProtectedError
 from django.urls import reverse
 from django.core.paginator import Paginator
+from django.utils import timezone
 
-from .models import Room, RoomImage, RoomType
+from .models import Booking, BookingStatus, Room, RoomImage, RoomType
 from .forms_rooms import RoomForm, RoomImageForm, RoomFilterForm
 from .views_recommendations import get_recommendations_context
+
+
+BOOKED_CALENDAR_STATUSES = [BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
+
+
+def _booked_date_ranges_for_rooms(room_ids):
+    """Return flatpickr-compatible booked night ranges keyed by room id."""
+    ranges_by_room = {str(room_id): [] for room_id in room_ids}
+    bookings = Booking.objects.filter(
+        room_id__in=room_ids,
+        status__in=BOOKED_CALENDAR_STATUSES,
+        check_out__gt=timezone.now().date(),
+    ).values('room_id', 'check_in', 'check_out').order_by('check_in')
+
+    for booking in bookings:
+        last_booked_night = booking['check_out'] - timezone.timedelta(days=1)
+        ranges_by_room[str(booking['room_id'])].append({
+            'from': booking['check_in'].isoformat(),
+            'to': last_booked_night.isoformat(),
+        })
+
+    return ranges_by_room
 
 
 def _redirect_non_guest_room_access(request):
@@ -77,6 +100,7 @@ def room_list_view(request):
     paginator = Paginator(rooms, 12)
     page_number = request.GET.get('page')
     rooms = paginator.get_page(page_number)
+    room_booked_dates = _booked_date_ranges_for_rooms([room.id for room in rooms.object_list])
     
     # Get filter form
     filter_form = RoomFilterForm(request.GET or None)
@@ -90,6 +114,7 @@ def room_list_view(request):
         'room_types': RoomType.choices,
         'recommendations': recommendations_context['recommendations'],
         'has_recommendations': recommendations_context['has_recommendations'],
+        'room_booked_dates': room_booked_dates,
     }
     return render(request, 'rooms/room_list.html', context)
 
@@ -136,6 +161,7 @@ def room_search_view(request):
     paginator = Paginator(rooms, 12)
     page_number = request.GET.get('page')
     rooms = paginator.get_page(page_number)
+    room_booked_dates = _booked_date_ranges_for_rooms([room.id for room in rooms.object_list])
     
     context = {
         'rooms': rooms,
@@ -144,6 +170,7 @@ def room_search_view(request):
         'capacity': capacity,
         'room_types': RoomType.choices,
         'is_search': True,
+        'room_booked_dates': room_booked_dates,
     }
     return render(request, 'rooms/room_list.html', context)
 
@@ -163,11 +190,13 @@ def room_detail_view(request, room_id):
         room_type=room.room_type,
         is_available=True
     ).exclude(id=room_id)[:3]
+    booked_dates = _booked_date_ranges_for_rooms([room.id]).get(str(room.id), [])
     
     context = {
         'room': room,
         'images': images,
         'similar_rooms': similar_rooms,
+        'booked_dates': booked_dates,
     }
     return render(request, 'rooms/room_detail.html', context)
 

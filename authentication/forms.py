@@ -56,14 +56,14 @@ class RegisterForm(UserCreationForm):
         }),
         label='Confirm Password'
     )
-    accept_terms = forms.BooleanField(
+    agree_to_terms = forms.BooleanField(
         required=True,
         widget=forms.CheckboxInput(attrs={
             'class': 'form-check-input',
         }),
         label='I agree to the Terms and Conditions',
         error_messages={
-            'required': 'Please accept the Terms and Conditions to create an account.'
+            'required': 'You must accept the Terms and Conditions.'
         }
     )
 
@@ -72,8 +72,10 @@ class RegisterForm(UserCreationForm):
         fields = ('email', 'password1', 'password2')
 
     def clean_email(self):
-        email = self.cleaned_data.get('email')
-        if User.objects.filter(email=email).exists():
+        email = (self.cleaned_data.get('email') or '').strip().lower()
+        if not email:
+            raise ValidationError('Email is required.')
+        if User.objects.filter(email__iexact=email).exists():
             raise ValidationError('This email is already registered.')
         return email
 
@@ -87,11 +89,11 @@ class RegisterForm(UserCreationForm):
             raise ValidationError('Please enter a valid Philippine phone number.')
         return phone
 
-    def clean_accept_terms(self):
-        accept_terms = self.cleaned_data.get('accept_terms')
-        if not accept_terms:
-            raise ValidationError('You must accept the Terms and Conditions to proceed.')
-        return accept_terms
+    def clean_agree_to_terms(self):
+        agree_to_terms = self.cleaned_data.get('agree_to_terms')
+        if not agree_to_terms:
+            raise ValidationError('You must accept the Terms and Conditions.')
+        return agree_to_terms
 
     def save(self, commit=True):
         user = super().save(commit=False)

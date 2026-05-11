@@ -1,6 +1,6 @@
 {% extends 'guest/guest_base.html' %}
 
-{% block title %}Submit Complaint - Cebu Luxury{% endblock %}
+{% block title %}Submit Complaint - Cebu Mini Hotel{% endblock %}
 
 {% block content %}
 <div class="guest-page">
@@ -8,34 +8,55 @@
         <div>
             <p class="guest-kicker">Guest Services</p>
             <h1>Submit Complaint</h1>
-            <p>Tell management what happened and how we can help resolve it.</p>
+            <p>Tell our team what happened so we can follow up clearly.</p>
         </div>
-        <a href="{% url 'bookings:booking_detail' booking.id %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left"></i> Cancel
+        <a href="{% url 'bookings:my_complaints' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> My Complaints
         </a>
     </section>
 
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <section class="guest-card">
-                <h2 class="h4 mb-3">Booking Information</h2>
-                <div class="guest-grid two mb-4">
-                    <div>
-                        <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
-                        <p><strong>Room:</strong> {{ booking.room.room_number }}</p>
-                    </div>
-                    <div>
-                        <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
-                        <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
-                    </div>
-                </div>
-
                 <form method="post">
                     {% csrf_token %}
+
                     <div class="mb-3">
-                        <label for="complaint_description" class="form-label">Describe Your Complaint</label>
-                        <textarea class="form-control" id="complaint_description" name="complaint_description" rows="6" required placeholder="Please describe what happened and how we can help resolve this issue..."></textarea>
-                        <div class="form-text">Provide as much detail as possible to help management understand the situation.</div>
+                        <label for="subject" class="form-label">Subject</label>
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="subject"
+                            name="subject"
+                            maxlength="200"
+                            required
+                            placeholder="Briefly summarize the issue"
+                            value="{{ request.POST.subject }}"
+                        >
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="booking" class="form-label">Related Booking</label>
+                        <select class="form-select" id="booking" name="booking">
+                            <option value="">No booking selected</option>
+                            {% for guest_booking in guest_bookings %}
+                                <option value="{{ guest_booking.id }}" {% if booking and booking.id == guest_booking.id %}selected{% elif request.POST.booking == guest_booking.id|stringformat:"s" %}selected{% endif %}>
+                                    Booking #{{ guest_booking.id }} - Room {{ guest_booking.room.room_number }} ({{ guest_booking.check_in|date:"M d, Y" }} to {{ guest_booking.check_out|date:"M d, Y" }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea
+                            class="form-control"
+                            id="description"
+                            name="description"
+                            rows="7"
+                            required
+                            placeholder="Please describe the issue, when it happened, and what would help resolve it."
+                        >{{ request.POST.description }}</textarea>
                     </div>
 
                     <button type="submit" class="btn btn-primary btn-lg">
@@ -44,7 +65,7 @@
                 </form>
 
                 <div class="alert alert-info mt-4 mb-0">
-                    Your complaint will be reviewed by management. We will contact you shortly with a resolution.
+                    Complaints are reviewed by Cebu Mini Hotel staff. You can track status updates from My Complaints.
                 </div>
             </section>
         </div>

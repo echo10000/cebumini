@@ -3,6 +3,128 @@
 
 {% block title %}Booking Details - Cebu Hotel{% endblock %}
 
+{% block extra_css %}
+<style>
+    .booking-progress-panel {
+        margin: 0 0 1.5rem;
+        padding: 1.2rem 1rem 1rem;
+        background: #ffffff;
+        border: 1px solid #d9e1ec;
+        border-radius: 8px;
+    }
+
+    .booking-progress {
+        margin-top: 0.2rem;
+    }
+
+    .booking-progress-track {
+        --progress-fill: 0%;
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        padding-top: 0.25rem;
+    }
+
+    .booking-progress-track::before,
+    .booking-progress-track::after {
+        content: "";
+        position: absolute;
+        top: 18px;
+        left: 12.5%;
+        right: 12.5%;
+        height: 3px;
+        border-radius: 999px;
+    }
+
+    .booking-progress-track::before {
+        background: #d9e1ec;
+    }
+
+    .booking-progress-track::after {
+        width: var(--progress-fill);
+        right: auto;
+        background: #0f766e;
+    }
+
+    .booking-progress-track.step-1 { --progress-fill: 0%; }
+    .booking-progress-track.step-2 { --progress-fill: 25%; }
+    .booking-progress-track.step-3 { --progress-fill: 50%; }
+    .booking-progress-track.step-4 { --progress-fill: 75%; }
+
+    .booking-progress-step {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.45rem;
+        color: #64748b;
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    .booking-progress-circle {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid #d9e1ec;
+        background: #ffffff;
+        color: #94a3b8;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .booking-progress-step.is-complete .booking-progress-circle,
+    .booking-progress-step.is-current .booking-progress-circle {
+        background: #0f766e;
+        border-color: #0f766e;
+        color: #ffffff;
+    }
+
+    .booking-progress-step.is-current .booking-progress-circle {
+        width: 40px;
+        height: 40px;
+        margin-top: -3px;
+        box-shadow: 0 0 0 6px rgba(15, 118, 110, 0.12);
+        animation: progressPulse 1.8s ease-in-out infinite;
+    }
+
+    .booking-progress-step.is-complete,
+    .booking-progress-step.is-current {
+        color: #115e59;
+    }
+
+    .booking-terminal-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.65rem 0.9rem;
+        border-radius: 8px;
+        font-weight: 800;
+    }
+
+    .booking-terminal-badge.cancelled {
+        background: #fef2f2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    .booking-terminal-badge.no-show {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #d9e1ec;
+    }
+
+    @keyframes progressPulse {
+        0%, 100% { box-shadow: 0 0 0 6px rgba(15, 118, 110, 0.12); }
+        50% { box-shadow: 0 0 0 9px rgba(15, 118, 110, 0.18); }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="guest-page">
     <section class="guest-page-header">
@@ -27,6 +149,39 @@
                 <div class="alert alert-success">
                     <strong>Check-in Reference:</strong> {{ booking.booking_reference }}
                     <span class="d-block small mt-1">Show this code and a valid ID at the front desk.</span>
+                </div>
+
+                <div class="booking-progress-panel">
+                    {% if booking.status == 'CANCELLED' %}
+                        <div class="booking-terminal-badge cancelled">
+                            <i class="fas fa-ban"></i> Cancelled
+                        </div>
+                    {% elif booking.status == 'NO_SHOW' %}
+                        <div class="booking-terminal-badge no-show">
+                            <i class="fas fa-user-slash"></i> No Show
+                        </div>
+                    {% else %}
+                        <div class="booking-progress" aria-label="Booking status progress">
+                            <div class="booking-progress-track {% if booking.status == 'PENDING' %}step-1{% elif booking.status == 'CONFIRMED' %}step-2{% elif booking.status == 'CHECKED_IN' %}step-3{% elif booking.status == 'CHECKED_OUT' %}step-4{% endif %}">
+                                <div class="booking-progress-step {% if booking.status == 'PENDING' %}is-current{% elif booking.status == 'CONFIRMED' or booking.status == 'CHECKED_IN' or booking.status == 'CHECKED_OUT' %}is-complete{% endif %}">
+                                    <span class="booking-progress-circle">{% if booking.status == 'CONFIRMED' or booking.status == 'CHECKED_IN' or booking.status == 'CHECKED_OUT' %}<i class="fas fa-check"></i>{% else %}1{% endif %}</span>
+                                    <span>Pending</span>
+                                </div>
+                                <div class="booking-progress-step {% if booking.status == 'CONFIRMED' %}is-current{% elif booking.status == 'CHECKED_IN' or booking.status == 'CHECKED_OUT' %}is-complete{% endif %}">
+                                    <span class="booking-progress-circle">{% if booking.status == 'CHECKED_IN' or booking.status == 'CHECKED_OUT' %}<i class="fas fa-check"></i>{% else %}2{% endif %}</span>
+                                    <span>Confirmed</span>
+                                </div>
+                                <div class="booking-progress-step {% if booking.status == 'CHECKED_IN' %}is-current{% elif booking.status == 'CHECKED_OUT' %}is-complete{% endif %}">
+                                    <span class="booking-progress-circle">{% if booking.status == 'CHECKED_OUT' %}<i class="fas fa-check"></i>{% else %}3{% endif %}</span>
+                                    <span>Checked In</span>
+                                </div>
+                                <div class="booking-progress-step {% if booking.status == 'CHECKED_OUT' %}is-current{% endif %}">
+                                    <span class="booking-progress-circle">4</span>
+                                    <span>Checked Out</span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
 
                 <h2 class="h4 mb-3"><i class="fas fa-door-open"></i> Room Information</h2>
@@ -85,10 +240,20 @@
 
                 <div class="d-flex gap-2 flex-wrap">
                     {% if can_cancel %}
-                        <a href="{% url 'bookings:cancel_booking' booking.id %}" class="btn btn-danger">
-                            <i class="fas fa-times-circle"></i> Cancel Booking
-                        </a>
+                        <form method="post" action="{% url 'bookings:cancel_booking' booking.id %}" id="cancel-booking-form-{{ booking.id }}">
+                            {% csrf_token %}
+                            <button
+                                type="button"
+                                class="btn btn-danger"
+                                onclick="openBookingCancelDialog('cancel-booking-form-{{ booking.id }}', 'Cancel Booking #{{ booking.id }} for Room {{ booking.room.room_number|escapejs }}? This cannot be undone.')"
+                            >
+                                <i class="fas fa-times-circle"></i> Cancel Booking
+                            </button>
+                        </form>
                     {% endif %}
+                    <a href="{% url 'bookings:booking_pdf' booking.id %}" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Download Confirmation
+                    </a>
                     <a href="{% url 'bookings:request_refund' booking.id %}" class="btn btn-secondary"><i class="fas fa-money-bill-wave"></i> Request Refund</a>
                     <a href="{% url 'bookings:submit_complaint' booking.id %}" class="btn btn-secondary"><i class="fas fa-exclamation-triangle"></i> Submit Complaint</a>
                     <a href="{% url 'bookings:my_refunds' %}" class="btn btn-secondary"><i class="fas fa-list"></i> My Refunds</a>
@@ -163,4 +328,37 @@
         </aside>
     </div>
 </div>
+
+<div id="bookingCancelModalBackdrop" class="confirm-modal-backdrop" aria-hidden="true">
+    <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="bookingCancelModalTitle">
+        <h3 id="bookingCancelModalTitle">Cancel Booking</h3>
+        <p id="bookingCancelModalMessage">Cancel this booking? This cannot be undone.</p>
+        <div class="confirm-modal-actions">
+            <button type="button" class="confirm-cancel" onclick="closeBookingCancelDialog()">Cancel</button>
+            <button type="button" class="confirm-submit" onclick="submitBookingCancelForm()">Confirm Cancellation</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let bookingCancelTargetForm = null;
+
+    function openBookingCancelDialog(formId, message) {
+        bookingCancelTargetForm = formId;
+        document.getElementById('bookingCancelModalMessage').textContent = message;
+        document.getElementById('bookingCancelModalBackdrop').classList.add('show');
+        document.getElementById('bookingCancelModalBackdrop').setAttribute('aria-hidden', 'false');
+    }
+
+    function closeBookingCancelDialog() {
+        document.getElementById('bookingCancelModalBackdrop').classList.remove('show');
+        document.getElementById('bookingCancelModalBackdrop').setAttribute('aria-hidden', 'true');
+        bookingCancelTargetForm = null;
+    }
+
+    function submitBookingCancelForm() {
+        if (!bookingCancelTargetForm) return;
+        document.getElementById(bookingCancelTargetForm).submit();
+    }
+</script>
 {% endblock %}

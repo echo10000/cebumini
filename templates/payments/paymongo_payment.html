@@ -2,13 +2,101 @@
 
 {% block title %}Secure Payment - Cebu Hotel{% endblock %}
 
+{% block extra_css %}
+<style>
+    .paymongo-method-shell {
+        padding: 1rem;
+        border: 1px solid #d9e2e7;
+        border-radius: 12px;
+        background: #ffffff;
+    }
+
+    .paymongo-method-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .paymongo-method-card {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        min-height: 96px;
+        padding: 1rem 1.15rem;
+        border: 1px solid #d9e2e7;
+        border-radius: 12px;
+        background: #ffffff;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    }
+
+    .paymongo-method-card:hover {
+        border-color: #008080;
+        box-shadow: 0 8px 18px rgba(0, 128, 128, 0.08);
+        transform: translateY(-1px);
+    }
+
+    .paymongo-method-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: #ffffff;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #0aa3a3, #008080);
+        box-shadow: 0 6px 14px rgba(0, 128, 128, 0.18);
+    }
+
+    .paymongo-method-icon.gcash {
+        background: linear-gradient(135deg, #12b3b3, #008080);
+    }
+
+    .paymongo-method-icon.maya {
+        background: linear-gradient(135deg, #17b0b0, #008080);
+    }
+
+    .paymongo-method-icon.grabpay {
+        background: linear-gradient(135deg, #14adad, #008080);
+    }
+
+    .paymongo-method-icon.card {
+        background: linear-gradient(135deg, #1ab8b8, #008080);
+        color: #ffffff;
+    }
+
+    .paymongo-method-label {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        margin: 0;
+        color: #1f2937;
+    }
+
+    .paymongo-method-note {
+        margin: 0.15rem 0 0;
+        color: #4b5563;
+        font-size: 0.88rem;
+        line-height: 1.45;
+    }
+
+    @media (max-width: 767.98px) {
+        .paymongo-method-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="guest-page">
     <section class="guest-page-header">
         <div>
             <p class="guest-kicker">Secure Payment</p>
             <h1>Pay via PayMongo</h1>
-            <p>Pay securely using debit or credit card through PayMongo checkout.</p>
+            <p>Pay securely using GCash, Maya, GrabPay, or Card through PayMongo checkout.</p>
         </div>
     </section>
 
@@ -28,12 +116,35 @@
                     </table>
                 </div>
 
-                <div class="guest-card shadow-none mb-4">
-                    <div class="guest-stat">
-                        <span class="guest-stat-icon"><i class="fas fa-credit-card"></i></span>
-                        <div>
-                            <h2 class="h5 mb-1">Debit/Credit Card</h2>
-                            <p class="text-muted mb-0">Visa and Mastercard powered by PayMongo.</p>
+                <div class="guest-card shadow-none mb-4 paymongo-method-shell">
+                    <div class="paymongo-method-grid">
+                        <div class="paymongo-method-card">
+                            <span class="paymongo-method-icon gcash">G</span>
+                            <div>
+                                <h2 class="paymongo-method-label">GCash</h2>
+                                <p class="paymongo-method-note">Fast wallet checkout via PayMongo.</p>
+                            </div>
+                        </div>
+                        <div class="paymongo-method-card">
+                            <span class="paymongo-method-icon maya">M</span>
+                            <div>
+                                <h2 class="paymongo-method-label">Maya</h2>
+                                <p class="paymongo-method-note">Pay with your Maya wallet in seconds.</p>
+                            </div>
+                        </div>
+                        <div class="paymongo-method-card">
+                            <span class="paymongo-method-icon grabpay">G</span>
+                            <div>
+                                <h2 class="paymongo-method-label">GrabPay</h2>
+                                <p class="paymongo-method-note">Use GrabPay on the secure checkout page.</p>
+                            </div>
+                        </div>
+                        <div class="paymongo-method-card">
+                            <span class="paymongo-method-icon card"><i class="fas fa-credit-card"></i></span>
+                            <div>
+                                <h2 class="paymongo-method-label">Debit/Credit Card</h2>
+                                <p class="paymongo-method-note">Visa and Mastercard powered by PayMongo.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -42,7 +153,7 @@
                     {% csrf_token %}
                     <div class="alert alert-info">
                         <i class="fas fa-shield-alt"></i>
-                        <strong>Secure Payment:</strong> You will be redirected to a secure PayMongo checkout page.
+                        <strong>Secure Payment:</strong> You will be redirected to a secure PayMongo checkout page where you can choose your preferred payment method.
                     </div>
 
                     <div class="d-grid gap-2">

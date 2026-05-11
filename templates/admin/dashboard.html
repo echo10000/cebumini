@@ -146,6 +146,12 @@
 <div class="page-header">
     <h1>Dashboard Overview</h1>
     <p>Welcome back to your hotel management system</p>
+    <p>
+        <a href="{% url 'auth:setup_2fa' %}" class="btn {% if two_fa and two_fa.is_enabled and two_fa.is_verified %}btn-success{% else %}btn-warning{% endif %} btn-sm">
+            <i class="fas fa-shield-alt"></i>
+            2FA Status: {% if two_fa and two_fa.is_enabled and two_fa.is_verified %}✅ Enabled{% else %}⚠️ Not Set Up{% endif %}
+        </a>
+    </p>
 </div>
 
 <!-- Luxury Stat Cards -->
@@ -325,6 +331,153 @@
     </div>
 </div>
 
+<div class="gold-divider"></div>
+
+<!-- Occupancy Overview -->
+<div class="admin-card mb-4">
+    <div class="admin-card-header">
+        <h5><i class="fas fa-chart-pie"></i> Occupancy Overview</h5>
+    </div>
+    <div class="admin-card-body">
+        <div class="dashboard-occupancy-layout">
+            <div class="dashboard-room-grid">
+                {% for card in occupancy_room_cards %}
+                    <article class="dashboard-room-card {{ card.status_key }}">
+                        <div>
+                            <div class="dashboard-room-number">Room {{ card.room.room_number }}</div>
+                            <div class="dashboard-room-type">{{ card.room.get_room_type_display }}</div>
+                            {% if card.guest_name %}
+                                <div class="dashboard-room-guest"><i class="fas fa-user"></i> {{ card.guest_name }}</div>
+                            {% endif %}
+                        </div>
+                        <span class="dashboard-room-status">{{ card.status_label }}</span>
+                    </article>
+                {% empty %}
+                    <p style="color: var(--text-muted); margin: 0;">No rooms found.</p>
+                {% endfor %}
+            </div>
+            <div class="dashboard-occupancy-side">
+                <div class="dashboard-ring-panel">
+                    <div class="dashboard-occupancy-ring" style="--occupancy-percent: {{ occupancy_rate_percent|floatformat:0 }}%;">
+                        <span>{{ occupancy_rate_percent|floatformat:0 }}%</span>
+                    </div>
+                    <div class="dashboard-ring-label">{{ occupancy_occupied_today }} of {{ occupancy_total_rooms }} rooms occupied</div>
+                </div>
+                <div class="dashboard-chart-panel">
+                    <canvas id="dashboardWeeklyOccupancyChart" aria-label="Weekly occupancy chart" role="img"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="gold-divider"></div>
+
+<!-- Audit Log -->
+<div class="admin-card mb-4">
+    <div class="admin-card-header audit-header">
+        <h5><i class="fas fa-clipboard-list"></i> Recent Audit Logs</h5>
+        <form method="get" class="audit-filter-form">
+            <select name="audit_action" onchange="this.form.submit()">
+                <option value="">All actions</option>
+                {% for value, label in audit_action_choices %}
+                    <option value="{{ value }}" {% if audit_action_filter == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+    <div class="admin-card-body">
+        <div class="admin-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Time</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Model</th>
+                        <th>Object ID</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_audit_logs %}
+                        <tr>
+                            <td>{{ log.created_at|date:"M d, Y H:i" }}</td>
+                            <td>{% if log.actor %}{{ log.actor.get_full_name|default:log.actor.email }}{% else %}System{% endif %}</td>
+                            <td>{{ log.get_action_display }}</td>
+                            <td>{{ log.affected_entity_type }}</td>
+                            <td>{{ log.affected_entity_id|default:"-" }}</td>
+                            <td>{{ log.ip_address|default:"-" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">No audit entries found.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="gold-divider"></div>
+
+<!-- Testimonials -->
+<div class="admin-card mb-4">
+    <div class="admin-card-header">
+        <h5><i class="fas fa-star"></i> Testimonials</h5>
+    </div>
+    <div class="admin-card-body">
+        <div class="admin-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Guest</th>
+                        <th>Rating</th>
+                        <th>Content</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for testimonial in pending_testimonials %}
+                        <tr>
+                            <td>
+                                {% if testimonial.guest %}
+                                    {{ testimonial.guest.get_full_name|default:testimonial.guest.email }}
+                                {% else %}
+                                    {{ testimonial.guest_name }}
+                                {% endif %}
+                            </td>
+                            <td>{{ testimonial.rating }} / 5</td>
+                            <td>{{ testimonial.display_content|truncatewords:18 }}</td>
+                            <td>{{ testimonial.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <div class="testimonial-actions">
+                                    <form method="post" action="{% url 'admin_panel:approve_testimonial' testimonial.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                    </form>
+                                    <form method="post" action="{% url 'admin_panel:reject_testimonial' testimonial.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No pending testimonials.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="gold-divider"></div>
+
 <!-- Revenue Overview -->
 <div class="row mb-4 g-4">
     <div class="col-md-6">
@@ -368,5 +521,196 @@
         background: linear-gradient(90deg, rgba(201, 168, 76, 0) 0%, rgba(201, 168, 76, 0.5) 50%, rgba(201, 168, 76, 0) 100%);
         margin: 2rem 0;
     }
+
+    .dashboard-occupancy-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+        gap: 1.25rem;
+        align-items: stretch;
+    }
+
+    .dashboard-room-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.9rem;
+    }
+
+    .dashboard-room-card {
+        border-radius: 8px;
+        padding: 1rem;
+        min-height: 128px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .dashboard-room-card.available { background: rgba(22, 163, 74, 0.18); border-color: rgba(34, 197, 94, 0.42); }
+    .dashboard-room-card.checked-in { background: rgba(37, 99, 235, 0.24); border-color: rgba(96, 165, 250, 0.42); }
+    .dashboard-room-card.confirmed { background: rgba(202, 138, 4, 0.2); border-color: rgba(250, 204, 21, 0.42); }
+    .dashboard-room-card.maintenance { background: rgba(185, 28, 28, 0.24); border-color: rgba(248, 113, 113, 0.48); }
+    .dashboard-room-card.checked-out { background: rgba(107, 114, 128, 0.24); border-color: rgba(156, 163, 175, 0.42); }
+
+    .dashboard-room-number {
+        color: #ffffff;
+        font-size: 1.08rem;
+        font-weight: 800;
+    }
+
+    .dashboard-room-type,
+    .dashboard-room-guest {
+        color: #d1d5db;
+        font-size: 0.86rem;
+        margin-top: 0.25rem;
+    }
+
+    .dashboard-room-status {
+        color: #ffffff;
+        background: rgba(15, 22, 35, 0.45);
+        border-radius: 999px;
+        padding: 0.28rem 0.6rem;
+        width: fit-content;
+        font-size: 0.78rem;
+        font-weight: 700;
+        margin-top: 0.8rem;
+    }
+
+    .dashboard-occupancy-side {
+        display: grid;
+        grid-template-rows: auto minmax(220px, 1fr);
+        gap: 1rem;
+    }
+
+    .dashboard-ring-panel,
+    .dashboard-chart-panel {
+        background: #111827;
+        border: 1px solid rgba(15, 118, 110, 0.28);
+        border-radius: 8px;
+        padding: 1.2rem;
+    }
+
+    .dashboard-occupancy-ring {
+        --occupancy-percent: 0%;
+        width: 148px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        margin: 0 auto 1rem;
+        background: conic-gradient(#0f766e var(--occupancy-percent), rgba(75, 85, 99, 0.55) 0);
+        display: grid;
+        place-items: center;
+        position: relative;
+    }
+
+    .dashboard-occupancy-ring::before {
+        content: '';
+        width: 106px;
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: #111827;
+        position: absolute;
+    }
+
+    .dashboard-occupancy-ring span {
+        color: #2dd4bf;
+        font-size: 1.6rem;
+        font-weight: 800;
+        position: relative;
+    }
+
+    .dashboard-ring-label {
+        color: #d1d5db;
+        text-align: center;
+        font-weight: 700;
+    }
+
+    .dashboard-chart-panel {
+        min-height: 250px;
+        position: relative;
+    }
+
+    .audit-header {
+        align-items: center;
+        gap: 1rem;
+        justify-content: space-between;
+    }
+
+    .audit-filter-form select {
+        background: #111827;
+        border: 1px solid rgba(201, 168, 76, 0.35);
+        border-radius: 8px;
+        color: #ffffff;
+        padding: 0.55rem 0.75rem;
+        min-width: 220px;
+    }
+
+    .testimonial-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+    }
+
+    @media (max-width: 1100px) {
+        .dashboard-occupancy-layout {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .dashboard-room-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .audit-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const canvas = document.getElementById('dashboardWeeklyOccupancyChart');
+    if (!canvas || typeof Chart === 'undefined') {
+        return;
+    }
+
+    new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels: {{ weekly_occupancy_labels_json|safe }},
+            datasets: [{
+                label: 'Occupied rooms',
+                data: {{ weekly_occupancy_values_json|safe }},
+                backgroundColor: 'rgba(15, 118, 110, 0.88)',
+                borderColor: '#2dd4bf',
+                borderWidth: 1,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    ticks: { color: '#d1d5db' },
+                    grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                },
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: {{ occupancy_total_rooms|default:6 }},
+                    ticks: { color: '#d1d5db', precision: 0, stepSize: 1 },
+                    grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: { color: '#e5e7eb' }
+                }
+            }
+        }
+    });
+});
+</script>
 {% endblock %}

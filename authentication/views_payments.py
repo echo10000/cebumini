@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
 
 from .models import Booking, BookingStatus, Payment, PaymentStatus
+from .utils import confirm_booking_after_completed_payment
 
 
 @login_required
@@ -19,24 +20,11 @@ def payment_success_view(request, booking_id):
     Displayed after successful PayMongo payment.
     """
     booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
-    payment = get_object_or_404(Payment, booking=booking)
+    payment = get_object_or_404(Payment.objects.order_by('-created_at'), booking=booking)
 
     if payment.status == PaymentStatus.COMPLETED and booking.status != BookingStatus.CONFIRMED:
-        booking.status = BookingStatus.CONFIRMED
-        booking.save()
+        confirm_booking_after_completed_payment(payment)
         messages.info(request, 'Booking has been confirmed after payment verification.')
-
-    if booking.status == BookingStatus.CONFIRMED:
-        email_sent_key = f'booking_{booking.id}_confirmation_sent'
-        if not request.session.get(email_sent_key, False):
-            sent = booking.send_confirmation_email()
-            if sent:
-                request.session[email_sent_key] = True
-                messages.success(request, f'Booking confirmation email sent to {booking.guest.email}.')
-            else:
-                messages.warning(request, 'Booking confirmation email was not sent. Please contact support.')
-        else:
-            messages.info(request, 'A booking confirmation email has already been sent for this booking.')
 
     context = {
         'booking': booking,
@@ -53,7 +41,7 @@ def payment_failed_view(request, booking_id):
     Displayed when PayMongo payment fails.
     """
     booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
-    payment = get_object_or_404(Payment, booking=booking)
+    payment = get_object_or_404(Payment.objects.order_by('-created_at'), booking=booking)
 
     context = {
         'booking': booking,
@@ -70,7 +58,7 @@ def payment_pending_view(request, booking_id):
     Displayed when payment is pending manual verification.
     """
     booking = get_object_or_404(Booking, id=booking_id, guest=request.user)
-    payment = get_object_or_404(Payment, booking=booking)
+    payment = get_object_or_404(Payment.objects.order_by('-created_at'), booking=booking)
 
     context = {
         'booking': booking,

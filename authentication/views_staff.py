@@ -3,6 +3,8 @@ Staff Views - Handle housekeeping and front desk operations
 Staff members can manage room status, check-ins, check-outs, and maintenance
 """
 
+from django.conf import settings
+from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponseForbidden
@@ -15,8 +17,24 @@ from datetime import timedelta
 from decimal import Decimal
 
 from .decorators import staff_required, staff_or_admin_required, staff_manager_or_admin_required
-from .models import Booking, BookingStatus, Room, CustomUser, UserRole
+from .models import (
+    Booking,
+    BookingStatus,
+    Complaint,
+    ComplaintStatus,
+    CustomUser,
+    HousekeepingTask,
+    HousekeepingTaskStatus,
+    Payment,
+    PaymentStatus,
+    Room,
+    RoomHousekeepingLog,
+    RoomStatus,
+    UserRole,
+)
 from .forms_bookings import ContactForm
+from .emails import send_checkin_email, send_checkout_email
+from .utils import confirm_booking_after_completed_payment, get_occupancy_chart_context, log_activity, log_audit
 
 
 @login_required(login_url='auth:login')
@@ -29,18 +47,17 @@ def staff_dashboard(request):
     today_check_ins = Booking.objects.filter(
         check_in=today,
         status=BookingStatus.CONFIRMED
-    ).select_related('guest', 'room')
+    ).select_related('guest', 'room').prefetch_related('payments')
     
     today_check_outs = Booking.objects.filter(
         check_out=today,
-        status=BookingStatus.CONFIRMED
+        status=BookingStatus.CHECKED_IN
     ).select_related('guest', 'room')
     
     # Get current bookings (checked in but not checked out yet)
     current_bookings = Booking.objects.filter(
         check_in__lte=today,
-        check_out__gt=today,
-        status=BookingStatus.CONFIRMED
+        status=BookingStatus.CHECKED_IN
     ).select_related('guest', 'room')
     
     # Room statistics
@@ -54,6 +71,35 @@ def staff_dashboard(request):
         check_in__lte=today + timedelta(days=7),
         status=BookingStatus.CONFIRMED
     ).select_related('guest', 'room').order_by('check_in')
+
+    pending_onsite_payments = Payment.objects.filter(
+        status=PaymentStatus.PENDING_ONSITE
+    ).select_related(
+        'booking__guest',
+        'booking__room',
+    ).order_by('booking__check_in', 'booking__room__room_number')
+
+    todays_arrivals = list(today_check_ins.order_by('check_in', 'room__room_number'))
+    for booking in todays_arrivals:
+        booking.dashboard_payment = booking.payments.first()
+
+    active_guests = Booking.objects.filter(
+        status=BookingStatus.CHECKED_IN
+    ).select_related('guest', 'room').order_by('check_out', 'room__room_number')
+
+    housekeeping_tasks = HousekeepingTask.objects.filter(
+        assigned_to=request.user
+    ).select_related('room').order_by('status', 'due_date', '-created_at')
+
+    rooms = Room.objects.all().order_by('room_number')
+    room_status_choices = [
+        status for status in RoomStatus.choices if status[0] != RoomStatus.OCCUPIED
+    ]
+
+    active_complaints = Complaint.objects.filter(
+        Q(assigned_to=request.user) | Q(assigned_to__isnull=True),
+        status__in=[ComplaintStatus.PENDING, ComplaintStatus.IN_PROGRESS],
+    ).select_related('guest', 'booking__room', 'assigned_to').order_by('created_at')
     
     context = {
         'today': today,
@@ -61,12 +107,139 @@ def staff_dashboard(request):
         'today_check_outs': today_check_outs,
         'current_bookings': current_bookings,
         'upcoming_check_ins': upcoming_check_ins,
+        'pending_onsite_payments': pending_onsite_payments,
+        'todays_arrivals': todays_arrivals,
+        'active_guests': active_guests,
+        'housekeeping_tasks': housekeeping_tasks,
+        'rooms': rooms,
+        'room_status_choices': room_status_choices,
+        'active_complaints': active_complaints,
         'total_rooms': total_rooms,
         'occupied_rooms': occupied_rooms,
         'available_rooms': available_rooms,
     }
+    context.update(get_occupancy_chart_context(today))
     
     return render(request, 'staff/dashboard.html', context)
+
+
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["POST"])
+def confirm_onsite_cash_payment(request, payment_id):
+    """Confirm a pending onsite cash payment from the staff dashboard."""
+    payment = get_object_or_404(
+        Payment.objects.select_related('booking'),
+        id=payment_id,
+        status=PaymentStatus.PENDING_ONSITE,
+    )
+    booking = payment.booking
+
+    payment.status = PaymentStatus.COMPLETED
+    payment.completed_at = timezone.now()
+    payment.notes = 'Cash payment confirmed by staff'
+    payment.save()
+    confirm_booking_after_completed_payment(payment)
+    log_activity(
+        request.user,
+        f'Confirmed cash payment for Booking #{booking.id}',
+        f'Payment #{payment.id}',
+        request
+    )
+
+    messages.success(request, 'Cash payment confirmed successfully.')
+    return redirect('staff:dashboard')
+
+
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["POST"])
+def dashboard_check_in_booking(request, booking_id):
+    """Mark a confirmed online-paid arrival as checked in."""
+    booking = get_object_or_404(Booking, id=booking_id, status=BookingStatus.CONFIRMED)
+    booking.status = BookingStatus.CHECKED_IN
+    booking.checked_in_at = timezone.now()
+    if not booking.verified_at:
+        booking.verified_at = booking.checked_in_at
+    if not booking.verified_by_id:
+        booking.verified_by = request.user
+    booking.save()
+
+    room = booking.room
+    previous_status = room.status
+    room.status = RoomStatus.OCCUPIED
+    room.is_available = False
+    room.save(update_fields=['status', 'is_available', 'updated_at'])
+    RoomHousekeepingLog.objects.create(
+        room=room,
+        previous_status=previous_status,
+        current_status=RoomStatus.OCCUPIED,
+        updated_by=request.user,
+        booking=booking,
+        notes=f'Room {room.room_number} set to occupied by check-in.'
+    )
+
+    if not send_checkin_email(booking):
+        messages.warning(request, 'Guest checked in, but the check-in email could not be sent.')
+    guest_name = booking.guest.get_full_name() or booking.guest.username
+    log_activity(
+        request.user,
+        f'Checked in {guest_name} to Room {room.room_number}',
+        f'Booking #{booking.id}',
+        request
+    )
+    messages.success(request, 'Guest checked in successfully')
+    return redirect('staff:dashboard')
+
+
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["POST"])
+def dashboard_check_out_booking(request, booking_id):
+    """Mark an active guest as checked out."""
+    booking = get_object_or_404(Booking, id=booking_id, status=BookingStatus.CHECKED_IN)
+    booking.status = BookingStatus.CHECKED_OUT
+    booking.checked_out_at = timezone.now()
+    booking.save()
+
+    room = booking.room
+    previous_status = room.status
+    room.status = RoomStatus.DIRTY
+    room.is_available = True
+    room.save(update_fields=['status', 'is_available', 'updated_at'])
+    RoomHousekeepingLog.objects.create(
+        room=room,
+        previous_status=previous_status,
+        current_status=RoomStatus.DIRTY,
+        updated_by=request.user,
+        booking=booking,
+        notes=f'Room {room.room_number} set to dirty after check-out.'
+    )
+
+    if not send_checkout_email(booking):
+        messages.warning(request, 'Guest checked out, but the checkout receipt email could not be sent.')
+    guest_name = booking.guest.get_full_name() or booking.guest.username
+    log_activity(
+        request.user,
+        f'Checked out {guest_name} from Room {room.room_number}',
+        f'Booking #{booking.id}',
+        request
+    )
+    messages.success(request, 'Guest checked out successfully')
+    return redirect('staff:dashboard')
+
+
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["POST"])
+def mark_booking_no_show(request, booking_id):
+    """Mark a confirmed arrival as no-show."""
+    booking = get_object_or_404(Booking, id=booking_id, status=BookingStatus.CONFIRMED)
+    booking.status = BookingStatus.NO_SHOW
+    booking.save()
+
+    messages.warning(request, f'Booking #{booking.id} marked as no-show.')
+    return redirect('staff:dashboard')
 
 
 @login_required(login_url='auth:login')
@@ -141,7 +314,7 @@ def check_in_checkout_list(request):
     # Check-outs today
     check_outs = Booking.objects.filter(
         check_out=today,
-        status=BookingStatus.CONFIRMED
+        status=BookingStatus.CHECKED_IN
     ).select_related('guest', 'room')
     
     # Tomorrow's check-ins
@@ -185,6 +358,28 @@ def check_in_booking(request, booking_id):
         for error in errors:
             messages.error(request, error)
     else:
+        room = booking.room
+        previous_status = room.status
+        room.status = RoomStatus.OCCUPIED
+        room.is_available = False
+        room.save(update_fields=['status', 'is_available', 'updated_at'])
+        RoomHousekeepingLog.objects.create(
+            room=room,
+            previous_status=previous_status,
+            current_status=RoomStatus.OCCUPIED,
+            updated_by=request.user,
+            booking=booking,
+            notes=f'Room {room.room_number} set to occupied by check-in verification.'
+        )
+        if not send_checkin_email(booking):
+            messages.warning(request, 'Guest checked in, but the check-in email could not be sent.')
+        guest_name = booking.guest.get_full_name() or booking.guest.username
+        log_activity(
+            request.user,
+            f'Checked in {guest_name} to Room {room.room_number}',
+            f'Booking #{booking.id}',
+            request
+        )
         messages.success(request, f'{booking.guest.get_full_name() or booking.guest.username} has been verified and checked in.')
 
     return redirect('staff:check_in_checkout')
@@ -207,6 +402,88 @@ def mark_room_clean(request, room_id):
         
         return redirect('staff:dashboard')
     
+    return redirect('staff:dashboard')
+
+
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["POST"])
+def update_room_status(request):
+    """Update a room status from the staff dashboard."""
+    room = get_object_or_404(Room, id=request.POST.get('room_id'))
+    new_status = request.POST.get('new_status')
+    allowed_statuses = [status[0] for status in RoomStatus.choices if status[0] != RoomStatus.OCCUPIED]
+
+    if new_status not in allowed_statuses:
+        messages.error(request, 'Select a valid room status. Occupied is set automatically by check-in and check-out.')
+        return redirect('staff:dashboard')
+
+    previous_status = room.status
+    room.status = new_status
+    room.is_available = new_status == RoomStatus.CLEAN
+    room.save(update_fields=['status', 'is_available', 'updated_at'])
+
+    RoomHousekeepingLog.objects.create(
+        room=room,
+        previous_status=previous_status,
+        current_status=new_status,
+        updated_by=request.user,
+        notes=f'Room {room.room_number} status changed to {new_status} by staff {request.user.get_username()}'
+    )
+    log_audit(
+        request,
+        request.user,
+        'ROOM_STATUS_CHANGED',
+        'Room',
+        room.id,
+        description=f'Room {room.room_number} status changed to {new_status} by staff {request.user.get_username()}',
+        changes={'previous_status': previous_status, 'new_status': new_status}
+    )
+    log_activity(
+        request.user,
+        f'Updated Room {room.room_number} status to {room.get_status_display()}',
+        f'Previous status: {previous_status}',
+        request
+    )
+
+    messages.success(request, f'Room {room.room_number} status updated to {room.get_status_display()}.')
+    return redirect('staff:dashboard')
+
+
+@login_required(login_url='auth:login')
+@staff_manager_or_admin_required
+@require_http_methods(["POST"])
+def mark_housekeeping_task_complete(request, task_id):
+    """Mark an assigned housekeeping task complete and set the room clean."""
+    task_queryset = HousekeepingTask.objects.select_related('room', 'assigned_to')
+    if request.user.is_staff_member():
+        task_queryset = task_queryset.filter(assigned_to=request.user)
+
+    task = get_object_or_404(task_queryset, id=task_id)
+    task.status = HousekeepingTaskStatus.COMPLETED
+    task.completed_at = timezone.now()
+    task.save(update_fields=['status', 'completed_at'])
+
+    room = task.room
+    previous_status = room.status
+    room.status = RoomStatus.CLEAN
+    room.is_available = True
+    room.save(update_fields=['status', 'is_available', 'updated_at'])
+    RoomHousekeepingLog.objects.create(
+        room=room,
+        previous_status=previous_status,
+        current_status=RoomStatus.CLEAN,
+        updated_by=request.user,
+        notes=f'Housekeeping task #{task.id} completed by {request.user.get_username()}.'
+    )
+    log_activity(
+        request.user,
+        'Completed housekeeping task',
+        f'Task #{task.id} for Room {room.room_number}',
+        request
+    )
+
+    messages.success(request, f'Housekeeping task for room {room.room_number} marked complete.')
     return redirect('staff:dashboard')
 
 
@@ -572,15 +849,18 @@ def manual_booking(request):
                 check_in=check_in_date,
                 check_out=check_out_date,
                 total_price=total_price,
-                status=BookingStatus.CONFIRMED,
+                status=BookingStatus.PENDING,
                 special_requests=f'Walk-in booking created by {request.user.get_full_name()}'
             )
             
             # Create Payment Record
             payment_amount_decimal = Decimal(payment_amount) if payment_amount else total_price
             
-            # Determine payment status based on amount collected
-            payment_status = PaymentStatus.COMPLETED if payment_amount_decimal >= total_price else PaymentStatus.PENDING
+            # Cash/walk-in bookings stay pending until staff explicitly confirms collection.
+            if payment_method == 'CASH':
+                payment_status = PaymentStatus.PENDING_ONSITE
+            else:
+                payment_status = PaymentStatus.COMPLETED if payment_amount_decimal >= total_price else PaymentStatus.PENDING
             
             # Handle reference number generation
             # For Cash/Card: auto-generate a reference number
@@ -609,13 +889,28 @@ def manual_booking(request):
                 from django.utils import timezone
                 payment.completed_at = timezone.now()
                 payment.save()
+                confirm_booking_after_completed_payment(payment)
+
+            log_activity(
+                request.user,
+                f'Created walk-in booking #{booking.id}',
+                f'Payment #{payment.id}',
+                request
+            )
             
             # Update room availability
             room.is_available = False
             room.save()
             
             # Prepare success message with receipt info
-            if payment_status == PaymentStatus.COMPLETED:
+            if payment_status == PaymentStatus.PENDING_ONSITE:
+                messages.warning(
+                    request,
+                    f'Walk-in cash booking created and awaiting staff cash confirmation.\n\nGuest: {guest_first_name} {guest_last_name}\n'
+                    f'Room: {room.room_number}\nCheck-in: {check_in_date}\nCheck-out: {check_out_date}\n'
+                    f'Amount Due: PHP {total_price}\nReference: {final_reference}'
+                )
+            elif payment_status == PaymentStatus.COMPLETED:
                 messages.success(
                     request, 
                     f'✓ Walk-in booking created & PAID\n\nGuest: {guest_first_name} {guest_last_name}\n'
@@ -769,6 +1064,13 @@ def process_remaining_payment(request, booking_id):
                 from django.utils import timezone
                 payment.completed_at = timezone.now()
                 payment.save()
+
+            log_activity(
+                request.user,
+                f'Confirmed cash payment for Booking #{booking.id}',
+                f'Payment #{payment.id}',
+                request
+            )
             
             # Update booking status if fully paid
             if new_balance <= 0:
@@ -809,26 +1111,27 @@ def process_remaining_payment(request, booking_id):
 @staff_required
 def update_room_housekeeping_status(request, room_id):
     """Staff updates room housekeeping status (clean, dirty, maintenance)"""
-    from .models import RoomStatus, RoomHousekeepingLog
-    from .utils import log_audit
-    
     room = get_object_or_404(Room, id=room_id)
     
     if request.method == 'POST':
         new_status = request.POST.get('status')
         notes = request.POST.get('notes', '')
         
-        if new_status not in [status[0] for status in RoomStatus.choices]:
+        if new_status not in [status[0] for status in RoomStatus.choices if status[0] != RoomStatus.OCCUPIED]:
             return JsonResponse({'success': False, 'error': 'Invalid status'}, status=400)
         
         # Create housekeeping log entry
         log_entry = RoomHousekeepingLog.objects.create(
             room=room,
-            previous_status=getattr(room, 'housekeeping_status', RoomStatus.CLEAN),
+            previous_status=room.status,
             current_status=new_status,
             updated_by=request.user,
             notes=notes
         )
+
+        room.status = new_status
+        room.is_available = new_status == RoomStatus.CLEAN
+        room.save(update_fields=['status', 'is_available', 'updated_at'])
         
         # Log audit
         log_audit(
@@ -840,13 +1143,19 @@ def update_room_housekeeping_status(request, room_id):
             description=f'Staff updated room {room.room_number} housekeeping status to {new_status}',
             changes={'housekeeping_status': new_status, 'notes': notes}
         )
+        log_activity(
+            request.user,
+            f'Updated Room {room.room_number} status to {room.get_status_display()}',
+            f'Previous status: {log_entry.previous_status}',
+            request
+        )
         
         messages.success(request, f'Room {room.room_number} status updated to {new_status}.')
         return redirect('staff:dashboard')
     
     context = {
         'room': room,
-        'statuses': RoomStatus.choices,
+        'statuses': [status for status in RoomStatus.choices if status[0] != RoomStatus.OCCUPIED],
     }
     
     return render(request, 'staff/update_room_status.html', context)
@@ -856,7 +1165,6 @@ def update_room_housekeeping_status(request, room_id):
 @staff_required
 def escalate_guest_complaint(request, booking_id):
     """Staff escalates unresolved guest complaint to manager"""
-    from .models import GuestComplaintEscalation
     from .utils import log_audit
     
     booking = get_object_or_404(Booking, id=booking_id)
@@ -864,31 +1172,61 @@ def escalate_guest_complaint(request, booking_id):
     if request.method == 'POST':
         complaint_description = request.POST.get('complaint_description')
         staff_notes = request.POST.get('staff_notes', '')
+        manager = CustomUser.objects.filter(
+            role=UserRole.MANAGER,
+            is_active=True,
+        ).order_by('id').first()
         
         if not complaint_description:
             messages.error(request, 'Complaint description is required.')
             return redirect('staff:dashboard')
+
+        if not manager:
+            messages.error(request, 'No active manager is available for escalation.')
+            return redirect('staff:dashboard')
         
-        # Create escalation record
-        escalation = GuestComplaintEscalation.objects.create(
-            booking=booking,
+        complaint = Complaint.objects.create(
             guest=booking.guest,
-            complaint_description=complaint_description,
-            reported_by_staff=request.user,
+            booking=booking,
+            subject=f'Complaint for Booking #{booking.id}',
+            description=complaint_description,
+            assigned_to=request.user,
+            escalated_to=manager,
             staff_notes=staff_notes,
-            status='OPEN'
+            status=ComplaintStatus.ESCALATED,
         )
+
+        if manager.email:
+            guest_name = booking.guest.get_full_name() or booking.guest.username
+            send_mail(
+                f'Complaint escalated: {complaint.subject}',
+                (
+                    f'Complaint #{complaint.id} has been escalated by {request.user.get_full_name() or request.user.username}.\n\n'
+                    f'Guest: {guest_name}\n'
+                    f'Room {booking.room.room_number}\n'
+                    f'Booking #{booking.id}\n\n'
+                    f'{complaint.description}'
+                ),
+                settings.DEFAULT_FROM_EMAIL,
+                [manager.email],
+                fail_silently=True,
+            )
         
-        # Log audit
         log_audit(
             request,
             request.user,
             'COMPLAINT_ESCALATED',
-            'GuestComplaintEscalation',
-            escalation.id,
+            'Complaint',
+            complaint.id,
             affected_user=booking.guest,
             description=f'Staff escalated guest complaint for Booking {booking.id}',
-            changes={'status': 'OPEN', 'reported_by': request.user.email}
+            changes={'status': ComplaintStatus.ESCALATED, 'reported_by': request.user.email}
+        )
+        log_activity(
+            request.user,
+            'Escalated complaint',
+            f'Complaint #{complaint.id} to {manager.get_full_name() or manager.username}',
+            request
         )
         
         messages.success(request, 'Guest complaint escalated to manager.')
@@ -1091,11 +1429,10 @@ def staff_message_detail_view(request, message_id):
 @staff_required
 def staff_escalated_complaints_view(request):
     """View complaints escalated by this staff member"""
-    from .models import GuestComplaintEscalation
-    
-    complaints = GuestComplaintEscalation.objects.filter(
-        reported_by_staff=request.user
-    ).select_related('booking', 'guest', 'escalated_to').order_by('-created_at')
+    complaints = Complaint.objects.filter(
+        assigned_to=request.user,
+        status__in=[ComplaintStatus.ESCALATED, ComplaintStatus.IN_PROGRESS, ComplaintStatus.RESOLVED],
+    ).select_related('booking__room', 'guest', 'escalated_to').order_by('-created_at')
     
     # Filter by status
     status_filter = request.GET.get('status', 'all')
@@ -1105,7 +1442,7 @@ def staff_escalated_complaints_view(request):
     context = {
         'complaints': complaints,
         'status_filter': status_filter,
-        'statuses': dict(GuestComplaintEscalation._meta.get_field('status').choices),
+        'statuses': ComplaintStatus.choices,
     }
     
     return render(request, 'staff/escalated_complaints.html', context)
@@ -1113,19 +1450,72 @@ def staff_escalated_complaints_view(request):
 
 @login_required(login_url='auth:login')
 @staff_required
-def staff_complaint_detail_view(request, complaint_id):
-    """View detail of a complaint escalated by this staff member"""
-    from .models import GuestComplaintEscalation
-    
+@require_http_methods(["POST"])
+def escalate_complaint(request, complaint_id):
+    """Escalate an active guest complaint to the first available manager."""
     complaint = get_object_or_404(
-        GuestComplaintEscalation,
+        Complaint.objects.select_related('guest', 'booking__room', 'assigned_to'),
+        Q(assigned_to=request.user) | Q(assigned_to__isnull=True),
         id=complaint_id,
-        reported_by_staff=request.user
+        status__in=[ComplaintStatus.PENDING, ComplaintStatus.IN_PROGRESS],
+    )
+    manager = CustomUser.objects.filter(
+        role=UserRole.MANAGER,
+        is_active=True,
+    ).order_by('id').first()
+
+    if not manager:
+        messages.error(request, 'No active manager is available for escalation.')
+        return redirect('staff:complaint_detail', complaint_id=complaint.id)
+
+    if not complaint.assigned_to_id:
+        complaint.assigned_to = request.user
+    complaint.escalated_to = manager
+    complaint.status = ComplaintStatus.ESCALATED
+    complaint.staff_notes = request.POST.get('staff_notes', complaint.staff_notes).strip()
+    complaint.save(update_fields=['assigned_to', 'escalated_to', 'status', 'staff_notes', 'updated_at'])
+
+    if manager.email:
+        guest_name = complaint.guest.get_full_name() or complaint.guest.username
+        room_label = f"Room {complaint.booking.room.room_number}" if complaint.booking and complaint.booking.room else "No room linked"
+        send_mail(
+            f'Complaint escalated: {complaint.subject}',
+            (
+                f'Complaint #{complaint.id} has been escalated by {request.user.get_full_name() or request.user.username}.\n\n'
+                f'Guest: {guest_name}\n'
+                f'{room_label}\n'
+                f'Subject: {complaint.subject}\n\n'
+                f'{complaint.description}'
+            ),
+            settings.DEFAULT_FROM_EMAIL,
+            [manager.email],
+            fail_silently=True,
+        )
+
+    log_activity(
+        request.user,
+        'Escalated complaint',
+        f'Complaint #{complaint.id} to {manager.get_full_name() or manager.username}',
+        request
+    )
+    messages.success(request, 'Complaint escalated to manager.')
+    return redirect('staff:complaint_detail', complaint_id=complaint.id)
+
+
+@login_required(login_url='auth:login')
+@staff_required
+def staff_complaint_detail_view(request, complaint_id):
+    """View detail of a complaint assigned to or available for this staff member."""
+    complaint = get_object_or_404(
+        Complaint.objects.select_related('guest', 'booking__room', 'assigned_to', 'escalated_to'),
+        Q(assigned_to=request.user) | Q(assigned_to__isnull=True),
+        id=complaint_id,
     )
     
     context = {
         'complaint': complaint,
         'booking': complaint.booking,
+        'can_escalate': complaint.status in [ComplaintStatus.PENDING, ComplaintStatus.IN_PROGRESS],
     }
     
     return render(request, 'staff/complaint_detail.html', context)

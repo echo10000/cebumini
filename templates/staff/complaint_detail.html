@@ -10,28 +10,32 @@
                 <i class="fas fa-comments"></i> Complaint Details
             </h1>
 
-            <!-- Booking & Guest Info -->
             <div class="card mb-4">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Booking & Guest Information</h5>
+                    <h5 class="mb-0">Guest & Booking</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
-                            <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
-                            <p><strong>Guest:</strong> {{ booking.guest.get_full_name }}</p>
-                            <p><strong>Email:</strong> {{ booking.guest.email }}</p>
+                            <p><strong>Guest:</strong> {{ complaint.guest.get_full_name|default:complaint.guest.username }}</p>
+                            <p><strong>Email:</strong> {{ complaint.guest.email }}</p>
+                            <p><strong>Assigned Staff:</strong> {{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.username|default:"Unassigned" }}</p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Room:</strong> {{ booking.room.room_number }}</p>
-                            <p><strong>Check-in:</strong> {{ booking.check_in }}</p>
-                            <p><strong>Check-out:</strong> {{ booking.check_out }}</p>
+                            {% if booking %}
+                                <p><strong>Booking ID:</strong> #{{ booking.id }}</p>
+                                <p><strong>Room:</strong> {{ booking.room.room_number }}</p>
+                                <p><strong>Stay:</strong> {{ booking.check_in|date:"M d, Y" }} to {{ booking.check_out|date:"M d, Y" }}</p>
+                            {% else %}
+                                <p><strong>Booking ID:</strong> N/A</p>
+                                <p><strong>Room:</strong> N/A</p>
+                                <p><strong>Stay:</strong> N/A</p>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Complaint Details -->
             <div class="card mb-4">
                 <div class="card-header bg-danger text-white">
                     <h5 class="mb-0">Complaint Information</h5>
@@ -39,63 +43,61 @@
                 <div class="card-body">
                     <div class="row mb-3">
                         <div class="col-md-6">
-                            <p><strong>Status:</strong>
-                                {% if complaint.status == 'OPEN' %}
-                                    <span class="badge bg-danger">Open</span>
-                                {% elif complaint.status == 'IN_PROGRESS' %}
-                                    <span class="badge bg-warning text-dark">In Progress</span>
-                                {% elif complaint.status == 'RESOLVED' %}
-                                    <span class="badge bg-success">Resolved</span>
-                                {% elif complaint.status == 'CLOSED' %}
-                                    <span class="badge bg-secondary">Closed</span>
-                                {% endif %}
-                            </p>
+                            <p><strong>Status:</strong> <span class="badge bg-warning text-dark">{{ complaint.get_status_display }}</span></p>
                         </div>
                         <div class="col-md-6">
-                            <p><strong>Escalated:</strong> {{ complaint.created_at|date:"M d, Y H:i" }}</p>
+                            <p><strong>Submitted:</strong> {{ complaint.created_at|date:"M d, Y H:i" }}</p>
                         </div>
                     </div>
 
-                    <p><strong>Complaint Description:</strong></p>
+                    <p><strong>Subject:</strong> {{ complaint.subject }}</p>
+                    <p><strong>Description:</strong></p>
                     <div class="border p-3 bg-light mb-3">
-                        {{ complaint.complaint_description }}
+                        {{ complaint.description|linebreaksbr }}
                     </div>
 
-                    <p><strong>Your Notes:</strong></p>
+                    <p><strong>Staff Notes:</strong></p>
                     <div class="border p-3 bg-light">
-                        {{ complaint.staff_notes|default:"<em>No notes provided</em>" }}
+                        {{ complaint.staff_notes|default:"No notes provided"|linebreaksbr }}
                     </div>
                 </div>
             </div>
 
-            <!-- Manager Resolution -->
-            {% if complaint.manager_notes %}
-            <div class="card mb-4">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Manager Resolution</h5>
+            {% if complaint.escalated_to %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-level-up-alt"></i>
+                    Escalated to {{ complaint.escalated_to.get_full_name|default:complaint.escalated_to.username }}.
                 </div>
-                <div class="card-body">
-                    <p><strong>Assigned to Manager:</strong> {{ complaint.escalated_to.get_full_name|default:"Unassigned" }}</p>
-                    <p><strong>Resolution Notes:</strong></p>
-                    <div class="border p-3 bg-light">
-                        {{ complaint.manager_notes }}
-                    </div>
-                    {% if complaint.resolved_at %}
-                    <p><strong>Resolved At:</strong> {{ complaint.resolved_at|date:"M d, Y H:i" }}</p>
-                    {% endif %}
-                </div>
-            </div>
-            {% else %}
-            <div class="alert alert-info" role="alert">
-                <i class="fas fa-info-circle"></i> This complaint is awaiting manager resolution.
-            </div>
             {% endif %}
 
-            <!-- Back Button -->
-            <div class="mt-4">
-                <a href="{% url 'staff:escalated_complaints' %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to My Complaints
+            {% if complaint.resolution_notes %}
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Resolution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="border p-3 bg-light">
+                            {{ complaint.resolution_notes|linebreaksbr }}
+                        </div>
+                        {% if complaint.resolved_at %}
+                            <p class="mt-3 mb-0"><strong>Resolved At:</strong> {{ complaint.resolved_at|date:"M d, Y H:i" }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="mt-4 d-flex gap-2 flex-wrap">
+                <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to Dashboard
                 </a>
+                {% if can_escalate %}
+                    <form method="post" action="{% url 'staff:escalate_complaint' complaint.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-level-up-alt"></i> Escalate to Manager
+                        </button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -7,6 +7,10 @@
     data-messages-url="{% url 'auth:guest_messages' %}"
     data-login-url="{% url 'auth:login' %}?next={% url 'auth:guest_messages' %}"
     data-is-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+    data-booking-status="{{ echo_booking_status_text|default:''|escape }}"
+    data-booking-detail-url="{{ echo_booking_detail_url|default:'' }}"
+    data-cancel-help-url="{{ echo_cancel_help_url|default:'' }}"
+    data-receipt-url="{{ echo_receipt_url|default:'' }}"
 >
     <div class="chatbot-header">
         <div class="chatbot-agent">
@@ -568,6 +572,10 @@
         const messagesUrl = widget?.dataset?.messagesUrl || '/auth/messages/';
         const loginUrl = widget?.dataset?.loginUrl || '/auth/login/?next=/auth/messages/';
         const isAuthenticated = widget?.dataset?.isAuthenticated === 'true';
+        const bookingStatusText = widget?.dataset?.bookingStatus || '';
+        const bookingDetailUrl = widget?.dataset?.bookingDetailUrl || '';
+        const cancelHelpUrl = widget?.dataset?.cancelHelpUrl || '';
+        const receiptUrl = widget?.dataset?.receiptUrl || '';
         const STORAGE_KEY = 'cebuhotel_chatbot_history_v3';
         const UI_STATE_KEY = 'cebuhotel_chatbot_ui_state_v1';
         const initialMessagesHtml = messagesContainer?.innerHTML || '';
@@ -590,6 +598,9 @@
         ] : [
             { label: 'Rooms', icon: 'fa-bed', message: 'What rooms do you have?' },
             { label: 'Availability', icon: 'fa-calendar-check', message: 'Check room availability' },
+            { label: 'My Booking Status', icon: 'fa-clipboard-check', action: showBookingStatus },
+            { label: 'Cancel Booking', icon: 'fa-ban', action: showCancelBookingHelp },
+            { label: 'Download Receipt', icon: 'fa-file-pdf', action: showDownloadReceiptHelp },
             { label: 'Payments', icon: 'fa-credit-card', message: 'What payment methods do you accept?' },
             { label: 'Cancellation', icon: 'fa-rotate-left', message: 'What is your cancellation policy?' },
             { label: 'Contact', icon: 'fa-phone', message: 'How do I contact the hotel?' },
@@ -792,6 +803,69 @@
                     </a>
                 </div>`;
             addTrustedBotHtml(card);
+        }
+
+        function showBookingStatus() {
+            if (!isAuthenticated) {
+                addTrustedBotHtml(`
+                    <div class="chatbot-contact-card">
+                        <strong>My Booking Status</strong>
+                        <span>Please sign in first so Echo can check your latest booking status.</span>
+                        <a class="chatbot-contact-action" href="${loginUrl}">
+                            <i class="fas fa-sign-in-alt"></i> Sign in
+                        </a>
+                    </div>`);
+                return;
+            }
+
+            const detailsLink = bookingDetailUrl
+                ? `<a class="chatbot-contact-action" href="${bookingDetailUrl}"><i class="fas fa-eye"></i> View booking</a>`
+                : '';
+            addTrustedBotHtml(`
+                <div class="chatbot-contact-card">
+                    <strong>My Booking Status</strong>
+                    <span>${escapeHtml(bookingStatusText || 'No booking status is available right now.')}</span>
+                    ${detailsLink}
+                </div>`);
+        }
+
+        function showCancelBookingHelp() {
+            const destination = isAuthenticated ? (cancelHelpUrl || bookingDetailUrl || '/bookings/history/') : loginUrl;
+            const actionLabel = isAuthenticated ? 'Open booking' : 'Sign in';
+            addTrustedBotHtml(`
+                <div class="chatbot-contact-card">
+                    <strong>Cancel Booking</strong>
+                    <span>Bookings can be cancelled while they are still pending or confirmed. Checked-in, checked-out, and already cancelled bookings cannot be cancelled from the guest portal.</span>
+                    <span>If payment was completed, Cebu Mini Hotel will mark the refund as pending review.</span>
+                    <a class="chatbot-contact-action" href="${destination}">
+                        <i class="fas fa-arrow-right"></i> ${actionLabel}
+                    </a>
+                </div>`);
+        }
+
+        function showDownloadReceiptHelp() {
+            if (!isAuthenticated) {
+                addTrustedBotHtml(`
+                    <div class="chatbot-contact-card">
+                        <strong>Download Receipt</strong>
+                        <span>Please sign in first so Echo can find your latest booking confirmation PDF.</span>
+                        <a class="chatbot-contact-action" href="${loginUrl}">
+                            <i class="fas fa-sign-in-alt"></i> Sign in
+                        </a>
+                    </div>`);
+                return;
+            }
+
+            const destination = receiptUrl || bookingDetailUrl || '/bookings/history/';
+            const actionLabel = receiptUrl ? 'Download PDF' : 'Open booking';
+            addTrustedBotHtml(`
+                <div class="chatbot-contact-card">
+                    <strong>Download Receipt</strong>
+                    <span>You can download the booking confirmation PDF from your latest booking.</span>
+                    <a class="chatbot-contact-action" href="${destination}">
+                        <i class="fas fa-file-pdf"></i> ${actionLabel}
+                    </a>
+                </div>`);
         }
 
         function addTrustedBotHtml(html) {
