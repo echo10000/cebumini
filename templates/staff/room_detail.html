@@ -7,19 +7,35 @@
 <style>
     .back-link {
         margin-bottom: 2rem;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
     }
 
     .room-hero {
-        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-        color: #fff;
+        position: relative;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.96);
+        color: var(--staff-ink);
         padding: 2rem;
+        border: 1px solid var(--staff-line);
+        border-left: 4px solid var(--staff-brand);
         border-radius: 8px;
         margin-bottom: 2rem;
-        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.16);
+        box-shadow: var(--staff-shadow);
+    }
+
+    .room-hero::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(15, 118, 110, 0));
     }
 
     .room-header {
+        position: relative;
+        z-index: 1;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -30,25 +46,25 @@
         margin: 0;
         font-size: 2.5rem;
         font-weight: 850;
-        color: #fff !important;
+        color: var(--staff-ink) !important;
     }
 
     .room-subtitle {
         margin: 0.35rem 0 0;
-        color: rgba(255, 255, 255, 0.88);
+        color: var(--staff-muted);
     }
 
     .info-card {
         background: rgba(255, 255, 255, 0.96);
-        border: 1px solid var(--guest-line);
+        border: 1px solid var(--staff-line);
         padding: 1.5rem;
         margin-bottom: 1.5rem;
         border-radius: 8px;
-        box-shadow: var(--guest-shadow);
+        box-shadow: var(--staff-shadow);
     }
 
     .info-card h5 {
-        color: var(--guest-ink);
+        color: var(--staff-ink);
         font-weight: 800;
         margin-bottom: 1rem;
         font-size: 1rem;
@@ -59,7 +75,7 @@
         justify-content: space-between;
         gap: 1rem;
         padding: 0.75rem 0;
-        border-bottom: 1px solid var(--guest-line);
+        border-bottom: 1px solid var(--staff-line);
     }
 
     .info-row:last-child {
@@ -68,22 +84,22 @@
 
     .info-label {
         font-weight: 700;
-        color: var(--guest-muted);
+        color: var(--staff-muted);
     }
 
     .info-value {
-        color: var(--guest-ink);
+        color: var(--staff-ink);
         text-align: right;
     }
 
     .guest-section {
         margin-top: 1rem;
         padding-top: 1rem;
-        border-top: 1px solid var(--guest-line);
+        border-top: 1px solid var(--staff-line);
     }
 
     .amenities-copy p {
-        color: var(--guest-ink);
+        color: var(--staff-ink);
         margin-bottom: 0.65rem;
     }
 
@@ -230,9 +246,12 @@
                 <h5><i class="fas fa-tasks"></i> Quick Actions</h5>
                 <div class="action-strip">
                     {% if not current_booking %}
-                        <button class="btn btn-primary">
-                            <i class="fas fa-check"></i> Mark as Clean
-                        </button>
+                        <form method="post" action="{% url 'staff:mark_clean' room.id %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check"></i> Mark as Clean
+                            </button>
+                        </form>
                     {% else %}
                         <button class="btn btn-secondary" disabled>
                             <i class="fas fa-user"></i> Room Occupied

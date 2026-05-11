@@ -318,6 +318,14 @@ a {
     border-color: var(--manager-line) !important;
 }
 
+.manager-main .bg-light,
+.manager-main .bg-light *,
+.manager-main .bg-light p,
+.manager-main .bg-light strong,
+.manager-main .border.bg-light {
+    color: var(--manager-ink) !important;
+}
+
 .manager-main .card-header {
     border-bottom: 1px solid var(--manager-line) !important;
 }
@@ -659,6 +667,14 @@ textarea:focus,
 input:focus {
     border-color: var(--manager-brand) !important;
     box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.13) !important;
+}
+
+.form-select option,
+select option,
+.form-select optgroup,
+select optgroup {
+    background: #fff !important;
+    color: var(--manager-ink) !important;
 }
 
 .alert {

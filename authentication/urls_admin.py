@@ -13,6 +13,8 @@ urlpatterns = [
     path('payments/<int:payment_id>/', views_admin.payment_detail, name='payment_detail'),
     path('payments/<int:payment_id>/approve/', views_admin.approve_payment, name='approve_payment'),
     path('payments/<int:payment_id>/reject/', views_admin.reject_payment, name='reject_payment'),
+    path('refunds/', views_admin.refund_requests, name='refund_requests'),
+    path('refunds/<int:refund_id>/issue/', views_admin.issue_refund_request, name='issue_refund_request'),
     
     # Room Management
     path('rooms/', views_admin.room_management, name='room_management'),

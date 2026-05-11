@@ -5,171 +5,177 @@
 
 {% block extra_css %}
 <style>
-    .guest-support-page {
-        width: 100%;
-        max-width: 1120px;
+    .support-conversation-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        width: min(100%, 1120px);
         margin: 0 auto;
-        padding: 0 1rem 2rem;
     }
 
-    .guest-support-back {
+    .support-back-link {
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        margin-bottom: 1rem;
-        color: #c9a84c;
+        gap: 0.45rem;
+        width: fit-content;
+        color: var(--guest-muted);
         font-weight: 800;
         text-decoration: none;
     }
 
-    .guest-support-back:hover {
-        color: #e6c766;
+    .support-back-link:hover {
+        color: var(--guest-brand-dark);
     }
 
-    .guest-support-shell {
+    .support-summary-card,
+    .support-thread-card,
+    .support-composer-card {
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--guest-line);
+        border-radius: var(--guest-radius);
+        box-shadow: var(--guest-shadow);
+        color: var(--guest-ink);
+    }
+
+    .support-summary-card {
         overflow: hidden;
-        background: #111827;
-        border: 1px solid rgba(201, 168, 76, 0.22);
-        border-radius: 12px;
-        box-shadow: 0 22px 54px rgba(0, 0, 0, 0.25);
     }
 
-    .guest-support-header {
+    .support-summary-header {
         display: flex;
+        align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
         padding: 1.25rem;
-        background: #1a2235;
-        border-bottom: 1px solid rgba(201, 168, 76, 0.18);
+        border-bottom: 1px solid var(--guest-line);
+        background: rgba(238, 242, 247, 0.72);
     }
 
-    .guest-support-person {
+    .support-person {
         display: flex;
         min-width: 0;
-        gap: 0.9rem;
         align-items: center;
+        gap: 0.9rem;
     }
 
-    .guest-support-avatar {
-        display: grid;
-        width: 48px;
-        height: 48px;
-        flex: 0 0 48px;
-        place-items: center;
-        border-radius: 50%;
-        background: rgba(201, 168, 76, 0.16);
-        color: #c9a84c;
-        font-weight: 900;
-    }
-
-    .guest-support-kicker {
-        margin: 0 0 0.2rem;
-        color: #9ca3af;
-        font-size: 0.78rem;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
-
-    .guest-support-title {
-        margin: 0;
-        color: #ffffff;
-        font-family: 'DM Sans', sans-serif;
-        font-size: clamp(1.2rem, 2vw, 1.65rem);
-        font-weight: 900;
-        line-height: 1.2;
-        word-break: break-word;
-    }
-
-    .guest-support-subtitle {
-        margin: 0.3rem 0 0;
-        color: #9ca3af;
-        font-size: 0.92rem;
-    }
-
-    .guest-support-status {
-        align-self: flex-start;
+    .support-avatar {
         display: inline-flex;
         align-items: center;
-        gap: 0.45rem;
-        white-space: nowrap;
-        border-radius: 999px;
-        padding: 0.45rem 0.75rem;
-        font-size: 0.82rem;
-        font-weight: 800;
+        justify-content: center;
+        width: 46px;
+        height: 46px;
+        flex: 0 0 46px;
+        border-radius: var(--guest-radius);
+        background: #e0f2f1;
+        color: var(--guest-brand-dark);
+        font-weight: 900;
     }
 
-    .guest-support-status.replied {
-        background: rgba(16, 185, 129, 0.18);
-        color: #6ee7b7;
-    }
-
-    .guest-support-status.pending {
-        background: rgba(245, 158, 11, 0.18);
-        color: #fbbf24;
-    }
-
-    .guest-support-meta {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 1px;
-        background: rgba(201, 168, 76, 0.16);
-        border-bottom: 1px solid rgba(201, 168, 76, 0.18);
-    }
-
-    .guest-support-meta-item {
-        min-width: 0;
-        padding: 0.95rem 1.25rem;
-        background: #111827;
-    }
-
-    .guest-support-meta-label {
-        display: flex;
-        gap: 0.4rem;
-        align-items: center;
-        margin-bottom: 0.28rem;
-        color: #9ca3af;
-        font-size: 0.74rem;
-        font-weight: 800;
-        letter-spacing: 0.05em;
+    .support-kicker {
+        margin: 0 0 0.25rem;
+        color: var(--guest-muted);
+        font-size: 0.78rem;
+        font-weight: 850;
+        letter-spacing: 0;
         text-transform: uppercase;
     }
 
-    .guest-support-meta-value {
-        color: #f8fafc;
-        font-size: 0.95rem;
-        font-weight: 700;
+    .support-title {
+        margin: 0;
+        color: var(--guest-ink);
+        font-size: clamp(1.35rem, 2.3vw, 2rem);
+        font-weight: 850;
+        line-height: 1.15;
         overflow-wrap: anywhere;
     }
 
-    .guest-thread {
+    .support-subtitle {
+        margin: 0.35rem 0 0;
+        color: var(--guest-muted);
+        font-weight: 650;
+    }
+
+    .support-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        white-space: nowrap;
+        border-radius: 999px;
+        padding: 0.45rem 0.72rem;
+        border: 1px solid transparent;
+        font-size: 0.82rem;
+        font-weight: 850;
+    }
+
+    .support-status.replied {
+        background: #dcfce7;
+        border-color: #bbf7d0;
+        color: var(--guest-success);
+    }
+
+    .support-status.pending {
+        background: #fef3c7;
+        border-color: #fde68a;
+        color: var(--guest-warning);
+    }
+
+    .support-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-top: 0;
+    }
+
+    .support-meta-item {
+        min-width: 0;
+        padding: 1rem 1.25rem;
+        border-right: 1px solid var(--guest-line);
+    }
+
+    .support-meta-item:last-child {
+        border-right: 0;
+    }
+
+    .support-meta-label {
         display: flex;
-        min-height: 420px;
-        max-height: min(62vh, 680px);
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 0.3rem;
+        color: var(--guest-muted);
+        font-size: 0.76rem;
+        font-weight: 850;
+        text-transform: uppercase;
+    }
+
+    .support-meta-value {
+        color: var(--guest-ink);
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .support-thread-card {
+        display: flex;
         flex-direction: column;
         gap: 1rem;
+        max-height: min(62vh, 680px);
+        min-height: 420px;
         overflow-y: auto;
         padding: 1.25rem;
-        background:
-            linear-gradient(rgba(10, 15, 30, 0.92), rgba(10, 15, 30, 0.92)),
-            repeating-linear-gradient(90deg, transparent 0 32px, rgba(201, 168, 76, 0.06) 32px 33px),
-            repeating-linear-gradient(0deg, transparent 0 32px, rgba(201, 168, 76, 0.06) 32px 33px);
         scroll-behavior: smooth;
     }
 
-    .guest-thread::-webkit-scrollbar {
+    .support-thread-card::-webkit-scrollbar {
         width: 8px;
     }
 
-    .guest-thread::-webkit-scrollbar-thumb {
-        background: rgba(201, 168, 76, 0.65);
+    .support-thread-card::-webkit-scrollbar-thumb {
+        background: rgba(15, 118, 110, 0.35);
         border-radius: 999px;
     }
 
     .thread-message {
         display: flex;
         flex-direction: column;
-        max-width: min(680px, 78%);
+        max-width: min(690px, 78%);
         gap: 0.35rem;
     }
 
@@ -183,19 +189,21 @@
         align-items: flex-end;
     }
 
-    .thread-sender {
-        color: #9ca3af;
-        font-size: 0.76rem;
+    .thread-sender,
+    .thread-time {
+        color: var(--guest-muted);
+        font-size: 0.78rem;
         font-weight: 800;
     }
 
     .thread-bubble {
         padding: 0.85rem 1rem;
+        border: 1px solid var(--guest-line);
         border-radius: 16px;
-        font-size: 0.95rem;
+        background: var(--guest-surface-alt);
+        color: var(--guest-ink);
         line-height: 1.55;
         overflow-wrap: anywhere;
-        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
     }
 
     .thread-bubble p:last-child {
@@ -203,144 +211,140 @@
     }
 
     .incoming .thread-bubble {
-        background: #1a2235;
-        color: #f8fafc;
-        border: 1px solid rgba(201, 168, 76, 0.16);
         border-bottom-left-radius: 5px;
     }
 
     .outgoing .thread-bubble {
-        background: #c9a84c;
-        color: #0a0f1e;
+        border-color: rgba(15, 118, 110, 0.28);
         border-bottom-right-radius: 5px;
+        background: #e0f2f1;
+        color: var(--guest-brand-dark);
     }
 
-    .thread-time {
-        color: #9ca3af;
-        font-size: 0.74rem;
-        font-weight: 700;
-    }
-
-    .guest-composer {
+    .support-composer-card {
         padding: 1rem 1.25rem 1.15rem;
-        background: #111827;
-        border-top: 1px solid rgba(201, 168, 76, 0.18);
     }
 
-    .guest-composer-heading {
+    .support-composer-heading {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         margin: 0 0 0.75rem;
-        color: #ffffff;
-        font-family: 'DM Sans', sans-serif;
-        font-size: 0.95rem;
-        font-weight: 900;
+        color: var(--guest-ink);
+        font-size: 1rem;
+        font-weight: 850;
     }
 
-    .guest-composer-alert {
+    .support-composer-alert {
         display: flex;
         align-items: center;
         gap: 0.55rem;
         margin-bottom: 0.75rem;
         padding: 0.75rem 0.85rem;
-        border-radius: 8px;
-        background: rgba(16, 185, 129, 0.12);
-        color: #6ee7b7;
-        font-size: 0.88rem;
-        font-weight: 700;
+        border: 1px solid #bbf7d0;
+        border-radius: var(--guest-radius);
+        background: #dcfce7;
+        color: var(--guest-success);
+        font-size: 0.9rem;
+        font-weight: 750;
     }
 
-    .guest-composer-form {
+    .support-composer-form {
         display: grid;
         grid-template-columns: minmax(0, 1fr) auto;
         gap: 0.75rem;
         align-items: end;
     }
 
-    .guest-composer-textarea {
+    .support-composer-textarea {
         width: 100%;
         min-height: 58px;
         max-height: 180px;
         padding: 0.9rem 1rem;
         resize: vertical;
-        border: 1px solid rgba(201, 168, 76, 0.28);
-        border-radius: 10px;
-        background: #0a0f1e;
-        color: #ffffff;
+        border: 1px solid var(--guest-line);
+        border-radius: var(--guest-radius);
+        background: #fff;
+        color: var(--guest-ink);
         font: inherit;
         line-height: 1.45;
     }
 
-    .guest-composer-textarea:focus {
-        border-color: #c9a84c;
-        box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.12);
+    .support-composer-textarea:focus {
+        border-color: var(--guest-brand);
+        box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.13);
         outline: none;
     }
 
-    .guest-composer-submit {
+    .support-composer-submit {
         display: inline-flex;
-        min-height: 58px;
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
+        min-height: 58px;
         padding: 0 1.15rem;
-        border: 0;
-        border-radius: 10px;
-        background: #c9a84c;
-        color: #0a0f1e;
-        font-weight: 900;
+        border: 1px solid var(--guest-brand);
+        border-radius: var(--guest-radius);
+        background: var(--guest-brand);
+        color: #fff;
+        font-weight: 850;
         cursor: pointer;
         white-space: nowrap;
-        transition: background 0.2s ease, transform 0.2s ease;
     }
 
-    .guest-composer-submit:hover {
-        background: #e6c766;
+    .support-composer-submit:hover {
+        background: var(--guest-brand-dark);
+        border-color: var(--guest-brand-dark);
         transform: translateY(-1px);
     }
 
-    .guest-composer-note {
-        margin: 0.6rem 0 0;
-        color: #9ca3af;
-        font-size: 0.82rem;
-        font-weight: 600;
-    }
-
-    .guest-contact-row {
-        margin-top: 1rem;
-        color: #9ca3af;
+    .support-composer-note,
+    .support-contact-row {
+        color: var(--guest-muted);
         font-size: 0.9rem;
     }
 
-    .guest-contact-row a {
-        color: #c9a84c;
-        font-weight: 800;
+    .support-composer-note {
+        margin: 0.65rem 0 0;
+    }
+
+    .support-contact-row {
+        margin: 0;
+    }
+
+    .support-contact-row a {
+        color: var(--guest-brand-dark);
+        font-weight: 850;
         text-decoration: none;
     }
 
     @media (max-width: 760px) {
-        .guest-support-header {
+        .support-summary-header {
             flex-direction: column;
         }
 
-        .guest-support-meta {
-            display: block;
+        .support-meta-grid {
+            grid-template-columns: 1fr;
         }
 
-        .guest-support-meta-item + .guest-support-meta-item {
-            border-top: 1px solid rgba(201, 168, 76, 0.16);
+        .support-meta-item {
+            border-right: 0;
+            border-bottom: 1px solid var(--guest-line);
+        }
+
+        .support-meta-item:last-child {
+            border-bottom: 0;
         }
 
         .thread-message {
             max-width: 92%;
         }
 
-        .guest-composer-form {
+        .support-composer-form {
             grid-template-columns: 1fr;
         }
 
-        .guest-composer-submit {
+        .support-composer-submit {
             width: 100%;
         }
     }
@@ -348,103 +352,105 @@
 {% endblock %}
 
 {% block content %}
-<div class="guest-support-page">
-    <a href="{% url 'auth:guest_messages' %}" class="guest-support-back">
+<div class="support-conversation-page">
+    <a href="{% url 'auth:guest_messages' %}" class="support-back-link">
         <i class="fas fa-arrow-left"></i>
         <span>Back to Support</span>
     </a>
 
     {% if had_new_response %}
-        <div class="alert alert-warning"><i class="fas fa-bell"></i> You have a new response from our staff.</div>
+        <div class="alert alert-warning">
+            <i class="fas fa-bell"></i> You have a new response from our staff.
+        </div>
     {% endif %}
 
-    <section class="guest-support-shell" aria-label="Support conversation">
-        <header class="guest-support-header">
-            <div class="guest-support-person">
-                <div class="guest-support-avatar">{{ message.name|first|upper }}</div>
+    <section class="support-summary-card" aria-label="Support conversation summary">
+        <header class="support-summary-header">
+            <div class="support-person">
+                <div class="support-avatar">{{ message.name|first|upper }}</div>
                 <div>
-                    <p class="guest-support-kicker">Support Conversation</p>
-                    <h1 class="guest-support-title">{{ message.subject }}</h1>
-                    <p class="guest-support-subtitle">Started {{ message.created_at|date:"M d, Y g:i A" }}</p>
+                    <p class="support-kicker">Support Conversation</p>
+                    <h1 class="support-title">{{ message.subject }}</h1>
+                    <p class="support-subtitle">Started {{ message.created_at|date:"M d, Y g:i A" }}</p>
                 </div>
             </div>
 
             {% if message.is_replied %}
-                <span class="guest-support-status replied"><i class="fas fa-check-circle"></i> Replied</span>
+                <span class="support-status replied"><i class="fas fa-check-circle"></i> Replied</span>
             {% else %}
-                <span class="guest-support-status pending"><i class="fas fa-clock"></i> Pending</span>
+                <span class="support-status pending"><i class="fas fa-clock"></i> Pending</span>
             {% endif %}
         </header>
 
-        <div class="guest-support-meta">
-            <div class="guest-support-meta-item">
-                <div class="guest-support-meta-label"><i class="fas fa-user"></i> Name</div>
-                <div class="guest-support-meta-value">{{ message.name }}</div>
+        <div class="support-meta-grid">
+            <div class="support-meta-item">
+                <div class="support-meta-label"><i class="fas fa-user"></i> Name</div>
+                <div class="support-meta-value">{{ message.name }}</div>
             </div>
-            <div class="guest-support-meta-item">
-                <div class="guest-support-meta-label"><i class="fas fa-envelope"></i> Email</div>
-                <div class="guest-support-meta-value">{{ message.email }}</div>
+            <div class="support-meta-item">
+                <div class="support-meta-label"><i class="fas fa-envelope"></i> Email</div>
+                <div class="support-meta-value">{{ message.email }}</div>
             </div>
-            <div class="guest-support-meta-item">
-                <div class="guest-support-meta-label"><i class="fas fa-phone"></i> Phone</div>
-                <div class="guest-support-meta-value">{{ message.phone|default:"Not provided" }}</div>
+            <div class="support-meta-item">
+                <div class="support-meta-label"><i class="fas fa-phone"></i> Phone</div>
+                <div class="support-meta-value">{{ message.phone|default:"Not provided" }}</div>
             </div>
         </div>
-
-        <div class="guest-thread" id="guest-thread">
-            <article class="thread-message outgoing">
-                <div class="thread-sender">You</div>
-                <div class="thread-bubble">{{ message.message|linebreaks }}</div>
-                <time class="thread-time">{{ message.created_at|date:"M d, Y g:i A" }}</time>
-            </article>
-
-            {% for reply in combined_replies %}
-                <article class="thread-message {% if reply.type == 'guest' %}outgoing{% else %}incoming{% endif %}">
-                    <div class="thread-sender">{% if reply.type == 'guest' %}You{% else %}{{ reply.sender }}{% endif %}</div>
-                    <div class="thread-bubble">{{ reply.text|linebreaks }}</div>
-                    <time class="thread-time">{{ reply.timestamp }}</time>
-                </article>
-            {% endfor %}
-        </div>
-
-        <section class="guest-composer" aria-label="Reply composer">
-            <h2 class="guest-composer-heading">
-                <i class="fas fa-reply"></i>
-                <span>Send a Reply</span>
-            </h2>
-
-            {% if messages %}
-                {% for message_alert in messages %}
-                    <div class="guest-composer-alert" role="alert">
-                        <i class="fas fa-check-circle"></i>
-                        <span>{{ message_alert }}</span>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
-            <form class="guest-composer-form" method="POST" action="{% url 'auth:reply_message' message.id %}">
-                {% csrf_token %}
-                <label class="visually-hidden" for="reply_text">Your Reply</label>
-                <textarea
-                    class="guest-composer-textarea"
-                    id="reply_text"
-                    name="reply_text"
-                    rows="2"
-                    placeholder="Write a reply..."
-                    required></textarea>
-                <button type="submit" class="guest-composer-submit">
-                    <i class="fas fa-paper-plane"></i>
-                    <span>Send Reply</span>
-                </button>
-            </form>
-            <p class="guest-composer-note">
-                <i class="fas fa-circle-info"></i>
-                Be specific and clear so the team can help you faster.
-            </p>
-        </section>
     </section>
 
-    <p class="guest-contact-row">
+    <section class="support-thread-card" id="guest-thread" aria-label="Conversation messages">
+        <article class="thread-message outgoing">
+            <div class="thread-sender">You</div>
+            <div class="thread-bubble">{{ message.message|linebreaks }}</div>
+            <time class="thread-time">{{ message.created_at|date:"M d, Y g:i A" }}</time>
+        </article>
+
+        {% for reply in combined_replies %}
+            <article class="thread-message {% if reply.type == 'guest' %}outgoing{% else %}incoming{% endif %}">
+                <div class="thread-sender">{% if reply.type == 'guest' %}You{% else %}{{ reply.sender }}{% endif %}</div>
+                <div class="thread-bubble">{{ reply.text|linebreaks }}</div>
+                <time class="thread-time">{{ reply.timestamp }}</time>
+            </article>
+        {% endfor %}
+    </section>
+
+    <section class="support-composer-card" aria-label="Reply composer">
+        <h2 class="support-composer-heading">
+            <i class="fas fa-reply"></i>
+            <span>Send a Reply</span>
+        </h2>
+
+        {% if messages %}
+            {% for message_alert in messages %}
+                <div class="support-composer-alert" role="alert">
+                    <i class="fas fa-check-circle"></i>
+                    <span>{{ message_alert }}</span>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form class="support-composer-form" method="POST" action="{% url 'auth:reply_message' message.id %}">
+            {% csrf_token %}
+            <label class="visually-hidden" for="reply_text">Your Reply</label>
+            <textarea
+                class="support-composer-textarea"
+                id="reply_text"
+                name="reply_text"
+                rows="2"
+                placeholder="Write a reply..."
+                required></textarea>
+            <button type="submit" class="support-composer-submit">
+                <i class="fas fa-paper-plane"></i>
+                <span>Send Reply</span>
+            </button>
+        </form>
+        <p class="support-composer-note">
+            <i class="fas fa-circle-info"></i>
+            Be specific and clear so the team can help you faster.
+        </p>
+    </section>
+
+    <p class="support-contact-row">
         Prefer another way to reach us?
         <a href="tel:+63324123456"><i class="fas fa-phone"></i> Call +63-32-412-3456</a>
     </p>

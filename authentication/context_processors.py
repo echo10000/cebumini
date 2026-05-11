@@ -28,6 +28,25 @@ def guest_notifications(request):
     return context
 
 
+def admin_sidebar_notifications(request):
+    """Add live admin sidebar notification counts."""
+    context = {
+        'pending_payments_count': 0,
+        'approved_refunds_count': 0,
+    }
+
+    if not request.user.is_authenticated or not request.user.is_admin():
+        return context
+
+    from .models import Payment, PaymentStatus
+
+    context['pending_payments_count'] = Payment.objects.filter(
+        status__in=[PaymentStatus.PENDING, PaymentStatus.PENDING_ONSITE]
+    ).count()
+
+    return context
+
+
 def echo_chatbot_context(request):
     """Add small guest booking hints for Echo's client-side quick replies."""
     context = {

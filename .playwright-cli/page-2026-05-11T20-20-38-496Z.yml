@@ -1,0 +1,47 @@
+- generic [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]: C
+        - generic [ref=e6]: Cebu Luxury
+      - generic [ref=e7]:
+        - link "Dashboard" [ref=e8] [cursor=pointer]:
+          - /url: /admin-panel/
+        - link "Logout" [ref=e9] [cursor=pointer]:
+          - /url: /auth/logout/
+  - main [ref=e10]:
+    - generic [ref=e12]:
+      - region "Authenticator verification" [ref=e13]:
+        - generic [ref=e14]:
+          - heading "Confirm it's really you." [level=1] [ref=e15]
+          - paragraph [ref=e16]: Use your authenticator app or a backup code to keep your Cebu Luxury account protected.
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e20]: 
+          - heading "Verify your identity" [level=2] [ref=e21]
+          - paragraph [ref=e22]: Enter the code from your authenticator app.
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - generic [ref=e25]: 6-Digit Code
+              - textbox "6-Digit Code" [active] [ref=e26]:
+                - /placeholder: "000000"
+              - generic [ref=e27]: Or paste a backup code
+            - button " Verify Code" [ref=e28] [cursor=pointer]:
+              - generic [ref=e29]: 
+              - text: Verify Code
+            - link " Go Back" [ref=e30] [cursor=pointer]:
+              - /url: /auth/login/
+              - generic [ref=e31]: 
+              - text: Go Back
+            - generic [ref=e32]:
+              - strong [ref=e33]: Need help?
+              - list [ref=e34]:
+                - listitem [ref=e35]: Make sure your device time is synchronized.
+                - listitem [ref=e36]: Use a backup code if your authenticator app is unavailable.
+                - listitem [ref=e37]: Each authenticator code is valid for 30 seconds.
+        - generic [ref=e38]:
+          - heading " Your security matters" [level=5] [ref=e39]:
+            - generic [ref=e40]: 
+            - text: Your security matters
+          - paragraph [ref=e41]: We use two-factor verification to help protect your bookings, payments, and guest messages.
+  - text:    

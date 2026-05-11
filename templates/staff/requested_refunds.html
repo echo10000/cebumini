@@ -3,77 +3,68 @@
 {% block title %}My Requested Refunds - Cebu Luxury{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h1 class="mb-4">
-        <i class="fas fa-money-bill-wave"></i> My Requested Refunds
-    </h1>
-
-    <!-- Status Filters -->
-    <div class="btn-group mb-4" role="group">
-        <a href="?status=all" class="btn btn-outline-secondary {% if status_filter == 'all' %}active{% endif %}">
-            All
-        </a>
-        <a href="?status=REQUESTED" class="btn btn-outline-warning {% if status_filter == 'REQUESTED' %}active{% endif %}">
-            Pending
-        </a>
-        <a href="?status=APPROVED" class="btn btn-outline-success {% if status_filter == 'APPROVED' %}active{% endif %}">
-            Approved
-        </a>
-        <a href="?status=REJECTED" class="btn btn-outline-danger {% if status_filter == 'REJECTED' %}active{% endif %}">
-            Rejected
-        </a>
-        <a href="?status=ISSUED" class="btn btn-outline-info {% if status_filter == 'ISSUED' %}active{% endif %}">
-            Issued
-        </a>
+<div class="container-fluid py-4">
+    <div class="page-header">
+        <h1><i class="fas fa-money-bill-wave"></i> My Requested Refunds</h1>
+        <p>Review refund requests submitted for manager decision</p>
     </div>
 
-    <!-- Refunds Table -->
-    <div class="card">
-        <div class="card-body">
-            {% if refunds %}
+    <div class="staff-filter-tabs" aria-label="Refund status filters">
+        <a href="?status=all" class="{% if status_filter == 'all' %}active{% endif %}">All</a>
+        <a href="?status=REQUESTED" class="{% if status_filter == 'REQUESTED' %}active{% endif %}">Pending</a>
+        <a href="?status=REJECTED" class="{% if status_filter == 'REJECTED' %}active{% endif %}">Rejected</a>
+        <a href="?status=ISSUED" class="{% if status_filter == 'ISSUED' %}active{% endif %}">Issued</a>
+    </div>
+
+    <section class="table-section staff-list-section">
+        {% if refunds %}
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover staff-data-table">
                     <thead>
                         <tr>
-                            <th>Booking ID</th>
+                            <th>Booking</th>
                             <th>Guest</th>
                             <th>Requested Amount</th>
                             <th>Reason</th>
                             <th>Status</th>
                             <th>Manager Notes</th>
                             <th>Date</th>
-                            <th>Action</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for refund in refunds %}
                         <tr>
                             <td><strong>#{{ refund.booking.id }}</strong></td>
-                            <td>{{ refund.booking.guest.get_full_name }}</td>
-                            <td><strong class="text-danger">₱{{ refund.requested_amount }}</strong></td>
-                            <td>{{ refund.reason|truncatewords:3 }}</td>
+                            <td>
+                                <div class="staff-primary-text">{{ refund.booking.guest.get_full_name|default:refund.booking.guest.username }}</div>
+                            </td>
+                            <td><strong class="amount-value">₱{{ refund.requested_amount }}</strong></td>
+                            <td>
+                                <span class="staff-secondary-text">{{ refund.reason|truncatewords:6 }}</span>
+                            </td>
                             <td>
                                 {% if refund.status == 'REQUESTED' %}
-                                    <span class="badge bg-warning text-dark">Pending</span>
-                                {% elif refund.status == 'APPROVED' %}
-                                    <span class="badge bg-success">Approved</span>
+                                    <span class="status-badge status-pending">Pending</span>
                                 {% elif refund.status == 'REJECTED' %}
-                                    <span class="badge bg-danger">Rejected</span>
+                                    <span class="status-badge status-escalated">Rejected</span>
                                 {% elif refund.status == 'ISSUED' %}
-                                    <span class="badge bg-info">Issued</span>
+                                    <span class="status-badge status-processing">Issued</span>
+                                {% elif refund.status == 'APPROVED' %}
+                                    <span class="status-badge status-processing">Processing</span>
                                 {% endif %}
                             </td>
                             <td>
                                 {% if refund.manager_notes %}
-                                    <small class="text-muted">{{ refund.manager_notes|truncatewords:3 }}</small>
+                                    <span class="staff-secondary-text">{{ refund.manager_notes|truncatewords:5 }}</span>
                                 {% else %}
-                                    <small class="text-muted">-</small>
+                                    <span class="muted-value">-</span>
                                 {% endif %}
                             </td>
                             <td>{{ refund.created_at|date:"M d, Y" }}</td>
-                            <td>
-                                <a href="{% url 'staff:refund_detail' refund.id %}" class="btn btn-sm btn-info">
-                                    View
+                            <td class="text-end">
+                                <a href="{% url 'staff:refund_detail' refund.id %}" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View
                                 </a>
                             </td>
                         </tr>
@@ -81,23 +72,19 @@
                     </tbody>
                 </table>
             </div>
-            {% else %}
-            <p class="text-muted text-center py-4">No refunds found</p>
-            {% endif %}
-        </div>
-    </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <h4>No refunds found</h4>
+                <p>There are no refund requests matching this status.</p>
+            </div>
+        {% endif %}
+    </section>
 
-    <!-- Back Button -->
     <div class="mt-4">
         <a href="{% url 'staff:dashboard' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to Dashboard
         </a>
     </div>
 </div>
-
-<style>
-    .table-hover tbody tr:hover {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-</style>
 {% endblock %}

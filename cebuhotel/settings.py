@@ -12,6 +12,10 @@ SECRET_KEY = 'django-insecure-your-secret-key-change-this-in-production'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.dev',
+    'https://*.ngrok.io',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,6 +63,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'authentication.context_processors.guest_notifications',
+                'authentication.context_processors.admin_sidebar_notifications',
                 'authentication.context_processors.echo_chatbot_context',
             ],
         },
@@ -128,17 +133,29 @@ AUTHENTICATION_BACKENDS = [
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Email Configuration - Gmail SMTP
-# Send real emails via Gmail
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'echogoodkid@gmail.com'
-EMAIL_HOST_PASSWORD = 'kmfakmtmpwditwtc'  # App password (spaces removed for clarity)
-DEFAULT_FROM_EMAIL = 'Cebu Hotel <echogoodkid@gmail.com>'
-EMAIL_TIMEOUT = 10
-SERVER_EMAIL = 'Cebu Hotel <echogoodkid@gmail.com>'
+# Email Configuration
+# Local development prints email contents to the console by default unless
+# Gmail SMTP credentials are present in .env.
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='').replace(' ', '')
+_smtp_default = bool(EMAIL_HOST_USER and EMAIL_HOST_PASSWORD)
+USE_SMTP_EMAIL = config(
+    'USE_SMTP_EMAIL',
+    default=_smtp_default,
+    cast=bool,
+)
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.smtp.EmailBackend'
+    if USE_SMTP_EMAIL else 'django.core.mail.backends.console.EmailBackend',
+)
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='Cebu Hotel <noreply@localhost>')
+EMAIL_TIMEOUT = config('EMAIL_TIMEOUT', default=10, cast=int)
+SERVER_EMAIL = config('SERVER_EMAIL', default=DEFAULT_FROM_EMAIL)
+SEND_LOGIN_NOTIFICATION_EMAILS = config('SEND_LOGIN_NOTIFICATION_EMAILS', default=True, cast=bool)
 
 # Allauth Settings
 ACCOUNT_LOGIN_METHODS = {'email'}
@@ -177,7 +194,7 @@ OTP_LOGIN_URL = '/auth/login/'
 # 2FA Settings
 TWO_FACTOR_ENABLED = True
 TWO_FACTOR_REQUIRED = True
-OTP_EMAIL_SENDER = 'noreply@cebu-luxury.com'
+OTP_EMAIL_SENDER = config('OTP_EMAIL_SENDER', default=DEFAULT_FROM_EMAIL)
 OTP_EMAIL_SUBJECT = 'Your Cebu Luxury Verification Code'
 OTP_EMAIL_TOKEN_VALIDITY = 300  # 5 minutes
 # ==================== PAYMENT CONFIGURATION ====================

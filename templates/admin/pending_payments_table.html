@@ -262,17 +262,17 @@ Features:
                         <span style="color: #c9a84c; font-weight: 600;">₱{{ payment.amount|floatformat:2 }}</span>
                     </td>
                     <td>
-                        {% if payment.payment_method == 'bank_transfer' %}
+                        {% if payment.payment_method == 'BANK_TRANSFER' %}
                             <span class="badge-pill bank-transfer">
                                 <i class="fas fa-university"></i>
                                 Bank Transfer
                             </span>
-                        {% elif payment.payment_method == 'paymongo' %}
+                        {% elif payment.payment_method == 'PAYMONGO' %}
                             <span class="badge-pill paymongo">
                                 <i class="fas fa-mobile-alt"></i>
                                 PayMongo
                             </span>
-                        {% elif payment.payment_method == 'stripe' %}
+                        {% elif payment.payment_method == 'STRIPE' %}
                             <span class="badge-pill stripe">
                                 <i class="fas fa-credit-card"></i>
                                 Stripe

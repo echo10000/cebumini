@@ -11,9 +11,12 @@
             <h1>Support Conversations</h1>
             <p>Track your inquiries and replies from Cebu Hotel.</p>
         </div>
-        <a href="{% url 'auth:contact' %}" class="btn btn-primary">
-            <i class="fas fa-pencil-alt"></i> Start Conversation
-        </a>
+        <form method="POST" action="{% url 'auth:start_guest_conversation' %}" class="m-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-pencil-alt"></i> Start Conversation
+            </button>
+        </form>
     </section>
 
     {% if total_count > 0 %}
@@ -75,9 +78,12 @@
                 <i class="fas fa-inbox"></i>
                 <h3>No Support Conversations Yet</h3>
                 <p>You have not submitted any inquiries to us yet.</p>
-                <a href="{% url 'auth:contact' %}" class="btn btn-primary mt-3">
-                    <i class="fas fa-pencil-alt"></i> Start a Conversation
-                </a>
+                <form method="POST" action="{% url 'auth:start_guest_conversation' %}" class="m-0">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary mt-3">
+                        <i class="fas fa-pencil-alt"></i> Start a Conversation
+                    </button>
+                </form>
             </div>
         {% endif %}
     </section>

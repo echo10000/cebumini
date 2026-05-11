@@ -69,13 +69,13 @@ We reserve the right to suspend or terminate accounts that violate these Terms o
 3. CANCELLATION AND REFUND POLICY
 
 3.1 Standard Cancellation Policy
-• Free Cancellation: 100% refund if cancelled up to 7 days before check-in
-• Late Cancellation: 50% refund if cancelled 3-7 days before check-in
-• Non-Refundable: No refund for cancellations within 3 days of check-in
-• No-Show: Full charge applied if reservation is not cancelled
+• Free Cancellation: 100% refund if cancelled more than 48 hours before check-in
+• Non-Refundable: No refund for cancellations made 48 hours or less before check-in
+• No-Show: No refund if the guest does not arrive and the reservation is not cancelled
+• Special promo, discounted, or event bookings may have separate refund terms
 
 3.2 Special Circumstances
-• Refunds are processed within 5-7 business days
+• Approved refunds are processed within 5-7 business days
 • Non-refundable rates clearly marked at time of booking
 • Group bookings have specific cancellation terms
 • Exceptions subject to management review

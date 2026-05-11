@@ -170,6 +170,14 @@ def booking_detail_view(request, booking_id):
         return redirect('rooms:list')
     
     can_cancel = booking.can_be_cancelled()
+    completed_payment = (
+        Payment.objects
+        .filter(booking=booking, status=PaymentStatus.COMPLETED)
+        .order_by('-completed_at', '-created_at')
+        .first()
+    )
+    existing_refund = RefundRequest.objects.filter(booking=booking).first()
+    can_request_refund = completed_payment is not None and existing_refund is None
     
     # Get recommendations for this booking
     recommendations_context = get_recommendations_context(
@@ -181,6 +189,8 @@ def booking_detail_view(request, booking_id):
     context = {
         'booking': booking,
         'can_cancel': can_cancel,
+        'can_request_refund': can_request_refund,
+        'existing_refund': existing_refund,
         'recommendations': recommendations_context['recommendations'],
         'has_recommendations': recommendations_context['has_recommendations'],
     }
@@ -955,14 +965,7 @@ def guest_request_refund_view(request, booking_id):
         .first()
     )
     if payment is None:
-        payment = (
-            Payment.objects
-            .filter(booking=booking)
-            .order_by('-created_at')
-            .first()
-        )
-    if payment is None:
-        messages.error(request, 'No payment found for this booking.')
+        messages.error(request, 'Refund requests are only available after a payment has been completed.')
         return redirect('bookings:booking_detail', booking_id=booking_id)
 
     # Prevent duplicate request for same booking (RefundRequest is OneToOne with Booking)
@@ -1045,13 +1048,20 @@ def guest_my_refund_requests_view(request):
     
     # Filter by status
     status_filter = request.GET.get('status', 'all')
+    if status_filter == RefundRequestStatus.APPROVED:
+        status_filter = 'all'
     if status_filter != 'all':
         refunds = refunds.filter(status=status_filter)
+
+    visible_statuses = [
+        choice for choice in RefundRequestStatus.choices
+        if choice[0] != RefundRequestStatus.APPROVED
+    ]
     
     context = {
         'refunds': refunds,
         'status_filter': status_filter,
-        'statuses': RefundRequestStatus.choices,
+        'statuses': visible_statuses,
     }
     
     return render(request, 'bookings/my_refunds.html', context)

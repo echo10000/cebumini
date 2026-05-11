@@ -524,78 +524,104 @@
 
     .dashboard-occupancy-layout {
         display: grid;
-        grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
-        gap: 1.25rem;
-        align-items: stretch;
+        grid-template-columns: minmax(0, 1.15fr) minmax(360px, 0.85fr);
+        gap: 1.5rem;
+        align-items: start;
     }
 
     .dashboard-room-grid {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.9rem;
+        gap: 0.75rem;
     }
 
     .dashboard-room-card {
+        background: #ffffff;
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-left: 4px solid var(--admin-muted, #64748b);
         border-radius: 8px;
-        padding: 1rem;
-        min-height: 128px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.05);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        min-height: 112px;
+        padding: 0.95rem;
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
     }
 
-    .dashboard-room-card.available { background: rgba(22, 163, 74, 0.18); border-color: rgba(34, 197, 94, 0.42); }
-    .dashboard-room-card.checked-in { background: rgba(37, 99, 235, 0.24); border-color: rgba(96, 165, 250, 0.42); }
-    .dashboard-room-card.confirmed { background: rgba(202, 138, 4, 0.2); border-color: rgba(250, 204, 21, 0.42); }
-    .dashboard-room-card.maintenance { background: rgba(185, 28, 28, 0.24); border-color: rgba(248, 113, 113, 0.48); }
-    .dashboard-room-card.checked-out { background: rgba(107, 114, 128, 0.24); border-color: rgba(156, 163, 175, 0.42); }
+    .dashboard-room-card:hover {
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .dashboard-room-card.available { border-left-color: #16a34a; background: linear-gradient(180deg, #ffffff, #f0fdf4); }
+    .dashboard-room-card.checked-in { border-left-color: #2563eb; background: linear-gradient(180deg, #ffffff, #eff6ff); }
+    .dashboard-room-card.confirmed { border-left-color: #d97706; background: linear-gradient(180deg, #ffffff, #fffbeb); }
+    .dashboard-room-card.maintenance { border-left-color: #dc2626; background: linear-gradient(180deg, #ffffff, #fef2f2); }
+    .dashboard-room-card.checked-out { border-left-color: #64748b; background: linear-gradient(180deg, #ffffff, #f8fafc); }
 
     .dashboard-room-number {
-        color: #ffffff;
-        font-size: 1.08rem;
+        color: var(--admin-ink, #172033);
+        font-size: 0.98rem;
         font-weight: 800;
+        line-height: 1.2;
     }
 
     .dashboard-room-type,
     .dashboard-room-guest {
-        color: #d1d5db;
-        font-size: 0.86rem;
+        color: var(--admin-muted, #64748b);
+        font-size: 0.82rem;
+        line-height: 1.35;
         margin-top: 0.25rem;
     }
 
     .dashboard-room-status {
-        color: #ffffff;
-        background: rgba(15, 22, 35, 0.45);
+        align-items: center;
+        background: rgba(15, 23, 42, 0.06);
         border-radius: 999px;
-        padding: 0.28rem 0.6rem;
-        width: fit-content;
-        font-size: 0.78rem;
+        color: var(--admin-ink, #172033);
+        display: inline-flex;
+        font-size: 0.72rem;
         font-weight: 700;
+        line-height: 1;
         margin-top: 0.8rem;
+        padding: 0.38rem 0.6rem;
+        width: fit-content;
+    }
+
+    .dashboard-room-card.available .dashboard-room-status { background: rgba(22, 163, 74, 0.12); color: #166534; }
+    .dashboard-room-card.checked-in .dashboard-room-status { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; }
+    .dashboard-room-card.confirmed .dashboard-room-status { background: rgba(217, 119, 6, 0.14); color: #92400e; }
+    .dashboard-room-card.maintenance .dashboard-room-status { background: rgba(220, 38, 38, 0.12); color: #991b1b; }
+    .dashboard-room-card.checked-out .dashboard-room-status { background: rgba(100, 116, 139, 0.14); color: #475569; }
+
+    .dashboard-room-grid > p {
+        color: var(--admin-muted, #64748b) !important;
+        margin: 0;
     }
 
     .dashboard-occupancy-side {
         display: grid;
-        grid-template-rows: auto minmax(220px, 1fr);
+        grid-template-rows: auto auto;
         gap: 1rem;
     }
 
     .dashboard-ring-panel,
     .dashboard-chart-panel {
-        background: #111827;
-        border: 1px solid rgba(15, 118, 110, 0.28);
+        background: #ffffff;
+        border: 1px solid var(--admin-line, #d9e1ec);
         border-radius: 8px;
-        padding: 1.2rem;
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+        padding: 1.25rem;
     }
 
     .dashboard-occupancy-ring {
         --occupancy-percent: 0%;
-        width: 148px;
+        width: 132px;
         aspect-ratio: 1;
         border-radius: 50%;
         margin: 0 auto 1rem;
-        background: conic-gradient(#0f766e var(--occupancy-percent), rgba(75, 85, 99, 0.55) 0);
+        background: conic-gradient(var(--admin-brand, #0f766e) var(--occupancy-percent), #e2e8f0 0);
         display: grid;
         place-items: center;
         position: relative;
@@ -603,29 +629,34 @@
 
     .dashboard-occupancy-ring::before {
         content: '';
-        width: 106px;
+        width: 94px;
         aspect-ratio: 1;
         border-radius: 50%;
-        background: #111827;
+        background: #ffffff;
         position: absolute;
     }
 
     .dashboard-occupancy-ring span {
-        color: #2dd4bf;
-        font-size: 1.6rem;
+        color: var(--admin-brand-dark, #115e59);
+        font-size: 1.45rem;
         font-weight: 800;
         position: relative;
     }
 
     .dashboard-ring-label {
-        color: #d1d5db;
+        color: var(--admin-muted, #64748b);
         text-align: center;
         font-weight: 700;
     }
 
     .dashboard-chart-panel {
-        min-height: 250px;
+        height: 330px;
         position: relative;
+    }
+
+    .dashboard-chart-panel canvas {
+        height: 100% !important;
+        width: 100% !important;
     }
 
     .audit-header {
@@ -660,6 +691,10 @@
             grid-template-columns: 1fr;
         }
 
+        .dashboard-chart-panel {
+            height: 280px;
+        }
+
         .audit-header {
             align-items: flex-start;
             flex-direction: column;
@@ -684,8 +719,8 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: 'Occupied rooms',
                 data: {{ weekly_occupancy_values_json|safe }},
-                backgroundColor: 'rgba(15, 118, 110, 0.88)',
-                borderColor: '#2dd4bf',
+                backgroundColor: 'rgba(15, 118, 110, 0.82)',
+                borderColor: '#115e59',
                 borderWidth: 1,
                 borderRadius: 6
             }]
@@ -694,19 +729,19 @@ document.addEventListener('DOMContentLoaded', function() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    ticks: { color: '#d1d5db' },
-                    grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                    ticks: { color: '#64748b' },
+                    grid: { color: 'rgba(100, 116, 139, 0.14)' }
                 },
                 y: {
                     beginAtZero: true,
                     suggestedMax: {{ occupancy_total_rooms|default:6 }},
-                    ticks: { color: '#d1d5db', precision: 0, stepSize: 1 },
-                    grid: { color: 'rgba(156, 163, 175, 0.12)' }
+                    ticks: { color: '#64748b', precision: 0, stepSize: 1 },
+                    grid: { color: 'rgba(100, 116, 139, 0.14)' }
                 }
             },
             plugins: {
                 legend: {
-                    labels: { color: '#e5e7eb' }
+                    labels: { color: '#172033' }
                 }
             }
         }

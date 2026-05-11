@@ -2,10 +2,109 @@
 
 {% block title %}Review Refund Request{% endblock %}
 
+{% block extra_css %}
+<style>
+    .refund-review-page {
+        max-width: 920px;
+        margin: 0 auto;
+    }
+
+    .refund-review-page .card {
+        border: 1px solid #cbd5e1 !important;
+        border-radius: 8px;
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .refund-review-page .card-header {
+        background: #ffffff !important;
+        border-bottom: 1px solid #cbd5e1 !important;
+        color: #111827 !important;
+        padding: 1rem 1.25rem;
+    }
+
+    .refund-review-page .card-body {
+        background: #ffffff !important;
+        color: #1f2937 !important;
+        padding: 1.25rem;
+    }
+
+    .refund-review-page p,
+    .refund-review-page label,
+    .refund-review-page small {
+        color: #1f2937 !important;
+    }
+
+    .refund-readable-box {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #1f2937 !important;
+        min-height: 54px;
+        line-height: 1.6;
+    }
+
+    .refund-choice-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+    }
+
+    .refund-choice {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        min-height: 48px;
+        padding: 0.75rem 0.875rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        background: #f8fafc;
+        color: #1f2937 !important;
+        cursor: pointer;
+    }
+
+    .refund-choice input {
+        width: 1rem;
+        height: 1rem;
+        accent-color: #0f766e;
+    }
+
+    .refund-choice:has(input:checked) {
+        border-color: #0f766e;
+        background: #ecfdf5;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .refund-review-page .input-group-text,
+    .refund-review-page .form-control {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #111827 !important;
+        min-height: 44px;
+    }
+
+    .refund-review-page .form-control::placeholder {
+        color: #64748b !important;
+    }
+
+    .refund-review-page .btn-primary {
+        background: #0f766e !important;
+        border-color: #0f766e !important;
+        color: #ffffff !important;
+    }
+
+    .refund-review-page .btn-secondary {
+        background: #ffffff !important;
+        border-color: #cbd5e1 !important;
+        color: #1f2937 !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-8 offset-md-2">
+        <div class="col-md-10 offset-md-1 refund-review-page">
             <h1 class="mb-4">
                 <i class="fas fa-check-circle"></i> Review Refund Request
             </h1>
@@ -42,8 +141,8 @@
                     <p><strong>Requested Amount:</strong> <span class="text-danger">₱{{ refund_request.requested_amount }}</span></p>
                     <p><strong>Requested By:</strong> {{ refund_request.requested_by.get_full_name }}</p>
                     <p><strong>Reason:</strong></p>
-                    <div class="border p-3 bg-light">
-                        {{ refund_request.reason }}
+                    <div class="border p-3 bg-light refund-readable-box">
+                        {{ refund_request.reason|default:"No reason provided"|linebreaksbr }}
                     </div>
                 </div>
             </div>
@@ -59,22 +158,23 @@
                         
                         <div class="form-group">
                             <label for="action"><strong>Action:</strong></label>
-                            <div class="custom-control custom-radio">
-                                <input type="radio" class="custom-control-input" id="approve" name="action" value="approve" checked>
-                                <label class="custom-control-label" for="approve">
-                                    <i class="fas fa-check text-success"></i> Approve Refund
+                            <div class="refund-choice-grid">
+                                <label class="refund-choice" for="issue">
+                                    <input type="radio" id="issue" name="action" value="issue" checked>
+                                    <i class="fas fa-money-bill-wave text-success"></i> Issue Refund
                                 </label>
-                            </div>
-                            <div class="custom-control custom-radio">
-                                <input type="radio" class="custom-control-input" id="reject" name="action" value="reject">
-                                <label class="custom-control-label" for="reject">
+                                <label class="refund-choice" for="reject">
+                                    <input type="radio" id="reject" name="action" value="reject">
                                     <i class="fas fa-times text-danger"></i> Reject Refund
                                 </label>
                             </div>
+                            <small class="form-text text-muted">
+                                Issuing completes the refund immediately and generates a transaction ID.
+                            </small>
                         </div>
 
                         <div class="form-group" id="amountGroup">
-                            <label for="approved_amount"><strong>Approved Amount (if approving):</strong></label>
+                            <label for="approved_amount"><strong>Refund Amount:</strong></label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">₱</span>
@@ -82,7 +182,7 @@
                                 <input type="number" class="form-control" id="approved_amount" name="approved_amount" 
                                        step="0.01" max="{{ refund_request.requested_amount }}" 
                                        value="{{ refund_request.requested_amount }}"
-                                       placeholder="Approved amount">
+                                       placeholder="Refund amount">
                             </div>
                             <small class="form-text text-muted">Maximum: ₱{{ refund_request.requested_amount }}</small>
                         </div>
@@ -110,7 +210,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const approveRadio = document.getElementById('approve');
     const rejectRadio = document.getElementById('reject');
     const amountGroup = document.getElementById('amountGroup');
     const approvedAmountInput = document.getElementById('approved_amount');
@@ -125,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    approveRadio.addEventListener('change', updateAmountVisibility);
+    document.getElementById('issue').addEventListener('change', updateAmountVisibility);
     rejectRadio.addEventListener('change', updateAmountVisibility);
 });
 </script>

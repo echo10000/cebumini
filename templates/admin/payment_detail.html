@@ -383,12 +383,12 @@
                     <div class="info-row">
                         <span class="info-label">Status:</span>
                         <span class="info-value">
-                            {% if payment.status == 'PENDING' %}
-                                <span class="status-badge pending">Pending</span>
-                            {% elif payment.status == 'COMPLETED' %}
-                                <span class="status-badge completed">Completed</span>
+                            {% if payment.status == 'PENDING' or payment.status == 'pending_onsite' or payment.status == 'REFUND_PENDING' %}
+                                <span class="status-badge pending">{{ payment.get_status_display }}</span>
+                            {% elif payment.status == 'COMPLETED' or payment.status == 'REFUNDED' or payment.status == 'PARTIALLY_REFUNDED' %}
+                                <span class="status-badge completed">{{ payment.get_status_display }}</span>
                             {% else %}
-                                <span class="status-badge failed">Failed</span>
+                                <span class="status-badge failed">{{ payment.get_status_display }}</span>
                             {% endif %}
                         </span>
                     </div>
@@ -473,7 +473,7 @@
             </div>
 
             <!-- Payment Action Card (if pending) -->
-            {% if payment.status == 'PENDING' %}
+            {% if payment.status == 'PENDING' or payment.status == 'pending_onsite' %}
             <div class="payment-action-card">
                 <div class="payment-action-header">
                     <i class="fas fa-gavel"></i>

@@ -1,0 +1,415 @@
+{% extends 'admin/admin_base.html' %}
+
+{% block title %}Refund Requests - Admin Panel{% endblock %}
+
+{% block extra_css %}
+<style>
+    .refund-page-header {
+        align-items: flex-start;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .refund-page-header h1 {
+        color: var(--admin-ink, #172033) !important;
+        font-size: 1.85rem;
+        font-weight: 800;
+        margin: 0;
+    }
+
+    .refund-page-header p {
+        color: var(--admin-muted, #64748b);
+        margin: 0.35rem 0 0;
+    }
+
+    .refund-card {
+        background: var(--admin-surface, #ffffff);
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-radius: 8px;
+        box-shadow: var(--admin-shadow, 0 14px 34px rgba(15, 23, 42, 0.08));
+        overflow: hidden;
+    }
+
+    .refund-card-header {
+        align-items: center;
+        border-bottom: 1px solid var(--admin-line, #d9e1ec);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        justify-content: space-between;
+        padding: 1rem 1.25rem;
+    }
+
+    .refund-card-header h2 {
+        align-items: center;
+        color: var(--admin-ink, #172033) !important;
+        display: flex;
+        font-size: 1rem;
+        font-weight: 800;
+        gap: 0.55rem;
+        margin: 0;
+    }
+
+    .refund-card-header h2 i {
+        color: var(--admin-brand, #0f766e);
+    }
+
+    .refund-filter {
+        align-items: center;
+        display: flex;
+        gap: 0.55rem;
+    }
+
+    .refund-filter select,
+    .refund-issue-form input,
+    .refund-issue-form textarea {
+        background: #ffffff;
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-radius: 8px;
+        color: var(--admin-ink, #172033);
+        min-height: 40px;
+        padding: 0.55rem 0.7rem;
+    }
+
+    .refund-table-wrap {
+        overflow-x: auto;
+    }
+
+    .refund-table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    .refund-table th {
+        background: #f8fafc;
+        border-bottom: 1px solid var(--admin-line, #d9e1ec);
+        color: var(--admin-muted, #64748b);
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 0.9rem 1rem;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .refund-table td {
+        border-bottom: 1px solid var(--admin-line, #d9e1ec);
+        color: var(--admin-ink, #172033);
+        padding: 1rem;
+        vertical-align: top;
+    }
+
+    .refund-primary {
+        font-weight: 800;
+    }
+
+    .refund-muted {
+        color: var(--admin-muted, #64748b);
+        display: block;
+        font-size: 0.85rem;
+        margin-top: 0.2rem;
+    }
+
+    .refund-status {
+        border-radius: 999px;
+        display: inline-flex;
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 0.35rem 0.6rem;
+    }
+
+    .refund-status.requested { background: rgba(217, 119, 6, 0.14); color: #92400e; }
+    .refund-status.approved { background: rgba(15, 118, 110, 0.12); color: #115e59; }
+    .refund-status.rejected { background: rgba(185, 28, 28, 0.12); color: #991b1b; }
+    .refund-status.issued { background: rgba(37, 99, 235, 0.12); color: #1d4ed8; }
+
+    .refund-issue-form {
+        display: grid;
+        gap: 0.5rem;
+        min-width: 240px;
+    }
+
+    .refund-issue-form textarea {
+        min-height: 74px;
+        resize: vertical;
+    }
+
+    .refund-btn {
+        align-items: center;
+        border: 0;
+        border-radius: 999px;
+        display: inline-flex;
+        font-weight: 800;
+        gap: 0.4rem;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0.55rem 0.9rem;
+        text-decoration: none;
+    }
+
+    .refund-btn-primary {
+        background: var(--admin-brand, #0f766e);
+        color: #ffffff;
+    }
+
+    .refund-empty {
+        color: var(--admin-muted, #64748b);
+        padding: 2rem;
+        text-align: center;
+    }
+
+    .refund-confirm-modal .modal-content {
+        border: 0;
+        border-radius: 12px;
+        box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
+    }
+
+    .refund-confirm-icon {
+        align-items: center;
+        background: rgba(15, 118, 110, 0.12);
+        border-radius: 12px;
+        color: var(--admin-brand, #0f766e);
+        display: inline-flex;
+        height: 46px;
+        justify-content: center;
+        width: 46px;
+    }
+
+    .refund-confirm-summary {
+        background: #f8fafc;
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-radius: 8px;
+        display: grid;
+        gap: 0.55rem;
+        margin-top: 1rem;
+        padding: 1rem;
+    }
+
+    .refund-confirm-summary div {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .refund-confirm-summary dt {
+        color: var(--admin-muted, #64748b);
+        font-size: 0.78rem;
+        font-weight: 800;
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    .refund-confirm-summary dd {
+        color: var(--admin-ink, #172033);
+        font-weight: 800;
+        margin: 0;
+        text-align: right;
+    }
+
+    .refund-confirm-note {
+        color: var(--admin-muted, #64748b);
+        font-size: 0.9rem;
+        margin: 1rem 0 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="refund-page-header">
+        <div>
+            <h1>Refund Requests</h1>
+            <p>Track refund requests and completed refund actions.</p>
+        </div>
+    </div>
+
+    <div class="refund-card">
+        <div class="refund-card-header">
+            <h2><i class="fas fa-money-bill-transfer"></i> Refund Queue</h2>
+            <form method="get" class="refund-filter">
+                <label for="status" class="refund-muted">Status</label>
+                <select name="status" id="status" onchange="this.form.submit()">
+                    <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                    {% for value, label in statuses %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        {% if refunds %}
+            <div class="refund-table-wrap">
+                <table class="refund-table">
+                    <thead>
+                        <tr>
+                            <th>Booking</th>
+                            <th>Guest</th>
+                            <th>Amount</th>
+                            <th>Request</th>
+                            <th>Status</th>
+                            <th>Admin Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for refund in refunds %}
+                            <tr>
+                                <td>
+                                    <span class="refund-primary">#{{ refund.booking.id }}</span>
+                                    <span class="refund-muted">Room {{ refund.booking.room.room_number }}</span>
+                                </td>
+                                <td>
+                                    <span class="refund-primary">{{ refund.booking.guest.get_full_name|default:refund.booking.guest.username }}</span>
+                                    <span class="refund-muted">{{ refund.booking.guest.email }}</span>
+                                </td>
+                                <td>
+                                    <span class="refund-primary">PHP {{ refund.approved_amount|default:refund.requested_amount }}</span>
+                                    <span class="refund-muted">Requested PHP {{ refund.requested_amount }}</span>
+                                </td>
+                                <td>
+                                    <span class="refund-primary">{{ refund.reason|truncatewords:8 }}</span>
+                                    {% if refund.approved_by %}
+                                        <span class="refund-muted">Handled by {{ refund.approved_by.get_full_name|default:refund.approved_by.username }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if refund.status == 'REQUESTED' %}
+                                        <span class="refund-status requested">{{ refund.get_status_display }}</span>
+                                    {% elif refund.status == 'APPROVED' %}
+                                        <span class="refund-status approved">Processing</span>
+                                    {% elif refund.status == 'REJECTED' %}
+                                        <span class="refund-status rejected">{{ refund.get_status_display }}</span>
+                                    {% elif refund.status == 'ISSUED' %}
+                                        <span class="refund-status issued">{{ refund.get_status_display }}</span>
+                                        {% if refund.refund_transaction_id %}
+                                            <span class="refund-muted">{{ refund.refund_transaction_id }}</span>
+                                        {% endif %}
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if refund.status == 'APPROVED' %}
+                                        <form method="post"
+                                              action="{% url 'admin_panel:issue_refund_request' refund.id %}"
+                                              class="refund-issue-form"
+                                              data-refund-issue-form
+                                              data-booking="#{{ refund.booking.id }}"
+                                              data-guest="{{ refund.booking.guest.get_full_name|default:refund.booking.guest.username }}"
+                                              data-amount="PHP {{ refund.approved_amount|default:refund.requested_amount }}">
+                                            {% csrf_token %}
+                                            <span class="refund-muted">Transaction ID will be generated automatically.</span>
+                                            <textarea name="admin_notes" placeholder="Admin notes"></textarea>
+                                            <button type="submit" class="refund-btn refund-btn-primary">
+                                                <i class="fas fa-check"></i> Complete Legacy Refund
+                                            </button>
+                                        </form>
+                                    {% elif refund.status == 'ISSUED' %}
+                                        <span class="refund-muted">
+                                            Issued {{ refund.issued_at|date:"M d, Y g:i A" }}
+                                            {% if refund.issued_by %}by {{ refund.issued_by.get_full_name|default:refund.issued_by.username }}{% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="refund-muted">No admin action available.</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="refund-empty">
+                <i class="fas fa-inbox"></i>
+                <p>No refund requests found for this filter.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade refund-confirm-modal" id="refundIssueConfirmModal" tabindex="-1" aria-labelledby="refundIssueConfirmTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="refund-confirm-icon"><i class="fas fa-money-bill-transfer"></i></span>
+                    <div>
+                        <h5 class="modal-title" id="refundIssueConfirmTitle">Issue Refund?</h5>
+                        <p class="refund-muted mb-0">This will mark the legacy refund as issued.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">Please confirm the refund details before continuing.</p>
+                <dl class="refund-confirm-summary">
+                    <div>
+                        <dt>Booking</dt>
+                        <dd id="refundConfirmBooking">-</dd>
+                    </div>
+                    <div>
+                        <dt>Guest</dt>
+                        <dd id="refundConfirmGuest">-</dd>
+                    </div>
+                    <div>
+                        <dt>Amount</dt>
+                        <dd id="refundConfirmAmount">-</dd>
+                    </div>
+                </dl>
+                <p class="refund-confirm-note">A refund transaction ID will be generated automatically and saved with this record.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmIssueRefundButton">
+                    <i class="fas fa-check"></i> Issue Refund
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalElement = document.getElementById('refundIssueConfirmModal');
+        const confirmButton = document.getElementById('confirmIssueRefundButton');
+        const bookingTarget = document.getElementById('refundConfirmBooking');
+        const guestTarget = document.getElementById('refundConfirmGuest');
+        const amountTarget = document.getElementById('refundConfirmAmount');
+        let pendingForm = null;
+
+        if (!modalElement || !confirmButton) {
+            return;
+        }
+
+        const confirmModal = new bootstrap.Modal(modalElement);
+
+        document.querySelectorAll('[data-refund-issue-form]').forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                pendingForm = form;
+                bookingTarget.textContent = form.dataset.booking || '-';
+                guestTarget.textContent = form.dataset.guest || '-';
+                amountTarget.textContent = form.dataset.amount || '-';
+                confirmModal.show();
+            });
+        });
+
+        confirmButton.addEventListener('click', function () {
+            if (!pendingForm) {
+                return;
+            }
+
+            confirmButton.disabled = true;
+            confirmButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Issuing...';
+            pendingForm.submit();
+        });
+
+        modalElement.addEventListener('hidden.bs.modal', function () {
+            confirmButton.disabled = false;
+            confirmButton.innerHTML = '<i class="fas fa-check"></i> Issue Refund';
+            pendingForm = null;
+        });
+    });
+</script>
+{% endblock %}

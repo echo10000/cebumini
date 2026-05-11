@@ -18,9 +18,9 @@
                         {% endfor %}
                     {% endif %}
 
-                    {% if form_errors.__all__ %}
+                    {% if form_errors.non_field_errors %}
                         <div class="alert alert-danger">
-                            {% for error in form_errors.__all__ %}
+                            {% for error in form_errors.non_field_errors %}
                                 <div>{{ error }}</div>
                             {% endfor %}
                         </div>
@@ -61,7 +61,7 @@
 
                         <div class="form-group">
                             <label for="password2"><strong>Confirm Password:</strong></label>
-                            <input type="password" class="form-control" id="password2" name="password2"
+                            <input type="password" class="form-control" id="password2" name="password2" required
                                    placeholder="Re-enter password">
                             {% if form_errors.password2 %}
                                 <div class="text-danger mt-1">{{ form_errors.password2|join:', ' }}</div>

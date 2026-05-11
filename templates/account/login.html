@@ -3,6 +3,7 @@
 
 {% block title %}Login - Cebu Hotel{% endblock %}
 {% block body_class %} class="auth-page"{% endblock %}
+{% block global_messages %}{% endblock %}
 
 {% block extra_css %}
 <link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
@@ -22,6 +23,8 @@
         <div class="auth-kicker">Account access</div>
         <h2 id="account-login-title">Welcome back</h2>
         <p class="auth-subtitle">Sign in with the email address connected to your Cebu Luxury account.</p>
+
+        {% include 'includes/auth_messages.html' %}
 
         <form method="POST" novalidate>
             {% csrf_token %}

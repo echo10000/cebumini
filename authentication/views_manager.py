@@ -7,9 +7,11 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.apps import apps
 from django.db import connection, transaction
-from django.db.utils import DatabaseError
+from django.db.utils import DatabaseError, IntegrityError
 from django.db.models import Count, Sum, Q, F, Case, When, IntegerField, Avg
 from django.db.models.functions import TruncMonth
 from django.utils import timezone
@@ -23,9 +25,8 @@ from .models import (
     ActivityLog, Complaint, ComplaintStatus
 )
 from .decorators import manager_required, manager_or_admin_required
-from .utils import log_activity, log_audit
-from .emails import send_complaint_resolved_email, send_refund_confirmation_email
-from .views_paymongo import PayMongoHandler
+from .utils import get_two_fa_status, issue_approved_refund, log_activity, log_audit
+from .emails import send_complaint_resolved_email
 
 
 def _staff_registration_context(form_data=None, errors=None):
@@ -386,7 +387,7 @@ def manager_dashboard_view(request):
         ],
         'recent_housekeeping_tasks': _recent_housekeeping_tasks(task_model),
         'today': today,
-        'two_fa': request.user.two_factor_auth,
+        'two_fa': get_two_fa_status(request.user),
     }
     
     return render(request, 'manager/manager_dashboard.html', context)
@@ -403,13 +404,19 @@ def manager_refund_requests_view(request):
     
     # Filter by status
     status_filter = request.GET.get('status', 'all')
+    visible_statuses = [
+        choice for choice in RefundRequestStatus.choices
+        if choice[0] != RefundRequestStatus.APPROVED
+    ]
+    if status_filter == RefundRequestStatus.APPROVED:
+        status_filter = 'all'
     if status_filter != 'all':
         refund_requests = refund_requests.filter(status=status_filter)
     
     context = {
         'refund_requests': refund_requests,
         'status_filter': status_filter,
-        'statuses': RefundRequestStatus.choices,
+        'statuses': visible_statuses,
     }
     
     return render(request, 'manager/refund_requests.html', context)
@@ -426,86 +433,57 @@ def approve_refund_request_view(request, refund_request_id):
         return redirect('auth:manager_refunds')
     
     if request.method == 'POST':
-        action = request.POST.get('action')  # 'approve' or 'reject'
+        action = request.POST.get('action')  # 'issue' or 'reject'
         manager_notes = request.POST.get('manager_notes', '')
         approved_amount = request.POST.get('approved_amount')
         
-        if action == 'approve':
-            # Validate approved amount
+        if action == 'issue':
             try:
                 approved_amount = Decimal(approved_amount)
                 if approved_amount <= 0 or approved_amount > refund_request.requested_amount:
-                    messages.error(request, 'Approved amount must be between 0 and requested amount.')
+                    messages.error(request, 'Refund amount must be between 0 and requested amount.')
                     return redirect('auth:manager_refunds')
             except (ValueError, TypeError):
-                messages.error(request, 'Invalid approved amount.')
-                return redirect('auth:manager_refunds')
-            
-            payment = Payment.objects.filter(
-                booking=refund_request.booking,
-                status=PaymentStatus.COMPLETED,
-            ).order_by('-completed_at', '-created_at').first()
-
-            if not payment:
-                messages.error(request, 'No completed payment found for this booking. Refund remains pending.')
+                messages.error(request, 'Invalid refund amount.')
                 return redirect('auth:manager_refunds')
 
-            if not payment.transaction_id:
-                messages.error(request, 'This payment has no PayMongo payment ID. Refund remains pending.')
-                return redirect('auth:manager_refunds')
-
-            paymongo = PayMongoHandler()
-            refund_result = paymongo.process_refund(payment.transaction_id, int(approved_amount * 100))
-
-            if not refund_result.get('success'):
-                error_detail = refund_result.get('response') or refund_result.get('error') or 'Unknown PayMongo refund error'
-                messages.error(request, f'Refund failed: {error_detail}')
-                return redirect('auth:manager_refunds')
-
-            refund_request.status = RefundRequestStatus.ISSUED
             refund_request.approved_by = request.user
             refund_request.approved_amount = approved_amount
             refund_request.manager_notes = manager_notes
             refund_request.approved_at = timezone.now()
-            refund_request.issued_by = request.user
-            refund_request.issued_at = timezone.now()
-            refund_request.refund_transaction_id = refund_result.get('refund_id') or ''
-            refund_request.save()
+            refund_request.save(update_fields=[
+                'approved_by',
+                'approved_amount',
+                'manager_notes',
+                'approved_at',
+                'updated_at',
+            ])
 
-            payment.status = PaymentStatus.REFUNDED
-            payment.refund_amount = approved_amount
-            payment.refund_transaction_id = refund_result.get('refund_id')
-            payment.refund_reason = refund_request.reason
-            payment.notes = 'Refund processed by manager'
-            payment.refunded_at = timezone.now()
-            payment.save()
+            try:
+                payment, transaction_id, issued_amount = issue_approved_refund(
+                    refund_request,
+                    request.user,
+                    manager_notes or 'Refund issued by manager',
+                )
+            except ValueError as error:
+                messages.error(request, str(error))
+                return redirect('auth:manager_refunds')
 
-            booking = refund_request.booking
-            booking.status = BookingStatus.CANCELLED
-            booking.cancelled_at = booking.cancelled_at or timezone.now()
-            booking.cancellation_reason = booking.cancellation_reason or 'Refund processed by manager'
-            booking.save()
-
-            if not send_refund_confirmation_email(booking, payment, approved_amount):
-                messages.warning(request, 'Refund processed, but the guest confirmation email could not be sent.')
-            
-            # Log audit
             log_audit(
                 request,
                 request.user,
-                'REFUND_APPROVED',
+                'REFUND_ISSUED',
                 'RefundRequest',
                 refund_request.id,
-                affected_user=refund_request.requested_by,
-                description=f'Manager processed PayMongo refund of PHP {approved_amount}',
+                affected_user=refund_request.booking.guest,
+                description=f'Manager issued refund of PHP {issued_amount}',
                 changes={
                     'status': 'ISSUED',
-                    'approved_amount': str(approved_amount),
-                    'refund_id': refund_result.get('refund_id'),
+                    'amount': str(issued_amount),
+                    'refund_transaction_id': transaction_id,
                 }
             )
-            
-            messages.success(request, 'Refund processed through PayMongo and guest has been notified.')
+            messages.success(request, f'Refund issued with transaction ID {transaction_id}.')
         
         elif action == 'reject':
             # Reject refund
@@ -573,11 +551,11 @@ def resolve_complaint_escalation_view(request, escalation_id):
         status__in=[ComplaintStatus.ESCALATED, ComplaintStatus.IN_PROGRESS, ComplaintStatus.RESOLVED],
     )
     
-    if complaint.status == ComplaintStatus.RESOLVED:
-        messages.error(request, 'This complaint is already resolved.')
-        return redirect('auth:manager_complaints')
-    
     if request.method == 'POST':
+        if complaint.status == ComplaintStatus.RESOLVED:
+            messages.info(request, 'This complaint is already resolved.')
+            return redirect('auth:manager_resolve_complaint', escalation_id=complaint.id)
+
         action = request.POST.get('action')  # 'in_progress' or 'resolve'
         manager_notes = request.POST.get('manager_notes', '').strip()
         
@@ -682,12 +660,20 @@ def register_staff_view(request):
                 'manager/register_staff.html',
                 _staff_registration_context(
                     form_data,
-                    {'__all__': ['Username, email, and password are required.']},
+                    {'non_field_errors': ['Username, email, and password are required.']},
                 ),
             )
         
         # Validate passwords match
-        if password2 and password != password2:
+        if not password2:
+            messages.error(request, 'Please confirm the staff password.')
+            return render(
+                request,
+                'manager/register_staff.html',
+                _staff_registration_context(form_data, {'password2': ['Please confirm the staff password.']}),
+            )
+
+        if password != password2:
             messages.error(request, 'Passwords do not match.')
             return render(
                 request,
@@ -721,18 +707,37 @@ def register_staff_view(request):
                 'manager/register_staff.html',
                 _staff_registration_context(form_data, {'password': ['Password must be at least 8 characters.']}),
             )
+
+        try:
+            validate_password(password)
+        except ValidationError as exc:
+            messages.error(request, 'Please choose a stronger password.')
+            return render(
+                request,
+                'manager/register_staff.html',
+                _staff_registration_context(form_data, {'password': list(exc.messages)}),
+            )
         
-        # Create staff user
-        staff_user = CustomUser.objects.create_user(
-            username=username,
-            email=email,
-            password=password,
-            role=UserRole.STAFF,
-            first_name=first_name,
-            last_name=last_name,
-            phone_number=phone_number,
-            is_active=True
-        )
+        try:
+            with transaction.atomic():
+                staff_user = CustomUser.objects.create_user(
+                    username=username,
+                    email=email,
+                    password=password,
+                    role=UserRole.STAFF,
+                    first_name=first_name,
+                    last_name=last_name,
+                    phone_number=phone_number,
+                    is_active=True,
+                    is_staff=True,
+                )
+        except IntegrityError:
+            messages.error(request, 'Could not create staff member because the username or email is already in use.')
+            return render(
+                request,
+                'manager/register_staff.html',
+                _staff_registration_context(form_data, {'non_field_errors': ['Username or email is already in use.']}),
+            )
         
         # Log audit
         log_audit(

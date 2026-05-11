@@ -3,6 +3,7 @@
 
 {% block title %}Login - Cebu Hotel{% endblock %}
 {% block body_class %} class="auth-page"{% endblock %}
+{% block global_messages %}{% endblock %}
 
 {% block extra_css %}
 <link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
@@ -22,6 +23,8 @@
         <div class="auth-kicker">Secure sign in</div>
         <h2 id="login-title">Welcome back</h2>
         <p class="auth-subtitle">Use your email or username to continue to the right dashboard for your role.</p>
+
+        {% include 'includes/auth_messages.html' %}
 
         {% if google_oauth_configured %}
             <a href="{% provider_login_url 'google' %}" class="auth-button secondary auth-google-button">

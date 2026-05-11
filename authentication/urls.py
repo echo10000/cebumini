@@ -14,6 +14,7 @@ urlpatterns = [
     path('contact/', views.contact_view, name='contact'),
     path('api/contact/', views.contact_form_api, name='contact_api'),
     path('messages/', views.guest_messages_view, name='guest_messages'),
+    path('messages/start/', views.start_guest_conversation_view, name='start_guest_conversation'),
     path('messages/<int:message_id>/', views.guest_message_detail_view, name='guest_message_detail'),
     path('messages/<int:message_id>/reply/', views.reply_message_view, name='reply_message'),
     

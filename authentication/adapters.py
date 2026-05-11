@@ -1,10 +1,13 @@
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.core.exceptions import ImmediateHttpResponse
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
 import uuid
+
+from .otp_utils import EmailOTPDeliveryError
 
 User = get_user_model()
 
@@ -100,7 +103,17 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
             if user.two_factor_auth.is_enabled:
                 if user.two_factor_auth.method == 'EMAIL':
                     from .otp_utils import send_otp_email
-                    send_otp_email(user)
+                    try:
+                        send_otp_email(user)
+                    except EmailOTPDeliveryError as exc:
+                        if getattr(settings, 'DEBUG', False) and exc.otp_code:
+                            messages.warning(
+                                request,
+                                f'Email delivery failed, so your local development verification code is {exc.otp_code}.',
+                            )
+                        else:
+                            messages.error(request, 'We could not send your verification code. Please contact an administrator.')
+                            raise ImmediateHttpResponse(redirect('auth:login'))
                     request.session['email_otp_user_id'] = user.id
                     request.session['email_otp_remember_me'] = False
                     raise ImmediateHttpResponse(redirect('auth:verify_otp'))

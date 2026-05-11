@@ -329,14 +329,18 @@
 
         .toast-container {
             position: fixed;
-            top: 1rem;
+            top: 6rem;
             right: 1rem;
-            z-index: 12000;
+            z-index: 30000;
             display: flex;
             flex-direction: column;
             gap: 0.85rem;
             max-width: 360px;
             width: auto;
+        }
+
+        body.auth-page .toast-container {
+            top: 5.5rem;
         }
 
         .toast {
@@ -835,40 +839,7 @@
                 <span style="font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.1rem; color: #c9a84c;">Cebu Luxury</span>
             </div>
             
-            <ul style="display: flex; gap: 2rem; list-style: none; align-items: center; margin: 0; padding: 0;">
-                {% if user.is_authenticated %}
-                    {% if user.is_manager %}
-                        <li><a href="{% url 'auth:manager_dashboard' %}" style="color: #c9a84c; text-decoration: none; font-weight: 500; transition: color 0.3s ease; border-bottom: 2px solid #c9a84c; padding-bottom: 3px;">Manager Dashboard</a></li>
-                        <li><a href="{% url 'auth:manager_refunds' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Refunds</a></li>
-                        <li><a href="{% url 'auth:manager_complaints' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Complaints</a></li>
-                        <li><a href="{% url 'staff:guest_services' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Guest Inquiries</a></li>
-                        <li><a href="{% url 'auth:manager_staff' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Staff</a></li>
-                    {% elif user.is_staff_member %}
-                        <li><a href="{% url 'staff:dashboard' %}" style="color: #c9a84c; text-decoration: none; font-weight: 500; transition: color 0.3s ease; border-bottom: 2px solid #c9a84c; padding-bottom: 3px;">Staff Dashboard</a></li>
-                        <li><a href="{% url 'staff:room_status' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Rooms</a></li>
-                        <li><a href="{% url 'staff:guest_services' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Guest Services</a></li>
-                        <li><a href="{% url 'staff:reports' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Reports</a></li>
-                    {% elif user.is_admin %}
-                        <li><a href="{% url 'admin_panel:dashboard' %}" style="color: #c9a84c; text-decoration: none; font-weight: 500; transition: color 0.3s ease; border-bottom: 2px solid #c9a84c; padding-bottom: 3px;">Admin Dashboard</a></li>
-                        <li><a href="{% url 'admin_panel:payment_management' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Payments</a></li>
-                        <li><a href="{% url 'admin_panel:booking_management' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Bookings</a></li>
-                        <li><a href="{% url 'admin_panel:room_management' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Rooms</a></li>
-                        <li><a href="{% url 'staff:guest_services' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Guest Inquiries</a></li>
-                    {% else %}
-                        <li><a href="/" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Home</a></li>
-                        <li><a href="{% url 'rooms:list' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Rooms</a></li>
-                        <li><a href="{% url 'bookings:booking_history' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">My Bookings</a></li>
-                        <li><a href="{% url 'auth:guest_messages' %}" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease; position: relative;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">
-                            <i class="fas fa-headset"></i> Support
-                            {% if guest_unread_replies > 0 %}
-                            <span style="position: absolute; top: -8px; right: -8px; background: #f97316; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold;">{{ guest_unread_replies }}</span>
-                            {% endif %}
-                        </a></li>
-                    {% endif %}
-                {% else %}
-                    <li><a href="/" style="color: #ffffff; text-decoration: none; font-weight: 500; transition: color 0.3s ease;" onmouseover="this.style.color='#c9a84c'" onmouseout="this.style.color='#ffffff'">Home</a></li>
-                {% endif %}
-            </ul>
+            <div aria-hidden="true"></div>
             
             <div style="display: flex; gap: 1rem; align-items: center;">
                 {% if user.is_authenticated %}

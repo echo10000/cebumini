@@ -6,15 +6,24 @@ from django.core.mail import send_mail
 from django.http import JsonResponse, HttpResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.urls import reverse
-from django.db.models import Q, Sum, Count, Prefetch
+from django.db.models import Q, Sum, Count, Prefetch, Case, When, Value, IntegerField
 from django.utils import timezone
 from datetime import timedelta
-from .models import Payment, PaymentStatus, Booking, BookingStatus, Room, CustomUser, UserRole, AuditLog, Testimonial
+from .models import Payment, PaymentStatus, Booking, BookingStatus, Room, CustomUser, UserRole, AuditLog, Testimonial, RefundRequest, RefundRequestStatus
 from .forms_admin import PaymentApprovalForm
 from .views_rooms import room_delete_view
-from .utils import confirm_booking_after_completed_payment, get_occupancy_chart_context, is_two_fa_configured, log_audit
+from .utils import confirm_booking_after_completed_payment, get_occupancy_chart_context, get_two_fa_status, is_two_fa_configured, issue_approved_refund, log_audit, user_requires_2fa
 import json
 import csv
+
+
+def _pending_payment_action_count():
+    return Payment.objects.filter(
+        status__in=[PaymentStatus.PENDING, PaymentStatus.PENDING_ONSITE]
+    ).count()
+
+
+PAYMENT_ACTION_STATUSES = [PaymentStatus.PENDING, PaymentStatus.PENDING_ONSITE]
 
 
 def admin_required(view_func):
@@ -30,7 +39,7 @@ def admin_required(view_func):
         if not request.user.has_accepted_terms():
             return redirect('auth:accept_terms')
 
-        if not is_two_fa_configured(request.user):
+        if user_requires_2fa(request.user) and not is_two_fa_configured(request.user):
             messages.warning(request, 'Two-factor authentication is required for admin accounts.')
             return redirect('auth:setup_2fa')
         
@@ -47,7 +56,7 @@ def admin_dashboard(request):
     
     # Basic stats
     total_bookings = Booking.objects.count()
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
     confirmed_bookings = Booking.objects.filter(status=BookingStatus.CONFIRMED).count()
     
     # Revenue calculations
@@ -106,7 +115,7 @@ def admin_dashboard(request):
         'audit_action_filter': audit_action_filter,
         'audit_action_choices': AuditLog.ACTION_CHOICES,
         'pending_testimonials': pending_testimonials,
-        'two_fa': request.user.two_factor_auth,
+        'two_fa': get_two_fa_status(request.user),
     }
     context.update(get_occupancy_chart_context(today))
     
@@ -169,19 +178,30 @@ def payment_management(request):
     payments = Payment.objects.select_related(
         'booking__room',
         'booking__guest'
-    ).order_by('-created_at')
+    ).annotate(
+        action_priority=Case(
+            When(status__in=PAYMENT_ACTION_STATUSES, then=Value(0)),
+            default=Value(1),
+            output_field=IntegerField(),
+        )
+    ).order_by('action_priority', '-created_at')
     
-    if status_filter:
+    if status_filter == 'needs_action':
+        payments = payments.filter(status__in=PAYMENT_ACTION_STATUSES)
+    elif status_filter:
         payments = payments.filter(status=status_filter)
     
     if payment_method_filter:
         payments = payments.filter(payment_method=payment_method_filter)
     
     # Statistics
-    pending_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_count = _pending_payment_action_count()
     completed_count = Payment.objects.filter(status=PaymentStatus.COMPLETED).count()
     failed_count = Payment.objects.filter(status=PaymentStatus.FAILED).count()
     
+    for payment in payments:
+        payment.needs_admin_action = payment.status in PAYMENT_ACTION_STATUSES
+
     context = {
         'payments': payments,
         'status_filter': status_filter,
@@ -191,6 +211,7 @@ def payment_management(request):
         'failed_count': failed_count,
         'pending_payments_count': pending_count,
         'payment_statuses': PaymentStatus.choices,
+        'payment_action_statuses': PAYMENT_ACTION_STATUSES,
         'payment_methods': Payment._meta.get_field('payment_method').choices,
         'show_pending_by_default': not status_filter,  # Show pending filter tab if no status specified
     }
@@ -262,7 +283,7 @@ def payment_detail(request, payment_id):
             print(f"Expected 'approve' or 'reject', got: '{action}'")
     
     # Get pending payments count for sidebar
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
     
     context = {
         'payment': payment,
@@ -285,19 +306,22 @@ def approve_payment(request, payment_id):
     """Quick approve payment via AJAX"""
     payment = get_object_or_404(Payment, id=payment_id)
     
-    if payment.status != PaymentStatus.PENDING:
-        return JsonResponse({'error': 'Payment is not pending'}, status=400)
-    
-    # Approve payment
+    if payment.status not in [PaymentStatus.PENDING, PaymentStatus.PENDING_ONSITE]:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Payment is not pending'}, status=400)
+        messages.error(request, 'Only pending payments can be approved.')
+        return redirect('admin_panel:payment_management')
+
     payment.status = PaymentStatus.COMPLETED
     payment.completed_at = timezone.now()
-    payment.save()
-    
-    # Confirm booking
+    payment.save(update_fields=['status', 'completed_at', 'updated_at'])
+    confirm_booking_after_completed_payment(payment)
+
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        messages.success(request, f'Payment #{payment.id} approved successfully. Booking confirmed.')
+        return redirect('admin_panel:payment_management')
+
     booking = payment.booking
-    booking.status = BookingStatus.CONFIRMED
-    booking.save()
-    
     return JsonResponse({
         'success': True,
         'message': f'Payment #{payment.id} approved successfully',
@@ -310,24 +334,109 @@ def approve_payment(request, payment_id):
 @admin_required
 @require_http_methods(["POST"])
 def reject_payment(request, payment_id):
-    """Quick reject payment via AJAX"""
+    """Quick reject payment via AJAX or normal form post."""
     payment = get_object_or_404(Payment, id=payment_id)
-    
-    if payment.status != PaymentStatus.PENDING:
-        return JsonResponse({'error': 'Payment is not pending'}, status=400)
-    
-    data = json.loads(request.body)
-    reason = data.get('reason', 'Payment rejected by admin')
-    
+
+    if payment.status not in [PaymentStatus.PENDING, PaymentStatus.PENDING_ONSITE]:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({'error': 'Payment is not pending'}, status=400)
+        messages.error(request, 'Only pending payments can be rejected.')
+        return redirect('admin_panel:payment_management')
+
+    try:
+        data = json.loads(request.body or '{}')
+    except json.JSONDecodeError:
+        data = request.POST
+    reason = data.get('reason') or 'Payment rejected by admin'
+
     payment.status = PaymentStatus.FAILED
     payment.notes = reason
-    payment.save()
-    
+    payment.save(update_fields=['status', 'notes', 'updated_at'])
+
+    if request.headers.get('X-Requested-With') != 'XMLHttpRequest':
+        messages.success(request, f'Payment #{payment.id} rejected.')
+        return redirect('admin_panel:payment_management')
+
     return JsonResponse({
         'success': True,
         'message': f'Payment #{payment.id} rejected',
         'payment_status': payment.get_status_display()
     })
+
+
+@login_required
+@admin_required
+def refund_requests(request):
+    """List refund requests for audit and legacy refund issuing."""
+    status_filter = request.GET.get('status', 'all')
+    refunds = RefundRequest.objects.select_related(
+        'booking__guest',
+        'booking__room',
+        'requested_by',
+        'approved_by',
+        'issued_by',
+    ).order_by('-created_at')
+
+    visible_statuses = [
+        choice for choice in RefundRequestStatus.choices
+        if choice[0] != RefundRequestStatus.APPROVED
+    ]
+    if status_filter == RefundRequestStatus.APPROVED:
+        status_filter = 'all'
+
+    if status_filter != 'all':
+        refunds = refunds.filter(status=status_filter)
+
+    pending_payments_count = _pending_payment_action_count()
+
+    context = {
+        'refunds': refunds,
+        'status_filter': status_filter,
+        'statuses': visible_statuses,
+        'pending_payments_count': pending_payments_count,
+    }
+    return render(request, 'admin/refund_requests.html', context)
+
+
+@login_required
+@admin_required
+@require_http_methods(["POST"])
+def issue_refund_request(request, refund_id):
+    """Mark a legacy pending-issue refund as issued and update the related payment record."""
+    refund_request = get_object_or_404(
+        RefundRequest.objects.select_related('booking'),
+        id=refund_id,
+        status=RefundRequestStatus.APPROVED,
+    )
+
+    if not refund_request.can_admin_issue():
+        messages.error(request, 'This refund cannot be issued.')
+        return redirect('admin_panel:refund_requests')
+
+    notes = request.POST.get('admin_notes', '').strip()
+    try:
+        payment, transaction_id, amount = issue_approved_refund(refund_request, request.user, notes or 'Refund issued by admin')
+    except ValueError as error:
+        messages.error(request, str(error))
+        return redirect('admin_panel:refund_requests')
+
+    log_audit(
+        request,
+        request.user,
+        'REFUND_ISSUED',
+        'RefundRequest',
+        refund_request.id,
+        affected_user=refund_request.booking.guest,
+        description=f'Admin issued refund of PHP {amount} for Booking #{refund_request.booking.id}',
+        changes={
+            'status': 'ISSUED',
+            'amount': str(amount),
+            'refund_transaction_id': transaction_id,
+        }
+    )
+
+    messages.success(request, f'Refund issued for Booking #{refund_request.booking.id}.')
+    return redirect('admin_panel:refund_requests')
 
 
 @login_required
@@ -340,7 +449,7 @@ def room_management(request):
     total_rooms = rooms.count()
     available_rooms = rooms.filter(is_available=True).count()
     occupied_rooms = total_rooms - available_rooms
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
     
     context = {
         'rooms': rooms,
@@ -395,7 +504,7 @@ def booking_management(request):
     pending_bookings = Booking.objects.filter(status=BookingStatus.PENDING).count()
     confirmed_bookings = Booking.objects.filter(status=BookingStatus.CONFIRMED).count()
     cancelled_bookings = Booking.objects.filter(status=BookingStatus.CANCELLED).count()
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
     
     context = {
         'bookings': bookings,
@@ -419,7 +528,7 @@ def booking_detail(request, booking_id):
     guest = booking.guest
     room = booking.room
     payment = Payment.objects.filter(booking=booking).first()
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
     
     context = {
         'booking': booking,
@@ -441,7 +550,7 @@ def booking_edit(request, booking_id):
     guest = booking.guest
     room = booking.room
     payment = Payment.objects.filter(booking=booking).first()
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
     
     if request.method == 'POST':
         action = request.POST.get('action')
@@ -642,7 +751,7 @@ def user_management(request):
     staff_users = CustomUser.objects.filter(role=UserRole.STAFF).count()
     manager_users = CustomUser.objects.filter(role=UserRole.MANAGER).count()
     verified_users = CustomUser.objects.filter(is_email_verified=True).count()
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
 
     context = {
         'users': users,
@@ -678,7 +787,7 @@ def admin_reports(request):
     total_revenue = completed_payments.aggregate(total=Sum('amount'))['total'] or 0
     total_bookings = Booking.objects.count()
     total_guests = CustomUser.objects.filter(role=UserRole.GUEST).count()
-    pending_payments_count = Payment.objects.filter(status=PaymentStatus.PENDING).count()
+    pending_payments_count = _pending_payment_action_count()
 
     def add_months(date_value, offset):
         month_index = date_value.month - 1 + offset

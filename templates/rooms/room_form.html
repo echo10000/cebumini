@@ -1,410 +1,412 @@
-{% extends 'base.html' %}
+{% extends 'admin/admin_base.html' %}
 
-{% block title %}{{ title }} - Cebu Hotel{% endblock %}
+{% block title %}{{ title }} - Admin Panel{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* ============================================
-       COMPREHENSIVE DARK LUXURY THEME
-       ============================================ */
-    
-    /* Page background */
-    body {
-        background-color: #0a0f1e !important;
+    .room-form-shell {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 1.5rem 0 2.5rem;
     }
 
-    .dashboard-container {
-        background-color: #0a0f1e !important;
-        color: #ffffff !important;
+    .room-form-header {
+        align-items: center;
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
     }
 
-    .container {
-        background-color: transparent !important;
+    .room-form-title h1 {
+        color: var(--admin-ink, #172033) !important;
+        font-size: 1.85rem;
+        font-weight: 800;
+        margin: 0;
     }
 
-    /* AGGRESSIVE CARD STYLING */
-    .card {
-        background-color: #1a2235 !important;
-        border: 1px solid rgba(201, 168, 76, 0.2) !important;
-        color: #ffffff !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+    .room-form-title p {
+        color: var(--admin-muted, #64748b);
+        margin: 0.35rem 0 0;
     }
 
-    .card-body {
-        background-color: #1a2235 !important;
-        color: #ffffff !important;
+    .room-form-card {
+        background: var(--admin-surface, #ffffff);
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-radius: 8px;
+        box-shadow: var(--admin-shadow, 0 14px 34px rgba(15, 23, 42, 0.08));
+        overflow: hidden;
     }
 
-    /* Override Bootstrap card defaults */
-    div.card {
-        background-color: #1a2235 !important;
+    .room-form-section {
+        border-bottom: 1px solid var(--admin-line, #d9e1ec);
+        padding: 1.5rem;
     }
 
-    div.card-body {
-        background-color: #1a2235 !important;
+    .room-form-section:last-of-type {
+        border-bottom: 0;
     }
 
-    /* Target all form inputs and selects */
-    input.form-control,
-    select.form-control,
-    textarea.form-control,
-    .form-control,
-    .form-select,
-    input[type="text"],
-    input[type="email"],
-    input[type="number"],
-    input[type="date"],
-    input[type="time"],
-    input[type="password"],
-    input[type="file"],
-    select,
-    textarea {
-        background-color: #111827 !important;
-        color: #ffffff !important;
-        border: 1.5px solid #374151 !important;
-        border-radius: 6px !important;
-        padding: 0.75rem 1rem !important;
+    .room-form-section h2 {
+        align-items: center;
+        color: var(--admin-ink, #172033) !important;
+        display: flex;
+        font-size: 1rem;
+        font-weight: 800;
+        gap: 0.55rem;
+        margin: 0 0 1.25rem;
     }
 
-    input.form-control:focus,
-    select.form-control:focus,
-    textarea.form-control:focus,
-    .form-control:focus,
-    .form-select:focus,
-    input[type="text"]:focus,
-    input[type="email"]:focus,
-    input[type="number"]:focus,
-    input[type="date"]:focus,
-    input[type="time"]:focus,
-    input[type="password"]:focus,
-    input[type="file"]:focus,
-    select:focus,
-    textarea:focus {
-        background-color: #1a2235 !important;
-        border-color: #c9a84c !important;
-        box-shadow: 0 0 0 0.2rem rgba(201, 168, 76, 0.25) !important;
-        color: #ffffff !important;
+    .room-form-section h2 i {
+        align-items: center;
+        background: rgba(15, 118, 110, 0.12);
+        border-radius: 8px;
+        color: var(--admin-brand, #0f766e);
+        display: inline-flex;
+        height: 34px;
+        justify-content: center;
+        width: 34px;
     }
 
-    /* Form labels */
-    .form-label {
-        color: #e5e7eb !important;
-        font-weight: 700 !important;
-        font-size: 1.05rem !important;
-        letter-spacing: 0.5px !important;
+    .room-form-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    /* Text color overrides */
-    h1, h2, h3, h4, h5, h6 {
-        color: #ffffff !important;
-        font-weight: 700 !important;
+    .room-form-field {
+        margin-bottom: 1rem;
     }
 
-    h1 {
-        font-size: 2rem !important;
+    .room-form-field:last-child {
+        margin-bottom: 0;
     }
 
-    legend {
-        color: #c9a84c !important;
-        font-weight: 700 !important;
-        font-size: 1.2rem !important;
-        letter-spacing: 0.5px !important;
+    .room-form-field.full {
+        grid-column: 1 / -1;
     }
 
-    /* Fieldset */
-    fieldset {
-        border-color: rgba(201, 168, 76, 0.2) !important;
-        background-color: transparent !important;
+    .room-form-field label,
+    .room-form-check label {
+        color: var(--admin-ink, #172033);
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 800;
+        margin-bottom: 0.45rem;
     }
 
-    /* General text readability */
-    p, span, label, div {
-        font-size: 1rem !important;
-        line-height: 1.6 !important;
+    .room-form-field input,
+    .room-form-field select,
+    .room-form-field textarea {
+        background: #ffffff !important;
+        border: 1px solid var(--admin-line, #d9e1ec) !important;
+        border-radius: 8px !important;
+        color: var(--admin-ink, #172033) !important;
+        font-size: 0.95rem !important;
+        min-height: 44px;
+        padding: 0.7rem 0.85rem !important;
+        width: 100%;
     }
 
-    /* Buttons */
-    .btn-secondary {
-        background-color: #374151 !important;
-        border-color: #4b5563 !important;
-        color: #ffffff !important;
+    .room-form-field textarea {
+        min-height: 120px;
+        resize: vertical;
     }
 
-    .btn-secondary:hover {
-        background-color: #4b5563 !important;
-        border-color: #5a6574 !important;
+    .room-form-field input:focus,
+    .room-form-field select:focus,
+    .room-form-field textarea:focus {
+        border-color: var(--admin-brand, #0f766e) !important;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14) !important;
+        outline: none !important;
     }
 
-    .btn-primary {
-        background-color: #c9a84c !important;
-        border-color: #c9a84c !important;
-        color: #0a0f1e !important;
+    .room-form-field input::placeholder,
+    .room-form-field textarea::placeholder {
+        color: #94a3b8;
     }
 
-    .btn-primary:hover {
-        background-color: #b8963d !important;
-        border-color: #b8963d !important;
+    .room-form-check {
+        align-items: center;
+        background: var(--admin-surface-alt, #eef2f7);
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-radius: 8px;
+        display: flex;
+        gap: 0.7rem;
+        min-height: 44px;
+        padding: 0.75rem 0.9rem;
     }
 
-    /* Error text */
-    .text-danger {
-        color: #ef4444 !important;
+    .room-form-check input {
+        accent-color: var(--admin-brand, #0f766e);
+        height: 1.05rem;
+        width: 1.05rem;
     }
 
-    /* Inline form check styling */
-    .form-check-input {
-        background-color: #111827 !important;
-        border: 1.5px solid #374151 !important;
-        accent-color: #c9a84c !important;
+    .room-form-check label {
+        margin: 0;
     }
 
-    .form-check-input:checked {
-        background-color: #c9a84c !important;
-        border-color: #c9a84c !important;
+    .room-form-help {
+        color: var(--admin-muted, #64748b);
+        display: block;
+        font-size: 0.82rem;
+        margin-top: 0.4rem;
     }
 
-    .form-check-label {
-        color: #e5e7eb !important;
+    .room-form-error,
+    .errorlist {
+        color: var(--admin-danger, #b91c1c);
+        font-size: 0.85rem;
+        list-style: none;
+        margin: 0.4rem 0 0;
+        padding: 0;
     }
 
-    /* Specific field styling with ID selectors */
-    #id_room_number,
-    #id_room_type,
-    #id_description,
-    #id_price_per_night,
-    #id_capacity,
-    #id_image,
-    #id_amenities {
-        background-color: #111827 !important;
-        color: #ffffff !important;
-        border: 1.5px solid #374151 !important;
+    .room-current-image {
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-radius: 8px;
+        display: block;
+        margin-top: 0.75rem;
+        max-height: 220px;
+        max-width: 320px;
+        object-fit: cover;
+        width: 100%;
     }
 
-    #id_room_number:focus,
-    #id_room_type:focus,
-    #id_description:focus,
-    #id_price_per_night:focus,
-    #id_capacity:focus,
-    #id_image:focus,
-    #id_amenities:focus {
-        background-color: #1a2235 !important;
-        border-color: #c9a84c !important;
+    .room-form-actions {
+        align-items: center;
+        background: #f8fafc;
+        border-top: 1px solid var(--admin-line, #d9e1ec);
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
     }
 
-    /* Row styling */
-    .row {
-        background-color: transparent !important;
+    .room-form-actions-left,
+    .room-form-actions-right {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
     }
 
-    .col-md-8,
-    .col-md-6,
-    .col-12 {
-        background-color: transparent !important;
+    .room-btn {
+        align-items: center;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        display: inline-flex;
+        font-weight: 800;
+        gap: 0.45rem;
+        justify-content: center;
+        min-height: 42px;
+        padding: 0.65rem 1rem;
+        text-decoration: none;
     }
 
-    .mb-3,
-    .mb-4 {
-        background-color: transparent !important;
+    .room-btn-primary {
+        background: var(--admin-brand, #0f766e);
+        color: #ffffff;
     }
 
-    /* Small text (help text, errors) */
-    small,
-    .small {
-        color: #9ca3af !important;
+    .room-btn-primary:hover {
+        background: var(--admin-brand-dark, #115e59);
+        color: #ffffff;
+    }
+
+    .room-btn-secondary {
+        background: #ffffff;
+        border-color: var(--admin-line, #d9e1ec);
+        color: var(--admin-ink, #172033);
+    }
+
+    .room-btn-secondary:hover {
+        background: var(--admin-surface-alt, #eef2f7);
+        color: var(--admin-ink, #172033);
+    }
+
+    .room-btn-danger {
+        background: rgba(185, 28, 28, 0.1);
+        border-color: rgba(185, 28, 28, 0.24);
+        color: var(--admin-danger, #b91c1c);
+    }
+
+    .room-btn-danger:hover {
+        background: var(--admin-danger, #b91c1c);
+        color: #ffffff;
+    }
+
+    .room-gallery {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    }
+
+    .room-gallery-card {
+        background: #ffffff;
+        border: 1px solid var(--admin-line, #d9e1ec);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .room-gallery-card img {
+        aspect-ratio: 4 / 3;
+        display: block;
+        object-fit: cover;
+        width: 100%;
+    }
+
+    .room-gallery-body {
+        padding: 0.75rem;
+    }
+
+    @media (max-width: 760px) {
+        .room-form-header,
+        .room-form-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .room-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .room-btn {
+            width: 100%;
+        }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
-    <div class="container">
-        <div class="row mb-4">
-            <div class="col-12">
-                <h1>{{ title }}</h1>
-                <a href="{% url 'rooms:list' %}" class="btn btn-secondary btn-sm">← Back to Rooms</a>
-            </div>
+<div class="room-form-shell">
+    <div class="room-form-header">
+        <div class="room-form-title">
+            <h1>{% if room %}Edit Room {{ room.room_number }}{% else %}Add New Room{% endif %}</h1>
+            <p>Manage room details, pricing, amenities, and availability.</p>
         </div>
-
-        <div class="row">
-            <div class="col-md-8 offset-md-2">
-                <div class="card">
-                    <div class="card-body">
-                        <form method="POST" enctype="multipart/form-data" novalidate>
-                            {% csrf_token %}
-
-                            <!-- Room Basic Info -->
-                            <fieldset class="mb-4">
-                                <legend class="h5 mb-3">Basic Information</legend>
-
-                                <div class="mb-3">
-                                    <label for="{{ form.room_number.id_for_label }}" class="form-label">Room Number</label>
-                                    {{ form.room_number }}
-                                    {% if form.room_number.errors %}
-                                        <div class="text-danger small">
-                                            {{ form.room_number.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="{{ form.room_type.id_for_label }}" class="form-label">Room Type</label>
-                                            {{ form.room_type }}
-                                            {% if form.room_type.errors %}
-                                                <div class="text-danger small">
-                                                    {{ form.room_type.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="{{ form.capacity.id_for_label }}" class="form-label">Guest Capacity</label>
-                                            {{ form.capacity }}
-                                            {% if form.capacity.errors %}
-                                                <div class="text-danger small">
-                                                    {{ form.capacity.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="{{ form.description.id_for_label }}" class="form-label">Description</label>
-                                    {{ form.description }}
-                                    {% if form.description.errors %}
-                                        <div class="text-danger small">
-                                            {{ form.description.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </fieldset>
-
-                            <!-- Pricing & Availability -->
-                            <fieldset class="mb-4">
-                                <legend class="h5 mb-3">Pricing & Availability</legend>
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="{{ form.price_per_night.id_for_label }}" class="form-label">Price per Night (₱)</label>
-                                            {{ form.price_per_night }}
-                                            {% if form.price_per_night.errors %}
-                                                <div class="text-danger small">
-                                                    {{ form.price_per_night.errors }}
-                                                </div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label class="form-label">Status</label>
-                                            <div class="form-check">
-                                                {{ form.is_available }}
-                                                <label class="form-check-label" for="{{ form.is_available.id_for_label }}">
-                                                    Mark as Available
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </fieldset>
-
-                            <!-- Amenities & Image -->
-                            <fieldset class="mb-4">
-                                <legend class="h5 mb-3">Amenities & Image</legend>
-
-                                <div class="mb-3">
-                                    <label for="{{ form.amenities.id_for_label }}" class="form-label">Amenities</label>
-                                    {{ form.amenities }}
-                                    <small class="form-text text-muted">
-                                        List amenities separated by commas (e.g., WiFi, TV, AC, Minibar)
-                                    </small>
-                                    {% if form.amenities.errors %}
-                                        <div class="text-danger small">
-                                            {{ form.amenities.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="{{ form.image.id_for_label }}" class="form-label">Room Image</label>
-                                    {% if form.image.value %}
-                                        <div class="mb-2">
-                                            <img src="{{ form.image.value.url }}" alt="Room image" 
-                                                 class="img-thumbnail" style="max-width: 300px; max-height: 200px;">
-                                        </div>
-                                    {% endif %}
-                                    {{ form.image }}
-                                    <small class="form-text text-muted">
-                                        Upload a main image for the room. Accepted formats: JPG, PNG, GIF
-                                    </small>
-                                    {% if form.image.errors %}
-                                        <div class="text-danger small">
-                                            {{ form.image.errors }}
-                                        </div>
-                                    {% endif %}
-                                </div>
-                            </fieldset>
-
-                            <!-- Form Actions -->
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary">
-                                    {% if room %}Save Changes{% else %}Create Room{% endif %}
-                                </button>
-                                <a href="{% url 'rooms:list' %}" class="btn btn-secondary">Cancel</a>
-                                {% if room %}
-                                    <form method="POST" action="{% url 'rooms:delete' room.id %}" 
-                                          style="display:inline;"
-                                          onsubmit="return confirm('Are you sure you want to delete this room?');">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-danger">Delete Room</button>
-                                    </form>
-                                {% endif %}
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Image Gallery (if editing) -->
-        {% if room and images %}
-            <div class="row mt-4">
-                <div class="col-md-8 offset-md-2">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Additional Images</h5>
-                            <div class="row">
-                                {% for image in images %}
-                                    <div class="col-md-4 mb-3">
-                                        <div class="card">
-                                            <img src="{{ image.image.url }}" class="card-img-top" 
-                                                 alt="{{ image.caption }}" style="height: 150px; object-fit: cover;">
-                                            <div class="card-body p-2">
-                                                {% if image.caption %}
-                                                    <small class="text-muted">{{ image.caption }}</small>
-                                                {% else %}
-                                                    <small class="text-muted">No caption</small>
-                                                {% endif %}
-                                            </div>
-                                            <form method="POST" action="{% url 'rooms:delete_image' image.id %}" 
-                                                  class="d-grid"
-                                                  onsubmit="return confirm('Delete this image?');">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endif %}
+        <a href="{% url 'admin_panel:room_management' %}" class="room-btn room-btn-secondary">
+            <i class="fas fa-arrow-left"></i> Rooms
+        </a>
     </div>
+
+    <form method="POST" enctype="multipart/form-data" novalidate class="room-form-card">
+        {% csrf_token %}
+
+        <section class="room-form-section">
+            <h2><i class="fas fa-door-open"></i> Basic Information</h2>
+            <div class="room-form-field">
+                <label for="{{ form.room_number.id_for_label }}">Room Number</label>
+                {{ form.room_number }}
+                {{ form.room_number.errors }}
+            </div>
+
+            <div class="room-form-grid">
+                <div class="room-form-field">
+                    <label for="{{ form.room_type.id_for_label }}">Room Type</label>
+                    {{ form.room_type }}
+                    {{ form.room_type.errors }}
+                </div>
+                <div class="room-form-field">
+                    <label for="{{ form.capacity.id_for_label }}">Guest Capacity</label>
+                    {{ form.capacity }}
+                    {{ form.capacity.errors }}
+                </div>
+            </div>
+
+            <div class="room-form-field">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {{ form.description.errors }}
+            </div>
+        </section>
+
+        <section class="room-form-section">
+            <h2><i class="fas fa-peso-sign"></i> Pricing & Availability</h2>
+            <div class="room-form-grid">
+                <div class="room-form-field">
+                    <label for="{{ form.price_per_night.id_for_label }}">Price per Night</label>
+                    {{ form.price_per_night }}
+                    {{ form.price_per_night.errors }}
+                </div>
+                <div class="room-form-field">
+                    <label>Status</label>
+                    <div class="room-form-check">
+                        {{ form.is_available }}
+                        <label for="{{ form.is_available.id_for_label }}">Mark as Available</label>
+                    </div>
+                    {{ form.is_available.errors }}
+                </div>
+            </div>
+        </section>
+
+        <section class="room-form-section">
+            <h2><i class="fas fa-list-check"></i> Amenities & Image</h2>
+            <div class="room-form-field">
+                <label for="{{ form.amenities.id_for_label }}">Amenities</label>
+                {{ form.amenities }}
+                <span class="room-form-help">List amenities separated by commas, for example: WiFi, TV, AC, Minibar.</span>
+                {{ form.amenities.errors }}
+            </div>
+
+            <div class="room-form-field">
+                <label for="{{ form.image.id_for_label }}">Room Image</label>
+                {{ form.image }}
+                <span class="room-form-help">Upload a main image for the room. Accepted formats: JPG, PNG, GIF.</span>
+                {{ form.image.errors }}
+                {% if form.instance.image %}
+                    <img src="{{ form.instance.image.url }}" alt="Current room image" class="room-current-image">
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="room-form-actions">
+            <div class="room-form-actions-left">
+                <button type="submit" class="room-btn room-btn-primary">
+                    <i class="fas fa-save"></i>
+                    {% if room %}Save Changes{% else %}Create Room{% endif %}
+                </button>
+                <a href="{% if room %}{% url 'admin_panel:room_detail_admin' room.id %}{% else %}{% url 'admin_panel:room_management' %}{% endif %}" class="room-btn room-btn-secondary">
+                    Cancel
+                </a>
+            </div>
+        </div>
+    </form>
+
+    {% if room %}
+        <form method="POST" action="{% url 'rooms:delete' room.id %}" class="mt-3" onsubmit="return confirm('Are you sure you want to delete this room?');">
+            {% csrf_token %}
+            <input type="hidden" name="next_success" value="{% url 'admin_panel:room_management' %}">
+            <input type="hidden" name="next_error" value="{% url 'admin_panel:room_detail_admin' room.id %}">
+            <button type="submit" class="room-btn room-btn-danger">
+                <i class="fas fa-trash"></i> Delete Room
+            </button>
+        </form>
+    {% endif %}
+
+    {% if room and images %}
+        <section class="room-form-card mt-4">
+            <div class="room-form-section">
+                <h2><i class="fas fa-images"></i> Additional Images</h2>
+                <div class="room-gallery">
+                    {% for image in images %}
+                        <article class="room-gallery-card">
+                            <img src="{{ image.image.url }}" alt="{{ image.caption|default:'Room image' }}">
+                            <div class="room-gallery-body">
+                                <span class="room-form-help">{{ image.caption|default:'No caption' }}</span>
+                                <form method="POST" action="{% url 'rooms:delete_image' image.id %}" class="mt-2" onsubmit="return confirm('Delete this image?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="room-btn room-btn-danger">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% endif %}
 </div>
 {% endblock %}

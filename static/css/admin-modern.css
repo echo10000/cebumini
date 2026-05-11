@@ -190,10 +190,20 @@ a {
     border-radius: var(--admin-radius);
     padding: 0.8rem 0.75rem !important;
     margin-bottom: 0.25rem !important;
+    gap: 0.75rem !important;
+    min-height: 44px;
 }
 
 .sidebar-nav a i {
     color: var(--admin-brand) !important;
+    flex: 0 0 20px;
+}
+
+.sidebar-nav a > span:not(.badge-notification) {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .sidebar-nav a:hover,
@@ -208,17 +218,38 @@ a {
     background: var(--admin-danger) !important;
     color: #fff !important;
     border-radius: 999px !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 0.45rem !important;
+    margin-left: auto !important;
+    font-size: 0.72rem !important;
+    font-weight: 850 !important;
+    line-height: 1 !important;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 8px 18px rgba(185, 28, 28, 0.22);
 }
 
 .admin-container {
     position: relative;
-    z-index: 1;
+    z-index: auto;
     margin-left: 248px !important;
     margin-top: 0 !important;
     background: transparent !important;
     min-height: calc(100vh - 76px) !important;
     padding: 2rem !important;
     color: var(--admin-ink) !important;
+}
+
+.modal {
+    z-index: 1205 !important;
+}
+
+.modal-backdrop {
+    z-index: 1200 !important;
 }
 
 .admin-container > * {

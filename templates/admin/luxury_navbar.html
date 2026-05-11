@@ -82,62 +82,6 @@ Features:
        NAV LINKS
        ============================================ */
 
-    .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 2.5rem;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-        height: 100%;
-    }
-
-    .nav-link {
-        height: 100%;
-        display: flex;
-        align-items: center;
-    }
-
-    .nav-link a {
-        color: #ffffff;
-        text-decoration: none;
-        font-size: 0.95rem;
-        font-weight: 500;
-        transition: color 0.3s ease;
-        position: relative;
-    }
-
-    .nav-link a::after {
-        content: '';
-        position: absolute;
-        bottom: -6px;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: #c9a84c;
-        transition: width 0.3s ease;
-        display: none;
-    }
-
-    .nav-link a:hover {
-        color: #c9a84c;
-    }
-
-    .nav-link a:hover::after {
-        width: 100%;
-    }
-
-    /* Active Link - Subtle Glow Effect */
-    .nav-link a.active {
-        color: #c9a84c;
-        border-bottom: 2px solid #c9a84c;
-        text-shadow: none;
-    }
-
-    .nav-link a.active::after {
-        width: 100%;
-    }
-
     /* ============================================
        ACTION BUTTONS (Right Side)
        ============================================ */
@@ -257,14 +201,6 @@ Features:
             font-size: 1rem;
         }
 
-        .nav-links {
-            gap: 1.5rem;
-        }
-
-        .nav-link a {
-            font-size: 0.9rem;
-        }
-
         .navbar-actions {
             gap: 1rem;
         }
@@ -282,45 +218,8 @@ Features:
             height: 60px;
         }
 
-        .navbar-toggle {
-            display: block;
-        }
-
         .logo-text p {
             display: none;
-        }
-
-        .nav-links {
-            position: absolute;
-            top: 60px;
-            left: 0;
-            right: 0;
-            flex-direction: column;
-            background: #111827;
-            border-bottom: 2px solid #c9a84c;
-            padding: 1rem;
-            gap: 0;
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease;
-        }
-
-        .nav-links.active {
-            max-height: 400px;
-        }
-
-        .nav-link {
-            height: auto;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid rgba(201, 168, 76, 0.1);
-        }
-
-        .nav-link a::after {
-            display: none;
-        }
-
-        .nav-link a.active {
-            color: #c9a84c;
         }
 
         .navbar-actions {
@@ -357,50 +256,6 @@ Features:
         </div>
     </a>
 
-    <!-- Mobile Menu Toggle -->
-    <button class="navbar-toggle" onclick="toggleMobileMenu()">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- Nav Links -->
-    <ul class="nav-links" id="navLinks">
-        <li class="nav-link">
-            <a href="{% url 'admin_panel:dashboard' %}" {% if request.resolver_match.url_name == 'dashboard' %}class="active"{% endif %}>
-                <i class="fas fa-chart-line" style="margin-right: 0.5rem;"></i>Dashboard
-            </a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'admin_panel:payment_management' %}" {% if request.resolver_match.url_name == 'payment_management' %}class="active"{% endif %}>
-                <i class="fas fa-credit-card" style="margin-right: 0.5rem;"></i>Payments
-            </a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'admin_panel:booking_management' %}" {% if request.resolver_match.url_name == 'booking_management' %}class="active"{% endif %}>
-                <i class="fas fa-calendar-check" style="margin-right: 0.5rem;"></i>Bookings
-            </a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'admin_panel:room_management' %}" {% if request.resolver_match.url_name == 'room_management' %}class="active"{% endif %}>
-                <i class="fas fa-door-open" style="margin-right: 0.5rem;"></i>Rooms
-            </a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'admin_panel:user_management' %}" {% if request.resolver_match.url_name == 'user_management' %}class="active"{% endif %}>
-                <i class="fas fa-users" style="margin-right: 0.5rem;"></i>Users
-            </a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'admin_panel:reports' %}" {% if request.resolver_match.url_name == 'reports' %}class="active"{% endif %}>
-                <i class="fas fa-file-chart-line" style="margin-right: 0.5rem;"></i>Reports
-            </a>
-        </li>
-        <li class="nav-link">
-            <a href="{% url 'home' %}" style="margin-right: 0.5rem;">
-                <i class="fas fa-home" style="margin-right: 0.5rem;"></i>Back to Hotel
-            </a>
-        </li>
-    </ul>
-
     <!-- Action Buttons -->
     <ul class="navbar-actions">
         <li>
@@ -417,17 +272,3 @@ Features:
     </ul>
 </nav>
 
-<!-- Mobile Menu Toggle Script -->
-<script>
-    function toggleMobileMenu() {
-        const navLinks = document.getElementById('navLinks');
-        navLinks.classList.toggle('active');
-    }
-
-    // Close mobile menu when a link is clicked
-    document.querySelectorAll('.nav-link a').forEach(link => {
-        link.addEventListener('click', () => {
-            document.getElementById('navLinks').classList.remove('active');
-        });
-    });
-</script>

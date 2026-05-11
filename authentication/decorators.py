@@ -21,8 +21,20 @@ def _redirect_if_2fa_required(request):
     two_fa = get_two_fa_status(request.user)
     if two_fa and request.session.get('2fa_verified_user_id') != request.user.id:
         if two_fa.method == 'EMAIL':
-            from .otp_utils import send_otp_email
-            send_otp_email(request.user)
+            from django.conf import settings
+            from django.contrib import messages
+            from .otp_utils import EmailOTPDeliveryError, send_otp_email
+            try:
+                send_otp_email(request.user)
+            except EmailOTPDeliveryError as exc:
+                if getattr(settings, 'DEBUG', False) and exc.otp_code:
+                    messages.warning(
+                        request,
+                        f'Email delivery failed, so your local development verification code is {exc.otp_code}.',
+                    )
+                else:
+                    messages.error(request, 'We could not send your verification code. Please contact an administrator.')
+                    return redirect(reverse('auth:login'))
             request.session['email_otp_user_id'] = request.user.id
             request.session['email_otp_remember_me'] = False
             return redirect(reverse('auth:verify_otp'))

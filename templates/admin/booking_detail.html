@@ -449,7 +449,7 @@
                     </div>
                     <div class="info-row">
                         <span class="info-label">Reference Code:</span>
-                        <span class="info-value info-value-large">{{ booking.booking_reference }}</span>
+                        <span class="info-value">Guest-provided at check-in</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label">Check-In:</span>
@@ -619,7 +619,7 @@
                         {% if booking.status == 'CONFIRMED' %}
                         <div class="verification-panel">
                             <label for="booking-reference-input">Check-in Reference Code</label>
-                            <input type="text" id="booking-reference-input" name="booking_reference" placeholder="Ask guest for {{ booking.booking_reference }}" autocomplete="off" required>
+                            <input type="text" id="booking-reference-input" name="booking_reference" placeholder="Enter guest-provided reference code" autocomplete="off" required>
 
                             <label class="verification-check">
                                 <input type="checkbox" name="reference_verified" required>

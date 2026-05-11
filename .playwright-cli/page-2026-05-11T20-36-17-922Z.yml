@@ -1,0 +1,1409 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - link "C Cebu Luxury Admin Panel" [ref=e3] [cursor=pointer]:
+      - /url: /admin-panel/
+      - generic [ref=e4]: C
+      - generic [ref=e5]:
+        - heading "Cebu Luxury" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Admin Panel
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: S
+          - generic [ref=e12]: Super
+      - listitem [ref=e13]:
+        - link " Logout" [ref=e14] [cursor=pointer]:
+          - /url: /auth/logout/
+          - generic [ref=e15]: 
+          - text: Logout
+  - complementary [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]: Dashboard
+      - list [ref=e19]:
+        - listitem [ref=e20]:
+          - link " Overview" [ref=e21] [cursor=pointer]:
+            - /url: /admin-panel/
+            - generic [ref=e22]: 
+            - generic [ref=e23]: Overview
+    - generic [ref=e24]:
+      - generic [ref=e25]: Management
+      - list [ref=e26]:
+        - listitem [ref=e27]:
+          - link " Payments 3" [ref=e28] [cursor=pointer]:
+            - /url: /admin-panel/payments/
+            - generic [ref=e29]: 
+            - generic [ref=e30]: Payments
+            - generic [ref=e31]: "3"
+        - listitem [ref=e32]:
+          - link " Refunds" [ref=e33] [cursor=pointer]:
+            - /url: /admin-panel/refunds/
+            - generic [ref=e34]: 
+            - generic [ref=e35]: Refunds
+        - listitem [ref=e36]:
+          - link " Bookings" [ref=e37] [cursor=pointer]:
+            - /url: /admin-panel/bookings/
+            - generic [ref=e38]: 
+            - generic [ref=e39]: Bookings
+        - listitem [ref=e40]:
+          - link " Rooms" [ref=e41] [cursor=pointer]:
+            - /url: /admin-panel/rooms/
+            - generic [ref=e42]: 
+            - generic [ref=e43]: Rooms
+        - listitem [ref=e44]:
+          - link " Users" [ref=e45] [cursor=pointer]:
+            - /url: /admin-panel/users/
+            - generic [ref=e46]: 
+            - generic [ref=e47]: Users
+        - listitem [ref=e48]:
+          - link " Guest Inquiries" [ref=e49] [cursor=pointer]:
+            - /url: /staff/guest-services/
+            - generic [ref=e50]: 
+            - generic [ref=e51]: Guest Inquiries
+    - generic [ref=e52]:
+      - generic [ref=e53]: Reports
+      - list [ref=e54]:
+        - listitem [ref=e55]:
+          - link "Reports" [ref=e56] [cursor=pointer]:
+            - /url: /admin-panel/reports/
+            - generic [ref=e57]: Reports
+    - generic [ref=e58]:
+      - generic [ref=e59]: Other
+      - list [ref=e60]:
+        - listitem [ref=e61]:
+          - link " Back to Hotel" [ref=e62] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e63]: 
+            - generic [ref=e64]: Back to Hotel
+  - main [ref=e65]:
+    - generic [ref=e66]:
+      - heading "User Management" [level=1] [ref=e67]
+      - paragraph [ref=e68]: Manage account access, roles, and activation status.
+    - generic [ref=e69]:
+      - generic [ref=e71]:
+        - generic [ref=e73]: 
+        - generic [ref=e74]: Total Users
+        - generic [ref=e75]: "79"
+        - generic [ref=e76]: Registered accounts
+      - generic [ref=e78]:
+        - generic [ref=e80]: 
+        - generic [ref=e81]: Guests
+        - generic [ref=e82]: "41"
+        - generic [ref=e83]: Guest accounts
+      - generic [ref=e85]:
+        - generic [ref=e87]: 
+        - generic [ref=e88]: Operations
+        - generic [ref=e89]: "38"
+        - generic [ref=e90]: Staff, managers, and admins
+      - generic [ref=e92]:
+        - generic [ref=e94]: 
+        - generic [ref=e95]: Verified
+        - generic [ref=e96]: "26"
+        - generic [ref=e97]: Email verified accounts
+    - generic [ref=e98]:
+      - heading " Filter Users" [level=5] [ref=e100]:
+        - generic [ref=e101]: 
+        - text: Filter Users
+      - generic [ref=e103]:
+        - generic [ref=e104]:
+          - generic [ref=e105]: Search
+          - searchbox "Search" [ref=e106]
+        - generic [ref=e107]:
+          - generic [ref=e108]: User Role
+          - combobox "User Role" [ref=e109]:
+            - option "All Roles" [selected]
+            - option "Guest"
+            - option "Staff"
+            - option "Manager"
+            - option "Administrator"
+        - generic [ref=e110]:
+          - generic [ref=e111]: Status
+          - combobox "Status" [ref=e112]:
+            - option "Any Status" [selected]
+            - option "Active"
+            - option "Inactive"
+        - generic [ref=e113]:
+          - button " Filter" [ref=e114] [cursor=pointer]:
+            - generic [ref=e115]: 
+            - text: Filter
+          - link "" [ref=e116] [cursor=pointer]:
+            - /url: /admin-panel/users/
+            - generic [ref=e117]: 
+    - generic [ref=e118]:
+      - heading " Users" [level=5] [ref=e120]:
+        - generic [ref=e121]: 
+        - text: Users
+      - table [ref=e124]:
+        - rowgroup [ref=e125]:
+          - row "Name Email Role Status Joined Actions" [ref=e126]:
+            - columnheader "Name" [ref=e127]
+            - columnheader "Email" [ref=e128]
+            - columnheader "Role" [ref=e129]
+            - columnheader "Status" [ref=e130]
+            - columnheader "Joined" [ref=e131]
+            - columnheader "Actions" [ref=e132]
+        - rowgroup [ref=e133]:
+          - row "Staff Staff @staff1 staff11@gmail.com Staff Active May 11, 2026   " [ref=e134]:
+            - cell "Staff Staff @staff1" [ref=e135]:
+              - strong [ref=e136]: Staff Staff
+              - generic [ref=e137]: "@staff1"
+            - cell "staff11@gmail.com" [ref=e138]
+            - cell "Staff" [ref=e139]
+            - cell "Active" [ref=e140]
+            - cell "May 11, 2026" [ref=e141]
+            - cell "  " [ref=e142]:
+              - generic [ref=e143]:
+                - button "" [ref=e144] [cursor=pointer]:
+                  - generic [ref=e145]: 
+                - button "" [ref=e146] [cursor=pointer]:
+                  - generic [ref=e147]: 
+                - button "" [ref=e148] [cursor=pointer]:
+                  - generic [ref=e149]: 
+          - row "sample_admin @sample_admin sample.admin@example.com Administrator Active May 11, 2026   " [ref=e150]:
+            - cell "sample_admin @sample_admin" [ref=e151]:
+              - strong [ref=e152]: sample_admin
+              - generic [ref=e153]: "@sample_admin"
+            - cell "sample.admin@example.com" [ref=e154]
+            - cell "Administrator" [ref=e155]
+            - cell "Active" [ref=e156]
+            - cell "May 11, 2026" [ref=e157]
+            - cell "  " [ref=e158]:
+              - generic [ref=e159]:
+                - button "" [ref=e160] [cursor=pointer]:
+                  - generic [ref=e161]: 
+                - button "" [ref=e162] [cursor=pointer]:
+                  - generic [ref=e163]: 
+                - button "" [ref=e164] [cursor=pointer]:
+                  - generic [ref=e165]: 
+          - row "sample_manager @sample_manager sample.manager@example.com Manager Active May 11, 2026   " [ref=e166]:
+            - cell "sample_manager @sample_manager" [ref=e167]:
+              - strong [ref=e168]: sample_manager
+              - generic [ref=e169]: "@sample_manager"
+            - cell "sample.manager@example.com" [ref=e170]
+            - cell "Manager" [ref=e171]
+            - cell "Active" [ref=e172]
+            - cell "May 11, 2026" [ref=e173]
+            - cell "  " [ref=e174]:
+              - generic [ref=e175]:
+                - button "" [ref=e176] [cursor=pointer]:
+                  - generic [ref=e177]: 
+                - button "" [ref=e178] [cursor=pointer]:
+                  - generic [ref=e179]: 
+                - button "" [ref=e180] [cursor=pointer]:
+                  - generic [ref=e181]: 
+          - row "Owen Navarro @staff_tm_03 staff-tm-03@example.com Guest Active May 11, 2026   " [ref=e182]:
+            - cell "Owen Navarro @staff_tm_03" [ref=e183]:
+              - strong [ref=e184]: Owen Navarro
+              - generic [ref=e185]: "@staff_tm_03"
+            - cell "staff-tm-03@example.com" [ref=e186]
+            - cell "Guest" [ref=e187]
+            - cell "Active" [ref=e188]
+            - cell "May 11, 2026" [ref=e189]
+            - cell "  " [ref=e190]:
+              - generic [ref=e191]:
+                - button "" [ref=e192] [cursor=pointer]:
+                  - generic [ref=e193]: 
+                - button "" [ref=e194] [cursor=pointer]:
+                  - generic [ref=e195]: 
+                - button "" [ref=e196] [cursor=pointer]:
+                  - generic [ref=e197]: 
+          - row "Katrina Yu @staff_tm_02 staff-tm-02@example.com Guest Active May 11, 2026   " [ref=e198]:
+            - cell "Katrina Yu @staff_tm_02" [ref=e199]:
+              - strong [ref=e200]: Katrina Yu
+              - generic [ref=e201]: "@staff_tm_02"
+            - cell "staff-tm-02@example.com" [ref=e202]
+            - cell "Guest" [ref=e203]
+            - cell "Active" [ref=e204]
+            - cell "May 11, 2026" [ref=e205]
+            - cell "  " [ref=e206]:
+              - generic [ref=e207]:
+                - button "" [ref=e208] [cursor=pointer]:
+                  - generic [ref=e209]: 
+                - button "" [ref=e210] [cursor=pointer]:
+                  - generic [ref=e211]: 
+                - button "" [ref=e212] [cursor=pointer]:
+                  - generic [ref=e213]: 
+          - row "Ramon Villanueva @staff_tm_01 staff-tm-01@example.com Guest Active May 11, 2026   " [ref=e214]:
+            - cell "Ramon Villanueva @staff_tm_01" [ref=e215]:
+              - strong [ref=e216]: Ramon Villanueva
+              - generic [ref=e217]: "@staff_tm_01"
+            - cell "staff-tm-01@example.com" [ref=e218]
+            - cell "Guest" [ref=e219]
+            - cell "Active" [ref=e220]
+            - cell "May 11, 2026" [ref=e221]
+            - cell "  " [ref=e222]:
+              - generic [ref=e223]:
+                - button "" [ref=e224] [cursor=pointer]:
+                  - generic [ref=e225]: 
+                - button "" [ref=e226] [cursor=pointer]:
+                  - generic [ref=e227]: 
+                - button "" [ref=e228] [cursor=pointer]:
+                  - generic [ref=e229]: 
+          - row "Alyssa Dela Pena @staff_co_03 staff-co-03@example.com Guest Active May 11, 2026   " [ref=e230]:
+            - cell "Alyssa Dela Pena @staff_co_03" [ref=e231]:
+              - strong [ref=e232]: Alyssa Dela Pena
+              - generic [ref=e233]: "@staff_co_03"
+            - cell "staff-co-03@example.com" [ref=e234]
+            - cell "Guest" [ref=e235]
+            - cell "Active" [ref=e236]
+            - cell "May 11, 2026" [ref=e237]
+            - cell "  " [ref=e238]:
+              - generic [ref=e239]:
+                - button "" [ref=e240] [cursor=pointer]:
+                  - generic [ref=e241]: 
+                - button "" [ref=e242] [cursor=pointer]:
+                  - generic [ref=e243]: 
+                - button "" [ref=e244] [cursor=pointer]:
+                  - generic [ref=e245]: 
+          - row "Ben Torres @staff_co_02 staff-co-02@example.com Guest Active May 11, 2026   " [ref=e246]:
+            - cell "Ben Torres @staff_co_02" [ref=e247]:
+              - strong [ref=e248]: Ben Torres
+              - generic [ref=e249]: "@staff_co_02"
+            - cell "staff-co-02@example.com" [ref=e250]
+            - cell "Guest" [ref=e251]
+            - cell "Active" [ref=e252]
+            - cell "May 11, 2026" [ref=e253]
+            - cell "  " [ref=e254]:
+              - generic [ref=e255]:
+                - button "" [ref=e256] [cursor=pointer]:
+                  - generic [ref=e257]: 
+                - button "" [ref=e258] [cursor=pointer]:
+                  - generic [ref=e259]: 
+                - button "" [ref=e260] [cursor=pointer]:
+                  - generic [ref=e261]: 
+          - row "Maya Cruz @staff_co_01 staff-co-01@example.com Guest Active May 11, 2026   " [ref=e262]:
+            - cell "Maya Cruz @staff_co_01" [ref=e263]:
+              - strong [ref=e264]: Maya Cruz
+              - generic [ref=e265]: "@staff_co_01"
+            - cell "staff-co-01@example.com" [ref=e266]
+            - cell "Guest" [ref=e267]
+            - cell "Active" [ref=e268]
+            - cell "May 11, 2026" [ref=e269]
+            - cell "  " [ref=e270]:
+              - generic [ref=e271]:
+                - button "" [ref=e272] [cursor=pointer]:
+                  - generic [ref=e273]: 
+                - button "" [ref=e274] [cursor=pointer]:
+                  - generic [ref=e275]: 
+                - button "" [ref=e276] [cursor=pointer]:
+                  - generic [ref=e277]: 
+          - row "Nico Garcia @staff_ci_04 staff-ci-04@example.com Guest Active May 11, 2026   " [ref=e278]:
+            - cell "Nico Garcia @staff_ci_04" [ref=e279]:
+              - strong [ref=e280]: Nico Garcia
+              - generic [ref=e281]: "@staff_ci_04"
+            - cell "staff-ci-04@example.com" [ref=e282]
+            - cell "Guest" [ref=e283]
+            - cell "Active" [ref=e284]
+            - cell "May 11, 2026" [ref=e285]
+            - cell "  " [ref=e286]:
+              - generic [ref=e287]:
+                - button "" [ref=e288] [cursor=pointer]:
+                  - generic [ref=e289]: 
+                - button "" [ref=e290] [cursor=pointer]:
+                  - generic [ref=e291]: 
+                - button "" [ref=e292] [cursor=pointer]:
+                  - generic [ref=e293]: 
+          - row "Iris Lim @staff_ci_03 staff-ci-03@example.com Guest Active May 11, 2026   " [ref=e294]:
+            - cell "Iris Lim @staff_ci_03" [ref=e295]:
+              - strong [ref=e296]: Iris Lim
+              - generic [ref=e297]: "@staff_ci_03"
+            - cell "staff-ci-03@example.com" [ref=e298]
+            - cell "Guest" [ref=e299]
+            - cell "Active" [ref=e300]
+            - cell "May 11, 2026" [ref=e301]
+            - cell "  " [ref=e302]:
+              - generic [ref=e303]:
+                - button "" [ref=e304] [cursor=pointer]:
+                  - generic [ref=e305]: 
+                - button "" [ref=e306] [cursor=pointer]:
+                  - generic [ref=e307]: 
+                - button "" [ref=e308] [cursor=pointer]:
+                  - generic [ref=e309]: 
+          - row "Marco Reyes @staff_ci_02 staff-ci-02@example.com Guest Active May 11, 2026   " [ref=e310]:
+            - cell "Marco Reyes @staff_ci_02" [ref=e311]:
+              - strong [ref=e312]: Marco Reyes
+              - generic [ref=e313]: "@staff_ci_02"
+            - cell "staff-ci-02@example.com" [ref=e314]
+            - cell "Guest" [ref=e315]
+            - cell "Active" [ref=e316]
+            - cell "May 11, 2026" [ref=e317]
+            - cell "  " [ref=e318]:
+              - generic [ref=e319]:
+                - button "" [ref=e320] [cursor=pointer]:
+                  - generic [ref=e321]: 
+                - button "" [ref=e322] [cursor=pointer]:
+                  - generic [ref=e323]: 
+                - button "" [ref=e324] [cursor=pointer]:
+                  - generic [ref=e325]: 
+          - row "Leah Santos @staff_ci_01 staff-ci-01@example.com Guest Active May 11, 2026   " [ref=e326]:
+            - cell "Leah Santos @staff_ci_01" [ref=e327]:
+              - strong [ref=e328]: Leah Santos
+              - generic [ref=e329]: "@staff_ci_01"
+            - cell "staff-ci-01@example.com" [ref=e330]
+            - cell "Guest" [ref=e331]
+            - cell "Active" [ref=e332]
+            - cell "May 11, 2026" [ref=e333]
+            - cell "  " [ref=e334]:
+              - generic [ref=e335]:
+                - button "" [ref=e336] [cursor=pointer]:
+                  - generic [ref=e337]: 
+                - button "" [ref=e338] [cursor=pointer]:
+                  - generic [ref=e339]: 
+                - button "" [ref=e340] [cursor=pointer]:
+                  - generic [ref=e341]: 
+          - row "Diego Tomas Dominguez @myladtomdominguez98 myladtomdominguez98@gmail.com Guest Active May 11, 2026   " [ref=e342]:
+            - cell "Diego Tomas Dominguez @myladtomdominguez98" [ref=e343]:
+              - strong [ref=e344]: Diego Tomas Dominguez
+              - generic [ref=e345]: "@myladtomdominguez98"
+            - cell "myladtomdominguez98@gmail.com" [ref=e346]
+            - cell "Guest" [ref=e347]
+            - cell "Active" [ref=e348]
+            - cell "May 11, 2026" [ref=e349]
+            - cell "  " [ref=e350]:
+              - generic [ref=e351]:
+                - button "" [ref=e352] [cursor=pointer]:
+                  - generic [ref=e353]: 
+                - button "" [ref=e354] [cursor=pointer]:
+                  - generic [ref=e355]: 
+                - button "" [ref=e356] [cursor=pointer]:
+                  - generic [ref=e357]: 
+          - row "Joyce Mae Prandas @joycemaeprandas11 joycemaeprandas11@gmail.com Guest Active May 11, 2026   " [ref=e358]:
+            - cell "Joyce Mae Prandas @joycemaeprandas11" [ref=e359]:
+              - strong [ref=e360]: Joyce Mae Prandas
+              - generic [ref=e361]: "@joycemaeprandas11"
+            - cell "joycemaeprandas11@gmail.com" [ref=e362]
+            - cell "Guest" [ref=e363]
+            - cell "Active" [ref=e364]
+            - cell "May 11, 2026" [ref=e365]
+            - cell "  " [ref=e366]:
+              - generic [ref=e367]:
+                - button "" [ref=e368] [cursor=pointer]:
+                  - generic [ref=e369]: 
+                - button "" [ref=e370] [cursor=pointer]:
+                  - generic [ref=e371]: 
+                - button "" [ref=e372] [cursor=pointer]:
+                  - generic [ref=e373]: 
+          - row "Liza Garcia @demo_admin admin@demo.com Administrator Active May 11, 2026   " [ref=e374]:
+            - cell "Liza Garcia @demo_admin" [ref=e375]:
+              - strong [ref=e376]: Liza Garcia
+              - generic [ref=e377]: "@demo_admin"
+            - cell "admin@demo.com" [ref=e378]
+            - cell "Administrator" [ref=e379]
+            - cell "Active" [ref=e380]
+            - cell "May 11, 2026" [ref=e381]
+            - cell "  " [ref=e382]:
+              - generic [ref=e383]:
+                - button "" [ref=e384] [cursor=pointer]:
+                  - generic [ref=e385]: 
+                - button "" [ref=e386] [cursor=pointer]:
+                  - generic [ref=e387]: 
+                - button "" [ref=e388] [cursor=pointer]:
+                  - generic [ref=e389]: 
+          - row "Carlo Mendoza @demo_manager manager@demo.com Manager Active May 11, 2026   " [ref=e390]:
+            - cell "Carlo Mendoza @demo_manager" [ref=e391]:
+              - strong [ref=e392]: Carlo Mendoza
+              - generic [ref=e393]: "@demo_manager"
+            - cell "manager@demo.com" [ref=e394]
+            - cell "Manager" [ref=e395]
+            - cell "Active" [ref=e396]
+            - cell "May 11, 2026" [ref=e397]
+            - cell "  " [ref=e398]:
+              - generic [ref=e399]:
+                - button "" [ref=e400] [cursor=pointer]:
+                  - generic [ref=e401]: 
+                - button "" [ref=e402] [cursor=pointer]:
+                  - generic [ref=e403]: 
+                - button "" [ref=e404] [cursor=pointer]:
+                  - generic [ref=e405]: 
+          - row "Ana Lim @demo_staff staff@demo.com Staff Active May 11, 2026   " [ref=e406]:
+            - cell "Ana Lim @demo_staff" [ref=e407]:
+              - strong [ref=e408]: Ana Lim
+              - generic [ref=e409]: "@demo_staff"
+            - cell "staff@demo.com" [ref=e410]
+            - cell "Staff" [ref=e411]
+            - cell "Active" [ref=e412]
+            - cell "May 11, 2026" [ref=e413]
+            - cell "  " [ref=e414]:
+              - generic [ref=e415]:
+                - button "" [ref=e416] [cursor=pointer]:
+                  - generic [ref=e417]: 
+                - button "" [ref=e418] [cursor=pointer]:
+                  - generic [ref=e419]: 
+                - button "" [ref=e420] [cursor=pointer]:
+                  - generic [ref=e421]: 
+          - row "Pedro Reyes @pedro pedro@demo.com Guest Active May 11, 2026   " [ref=e422]:
+            - cell "Pedro Reyes @pedro" [ref=e423]:
+              - strong [ref=e424]: Pedro Reyes
+              - generic [ref=e425]: "@pedro"
+            - cell "pedro@demo.com" [ref=e426]
+            - cell "Guest" [ref=e427]
+            - cell "Active" [ref=e428]
+            - cell "May 11, 2026" [ref=e429]
+            - cell "  " [ref=e430]:
+              - generic [ref=e431]:
+                - button "" [ref=e432] [cursor=pointer]:
+                  - generic [ref=e433]: 
+                - button "" [ref=e434] [cursor=pointer]:
+                  - generic [ref=e435]: 
+                - button "" [ref=e436] [cursor=pointer]:
+                  - generic [ref=e437]: 
+          - row "Maria Santos @maria maria@demo.com Guest Active May 11, 2026   " [ref=e438]:
+            - cell "Maria Santos @maria" [ref=e439]:
+              - strong [ref=e440]: Maria Santos
+              - generic [ref=e441]: "@maria"
+            - cell "maria@demo.com" [ref=e442]
+            - cell "Guest" [ref=e443]
+            - cell "Active" [ref=e444]
+            - cell "May 11, 2026" [ref=e445]
+            - cell "  " [ref=e446]:
+              - generic [ref=e447]:
+                - button "" [ref=e448] [cursor=pointer]:
+                  - generic [ref=e449]: 
+                - button "" [ref=e450] [cursor=pointer]:
+                  - generic [ref=e451]: 
+                - button "" [ref=e452] [cursor=pointer]:
+                  - generic [ref=e453]: 
+          - row "Juan dela Cruz @juan juan@demo.com Guest Active May 11, 2026   " [ref=e454]:
+            - cell "Juan dela Cruz @juan" [ref=e455]:
+              - strong [ref=e456]: Juan dela Cruz
+              - generic [ref=e457]: "@juan"
+            - cell "juan@demo.com" [ref=e458]
+            - cell "Guest" [ref=e459]
+            - cell "Active" [ref=e460]
+            - cell "May 11, 2026" [ref=e461]
+            - cell "  " [ref=e462]:
+              - generic [ref=e463]:
+                - button "" [ref=e464] [cursor=pointer]:
+                  - generic [ref=e465]: 
+                - button "" [ref=e466] [cursor=pointer]:
+                  - generic [ref=e467]: 
+                - button "" [ref=e468] [cursor=pointer]:
+                  - generic [ref=e469]: 
+          - row "Jericho Blando @echoecho0126 echoecho0126@gmail.com Guest Active May 11, 2026   " [ref=e470]:
+            - cell "Jericho Blando @echoecho0126" [ref=e471]:
+              - strong [ref=e472]: Jericho Blando
+              - generic [ref=e473]: "@echoecho0126"
+            - cell "echoecho0126@gmail.com" [ref=e474]
+            - cell "Guest" [ref=e475]
+            - cell "Active" [ref=e476]
+            - cell "May 11, 2026" [ref=e477]
+            - cell "  " [ref=e478]:
+              - generic [ref=e479]:
+                - button "" [ref=e480] [cursor=pointer]:
+                  - generic [ref=e481]: 
+                - button "" [ref=e482] [cursor=pointer]:
+                  - generic [ref=e483]: 
+                - button "" [ref=e484] [cursor=pointer]:
+                  - generic [ref=e485]: 
+          - row "test @test test@example.com Guest Active May 11, 2026   " [ref=e486]:
+            - cell "test @test" [ref=e487]:
+              - strong [ref=e488]: test
+              - generic [ref=e489]: "@test"
+            - cell "test@example.com" [ref=e490]
+            - cell "Guest" [ref=e491]
+            - cell "Active" [ref=e492]
+            - cell "May 11, 2026" [ref=e493]
+            - cell "  " [ref=e494]:
+              - generic [ref=e495]:
+                - button "" [ref=e496] [cursor=pointer]:
+                  - generic [ref=e497]: 
+                - button "" [ref=e498] [cursor=pointer]:
+                  - generic [ref=e499]: 
+                - button "" [ref=e500] [cursor=pointer]:
+                  - generic [ref=e501]: 
+          - row "Jericho Blando @forlaifecho forlaifecho@gmail.com Guest Active May 11, 2026   " [ref=e502]:
+            - cell "Jericho Blando @forlaifecho" [ref=e503]:
+              - strong [ref=e504]: Jericho Blando
+              - generic [ref=e505]: "@forlaifecho"
+            - cell "forlaifecho@gmail.com" [ref=e506]
+            - cell "Guest" [ref=e507]
+            - cell "Active" [ref=e508]
+            - cell "May 11, 2026" [ref=e509]
+            - cell "  " [ref=e510]:
+              - generic [ref=e511]:
+                - button "" [ref=e512] [cursor=pointer]:
+                  - generic [ref=e513]: 
+                - button "" [ref=e514] [cursor=pointer]:
+                  - generic [ref=e515]: 
+                - button "" [ref=e516] [cursor=pointer]:
+                  - generic [ref=e517]: 
+          - row "staff staff @staffecho staff1@gmail.com Staff Active May 01, 2026   " [ref=e518]:
+            - cell "staff staff @staffecho" [ref=e519]:
+              - strong [ref=e520]: staff staff
+              - generic [ref=e521]: "@staffecho"
+            - cell "staff1@gmail.com" [ref=e522]
+            - cell "Staff" [ref=e523]
+            - cell "Active" [ref=e524]
+            - cell "May 01, 2026" [ref=e525]
+            - cell "  " [ref=e526]:
+              - generic [ref=e527]:
+                - button "" [ref=e528] [cursor=pointer]:
+                  - generic [ref=e529]: 
+                - button "" [ref=e530] [cursor=pointer]:
+                  - generic [ref=e531]: 
+                - button "" [ref=e532] [cursor=pointer]:
+                  - generic [ref=e533]: 
+          - row "Jaira Mae Sevilla @jigoraku71 jigoraku71@gmail.com Guest Active May 01, 2026   " [ref=e534]:
+            - cell "Jaira Mae Sevilla @jigoraku71" [ref=e535]:
+              - strong [ref=e536]: Jaira Mae Sevilla
+              - generic [ref=e537]: "@jigoraku71"
+            - cell "jigoraku71@gmail.com" [ref=e538]
+            - cell "Guest" [ref=e539]
+            - cell "Active" [ref=e540]
+            - cell "May 01, 2026" [ref=e541]
+            - cell "  " [ref=e542]:
+              - generic [ref=e543]:
+                - button "" [ref=e544] [cursor=pointer]:
+                  - generic [ref=e545]: 
+                - button "" [ref=e546] [cursor=pointer]:
+                  - generic [ref=e547]: 
+                - button "" [ref=e548] [cursor=pointer]:
+                  - generic [ref=e549]: 
+          - row "Admin Tester @codex2_admin_2078 codex2_admin_2078@example.com Administrator Active May 01, 2026   " [ref=e550]:
+            - cell "Admin Tester @codex2_admin_2078" [ref=e551]:
+              - strong [ref=e552]: Admin Tester
+              - generic [ref=e553]: "@codex2_admin_2078"
+            - cell "codex2_admin_2078@example.com" [ref=e554]
+            - cell "Administrator" [ref=e555]
+            - cell "Active" [ref=e556]
+            - cell "May 01, 2026" [ref=e557]
+            - cell "  " [ref=e558]:
+              - generic [ref=e559]:
+                - button "" [ref=e560] [cursor=pointer]:
+                  - generic [ref=e561]: 
+                - button "" [ref=e562] [cursor=pointer]:
+                  - generic [ref=e563]: 
+                - button "" [ref=e564] [cursor=pointer]:
+                  - generic [ref=e565]: 
+          - row "Manager Tester @codex2_manager_2078 codex2_manager_2078@example.com Manager Active May 01, 2026   " [ref=e566]:
+            - cell "Manager Tester @codex2_manager_2078" [ref=e567]:
+              - strong [ref=e568]: Manager Tester
+              - generic [ref=e569]: "@codex2_manager_2078"
+            - cell "codex2_manager_2078@example.com" [ref=e570]
+            - cell "Manager" [ref=e571]
+            - cell "Active" [ref=e572]
+            - cell "May 01, 2026" [ref=e573]
+            - cell "  " [ref=e574]:
+              - generic [ref=e575]:
+                - button "" [ref=e576] [cursor=pointer]:
+                  - generic [ref=e577]: 
+                - button "" [ref=e578] [cursor=pointer]:
+                  - generic [ref=e579]: 
+                - button "" [ref=e580] [cursor=pointer]:
+                  - generic [ref=e581]: 
+          - row "Staff Tester @codex2_staff_2078 codex2_staff_2078@example.com Staff Active May 01, 2026   " [ref=e582]:
+            - cell "Staff Tester @codex2_staff_2078" [ref=e583]:
+              - strong [ref=e584]: Staff Tester
+              - generic [ref=e585]: "@codex2_staff_2078"
+            - cell "codex2_staff_2078@example.com" [ref=e586]
+            - cell "Staff" [ref=e587]
+            - cell "Active" [ref=e588]
+            - cell "May 01, 2026" [ref=e589]
+            - cell "  " [ref=e590]:
+              - generic [ref=e591]:
+                - button "" [ref=e592] [cursor=pointer]:
+                  - generic [ref=e593]: 
+                - button "" [ref=e594] [cursor=pointer]:
+                  - generic [ref=e595]: 
+                - button "" [ref=e596] [cursor=pointer]:
+                  - generic [ref=e597]: 
+          - row "Guest Tester @codex2_guest_2078 codex2_guest_2078@example.com Guest Inactive May 01, 2026   " [ref=e598]:
+            - cell "Guest Tester @codex2_guest_2078" [ref=e599]:
+              - strong [ref=e600]: Guest Tester
+              - generic [ref=e601]: "@codex2_guest_2078"
+            - cell "codex2_guest_2078@example.com" [ref=e602]
+            - cell "Guest" [ref=e603]
+            - cell "Inactive" [ref=e604]
+            - cell "May 01, 2026" [ref=e605]
+            - cell "  " [ref=e606]:
+              - generic [ref=e607]:
+                - button "" [ref=e608] [cursor=pointer]:
+                  - generic [ref=e609]: 
+                - button "" [ref=e610] [cursor=pointer]:
+                  - generic [ref=e611]: 
+                - button "" [ref=e612] [cursor=pointer]:
+                  - generic [ref=e613]: 
+          - row "Admin Tester @codex_admin_1071 codex_admin_1071@example.com Administrator Active May 01, 2026   " [ref=e614]:
+            - cell "Admin Tester @codex_admin_1071" [ref=e615]:
+              - strong [ref=e616]: Admin Tester
+              - generic [ref=e617]: "@codex_admin_1071"
+            - cell "codex_admin_1071@example.com" [ref=e618]
+            - cell "Administrator" [ref=e619]
+            - cell "Active" [ref=e620]
+            - cell "May 01, 2026" [ref=e621]
+            - cell "  " [ref=e622]:
+              - generic [ref=e623]:
+                - button "" [ref=e624] [cursor=pointer]:
+                  - generic [ref=e625]: 
+                - button "" [ref=e626] [cursor=pointer]:
+                  - generic [ref=e627]: 
+                - button "" [ref=e628] [cursor=pointer]:
+                  - generic [ref=e629]: 
+          - row "Manager Tester @codex_manager_1071 codex_manager_1071@example.com Manager Active May 01, 2026   " [ref=e630]:
+            - cell "Manager Tester @codex_manager_1071" [ref=e631]:
+              - strong [ref=e632]: Manager Tester
+              - generic [ref=e633]: "@codex_manager_1071"
+            - cell "codex_manager_1071@example.com" [ref=e634]
+            - cell "Manager" [ref=e635]
+            - cell "Active" [ref=e636]
+            - cell "May 01, 2026" [ref=e637]
+            - cell "  " [ref=e638]:
+              - generic [ref=e639]:
+                - button "" [ref=e640] [cursor=pointer]:
+                  - generic [ref=e641]: 
+                - button "" [ref=e642] [cursor=pointer]:
+                  - generic [ref=e643]: 
+                - button "" [ref=e644] [cursor=pointer]:
+                  - generic [ref=e645]: 
+          - row "Staff Tester @codex_staff_1071 codex_staff_1071@example.com Staff Active May 01, 2026   " [ref=e646]:
+            - cell "Staff Tester @codex_staff_1071" [ref=e647]:
+              - strong [ref=e648]: Staff Tester
+              - generic [ref=e649]: "@codex_staff_1071"
+            - cell "codex_staff_1071@example.com" [ref=e650]
+            - cell "Staff" [ref=e651]
+            - cell "Active" [ref=e652]
+            - cell "May 01, 2026" [ref=e653]
+            - cell "  " [ref=e654]:
+              - generic [ref=e655]:
+                - button "" [ref=e656] [cursor=pointer]:
+                  - generic [ref=e657]: 
+                - button "" [ref=e658] [cursor=pointer]:
+                  - generic [ref=e659]: 
+                - button "" [ref=e660] [cursor=pointer]:
+                  - generic [ref=e661]: 
+          - row "Guest Tester @codex_guest_1071 codex_guest_1071@example.com Guest Active May 01, 2026   " [ref=e662]:
+            - cell "Guest Tester @codex_guest_1071" [ref=e663]:
+              - strong [ref=e664]: Guest Tester
+              - generic [ref=e665]: "@codex_guest_1071"
+            - cell "codex_guest_1071@example.com" [ref=e666]
+            - cell "Guest" [ref=e667]
+            - cell "Active" [ref=e668]
+            - cell "May 01, 2026" [ref=e669]
+            - cell "  " [ref=e670]:
+              - generic [ref=e671]:
+                - button "" [ref=e672] [cursor=pointer]:
+                  - generic [ref=e673]: 
+                - button "" [ref=e674] [cursor=pointer]:
+                  - generic [ref=e675]: 
+                - button "" [ref=e676] [cursor=pointer]:
+                  - generic [ref=e677]: 
+          - row "manager_button_guest @manager_button_guest manager_button_guest@example.com Guest Active May 01, 2026   " [ref=e678]:
+            - cell "manager_button_guest @manager_button_guest" [ref=e679]:
+              - strong [ref=e680]: manager_button_guest
+              - generic [ref=e681]: "@manager_button_guest"
+            - cell "manager_button_guest@example.com" [ref=e682]
+            - cell "Guest" [ref=e683]
+            - cell "Active" [ref=e684]
+            - cell "May 01, 2026" [ref=e685]
+            - cell "  " [ref=e686]:
+              - generic [ref=e687]:
+                - button "" [ref=e688] [cursor=pointer]:
+                  - generic [ref=e689]: 
+                - button "" [ref=e690] [cursor=pointer]:
+                  - generic [ref=e691]: 
+                - button "" [ref=e692] [cursor=pointer]:
+                  - generic [ref=e693]: 
+          - row "admin_button_guest @admin_button_guest admin_button_guest@example.com Guest Active May 01, 2026   " [ref=e694]:
+            - cell "admin_button_guest @admin_button_guest" [ref=e695]:
+              - strong [ref=e696]: admin_button_guest
+              - generic [ref=e697]: "@admin_button_guest"
+            - cell "admin_button_guest@example.com" [ref=e698]
+            - cell "Guest" [ref=e699]
+            - cell "Active" [ref=e700]
+            - cell "May 01, 2026" [ref=e701]
+            - cell "  " [ref=e702]:
+              - generic [ref=e703]:
+                - button "" [ref=e704] [cursor=pointer]:
+                  - generic [ref=e705]: 
+                - button "" [ref=e706] [cursor=pointer]:
+                  - generic [ref=e707]: 
+                - button "" [ref=e708] [cursor=pointer]:
+                  - generic [ref=e709]: 
+          - row "manager_button_ok @manager_button_ok manager_button_ok@example.com Manager Active May 01, 2026   " [ref=e710]:
+            - cell "manager_button_ok @manager_button_ok" [ref=e711]:
+              - strong [ref=e712]: manager_button_ok
+              - generic [ref=e713]: "@manager_button_ok"
+            - cell "manager_button_ok@example.com" [ref=e714]
+            - cell "Manager" [ref=e715]
+            - cell "Active" [ref=e716]
+            - cell "May 01, 2026" [ref=e717]
+            - cell "  " [ref=e718]:
+              - generic [ref=e719]:
+                - button "" [ref=e720] [cursor=pointer]:
+                  - generic [ref=e721]: 
+                - button "" [ref=e722] [cursor=pointer]:
+                  - generic [ref=e723]: 
+                - button "" [ref=e724] [cursor=pointer]:
+                  - generic [ref=e725]: 
+          - row "admin_button_ok @admin_button_ok admin_button_ok@example.com Administrator Active May 01, 2026   " [ref=e726]:
+            - cell "admin_button_ok @admin_button_ok" [ref=e727]:
+              - strong [ref=e728]: admin_button_ok
+              - generic [ref=e729]: "@admin_button_ok"
+            - cell "admin_button_ok@example.com" [ref=e730]
+            - cell "Administrator" [ref=e731]
+            - cell "Active" [ref=e732]
+            - cell "May 01, 2026" [ref=e733]
+            - cell "  " [ref=e734]:
+              - generic [ref=e735]:
+                - button "" [ref=e736] [cursor=pointer]:
+                  - generic [ref=e737]: 
+                - button "" [ref=e738] [cursor=pointer]:
+                  - generic [ref=e739]: 
+                - button "" [ref=e740] [cursor=pointer]:
+                  - generic [ref=e741]: 
+          - row "guest_for_manager_inquiry @guest_for_manager_inquiry guest_for_manager_inquiry@example.com Guest Active May 01, 2026   " [ref=e742]:
+            - cell "guest_for_manager_inquiry @guest_for_manager_inquiry" [ref=e743]:
+              - strong [ref=e744]: guest_for_manager_inquiry
+              - generic [ref=e745]: "@guest_for_manager_inquiry"
+            - cell "guest_for_manager_inquiry@example.com" [ref=e746]
+            - cell "Guest" [ref=e747]
+            - cell "Active" [ref=e748]
+            - cell "May 01, 2026" [ref=e749]
+            - cell "  " [ref=e750]:
+              - generic [ref=e751]:
+                - button "" [ref=e752] [cursor=pointer]:
+                  - generic [ref=e753]: 
+                - button "" [ref=e754] [cursor=pointer]:
+                  - generic [ref=e755]: 
+                - button "" [ref=e756] [cursor=pointer]:
+                  - generic [ref=e757]: 
+          - row "guest_for_admin_inquiry @guest_for_admin_inquiry guest_for_admin_inquiry@example.com Guest Active May 01, 2026   " [ref=e758]:
+            - cell "guest_for_admin_inquiry @guest_for_admin_inquiry" [ref=e759]:
+              - strong [ref=e760]: guest_for_admin_inquiry
+              - generic [ref=e761]: "@guest_for_admin_inquiry"
+            - cell "guest_for_admin_inquiry@example.com" [ref=e762]
+            - cell "Guest" [ref=e763]
+            - cell "Active" [ref=e764]
+            - cell "May 01, 2026" [ref=e765]
+            - cell "  " [ref=e766]:
+              - generic [ref=e767]:
+                - button "" [ref=e768] [cursor=pointer]:
+                  - generic [ref=e769]: 
+                - button "" [ref=e770] [cursor=pointer]:
+                  - generic [ref=e771]: 
+                - button "" [ref=e772] [cursor=pointer]:
+                  - generic [ref=e773]: 
+          - row "manager_inquiry_ok @manager_inquiry_ok manager_inquiry_ok@example.com Manager Active May 01, 2026   " [ref=e774]:
+            - cell "manager_inquiry_ok @manager_inquiry_ok" [ref=e775]:
+              - strong [ref=e776]: manager_inquiry_ok
+              - generic [ref=e777]: "@manager_inquiry_ok"
+            - cell "manager_inquiry_ok@example.com" [ref=e778]
+            - cell "Manager" [ref=e779]
+            - cell "Active" [ref=e780]
+            - cell "May 01, 2026" [ref=e781]
+            - cell "  " [ref=e782]:
+              - generic [ref=e783]:
+                - button "" [ref=e784] [cursor=pointer]:
+                  - generic [ref=e785]: 
+                - button "" [ref=e786] [cursor=pointer]:
+                  - generic [ref=e787]: 
+                - button "" [ref=e788] [cursor=pointer]:
+                  - generic [ref=e789]: 
+          - row "admin_inquiry_ok @admin_inquiry_ok admin_inquiry_ok@example.com Administrator Active May 01, 2026   " [ref=e790]:
+            - cell "admin_inquiry_ok @admin_inquiry_ok" [ref=e791]:
+              - strong [ref=e792]: admin_inquiry_ok
+              - generic [ref=e793]: "@admin_inquiry_ok"
+            - cell "admin_inquiry_ok@example.com" [ref=e794]
+            - cell "Administrator" [ref=e795]
+            - cell "Active" [ref=e796]
+            - cell "May 01, 2026" [ref=e797]
+            - cell "  " [ref=e798]:
+              - generic [ref=e799]:
+                - button "" [ref=e800] [cursor=pointer]:
+                  - generic [ref=e801]: 
+                - button "" [ref=e802] [cursor=pointer]:
+                  - generic [ref=e803]: 
+                - button "" [ref=e804] [cursor=pointer]:
+                  - generic [ref=e805]: 
+          - row "final_guest_ok @final_guest_ok final_guest_ok@example.com Guest Active May 01, 2026   " [ref=e806]:
+            - cell "final_guest_ok @final_guest_ok" [ref=e807]:
+              - strong [ref=e808]: final_guest_ok
+              - generic [ref=e809]: "@final_guest_ok"
+            - cell "final_guest_ok@example.com" [ref=e810]
+            - cell "Guest" [ref=e811]
+            - cell "Active" [ref=e812]
+            - cell "May 01, 2026" [ref=e813]
+            - cell "  " [ref=e814]:
+              - generic [ref=e815]:
+                - button "" [ref=e816] [cursor=pointer]:
+                  - generic [ref=e817]: 
+                - button "" [ref=e818] [cursor=pointer]:
+                  - generic [ref=e819]: 
+                - button "" [ref=e820] [cursor=pointer]:
+                  - generic [ref=e821]: 
+          - row "final_staff_ok @final_staff_ok final_staff_ok@example.com Staff Active May 01, 2026   " [ref=e822]:
+            - cell "final_staff_ok @final_staff_ok" [ref=e823]:
+              - strong [ref=e824]: final_staff_ok
+              - generic [ref=e825]: "@final_staff_ok"
+            - cell "final_staff_ok@example.com" [ref=e826]
+            - cell "Staff" [ref=e827]
+            - cell "Active" [ref=e828]
+            - cell "May 01, 2026" [ref=e829]
+            - cell "  " [ref=e830]:
+              - generic [ref=e831]:
+                - button "" [ref=e832] [cursor=pointer]:
+                  - generic [ref=e833]: 
+                - button "" [ref=e834] [cursor=pointer]:
+                  - generic [ref=e835]: 
+                - button "" [ref=e836] [cursor=pointer]:
+                  - generic [ref=e837]: 
+          - row "reply_guest_ok @reply_guest_ok reply_guest_ok@example.com Guest Active May 01, 2026   " [ref=e838]:
+            - cell "reply_guest_ok @reply_guest_ok" [ref=e839]:
+              - strong [ref=e840]: reply_guest_ok
+              - generic [ref=e841]: "@reply_guest_ok"
+            - cell "reply_guest_ok@example.com" [ref=e842]
+            - cell "Guest" [ref=e843]
+            - cell "Active" [ref=e844]
+            - cell "May 01, 2026" [ref=e845]
+            - cell "  " [ref=e846]:
+              - generic [ref=e847]:
+                - button "" [ref=e848] [cursor=pointer]:
+                  - generic [ref=e849]: 
+                - button "" [ref=e850] [cursor=pointer]:
+                  - generic [ref=e851]: 
+                - button "" [ref=e852] [cursor=pointer]:
+                  - generic [ref=e853]: 
+          - row "reply_staff_ok @reply_staff_ok reply_staff_ok@example.com Staff Inactive May 01, 2026   " [ref=e854]:
+            - cell "reply_staff_ok @reply_staff_ok" [ref=e855]:
+              - strong [ref=e856]: reply_staff_ok
+              - generic [ref=e857]: "@reply_staff_ok"
+            - cell "reply_staff_ok@example.com" [ref=e858]
+            - cell "Staff" [ref=e859]
+            - cell "Inactive" [ref=e860]
+            - cell "May 01, 2026" [ref=e861]
+            - cell "  " [ref=e862]:
+              - generic [ref=e863]:
+                - button "" [ref=e864] [cursor=pointer]:
+                  - generic [ref=e865]: 
+                - button "" [ref=e866] [cursor=pointer]:
+                  - generic [ref=e867]: 
+                - button "" [ref=e868] [cursor=pointer]:
+                  - generic [ref=e869]: 
+          - row "functional_guest @functional_guest functional_guest@example.com Guest Active May 01, 2026   " [ref=e870]:
+            - cell "functional_guest @functional_guest" [ref=e871]:
+              - strong [ref=e872]: functional_guest
+              - generic [ref=e873]: "@functional_guest"
+            - cell "functional_guest@example.com" [ref=e874]
+            - cell "Guest" [ref=e875]
+            - cell "Active" [ref=e876]
+            - cell "May 01, 2026" [ref=e877]
+            - cell "  " [ref=e878]:
+              - generic [ref=e879]:
+                - button "" [ref=e880] [cursor=pointer]:
+                  - generic [ref=e881]: 
+                - button "" [ref=e882] [cursor=pointer]:
+                  - generic [ref=e883]: 
+                - button "" [ref=e884] [cursor=pointer]:
+                  - generic [ref=e885]: 
+          - row "functional_staff @functional_staff functional_staff@example.com Staff Active May 01, 2026   " [ref=e886]:
+            - cell "functional_staff @functional_staff" [ref=e887]:
+              - strong [ref=e888]: functional_staff
+              - generic [ref=e889]: "@functional_staff"
+            - cell "functional_staff@example.com" [ref=e890]
+            - cell "Staff" [ref=e891]
+            - cell "Active" [ref=e892]
+            - cell "May 01, 2026" [ref=e893]
+            - cell "  " [ref=e894]:
+              - generic [ref=e895]:
+                - button "" [ref=e896] [cursor=pointer]:
+                  - generic [ref=e897]: 
+                - button "" [ref=e898] [cursor=pointer]:
+                  - generic [ref=e899]: 
+                - button "" [ref=e900] [cursor=pointer]:
+                  - generic [ref=e901]: 
+          - row "layoutstaff3 @layoutstaff3 layoutstaff3@example.com Staff Active May 01, 2026   " [ref=e902]:
+            - cell "layoutstaff3 @layoutstaff3" [ref=e903]:
+              - strong [ref=e904]: layoutstaff3
+              - generic [ref=e905]: "@layoutstaff3"
+            - cell "layoutstaff3@example.com" [ref=e906]
+            - cell "Staff" [ref=e907]
+            - cell "Active" [ref=e908]
+            - cell "May 01, 2026" [ref=e909]
+            - cell "  " [ref=e910]:
+              - generic [ref=e911]:
+                - button "" [ref=e912] [cursor=pointer]:
+                  - generic [ref=e913]: 
+                - button "" [ref=e914] [cursor=pointer]:
+                  - generic [ref=e915]: 
+                - button "" [ref=e916] [cursor=pointer]:
+                  - generic [ref=e917]: 
+          - row "layout_staff @layout_staff layout_staff@example.com Staff Active May 01, 2026   " [ref=e918]:
+            - cell "layout_staff @layout_staff" [ref=e919]:
+              - strong [ref=e920]: layout_staff
+              - generic [ref=e921]: "@layout_staff"
+            - cell "layout_staff@example.com" [ref=e922]
+            - cell "Staff" [ref=e923]
+            - cell "Active" [ref=e924]
+            - cell "May 01, 2026" [ref=e925]
+            - cell "  " [ref=e926]:
+              - generic [ref=e927]:
+                - button "" [ref=e928] [cursor=pointer]:
+                  - generic [ref=e929]: 
+                - button "" [ref=e930] [cursor=pointer]:
+                  - generic [ref=e931]: 
+                - button "" [ref=e932] [cursor=pointer]:
+                  - generic [ref=e933]: 
+          - row "smoke_staff3 @smoke_staff3 smoke_staff3@example.com Staff Active Apr 30, 2026   " [ref=e934]:
+            - cell "smoke_staff3 @smoke_staff3" [ref=e935]:
+              - strong [ref=e936]: smoke_staff3
+              - generic [ref=e937]: "@smoke_staff3"
+            - cell "smoke_staff3@example.com" [ref=e938]
+            - cell "Staff" [ref=e939]
+            - cell "Active" [ref=e940]
+            - cell "Apr 30, 2026" [ref=e941]
+            - cell "  " [ref=e942]:
+              - generic [ref=e943]:
+                - button "" [ref=e944] [cursor=pointer]:
+                  - generic [ref=e945]: 
+                - button "" [ref=e946] [cursor=pointer]:
+                  - generic [ref=e947]: 
+                - button "" [ref=e948] [cursor=pointer]:
+                  - generic [ref=e949]: 
+          - row "smoke_guest3 @smoke_guest3 smoke_guest3@example.com Guest Active Apr 30, 2026   " [ref=e950]:
+            - cell "smoke_guest3 @smoke_guest3" [ref=e951]:
+              - strong [ref=e952]: smoke_guest3
+              - generic [ref=e953]: "@smoke_guest3"
+            - cell "smoke_guest3@example.com" [ref=e954]
+            - cell "Guest" [ref=e955]
+            - cell "Active" [ref=e956]
+            - cell "Apr 30, 2026" [ref=e957]
+            - cell "  " [ref=e958]:
+              - generic [ref=e959]:
+                - button "" [ref=e960] [cursor=pointer]:
+                  - generic [ref=e961]: 
+                - button "" [ref=e962] [cursor=pointer]:
+                  - generic [ref=e963]: 
+                - button "" [ref=e964] [cursor=pointer]:
+                  - generic [ref=e965]: 
+          - row "smoke_guest_ajax @smoke_guest_ajax smoke_guest_ajax@example.com Guest Active Apr 30, 2026   " [ref=e966]:
+            - cell "smoke_guest_ajax @smoke_guest_ajax" [ref=e967]:
+              - strong [ref=e968]: smoke_guest_ajax
+              - generic [ref=e969]: "@smoke_guest_ajax"
+            - cell "smoke_guest_ajax@example.com" [ref=e970]
+            - cell "Guest" [ref=e971]
+            - cell "Active" [ref=e972]
+            - cell "Apr 30, 2026" [ref=e973]
+            - cell "  " [ref=e974]:
+              - generic [ref=e975]:
+                - button "" [ref=e976] [cursor=pointer]:
+                  - generic [ref=e977]: 
+                - button "" [ref=e978] [cursor=pointer]:
+                  - generic [ref=e979]: 
+                - button "" [ref=e980] [cursor=pointer]:
+                  - generic [ref=e981]: 
+          - row "smoke_staff_ajax @smoke_staff_ajax smoke_staff_ajax@example.com Staff Active Apr 30, 2026   " [ref=e982]:
+            - cell "smoke_staff_ajax @smoke_staff_ajax" [ref=e983]:
+              - strong [ref=e984]: smoke_staff_ajax
+              - generic [ref=e985]: "@smoke_staff_ajax"
+            - cell "smoke_staff_ajax@example.com" [ref=e986]
+            - cell "Staff" [ref=e987]
+            - cell "Active" [ref=e988]
+            - cell "Apr 30, 2026" [ref=e989]
+            - cell "  " [ref=e990]:
+              - generic [ref=e991]:
+                - button "" [ref=e992] [cursor=pointer]:
+                  - generic [ref=e993]: 
+                - button "" [ref=e994] [cursor=pointer]:
+                  - generic [ref=e995]: 
+                - button "" [ref=e996] [cursor=pointer]:
+                  - generic [ref=e997]: 
+          - row "smoke_admin @smoke_admin smoke_admin@example.com Administrator Active Apr 30, 2026   " [ref=e998]:
+            - cell "smoke_admin @smoke_admin" [ref=e999]:
+              - strong [ref=e1000]: smoke_admin
+              - generic [ref=e1001]: "@smoke_admin"
+            - cell "smoke_admin@example.com" [ref=e1002]
+            - cell "Administrator" [ref=e1003]
+            - cell "Active" [ref=e1004]
+            - cell "Apr 30, 2026" [ref=e1005]
+            - cell "  " [ref=e1006]:
+              - generic [ref=e1007]:
+                - button "" [ref=e1008] [cursor=pointer]:
+                  - generic [ref=e1009]: 
+                - button "" [ref=e1010] [cursor=pointer]:
+                  - generic [ref=e1011]: 
+                - button "" [ref=e1012] [cursor=pointer]:
+                  - generic [ref=e1013]: 
+          - row "smoke_manager @smoke_manager smoke_manager@example.com Manager Active Apr 30, 2026   " [ref=e1014]:
+            - cell "smoke_manager @smoke_manager" [ref=e1015]:
+              - strong [ref=e1016]: smoke_manager
+              - generic [ref=e1017]: "@smoke_manager"
+            - cell "smoke_manager@example.com" [ref=e1018]
+            - cell "Manager" [ref=e1019]
+            - cell "Active" [ref=e1020]
+            - cell "Apr 30, 2026" [ref=e1021]
+            - cell "  " [ref=e1022]:
+              - generic [ref=e1023]:
+                - button "" [ref=e1024] [cursor=pointer]:
+                  - generic [ref=e1025]: 
+                - button "" [ref=e1026] [cursor=pointer]:
+                  - generic [ref=e1027]: 
+                - button "" [ref=e1028] [cursor=pointer]:
+                  - generic [ref=e1029]: 
+          - row "smoke_staff @smoke_staff smoke_staff@example.com Staff Active Apr 30, 2026   " [ref=e1030]:
+            - cell "smoke_staff @smoke_staff" [ref=e1031]:
+              - strong [ref=e1032]: smoke_staff
+              - generic [ref=e1033]: "@smoke_staff"
+            - cell "smoke_staff@example.com" [ref=e1034]
+            - cell "Staff" [ref=e1035]
+            - cell "Active" [ref=e1036]
+            - cell "Apr 30, 2026" [ref=e1037]
+            - cell "  " [ref=e1038]:
+              - generic [ref=e1039]:
+                - button "" [ref=e1040] [cursor=pointer]:
+                  - generic [ref=e1041]: 
+                - button "" [ref=e1042] [cursor=pointer]:
+                  - generic [ref=e1043]: 
+                - button "" [ref=e1044] [cursor=pointer]:
+                  - generic [ref=e1045]: 
+          - row "smoke_guest2 @smoke_guest2 smoke_guest2@example.com Guest Active Apr 30, 2026   " [ref=e1046]:
+            - cell "smoke_guest2 @smoke_guest2" [ref=e1047]:
+              - strong [ref=e1048]: smoke_guest2
+              - generic [ref=e1049]: "@smoke_guest2"
+            - cell "smoke_guest2@example.com" [ref=e1050]
+            - cell "Guest" [ref=e1051]
+            - cell "Active" [ref=e1052]
+            - cell "Apr 30, 2026" [ref=e1053]
+            - cell "  " [ref=e1054]:
+              - generic [ref=e1055]:
+                - button "" [ref=e1056] [cursor=pointer]:
+                  - generic [ref=e1057]: 
+                - button "" [ref=e1058] [cursor=pointer]:
+                  - generic [ref=e1059]: 
+                - button "" [ref=e1060] [cursor=pointer]:
+                  - generic [ref=e1061]: 
+          - row "echoforlaif @echoforlaif echoforlaif@gmail.com Guest Active Apr 28, 2026   " [ref=e1062]:
+            - cell "echoforlaif @echoforlaif" [ref=e1063]:
+              - strong [ref=e1064]: echoforlaif
+              - generic [ref=e1065]: "@echoforlaif"
+            - cell "echoforlaif@gmail.com" [ref=e1066]
+            - cell "Guest" [ref=e1067]
+            - cell "Active" [ref=e1068]
+            - cell "Apr 28, 2026" [ref=e1069]
+            - cell "  " [ref=e1070]:
+              - generic [ref=e1071]:
+                - button "" [ref=e1072] [cursor=pointer]:
+                  - generic [ref=e1073]: 
+                - button "" [ref=e1074] [cursor=pointer]:
+                  - generic [ref=e1075]: 
+                - button "" [ref=e1076] [cursor=pointer]:
+                  - generic [ref=e1077]: 
+          - row "qa_manager @qa_manager qa_manager@test.com Manager Active Apr 23, 2026   " [ref=e1078]:
+            - cell "qa_manager @qa_manager" [ref=e1079]:
+              - strong [ref=e1080]: qa_manager
+              - generic [ref=e1081]: "@qa_manager"
+            - cell "qa_manager@test.com" [ref=e1082]
+            - cell "Manager" [ref=e1083]
+            - cell "Active" [ref=e1084]
+            - cell "Apr 23, 2026" [ref=e1085]
+            - cell "  " [ref=e1086]:
+              - generic [ref=e1087]:
+                - button "" [ref=e1088] [cursor=pointer]:
+                  - generic [ref=e1089]: 
+                - button "" [ref=e1090] [cursor=pointer]:
+                  - generic [ref=e1091]: 
+                - button "" [ref=e1092] [cursor=pointer]:
+                  - generic [ref=e1093]: 
+          - row "qa_guest @qa_guest qa_guest@test.com Guest Active Apr 23, 2026   " [ref=e1094]:
+            - cell "qa_guest @qa_guest" [ref=e1095]:
+              - strong [ref=e1096]: qa_guest
+              - generic [ref=e1097]: "@qa_guest"
+            - cell "qa_guest@test.com" [ref=e1098]
+            - cell "Guest" [ref=e1099]
+            - cell "Active" [ref=e1100]
+            - cell "Apr 23, 2026" [ref=e1101]
+            - cell "  " [ref=e1102]:
+              - generic [ref=e1103]:
+                - button "" [ref=e1104] [cursor=pointer]:
+                  - generic [ref=e1105]: 
+                - button "" [ref=e1106] [cursor=pointer]:
+                  - generic [ref=e1107]: 
+                - button "" [ref=e1108] [cursor=pointer]:
+                  - generic [ref=e1109]: 
+          - row "Test Manager @test_manager test_manager@test.com Manager Active Apr 23, 2026   " [ref=e1110]:
+            - cell "Test Manager @test_manager" [ref=e1111]:
+              - strong [ref=e1112]: Test Manager
+              - generic [ref=e1113]: "@test_manager"
+            - cell "test_manager@test.com" [ref=e1114]
+            - cell "Manager" [ref=e1115]
+            - cell "Active" [ref=e1116]
+            - cell "Apr 23, 2026" [ref=e1117]
+            - cell "  " [ref=e1118]:
+              - generic [ref=e1119]:
+                - button "" [ref=e1120] [cursor=pointer]:
+                  - generic [ref=e1121]: 
+                - button "" [ref=e1122] [cursor=pointer]:
+                  - generic [ref=e1123]: 
+                - button "" [ref=e1124] [cursor=pointer]:
+                  - generic [ref=e1125]: 
+          - row "Test Staff @test_staff test_staff@test.com Staff Active Apr 23, 2026   " [ref=e1126]:
+            - cell "Test Staff @test_staff" [ref=e1127]:
+              - strong [ref=e1128]: Test Staff
+              - generic [ref=e1129]: "@test_staff"
+            - cell "test_staff@test.com" [ref=e1130]
+            - cell "Staff" [ref=e1131]
+            - cell "Active" [ref=e1132]
+            - cell "Apr 23, 2026" [ref=e1133]
+            - cell "  " [ref=e1134]:
+              - generic [ref=e1135]:
+                - button "" [ref=e1136] [cursor=pointer]:
+                  - generic [ref=e1137]: 
+                - button "" [ref=e1138] [cursor=pointer]:
+                  - generic [ref=e1139]: 
+                - button "" [ref=e1140] [cursor=pointer]:
+                  - generic [ref=e1141]: 
+          - row "Test Staff @teststaff staff@cebuhotel.com Staff Active Apr 20, 2026   " [ref=e1142]:
+            - cell "Test Staff @teststaff" [ref=e1143]:
+              - strong [ref=e1144]: Test Staff
+              - generic [ref=e1145]: "@teststaff"
+            - cell "staff@cebuhotel.com" [ref=e1146]
+            - cell "Staff" [ref=e1147]
+            - cell "Active" [ref=e1148]
+            - cell "Apr 20, 2026" [ref=e1149]
+            - cell "  " [ref=e1150]:
+              - generic [ref=e1151]:
+                - button "" [ref=e1152] [cursor=pointer]:
+                  - generic [ref=e1153]: 
+                - button "" [ref=e1154] [cursor=pointer]:
+                  - generic [ref=e1155]: 
+                - button "" [ref=e1156] [cursor=pointer]:
+                  - generic [ref=e1157]: 
+          - row "test_guest @test_guest guest@test.com Guest Active Apr 20, 2026   " [ref=e1158]:
+            - cell "test_guest @test_guest" [ref=e1159]:
+              - strong [ref=e1160]: test_guest
+              - generic [ref=e1161]: "@test_guest"
+            - cell "guest@test.com" [ref=e1162]
+            - cell "Guest" [ref=e1163]
+            - cell "Active" [ref=e1164]
+            - cell "Apr 20, 2026" [ref=e1165]
+            - cell "  " [ref=e1166]:
+              - generic [ref=e1167]:
+                - button "" [ref=e1168] [cursor=pointer]:
+                  - generic [ref=e1169]: 
+                - button "" [ref=e1170] [cursor=pointer]:
+                  - generic [ref=e1171]: 
+                - button "" [ref=e1172] [cursor=pointer]:
+                  - generic [ref=e1173]: 
+          - row "blando.jericho26 @blando.jericho26 blando.jericho26@gmail.com Guest Active Apr 20, 2026   " [ref=e1174]:
+            - cell "blando.jericho26 @blando.jericho26" [ref=e1175]:
+              - strong [ref=e1176]: blando.jericho26
+              - generic [ref=e1177]: "@blando.jericho26"
+            - cell "blando.jericho26@gmail.com" [ref=e1178]
+            - cell "Guest" [ref=e1179]
+            - cell "Active" [ref=e1180]
+            - cell "Apr 20, 2026" [ref=e1181]
+            - cell "  " [ref=e1182]:
+              - generic [ref=e1183]:
+                - button "" [ref=e1184] [cursor=pointer]:
+                  - generic [ref=e1185]: 
+                - button "" [ref=e1186] [cursor=pointer]:
+                  - generic [ref=e1187]: 
+                - button "" [ref=e1188] [cursor=pointer]:
+                  - generic [ref=e1189]: 
+          - row "Super Admin @admin_super admin@example.com Administrator Active Apr 15, 2026   " [ref=e1190]:
+            - cell "Super Admin @admin_super" [ref=e1191]:
+              - strong [ref=e1192]: Super Admin
+              - generic [ref=e1193]: "@admin_super"
+            - cell "admin@example.com" [ref=e1194]
+            - cell "Administrator" [ref=e1195]
+            - cell "Active" [ref=e1196]
+            - cell "Apr 15, 2026" [ref=e1197]
+            - cell "  " [ref=e1198]:
+              - generic [ref=e1199]:
+                - button "" [ref=e1200] [cursor=pointer]:
+                  - generic [ref=e1201]: 
+                - button "" [ref=e1202] [cursor=pointer]:
+                  - generic [ref=e1203]: 
+                - button "" [ref=e1204] [cursor=pointer]:
+                  - generic [ref=e1205]: 
+          - row "Alex Taylor @manager_alex alex.manager@example.com Manager Active Apr 15, 2026   " [ref=e1206]:
+            - cell "Alex Taylor @manager_alex" [ref=e1207]:
+              - strong [ref=e1208]: Alex Taylor
+              - generic [ref=e1209]: "@manager_alex"
+            - cell "alex.manager@example.com" [ref=e1210]
+            - cell "Manager" [ref=e1211]
+            - cell "Active" [ref=e1212]
+            - cell "Apr 15, 2026" [ref=e1213]
+            - cell "  " [ref=e1214]:
+              - generic [ref=e1215]:
+                - button "" [ref=e1216] [cursor=pointer]:
+                  - generic [ref=e1217]: 
+                - button "" [ref=e1218] [cursor=pointer]:
+                  - generic [ref=e1219]: 
+                - button "" [ref=e1220] [cursor=pointer]:
+                  - generic [ref=e1221]: 
+          - row "Lisa Wilson @staff_lisa lisa.staff@example.com Staff Active Apr 15, 2026   " [ref=e1222]:
+            - cell "Lisa Wilson @staff_lisa" [ref=e1223]:
+              - strong [ref=e1224]: Lisa Wilson
+              - generic [ref=e1225]: "@staff_lisa"
+            - cell "lisa.staff@example.com" [ref=e1226]
+            - cell "Staff" [ref=e1227]
+            - cell "Active" [ref=e1228]
+            - cell "Apr 15, 2026" [ref=e1229]
+            - cell "  " [ref=e1230]:
+              - generic [ref=e1231]:
+                - button "" [ref=e1232] [cursor=pointer]:
+                  - generic [ref=e1233]: 
+                - button "" [ref=e1234] [cursor=pointer]:
+                  - generic [ref=e1235]: 
+                - button "" [ref=e1236] [cursor=pointer]:
+                  - generic [ref=e1237]: 
+          - row "Robert Miller @staff_robert robert.staff@example.com Staff Active Apr 15, 2026   " [ref=e1238]:
+            - cell "Robert Miller @staff_robert" [ref=e1239]:
+              - strong [ref=e1240]: Robert Miller
+              - generic [ref=e1241]: "@staff_robert"
+            - cell "robert.staff@example.com" [ref=e1242]
+            - cell "Staff" [ref=e1243]
+            - cell "Active" [ref=e1244]
+            - cell "Apr 15, 2026" [ref=e1245]
+            - cell "  " [ref=e1246]:
+              - generic [ref=e1247]:
+                - button "" [ref=e1248] [cursor=pointer]:
+                  - generic [ref=e1249]: 
+                - button "" [ref=e1250] [cursor=pointer]:
+                  - generic [ref=e1251]: 
+                - button "" [ref=e1252] [cursor=pointer]:
+                  - generic [ref=e1253]: 
+          - row "Emily Davis @staff_emily emily.staff@example.com Staff Active Apr 15, 2026   " [ref=e1254]:
+            - cell "Emily Davis @staff_emily" [ref=e1255]:
+              - strong [ref=e1256]: Emily Davis
+              - generic [ref=e1257]: "@staff_emily"
+            - cell "emily.staff@example.com" [ref=e1258]
+            - cell "Staff" [ref=e1259]
+            - cell "Active" [ref=e1260]
+            - cell "Apr 15, 2026" [ref=e1261]
+            - cell "  " [ref=e1262]:
+              - generic [ref=e1263]:
+                - button "" [ref=e1264] [cursor=pointer]:
+                  - generic [ref=e1265]: 
+                - button "" [ref=e1266] [cursor=pointer]:
+                  - generic [ref=e1267]: 
+                - button "" [ref=e1268] [cursor=pointer]:
+                  - generic [ref=e1269]: 
+          - row "Mike Brown @guest_mike mike.guest@example.com Guest Active Apr 15, 2026   " [ref=e1270]:
+            - cell "Mike Brown @guest_mike" [ref=e1271]:
+              - strong [ref=e1272]: Mike Brown
+              - generic [ref=e1273]: "@guest_mike"
+            - cell "mike.guest@example.com" [ref=e1274]
+            - cell "Guest" [ref=e1275]
+            - cell "Active" [ref=e1276]
+            - cell "Apr 15, 2026" [ref=e1277]
+            - cell "  " [ref=e1278]:
+              - generic [ref=e1279]:
+                - button "" [ref=e1280] [cursor=pointer]:
+                  - generic [ref=e1281]: 
+                - button "" [ref=e1282] [cursor=pointer]:
+                  - generic [ref=e1283]: 
+                - button "" [ref=e1284] [cursor=pointer]:
+                  - generic [ref=e1285]: 
+          - row "Sarah Williams @guest_sarah sarah.guest@example.com Guest Active Apr 15, 2026   " [ref=e1286]:
+            - cell "Sarah Williams @guest_sarah" [ref=e1287]:
+              - strong [ref=e1288]: Sarah Williams
+              - generic [ref=e1289]: "@guest_sarah"
+            - cell "sarah.guest@example.com" [ref=e1290]
+            - cell "Guest" [ref=e1291]
+            - cell "Active" [ref=e1292]
+            - cell "Apr 15, 2026" [ref=e1293]
+            - cell "  " [ref=e1294]:
+              - generic [ref=e1295]:
+                - button "" [ref=e1296] [cursor=pointer]:
+                  - generic [ref=e1297]: 
+                - button "" [ref=e1298] [cursor=pointer]:
+                  - generic [ref=e1299]: 
+                - button "" [ref=e1300] [cursor=pointer]:
+                  - generic [ref=e1301]: 
+          - row "Mark Johnson @guest_mark mark.guest@example.com Guest Active Apr 15, 2026   " [ref=e1302]:
+            - cell "Mark Johnson @guest_mark" [ref=e1303]:
+              - strong [ref=e1304]: Mark Johnson
+              - generic [ref=e1305]: "@guest_mark"
+            - cell "mark.guest@example.com" [ref=e1306]
+            - cell "Guest" [ref=e1307]
+            - cell "Active" [ref=e1308]
+            - cell "Apr 15, 2026" [ref=e1309]
+            - cell "  " [ref=e1310]:
+              - generic [ref=e1311]:
+                - button "" [ref=e1312] [cursor=pointer]:
+                  - generic [ref=e1313]: 
+                - button "" [ref=e1314] [cursor=pointer]:
+                  - generic [ref=e1315]: 
+                - button "" [ref=e1316] [cursor=pointer]:
+                  - generic [ref=e1317]: 
+          - row "Jane Smith @guest_jane jane.guest@example.com Guest Active Apr 15, 2026   " [ref=e1318]:
+            - cell "Jane Smith @guest_jane" [ref=e1319]:
+              - strong [ref=e1320]: Jane Smith
+              - generic [ref=e1321]: "@guest_jane"
+            - cell "jane.guest@example.com" [ref=e1322]
+            - cell "Guest" [ref=e1323]
+            - cell "Active" [ref=e1324]
+            - cell "Apr 15, 2026" [ref=e1325]
+            - cell "  " [ref=e1326]:
+              - generic [ref=e1327]:
+                - button "" [ref=e1328] [cursor=pointer]:
+                  - generic [ref=e1329]: 
+                - button "" [ref=e1330] [cursor=pointer]:
+                  - generic [ref=e1331]: 
+                - button "" [ref=e1332] [cursor=pointer]:
+                  - generic [ref=e1333]: 
+          - row "John Doe @guest_john john.guest@example.com Guest Active Apr 15, 2026   " [ref=e1334]:
+            - cell "John Doe @guest_john" [ref=e1335]:
+              - strong [ref=e1336]: John Doe
+              - generic [ref=e1337]: "@guest_john"
+            - cell "john.guest@example.com" [ref=e1338]
+            - cell "Guest" [ref=e1339]
+            - cell "Active" [ref=e1340]
+            - cell "Apr 15, 2026" [ref=e1341]
+            - cell "  " [ref=e1342]:
+              - generic [ref=e1343]:
+                - button "" [ref=e1344] [cursor=pointer]:
+                  - generic [ref=e1345]: 
+                - button "" [ref=e1346] [cursor=pointer]:
+                  - generic [ref=e1347]: 
+                - button "" [ref=e1348] [cursor=pointer]:
+                  - generic [ref=e1349]: 
+          - row "Jericho Blando @echogoodkid echogoodkid@gmail.com Guest Active Apr 09, 2026   " [ref=e1350]:
+            - cell "Jericho Blando @echogoodkid" [ref=e1351]:
+              - strong [ref=e1352]: Jericho Blando
+              - generic [ref=e1353]: "@echogoodkid"
+            - cell "echogoodkid@gmail.com" [ref=e1354]
+            - cell "Guest" [ref=e1355]
+            - cell "Active" [ref=e1356]
+            - cell "Apr 09, 2026" [ref=e1357]
+            - cell "  " [ref=e1358]:
+              - generic [ref=e1359]:
+                - button "" [ref=e1360] [cursor=pointer]:
+                  - generic [ref=e1361]: 
+                - button "" [ref=e1362] [cursor=pointer]:
+                  - generic [ref=e1363]: 
+                - button "" [ref=e1364] [cursor=pointer]:
+                  - generic [ref=e1365]: 
+          - row "New Staff @new_staff_wf newstaff_wf@hotel.com Staff Active Apr 09, 2026   " [ref=e1366]:
+            - cell "New Staff @new_staff_wf" [ref=e1367]:
+              - strong [ref=e1368]: New Staff
+              - generic [ref=e1369]: "@new_staff_wf"
+            - cell "newstaff_wf@hotel.com" [ref=e1370]
+            - cell "Staff" [ref=e1371]
+            - cell "Active" [ref=e1372]
+            - cell "Apr 09, 2026" [ref=e1373]
+            - cell "  " [ref=e1374]:
+              - generic [ref=e1375]:
+                - button "" [ref=e1376] [cursor=pointer]:
+                  - generic [ref=e1377]: 
+                - button "" [ref=e1378] [cursor=pointer]:
+                  - generic [ref=e1379]: 
+                - button "" [ref=e1380] [cursor=pointer]:
+                  - generic [ref=e1381]: 
+          - row "New Staff @new_staff_member newstaff@hotel.com Staff Active Apr 09, 2026   " [ref=e1382]:
+            - cell "New Staff @new_staff_member" [ref=e1383]:
+              - strong [ref=e1384]: New Staff
+              - generic [ref=e1385]: "@new_staff_member"
+            - cell "newstaff@hotel.com" [ref=e1386]
+            - cell "Staff" [ref=e1387]
+            - cell "Active" [ref=e1388]
+            - cell "Apr 09, 2026" [ref=e1389]
+            - cell "  " [ref=e1390]:
+              - generic [ref=e1391]:
+                - button "" [ref=e1392] [cursor=pointer]:
+                  - generic [ref=e1393]: 
+                - button "" [ref=e1394] [cursor=pointer]:
+                  - generic [ref=e1395]: 
+                - button "" [ref=e1396] [cursor=pointer]:
+                  - generic [ref=e1397]: 
+    - text: 

@@ -35,18 +35,18 @@
             <h2 class="h4 mb-0">Refund Request</h2>
             {% if refund.status == 'REQUESTED' %}
                 <span class="badge bg-warning">Pending</span>
-            {% elif refund.status == 'APPROVED' %}
-                <span class="badge bg-success">Approved</span>
             {% elif refund.status == 'REJECTED' %}
                 <span class="badge bg-danger">Rejected</span>
             {% elif refund.status == 'ISSUED' %}
                 <span class="badge bg-info">Issued</span>
+            {% elif refund.status == 'APPROVED' %}
+                <span class="badge bg-info">Processing</span>
             {% endif %}
         </div>
         <p><strong>Submitted:</strong> {{ refund.created_at|date:"M d, Y H:i" }}</p>
         <p><strong>Requested Amount:</strong> <span class="text-danger">PHP {{ refund.requested_amount }}</span></p>
         {% if refund.approved_amount %}
-            <p><strong>Approved Amount:</strong> <span class="text-success">PHP {{ refund.approved_amount }}</span></p>
+            <p><strong>Refund Amount:</strong> <span class="text-success">PHP {{ refund.approved_amount }}</span></p>
         {% endif %}
         <p><strong>Reason for Refund:</strong></p>
         <div class="guest-card shadow-none">{{ refund.reason }}</div>
@@ -54,10 +54,10 @@
 
     {% if refund.status != 'REQUESTED' %}
         <section class="guest-card">
-            <h2 class="h4 mb-3">Manager Decision</h2>
+            <h2 class="h4 mb-3">Refund Decision</h2>
             <p><strong>Decision Date:</strong> {{ refund.approved_at|date:"M d, Y H:i"|default:"N/A" }}</p>
             {% if refund.status == 'APPROVED' %}
-                <div class="alert alert-success">Your refund request has been approved for PHP {{ refund.approved_amount }}.</div>
+                <div class="alert alert-info">Your refund request is being processed.</div>
             {% elif refund.status == 'REJECTED' %}
                 <div class="alert alert-danger">Your refund request has been rejected.</div>
             {% elif refund.status == 'ISSUED' %}

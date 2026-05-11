@@ -688,8 +688,16 @@
                         <i class="fas fa-credit-card"></i>
                         <span>Payments</span>
                         {% if pending_payments_count %}
-                        <span class="badge-notification">{{ pending_payments_count }}</span>
+                        <span class="badge-notification" title="{{ pending_payments_count }} payment{{ pending_payments_count|pluralize }} need review">
+                            {% if pending_payments_count > 99 %}99+{% else %}{{ pending_payments_count }}{% endif %}
+                        </span>
                         {% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'admin_panel:refund_requests' %}" class="{% if request.resolver_match.url_name == 'refund_requests' %}active{% endif %}">
+                        <i class="fas fa-money-bill-transfer"></i>
+                        <span>Refunds</span>
                     </a>
                 </li>
                 <li>
@@ -699,7 +707,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'admin_panel:room_management' %}" class="{% if request.resolver_match.url_name == 'room_management' %}active{% endif %}">
+                    <a href="{% url 'admin_panel:room_management' %}" class="{% if request.resolver_match.url_name == 'room_management' or request.resolver_match.app_name == 'rooms' and request.resolver_match.url_name == 'edit' or request.resolver_match.url_name == 'room_detail_admin' %}active{% endif %}">
                         <i class="fas fa-door-open"></i>
                         <span>Rooms</span>
                     </a>

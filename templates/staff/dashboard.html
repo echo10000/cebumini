@@ -10,30 +10,31 @@
        ============================================ */
     
     .card-header {
-        background: #0f1623 !important;
-        border-bottom: 1px solid rgba(201, 168, 76, 0.15) !important;
-        color: #c9a84c !important;
+        background: var(--staff-surface-alt) !important;
+        border-bottom: 1px solid var(--staff-line) !important;
+        color: var(--staff-ink) !important;
     }
     
     .card {
-        background: #1a2235 !important;
-        border: 1px solid rgba(201, 168, 76, 0.15) !important;
-        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.94) !important;
+        border: 1px solid var(--staff-line) !important;
+        color: var(--staff-ink) !important;
     }
     
     .alert-info {
-        background: rgba(13, 115, 119, 0.1) !important;
-        border: 1px solid rgba(13, 115, 119, 0.3) !important;
-        color: #ffffff !important;
+        background: #fff !important;
+        border: 1px solid var(--staff-line) !important;
+        border-left: 4px solid var(--staff-brand) !important;
+        color: var(--staff-ink) !important;
     }
     
     .table-light {
-        background: #1a2235 !important;
+        background: var(--staff-surface-alt) !important;
     }
     
     .table-light thead th {
-        background: #0f1623 !important;
-        color: #c9a84c !important;
+        background: var(--staff-surface-alt) !important;
+        color: var(--staff-muted) !important;
     }
 
     /* ============================================
@@ -56,7 +57,7 @@
     }
     
     .page-header h1 {
-        color: #ffffff;
+        color: var(--staff-ink);
         font-size: 1.8rem;
         font-weight: 700;
         margin-bottom: 0.5rem;
@@ -66,11 +67,11 @@
     }
     
     .page-header h1 i {
-        color: #c9a84c;
+        color: var(--staff-brand-dark);
     }
     
     .page-header p {
-        color: #9ca3af;
+        color: var(--staff-muted);
         font-size: 0.95rem;
         margin: 0;
     }
@@ -87,48 +88,49 @@
     }
     
     .stat-card-luxury {
-        background: #1a2235;
-        border: 1px solid rgba(201, 168, 76, 0.15);
-        border-left: 4px solid #c9a84c;
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--staff-line);
+        border-left: 4px solid var(--staff-brand);
         border-radius: 8px;
         padding: 1.5rem;
         min-height: 140px;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        box-shadow: var(--staff-shadow);
         transition: all 0.3s ease;
     }
     
     .stat-card-luxury:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 16px rgba(201, 168, 76, 0.15);
+        box-shadow: 0 18px 42px rgba(15, 23, 42, 0.12);
+        border-color: rgba(15, 118, 110, 0.35);
     }
     
     .stat-card-luxury .stat-icon {
         font-size: 2.5rem;
-        color: #c9a84c;
+        color: var(--staff-brand-dark);
         margin-bottom: 0.75rem;
     }
     
     .stat-card-luxury .stat-label {
-        color: #9ca3af;
+        color: var(--staff-muted);
         font-size: 0.85rem;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        text-transform: none;
+        letter-spacing: 0;
         margin-bottom: 0.5rem;
     }
     
     .stat-card-luxury .stat-value {
-        color: #c9a84c;
+        color: var(--staff-brand-dark);
         font-size: 2rem;
         font-weight: 700;
         line-height: 1;
     }
     
     .stat-card-luxury .stat-description {
-        color: #6b7280;
+        color: var(--staff-muted);
         font-size: 0.8rem;
         margin-top: auto;
         padding-top: 0.75rem;
@@ -139,8 +141,8 @@
        ============================================ */
     
     .quick-actions-section {
-        background: #1a2235;
-        border: 1px solid rgba(201, 168, 76, 0.15);
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--staff-line);
         border-radius: 8px;
         padding: 1.5rem;
         margin-bottom: 2rem;
@@ -155,7 +157,7 @@
     
     .quick-actions-header i {
         font-size: 1.3rem;
-        color: #c9a84c;
+        color: var(--staff-brand-dark);
     }
     
     .quick-actions-header h3 {
@@ -173,7 +175,7 @@
     }
     
     .quick-actions-container .btn {
-        background: #3b82f6;
+        background: var(--staff-brand);
         color: white;
         border: none;
         padding: 0.6rem 1.25rem;
@@ -205,8 +207,8 @@
     }
     
     .checkins-checkouts-card {
-        background: #1a2235;
-        border: 1px solid rgba(201, 168, 76, 0.15);
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--staff-line);
         border-radius: 8px;
         overflow: hidden;
         min-height: 200px;
@@ -216,7 +218,7 @@
     
     .checkin-header,
     .checkout-header {
-        color: white;
+        color: var(--staff-ink);
         padding: 1rem;
         font-weight: 700;
         display: flex;
@@ -224,12 +226,9 @@
         gap: 0.5rem;
     }
     
-    .checkin-header {
-        background: #0d7377;
-    }
-    
+    .checkin-header,
     .checkout-header {
-        background: #374151;
+        background: var(--staff-surface-alt);
     }
     
     .checkin-header i,
@@ -248,20 +247,20 @@
     
     .guest-count-number {
         font-size: 2.5rem;
-        color: #c9a84c;
+        color: var(--staff-brand-dark);
         font-weight: 700;
         line-height: 1;
     }
     
     .guest-count-label {
-        color: #9ca3af;
+        color: var(--staff-muted);
         font-size: 0.9rem;
         margin-top: 0.5rem;
         margin-bottom: 1rem;
     }
 
     .verify-checkins-link {
-        background: #0d7377;
+        background: var(--staff-brand);
         color: #ffffff;
         border: none;
         padding: 0.6rem 1rem;
@@ -274,19 +273,8 @@
     }
 
     .verify-checkins-link:hover {
-        background: #0a5c60;
+        background: var(--staff-brand-dark);
         color: #ffffff;
-    }
-
-    .reference-code {
-        display: inline-block;
-        color: #c9a84c;
-        background: rgba(201, 168, 76, 0.12);
-        border: 1px solid rgba(201, 168, 76, 0.25);
-        border-radius: 6px;
-        padding: 0.35rem 0.6rem;
-        font-weight: 700;
-        letter-spacing: 0.04em;
     }
 
     /* ============================================
@@ -294,8 +282,8 @@
        ============================================ */
     
     .occupied-rooms-section {
-        background: #1a2235;
-        border: 1px solid rgba(201, 168, 76, 0.15);
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--staff-line);
         border-radius: 8px;
         padding: 1.5rem;
         margin-bottom: 2rem;
@@ -307,11 +295,11 @@
         gap: 0.75rem;
         margin-bottom: 1.5rem;
         padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(201, 168, 76, 0.15);
+        border-bottom: 1px solid var(--staff-line);
     }
     
     .section-header i {
-        color: #c9a84c;
+        color: var(--staff-brand-dark);
         font-size: 1.3rem;
     }
     
@@ -327,7 +315,7 @@
         justify-content: space-between;
         align-items: center;
         padding: 1rem 0;
-        border-bottom: 1px solid rgba(201, 168, 76, 0.1);
+        border-bottom: 1px solid var(--staff-line);
     }
     
     .occupied-room-item:last-child {
@@ -346,14 +334,14 @@
     }
     
     .occupied-room-details {
-        color: #c9a84c;
+        color: var(--staff-brand-dark);
         font-size: 0.85rem;
         font-weight: 500;
         margin-bottom: 0.25rem;
     }
     
     .occupied-room-checkout {
-        color: #6b7280;
+        color: var(--staff-muted);
         font-size: 0.8rem;
     }
     
@@ -366,7 +354,7 @@
     }
     
     .occupied-room-action {
-        background: #3b82f6;
+        background: var(--staff-brand);
         color: white;
         border: none;
         padding: 0.5rem 1rem;
@@ -380,7 +368,7 @@
     }
     
     .occupied-room-action:hover {
-        background: #2563eb;
+        background: var(--staff-brand-dark);
     }
 
     /* ============================================
@@ -388,8 +376,8 @@
        ============================================ */
 
     .occupancy-visual-section {
-        background: #1a2235;
-        border: 1px solid rgba(13, 115, 119, 0.35);
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--staff-line);
         border-radius: 8px;
         padding: 1.5rem;
         margin-bottom: 2rem;
@@ -412,7 +400,7 @@
         border-radius: 8px;
         padding: 1rem;
         min-height: 130px;
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        border: 1px solid var(--staff-line);
         display: flex;
         flex-direction: column;
         justify-content: space-between;
@@ -425,21 +413,21 @@
     .occupancy-room-card.maintenance { background: rgba(185, 28, 28, 0.24); border-color: rgba(248, 113, 113, 0.48); }
 
     .occupancy-room-number {
-        color: #ffffff;
+        color: var(--staff-ink);
         font-weight: 800;
         font-size: 1.1rem;
     }
 
     .occupancy-room-type,
     .occupancy-room-guest {
-        color: #d1d5db;
+        color: var(--staff-muted);
         font-size: 0.86rem;
         margin-top: 0.25rem;
     }
 
     .occupancy-status-pill {
-        color: #ffffff;
-        background: rgba(15, 22, 35, 0.45);
+        color: var(--staff-ink);
+        background: rgba(15, 118, 110, 0.08);
         border-radius: 999px;
         padding: 0.28rem 0.6rem;
         width: fit-content;
@@ -456,8 +444,8 @@
 
     .occupancy-ring-card,
     .occupancy-chart-card {
-        background: #111827;
-        border: 1px solid rgba(13, 115, 119, 0.28);
+        background: #fff;
+        border: 1px solid var(--staff-line);
         border-radius: 8px;
         padding: 1.2rem;
     }
@@ -468,7 +456,7 @@
         aspect-ratio: 1;
         border-radius: 50%;
         margin: 0 auto 1rem;
-        background: conic-gradient(#0d7377 var(--occupancy-percent), rgba(75, 85, 99, 0.55) 0);
+        background: conic-gradient(var(--staff-brand) var(--occupancy-percent), var(--staff-surface-alt) 0);
         display: grid;
         place-items: center;
         position: relative;
@@ -479,19 +467,19 @@
         width: 108px;
         aspect-ratio: 1;
         border-radius: 50%;
-        background: #111827;
+        background: #fff;
         position: absolute;
     }
 
     .occupancy-ring-value {
-        color: #2dd4bf;
+        color: var(--staff-brand-dark);
         font-size: 1.65rem;
         font-weight: 800;
         position: relative;
     }
 
     .occupancy-ring-label {
-        color: #d1d5db;
+        color: var(--staff-ink);
         text-align: center;
         font-weight: 700;
     }
@@ -507,8 +495,8 @@
     
     .table-section .section-header {
         padding: 1.5rem 1.5rem 1rem 1.5rem;
-        border-bottom: 2px solid rgba(201, 168, 76, 0.15);
-        background: #0f1623;
+        border-bottom: 1px solid var(--staff-line);
+        background: var(--staff-surface-alt);
     }
     
     .table-section .section-header h3 {
@@ -521,8 +509,8 @@
        ============================================ */
     
     .table-section {
-        background: #1a2235;
-        border: 1px solid rgba(201, 168, 76, 0.15);
+        background: rgba(255, 255, 255, 0.94);
+        border: 1px solid var(--staff-line);
         border-radius: 8px;
         overflow: hidden;
         margin-bottom: 2rem;
@@ -539,50 +527,50 @@
     
     .table {
         margin: 0;
-        color: #ffffff !important;
-        background: #1a2235 !important;
+        color: var(--staff-ink) !important;
+        background: transparent !important;
         width: 100%;
     }
     
     .table thead {
-        background: #0f1623 !important;
-        border-bottom: 2px solid rgba(201, 168, 76, 0.2) !important;
+        background: var(--staff-surface-alt) !important;
+        border-bottom: 1px solid var(--staff-line) !important;
         position: sticky;
         top: 0;
     }
     
     .table thead th {
-        color: #c9a84c !important;
+        color: var(--staff-muted) !important;
         font-weight: 700;
         font-size: 0.85rem;
         padding: 1rem;
         text-align: left;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        text-transform: none;
+        letter-spacing: 0;
         border: none !important;
-        background: #0f1623 !important;
+        background: var(--staff-surface-alt) !important;
     }
     
     .table tbody {
-        background: #1a2235 !important;
+        background: transparent !important;
     }
     
     .table tbody tr {
-        background: #1a2235 !important;
-        border-bottom: 1px solid rgba(201, 168, 76, 0.1) !important;
+        background: transparent !important;
+        border-bottom: 1px solid var(--staff-line) !important;
         transition: background 0.2s ease;
     }
     
     .table tbody tr:nth-child(even) {
-        background: #111827 !important;
+        background: rgba(248, 250, 252, 0.72) !important;
     }
     
     .table tbody tr:hover {
-        background: rgba(201, 168, 76, 0.05) !important;
+        background: rgba(15, 118, 110, 0.06) !important;
     }
     
     .table tbody td {
-        color: #ffffff !important;
+        color: var(--staff-ink) !important;
         padding: 1rem;
         font-size: 0.95rem;
         border: none !important;
@@ -591,20 +579,20 @@
     }
     
     .table-striped > tbody > tr:nth-of-type(odd) {
-        background: #1a2235 !important;
+        background: transparent !important;
     }
     
     .table-striped > tbody > tr:nth-of-type(even) {
-        background: #111827 !important;
+        background: rgba(248, 250, 252, 0.72) !important;
     }
     
     .table-hover tbody tr:hover {
-        background: rgba(201, 168, 76, 0.05) !important;
-        color: #ffffff !important;
+        background: rgba(15, 118, 110, 0.06) !important;
+        color: var(--staff-ink) !important;
     }
     
     .table .btn {
-        background: #3b82f6;
+        background: var(--staff-brand);
         color: white;
         border: none;
         padding: 0.4rem 0.8rem;
@@ -617,19 +605,19 @@
     }
     
     .table .btn:hover {
-        background: #2563eb;
+        background: var(--staff-brand-dark);
     }
 
     .table .btn-confirm-cash {
-        background: #0d7377;
+        background: var(--staff-brand);
     }
 
     .table .btn-confirm-cash:hover {
-        background: #0a5c60;
+        background: var(--staff-brand-dark);
     }
 
     .table .btn-no-show {
-        background: #7f1d1d;
+        background: var(--staff-danger);
     }
 
     .table .btn-no-show:hover {
@@ -644,7 +632,7 @@
     .table-empty {
         text-align: center;
         padding: 2rem;
-        color: #9ca3af;
+        color: var(--staff-muted);
         font-size: 0.95rem;
     }
 
@@ -655,31 +643,37 @@
         padding: 0.3rem 0.65rem;
         font-size: 0.78rem;
         font-weight: 700;
-        color: #ffffff;
-        background: #4b5563;
+        color: var(--staff-ink);
+        background: var(--staff-surface-alt);
+        border: 1px solid var(--staff-line);
     }
 
     .status-badge.clean,
     .status-badge.completed {
-        background: #15803d;
+        background: #dcfce7;
+        color: var(--staff-success);
     }
 
     .status-badge.dirty,
     .status-badge.pending {
-        background: #a16207;
+        background: #fef3c7;
+        color: var(--staff-warning);
     }
 
     .status-badge.maintenance {
-        background: #b91c1c;
+        background: #fee2e2;
+        color: var(--staff-danger);
     }
 
     .status-badge.occupied,
     .status-badge.in_progress {
-        background: #2563eb;
+        background: #dbeafe;
+        color: #1d4ed8;
     }
 
     .status-badge.escalated {
-        background: #7c3aed;
+        background: #ede9fe;
+        color: #6d28d9;
     }
 
     .room-status-grid {
@@ -690,20 +684,20 @@
     }
 
     .room-status-card {
-        background: #111827;
-        border: 1px solid rgba(201, 168, 76, 0.16);
+        background: #fff;
+        border: 1px solid var(--staff-line);
         border-radius: 8px;
         padding: 1rem;
     }
 
     .room-status-title {
-        color: #ffffff;
+        color: var(--staff-ink);
         font-weight: 800;
         margin-bottom: 0.25rem;
     }
 
     .room-status-type {
-        color: #9ca3af;
+        color: var(--staff-muted);
         font-size: 0.85rem;
         margin-bottom: 0.8rem;
     }
@@ -716,10 +710,10 @@
     }
 
     .room-status-form select {
-        background: #0f1623;
-        border: 1px solid rgba(201, 168, 76, 0.28);
+        background: #fff;
+        border: 1px solid var(--staff-line);
         border-radius: 6px;
-        color: #ffffff;
+        color: var(--staff-ink);
         min-width: 0;
         padding: 0.45rem 0.55rem;
     }
@@ -1014,6 +1008,9 @@
             <a href="{% url 'staff:room_status' %}" class="btn">
                 <i class="fas fa-door-open"></i> View All Rooms
             </a>
+            <a href="{% url 'staff:check_in_checkout' %}" class="btn">
+                <i class="fas fa-arrow-right-arrow-left"></i> Check-In / Out
+            </a>
             <a href="{% url 'staff:pending_balance' %}" class="btn">
                 <i class="fas fa-money-bill-wave"></i> Collect Balance
             </a>
@@ -1101,12 +1098,9 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <form method="post" action="{% url 'staff:dashboard_check_in' booking.id %}" class="inline-confirm-form">
-                                        {% csrf_token %}
-                                        <button type="submit" class="btn btn-confirm-cash">
-                                            <i class="fas fa-sign-in-alt"></i> Check In
-                                        </button>
-                                    </form>
+                                    <a href="{% url 'staff:check_in_checkout' %}?q={{ booking.id }}" class="btn btn-confirm-cash">
+                                        <i class="fas fa-shield-alt"></i> Verify
+                                    </a>
                                     <form method="post" action="{% url 'staff:dashboard_no_show' booking.id %}" class="inline-confirm-form">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-no-show">
@@ -1256,7 +1250,7 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <a href="{% url 'staff:complaint_detail' complaint.id %}" style="color: #c9a84c;">
+                                    <a href="{% url 'staff:complaint_detail' complaint.id %}" style="color: var(--staff-brand-dark);">
                                         {{ complaint.subject }}
                                     </a>
                                 </td>
@@ -1429,7 +1423,6 @@
                         <tr>
                             <th>Date</th>
                             <th>Guest Name</th>
-                            <th>Reference</th>
                             <th>Room</th>
                             <th>Phone</th>
                             <th>Action</th>
@@ -1440,7 +1433,6 @@
                         <tr>
                             <td>{{ booking.check_in|date:"M d, Y" }}</td>
                             <td>{{ booking.guest.get_full_name|default:booking.guest.username }}</td>
-                            <td><span class="reference-code">{{ booking.booking_reference }}</span></td>
                             <td>Room {{ booking.room.room_number }}</td>
                             <td>{{ booking.guest.phone_number|default:"N/A" }}</td>
                             <td>
@@ -1496,18 +1488,18 @@ document.addEventListener('DOMContentLoaded', function() {
             maintainAspectRatio: false,
             scales: {
                 x: {
-                    ticks: { color: '#d1d5db' },
+                    ticks: { color: '#64748b' },
                     grid: { color: 'rgba(156, 163, 175, 0.12)' }
                 },
                 y: {
                     beginAtZero: true,
-                    ticks: { color: '#d1d5db', precision: 0, stepSize: 1 },
+                    ticks: { color: '#64748b', precision: 0, stepSize: 1 },
                     grid: { color: 'rgba(156, 163, 175, 0.12)' }
                 }
             },
             plugins: {
                 legend: {
-                    labels: { color: '#e5e7eb' }
+                    labels: { color: '#334155' }
                 }
             }
         }

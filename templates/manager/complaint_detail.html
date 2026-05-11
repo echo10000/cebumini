@@ -2,6 +2,27 @@
 
 {% block title %}Resolve Guest Complaint{% endblock %}
 
+{% block extra_css %}
+<style>
+    .complaint-readable-box {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+        color: #1f2937 !important;
+        line-height: 1.65;
+    }
+
+    .complaint-readable-box,
+    .complaint-readable-box * {
+        color: #1f2937 !important;
+    }
+
+    .complaint-readable-box:empty::before {
+        content: "No details provided";
+        color: #64748b !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-4">
     <div class="row">
@@ -12,7 +33,7 @@
 
             <!-- Booking & Guest Info -->
             <div class="card mb-4">
-                <div class="card-header bg-info text-white">
+                <div class="card-header bg-info">
                     <h5 class="mb-0">Booking & Guest Information</h5>
                 </div>
                 <div class="card-body">
@@ -43,18 +64,18 @@
 
             <!-- Complaint Details -->
             <div class="card mb-4">
-                <div class="card-header bg-danger text-white">
+                <div class="card-header bg-danger">
                     <h5 class="mb-0">Complaint Details</h5>
                 </div>
                 <div class="card-body">
                     <p><strong>Subject:</strong> {{ complaint.subject }}</p>
                     <p><strong>Complaint:</strong></p>
-                    <div class="border p-3 bg-light mb-3">
+                    <div class="border p-3 bg-light mb-3 complaint-readable-box">
                         {{ complaint.description|linebreaksbr }}
                     </div>
                     <p><strong>Escalated By:</strong> {{ complaint.assigned_to.get_full_name|default:complaint.assigned_to.username|default:"Unassigned" }}</p>
                     <p><strong>Staff Notes:</strong></p>
-                    <div class="border p-3 bg-light">
+                    <div class="border p-3 bg-light complaint-readable-box">
                         {{ complaint.staff_notes|default:"No notes provided"|linebreaksbr }}
                     </div>
                 </div>
@@ -62,10 +83,22 @@
 
             <!-- Resolution Form -->
             <div class="card">
-                <div class="card-header bg-primary text-white">
+                <div class="card-header bg-primary">
                     <h5 class="mb-0">Manager Resolution</h5>
                 </div>
                 <div class="card-body">
+                    {% if complaint.status == 'resolved' %}
+                        <div class="alert alert-success">
+                            <strong>Resolved.</strong> This complaint was resolved on {{ complaint.resolved_at|date:"M d, Y g:i A" }}.
+                        </div>
+                        <p><strong>Resolution Notes:</strong></p>
+                        <div class="border p-3 bg-light mb-3 complaint-readable-box">
+                            {{ complaint.resolution_notes|default:"No resolution notes provided"|linebreaksbr }}
+                        </div>
+                        <a href="{% url 'auth:manager_complaints' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </a>
+                    {% else %}
                     <form method="post">
                         {% csrf_token %}
                         
@@ -100,6 +133,7 @@
                             </a>
                         </div>
                     </form>
+                    {% endif %}
                 </div>
             </div>
         </div>

@@ -8,7 +8,7 @@
         <div>
             <p class="guest-kicker">Payments</p>
             <h1>My Refund Requests</h1>
-            <p>Track refund requests, approval amounts, and issued payouts.</p>
+            <p>Track refund requests, refund amounts, and issued payouts.</p>
         </div>
         <a href="{% url 'bookings:booking_history' %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left"></i> Back to My Bookings
@@ -18,7 +18,6 @@
     <nav class="d-flex flex-wrap gap-2" aria-label="Refund filters">
         <a href="?status=all" class="btn {% if status_filter == 'all' %}btn-primary{% else %}btn-secondary{% endif %}">All</a>
         <a href="?status=REQUESTED" class="btn {% if status_filter == 'REQUESTED' %}btn-primary{% else %}btn-secondary{% endif %}">Pending</a>
-        <a href="?status=APPROVED" class="btn {% if status_filter == 'APPROVED' %}btn-primary{% else %}btn-secondary{% endif %}">Approved</a>
         <a href="?status=REJECTED" class="btn {% if status_filter == 'REJECTED' %}btn-primary{% else %}btn-secondary{% endif %}">Rejected</a>
         <a href="?status=ISSUED" class="btn {% if status_filter == 'ISSUED' %}btn-primary{% else %}btn-secondary{% endif %}">Issued</a>
     </nav>
@@ -33,7 +32,7 @@
                             <th>Requested Amount</th>
                             <th>Reason</th>
                             <th>Status</th>
-                            <th>Approved Amount</th>
+                            <th>Refund Amount</th>
                             <th>Submitted</th>
                             <th>Action</th>
                         </tr>
@@ -47,12 +46,12 @@
                             <td>
                                 {% if refund.status == 'REQUESTED' %}
                                     <span class="badge bg-warning">Pending</span>
-                                {% elif refund.status == 'APPROVED' %}
-                                    <span class="badge bg-success">Approved</span>
                                 {% elif refund.status == 'REJECTED' %}
                                     <span class="badge bg-danger">Rejected</span>
                                 {% elif refund.status == 'ISSUED' %}
                                     <span class="badge bg-info">Issued</span>
+                                {% elif refund.status == 'APPROVED' %}
+                                    <span class="badge bg-info">Processing</span>
                                 {% endif %}
                             </td>
                             <td>

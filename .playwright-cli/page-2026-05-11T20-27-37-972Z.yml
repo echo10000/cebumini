@@ -1,0 +1,57 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - heading "Page not found (404)" [level=1] [ref=e3]
+    - generic [ref=e4]: No Room matches the given query.
+    - table [ref=e5]:
+      - rowgroup [ref=e6]:
+        - 'row "Request Method: GET" [ref=e7]':
+          - rowheader "Request Method:" [ref=e8]
+          - cell "GET" [ref=e9]
+        - 'row "Request URL: http://127.0.0.1:8000/rooms/1/edit/" [ref=e10]':
+          - rowheader "Request URL:" [ref=e11]
+          - cell "http://127.0.0.1:8000/rooms/1/edit/" [ref=e12]
+        - 'row "Raised by: authentication.views_rooms.room_edit_view" [ref=e13]':
+          - rowheader "Raised by:" [ref=e14]
+          - cell "authentication.views_rooms.room_edit_view" [ref=e15]
+  - main [ref=e16]:
+    - paragraph [ref=e17]:
+      - text: Using the URLconf defined in
+      - code [ref=e18]: cebuhotel.urls
+      - text: ", Django tried these URL patterns, in this order:"
+    - list [ref=e19]:
+      - listitem [ref=e20]:
+        - code [ref=e21]: admin/
+      - listitem [ref=e22]:
+        - code [ref=e23]: accounts/login/ [name='allauth_login_redirect']
+      - listitem [ref=e24]:
+        - code [ref=e25]: accounts/signup/
+      - listitem [ref=e26]:
+        - code [ref=e27]: accounts/
+      - listitem [ref=e28]:
+        - code [ref=e29]: auth/
+      - listitem [ref=e30]:
+        - code [ref=e31]: rooms/
+        - code [ref=e32]: "[name='list']"
+      - listitem [ref=e33]:
+        - code [ref=e34]: rooms/
+        - code [ref=e35]: search/ [name='search']
+      - listitem [ref=e36]:
+        - code [ref=e37]: rooms/
+        - code [ref=e38]: <int:room_id>/ [name='detail']
+      - listitem [ref=e39]:
+        - code [ref=e40]: rooms/
+        - code [ref=e41]: create/ [name='create']
+      - listitem [ref=e42]:
+        - code [ref=e43]: rooms/
+        - code [ref=e44]: <int:room_id>/edit/ [name='edit']
+    - paragraph [ref=e45]:
+      - text: The current path,
+      - code [ref=e46]: rooms/1/edit/
+      - text: ", matched the last one."
+  - contentinfo [ref=e47]:
+    - paragraph [ref=e48]:
+      - text: You’re seeing this error because you have
+      - code [ref=e49]: DEBUG = True
+      - text: in your Django settings file. Change that to
+      - code [ref=e50]: "False"
+      - text: ", and Django will display a standard 404 page."

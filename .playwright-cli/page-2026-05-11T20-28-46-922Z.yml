@@ -1,0 +1,139 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - link "C Cebu Luxury Admin Panel" [ref=e3] [cursor=pointer]:
+      - /url: /admin-panel/
+      - generic [ref=e4]: C
+      - generic [ref=e5]:
+        - heading "Cebu Luxury" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Admin Panel
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: S
+          - generic [ref=e12]: Super
+      - listitem [ref=e13]:
+        - link " Logout" [ref=e14] [cursor=pointer]:
+          - /url: /auth/logout/
+          - generic [ref=e15]: 
+          - text: Logout
+  - complementary [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]: Dashboard
+      - list [ref=e19]:
+        - listitem [ref=e20]:
+          - link " Overview" [ref=e21] [cursor=pointer]:
+            - /url: /admin-panel/
+            - generic [ref=e22]: 
+            - generic [ref=e23]: Overview
+    - generic [ref=e24]:
+      - generic [ref=e25]: Management
+      - list [ref=e26]:
+        - listitem [ref=e27]:
+          - link " Payments" [ref=e28] [cursor=pointer]:
+            - /url: /admin-panel/payments/
+            - generic [ref=e29]: 
+            - generic [ref=e30]: Payments
+        - listitem [ref=e31]:
+          - link " Bookings" [ref=e32] [cursor=pointer]:
+            - /url: /admin-panel/bookings/
+            - generic [ref=e33]: 
+            - generic [ref=e34]: Bookings
+        - listitem [ref=e35]:
+          - link " Rooms" [ref=e36] [cursor=pointer]:
+            - /url: /admin-panel/rooms/
+            - generic [ref=e37]: 
+            - generic [ref=e38]: Rooms
+        - listitem [ref=e39]:
+          - link " Users" [ref=e40] [cursor=pointer]:
+            - /url: /admin-panel/users/
+            - generic [ref=e41]: 
+            - generic [ref=e42]: Users
+        - listitem [ref=e43]:
+          - link " Guest Inquiries" [ref=e44] [cursor=pointer]:
+            - /url: /staff/guest-services/
+            - generic [ref=e45]: 
+            - generic [ref=e46]: Guest Inquiries
+    - generic [ref=e47]:
+      - generic [ref=e48]: Reports
+      - list [ref=e49]:
+        - listitem [ref=e50]:
+          - link "Reports" [ref=e51] [cursor=pointer]:
+            - /url: /admin-panel/reports/
+            - generic [ref=e52]: Reports
+    - generic [ref=e53]:
+      - generic [ref=e54]: Other
+      - list [ref=e55]:
+        - listitem [ref=e56]:
+          - link " Back to Hotel" [ref=e57] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e58]: 
+            - generic [ref=e59]: Back to Hotel
+  - main [ref=e60]:
+    - generic [ref=e61]:
+      - generic [ref=e62]:
+        - generic [ref=e63]:
+          - heading "Edit Room QA001" [level=1] [ref=e64]
+          - paragraph [ref=e65]: Manage room details, pricing, amenities, and availability.
+        - link " Rooms" [ref=e66] [cursor=pointer]:
+          - /url: /admin-panel/rooms/
+          - generic [ref=e67]: 
+          - text: Rooms
+      - generic [ref=e68]:
+        - generic [ref=e69]:
+          - heading " Basic Information" [level=2] [ref=e70]:
+            - generic [ref=e71]: 
+            - text: Basic Information
+          - generic [ref=e72]:
+            - generic [ref=e73]: Room Number
+            - textbox "Room Number" [ref=e74]:
+              - /placeholder: Room number (e.g., 101, 102)
+              - text: QA001
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - generic [ref=e77]: Room Type
+              - combobox "Room Type" [ref=e78]:
+                - option "Standard Room" [selected]
+                - option "Deluxe Room"
+                - option "Suite Room"
+            - generic [ref=e79]:
+              - generic [ref=e80]: Guest Capacity
+              - spinbutton "Guest Capacity" [ref=e81]: "2"
+          - generic [ref=e82]:
+            - generic [ref=e83]: Description
+            - textbox "Description" [ref=e84]:
+              - /placeholder: Room description
+        - generic [ref=e85]:
+          - heading " Pricing & Availability" [level=2] [ref=e86]:
+            - generic [ref=e87]: 
+            - text: Pricing & Availability
+          - generic [ref=e88]:
+            - generic [ref=e89]:
+              - generic [ref=e90]: Price per Night
+              - spinbutton "Price per Night" [ref=e91]: "1200.00"
+            - generic [ref=e92]:
+              - generic [ref=e93]: Status
+              - generic [ref=e94]:
+                - checkbox "Mark as Available" [checked] [ref=e95]
+                - generic [ref=e96]: Mark as Available
+        - generic [ref=e97]:
+          - heading " Amenities & Image" [level=2] [ref=e98]:
+            - generic [ref=e99]: 
+            - text: Amenities & Image
+          - generic [ref=e100]:
+            - generic [ref=e101]: Amenities
+            - textbox "Amenities" [ref=e102]:
+              - /placeholder: "Amenities (comma-separated)\nExample: WiFi, TV, AC, Minibar"
+            - generic [ref=e103]: "List amenities separated by commas, for example: WiFi, TV, AC, Minibar."
+          - generic [ref=e104]:
+            - generic [ref=e105]: Room Image
+            - button "Room Image" [ref=e106] [cursor=pointer]
+            - generic [ref=e107]: "Upload a main image for the room. Accepted formats: JPG, PNG, GIF."
+        - generic [ref=e109]:
+          - button " Save Changes" [ref=e110] [cursor=pointer]:
+            - generic [ref=e111]: 
+            - text: Save Changes
+          - link "Cancel" [ref=e112] [cursor=pointer]:
+            - /url: /admin-panel/rooms/22/
+      - button " Delete Room" [ref=e114] [cursor=pointer]:
+        - generic [ref=e115]: 
+        - text: Delete Room

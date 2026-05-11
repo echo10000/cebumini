@@ -188,7 +188,7 @@ class BookingStatus(models.TextChoices):
 class CancellationPolicy(models.TextChoices):
     """Cancellation policies"""
     FREE = 'FREE', 'Free (100% refund)'
-    STANDARD = 'STANDARD', 'Standard (50% refund)'
+    STANDARD = 'STANDARD', 'Standard (48-hour refund policy)'
     NON_REFUNDABLE = 'NON_REFUNDABLE', 'Non-Refundable (0% refund)'
 
 
@@ -312,6 +312,15 @@ class Booking(models.Model):
         """Check if booking can be cancelled"""
         return self.status in [BookingStatus.PENDING, BookingStatus.CONFIRMED]
 
+    @property
+    def can_be_checked_in_now(self):
+        """Check if this confirmed booking is eligible for front-desk check-in."""
+        today = timezone.localdate()
+        return (
+            self.status == BookingStatus.CONFIRMED
+            and self.check_in <= today < self.check_out
+        )
+
     def complete_check_in_verification(self, staff_user, submitted_reference, checklist, notes=''):
         """
         Validate front-desk proof and check the guest in.
@@ -322,6 +331,13 @@ class Booking(models.Model):
 
         if self.status != BookingStatus.CONFIRMED:
             errors.append('Only confirmed bookings can be checked in.')
+
+        today = timezone.localdate()
+        if self.status == BookingStatus.CONFIRMED and not self.can_be_checked_in_now:
+            if today < self.check_in:
+                errors.append(f'This booking cannot be checked in before {self.check_in:%b %d, %Y}.')
+            elif today >= self.check_out:
+                errors.append('This booking is past its scheduled stay dates and cannot be checked in.')
 
         if submitted_reference != (self.booking_reference or '').upper():
             errors.append('Booking reference does not match this reservation.')
@@ -361,25 +377,19 @@ class Booking(models.Model):
         
         if self.cancellation_policy == CancellationPolicy.NON_REFUNDABLE:
             return (0, 0, 'Non-refundable booking - no refund available')
-        
-        elif self.cancellation_policy == CancellationPolicy.STANDARD:
-            # 50% refund if 3+ days before check-in, 0% otherwise
-            if days_until_checkin >= 3:
-                refund_amount = self.total_price * Decimal('0.50')
-                return (refund_amount, 50, f'50% refund (cancelled {days_until_checkin} days before check-in)')
-            else:
-                return (Decimal('0'), 0, f'Late cancellation - no refund ({days_until_checkin} days before check-in)')
-        
-        else:  # FREE policy
-            # 100% refund if 7+ days before check-in, 50% if 3-7 days, 0% if less than 3 days
-            if days_until_checkin >= 7:
-                refund_amount = self.total_price
-                return (refund_amount, 100, f'100% refund (cancelled {days_until_checkin} days before check-in)')
-            elif days_until_checkin >= 3:
-                refund_amount = self.total_price * Decimal('0.50')
-                return (refund_amount, 50, f'50% refund (cancelled {days_until_checkin} days before check-in)')
-            else:
-                return (Decimal('0'), 0, f'Late cancellation - no refund ({days_until_checkin} days before check-in)')
+
+        if days_until_checkin > 2:
+            return (
+                self.total_price,
+                100,
+                f'Free cancellation - 100% refund (cancelled more than 48 hours before check-in)',
+            )
+
+        return (
+            Decimal('0'),
+            0,
+            'Late cancellation - no refund (cancelled 48 hours or less before check-in)',
+        )
 
     def save(self, *args, **kwargs):
         """Override save to calculate total price and assign a reference code."""
@@ -909,13 +919,13 @@ class LoginSession(models.Model):
 class RefundRequestStatus(models.TextChoices):
     """Refund request workflow statuses"""
     REQUESTED = 'REQUESTED', 'Requested by Staff'
-    APPROVED = 'APPROVED', 'Approved by Manager'
+    APPROVED = 'APPROVED', 'Pending Issue'
     REJECTED = 'REJECTED', 'Rejected by Manager'
-    ISSUED = 'ISSUED', 'Refund Issued by Admin'
+    ISSUED = 'ISSUED', 'Refund Issued'
 
 
 class RefundRequest(models.Model):
-    """Refund Request - workflow: Staff request → Manager approve → Admin issue"""
+    """Refund Request - workflow: Staff/guest request → Manager issue or reject."""
     booking = models.OneToOneField(
         Booking,
         on_delete=models.CASCADE,
@@ -976,13 +986,13 @@ class RefundRequest(models.Model):
         null=True,
         blank=True,
         related_name='refund_requests_issued',
-        limit_choices_to={'role': 'ADMIN'},
-        help_text="Admin who issued the refund"
+        limit_choices_to={'role__in': ['MANAGER', 'ADMIN']},
+        help_text="Manager or admin who issued the refund"
     )
     issued_at = models.DateTimeField(
         null=True,
         blank=True,
-        help_text="When admin issued the refund"
+        help_text="When the refund was issued"
     )
     refund_transaction_id = models.CharField(
         max_length=255,

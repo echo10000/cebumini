@@ -11,6 +11,7 @@ from django.http import JsonResponse, HttpResponseForbidden
 from django.views.decorators.http import require_http_methods
 from django.db.models import Q, Count, Sum, Avg
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 from django.contrib import messages
 from datetime import timedelta
@@ -27,6 +28,7 @@ from .models import (
     HousekeepingTaskStatus,
     Payment,
     PaymentStatus,
+    RefundRequestStatus,
     Room,
     RoomHousekeepingLog,
     RoomStatus,
@@ -155,41 +157,10 @@ def confirm_onsite_cash_payment(request, payment_id):
 @staff_manager_or_admin_required
 @require_http_methods(["POST"])
 def dashboard_check_in_booking(request, booking_id):
-    """Mark a confirmed online-paid arrival as checked in."""
+    """Route dashboard check-in attempts to the official verification workflow."""
     booking = get_object_or_404(Booking, id=booking_id, status=BookingStatus.CONFIRMED)
-    booking.status = BookingStatus.CHECKED_IN
-    booking.checked_in_at = timezone.now()
-    if not booking.verified_at:
-        booking.verified_at = booking.checked_in_at
-    if not booking.verified_by_id:
-        booking.verified_by = request.user
-    booking.save()
-
-    room = booking.room
-    previous_status = room.status
-    room.status = RoomStatus.OCCUPIED
-    room.is_available = False
-    room.save(update_fields=['status', 'is_available', 'updated_at'])
-    RoomHousekeepingLog.objects.create(
-        room=room,
-        previous_status=previous_status,
-        current_status=RoomStatus.OCCUPIED,
-        updated_by=request.user,
-        booking=booking,
-        notes=f'Room {room.room_number} set to occupied by check-in.'
-    )
-
-    if not send_checkin_email(booking):
-        messages.warning(request, 'Guest checked in, but the check-in email could not be sent.')
-    guest_name = booking.guest.get_full_name() or booking.guest.username
-    log_activity(
-        request.user,
-        f'Checked in {guest_name} to Room {room.room_number}',
-        f'Booking #{booking.id}',
-        request
-    )
-    messages.success(request, 'Guest checked in successfully')
-    return redirect('staff:dashboard')
+    messages.info(request, 'Use the check-in verification form before marking the guest as checked in.')
+    return redirect(f"{reverse('staff:check_in_checkout')}?q={booking.id}")
 
 
 @login_required(login_url='auth:login')
@@ -249,11 +220,11 @@ def room_status(request):
     rooms = Room.objects.all().order_by('room_number')
     today = timezone.now().date()
     
-    # Get current bookings for each room
+    # Get in-house or date-active bookings for each room.
     current_bookings = Booking.objects.filter(
         check_in__lte=today,
         check_out__gt=today,
-        status=BookingStatus.CONFIRMED
+        status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
     ).select_related('guest', 'room')
     
     # Add booking info to rooms
@@ -275,12 +246,12 @@ def room_detail_staff(request, room_id):
     room = get_object_or_404(Room, id=room_id)
     today = timezone.now().date()
     
-    # Get current booking for this room
+    # Get current booking for this room.
     current_booking = Booking.objects.filter(
         room=room,
         check_in__lte=today,
         check_out__gt=today,
-        status=BookingStatus.CONFIRMED
+        status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
     ).first()
     
     # Get upcoming booking
@@ -304,6 +275,7 @@ def room_detail_staff(request, room_id):
 def check_in_checkout_list(request):
     """View upcoming check-ins and check-outs"""
     today = timezone.now().date()
+    search_query = request.GET.get('q', '').strip()
     
     # Check-ins today
     check_ins = Booking.objects.filter(
@@ -323,6 +295,26 @@ def check_in_checkout_list(request):
         check_in=tomorrow,
         status=BookingStatus.CONFIRMED
     ).select_related('guest', 'room')
+
+    search_results = Booking.objects.none()
+    if search_query:
+        search_filters = (
+            Q(booking_reference__iexact=search_query)
+            | Q(guest__first_name__icontains=search_query)
+            | Q(guest__last_name__icontains=search_query)
+            | Q(guest__email__icontains=search_query)
+            | Q(guest__phone_number__icontains=search_query)
+        )
+        booking_id_query = search_query.lstrip('#')
+        if booking_id_query.isdigit():
+            search_filters |= Q(id=int(booking_id_query))
+
+        search_results = (
+            Booking.objects
+            .filter(search_filters)
+            .select_related('guest', 'room')
+            .order_by('-check_in', 'room__room_number')[:10]
+        )
     
     context = {
         'today': today,
@@ -330,6 +322,8 @@ def check_in_checkout_list(request):
         'check_ins': check_ins,
         'check_outs': check_outs,
         'tomorrow_check_ins': tomorrow_check_ins,
+        'search_query': search_query,
+        'search_results': search_results,
     }
     
     return render(request, 'staff/check_in_checkout.html', context)
@@ -393,16 +387,32 @@ def mark_room_clean(request, room_id):
     room = get_object_or_404(Room, id=room_id)
     
     if request.method == 'POST':
-        # Update room status (if you have a status field)
-        # For now, we'll just show a success message
+        if room.status == RoomStatus.OCCUPIED:
+            message = f'Room {room.room_number} is occupied and cannot be marked clean.'
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'message': message}, status=400)
+            messages.error(request, message)
+            return redirect('staff:room_detail', room_id=room.id)
+
+        previous_status = room.status
+        room.status = RoomStatus.CLEAN
+        room.is_available = True
+        room.save(update_fields=['status', 'is_available', 'updated_at'])
+        RoomHousekeepingLog.objects.create(
+            room=room,
+            previous_status=previous_status,
+            current_status=RoomStatus.CLEAN,
+            updated_by=request.user,
+            notes=f'Room {room.room_number} marked clean from staff room controls.'
+        )
         messages.success(request, f'{room.room_number} marked as clean.')
         
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'success': True, 'message': 'Room marked as clean'})
         
-        return redirect('staff:dashboard')
+        return redirect('staff:room_detail', room_id=room.id)
     
-    return redirect('staff:dashboard')
+    return redirect('staff:room_detail', room_id=room.id)
 
 
 @login_required(login_url='auth:login')
@@ -926,7 +936,7 @@ def manual_booking(request):
                     f'Balance Due: ₱{balance_due}\nReference: {final_reference}'
                 )
             
-            return redirect('auth:dashboard')
+            return redirect('staff:dashboard')
         
         except Room.DoesNotExist:
             messages.error(request, 'Selected room not found')
@@ -949,11 +959,11 @@ def pending_balance_bookings(request):
     from .models import Payment, PaymentStatus
     from decimal import Decimal
     
-    # Get all bookings with CONFIRMED status (checked in or staying)
+    # Get confirmed or checked-in bookings with a balance due.
     bookings_with_partial_payment = []
     
     confirmed_bookings = Booking.objects.filter(
-        status=BookingStatus.CONFIRMED
+        status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
     ).select_related('guest', 'room')
     
     for booking in confirmed_bookings:
@@ -986,7 +996,11 @@ def process_remaining_payment(request, booking_id):
     from .models import Payment, PaymentStatus, PaymentMethod
     from decimal import Decimal
     
-    booking = get_object_or_404(Booking, id=booking_id, status=BookingStatus.CONFIRMED)
+    booking = get_object_or_404(
+        Booking,
+        id=booking_id,
+        status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
+    )
     
     # Calculate total paid and balance due
     total_paid = Payment.objects.filter(
@@ -1072,10 +1086,7 @@ def process_remaining_payment(request, booking_id):
                 request
             )
             
-            # Update booking status if fully paid
             if new_balance <= 0:
-                booking.status = BookingStatus.CONFIRMED  # Already confirmed, just updating the payment
-                booking.save()
                 messages.success(
                     request,
                     f'✓ Balance Payment Complete!\n\nBooking #{booking.id}\nPrevious Balance: ₱{balance_due}\n'
@@ -1533,13 +1544,20 @@ def staff_requested_refunds_view(request):
     
     # Filter by status
     status_filter = request.GET.get('status', 'all')
+    if status_filter == RefundRequestStatus.APPROVED:
+        status_filter = 'all'
     if status_filter != 'all':
         refunds = refunds.filter(status=status_filter)
+
+    visible_statuses = [
+        choice for choice in RefundRequestStatus.choices
+        if choice[0] != RefundRequestStatus.APPROVED
+    ]
     
     context = {
         'refunds': refunds,
         'status_filter': status_filter,
-        'statuses': RefundRequestStatus.choices,
+        'statuses': visible_statuses,
     }
     
     return render(request, 'staff/requested_refunds.html', context)

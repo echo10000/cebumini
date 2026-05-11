@@ -44,12 +44,12 @@
                             <p><strong>Status:</strong>
                                 {% if refund.status == 'REQUESTED' %}
                                     <span class="badge bg-warning text-dark">Pending</span>
-                                {% elif refund.status == 'APPROVED' %}
-                                    <span class="badge bg-success">Approved</span>
                                 {% elif refund.status == 'REJECTED' %}
                                     <span class="badge bg-danger">Rejected</span>
                                 {% elif refund.status == 'ISSUED' %}
                                     <span class="badge bg-info">Issued</span>
+                                {% elif refund.status == 'APPROVED' %}
+                                    <span class="badge bg-info">Processing</span>
                                 {% endif %}
                             </p>
                         </div>
@@ -61,7 +61,7 @@
                     <p><strong>Requested Amount:</strong> <span class="text-danger">₱{{ refund.requested_amount }}</span></p>
 
                     {% if refund.approved_amount %}
-                    <p><strong>Approved Amount:</strong> <span class="text-success">₱{{ refund.approved_amount }}</span></p>
+                    <p><strong>Refund Amount:</strong> <span class="text-success">₱{{ refund.approved_amount }}</span></p>
                     {% endif %}
 
                     <p><strong>Reason for Refund:</strong></p>
@@ -71,19 +71,19 @@
                 </div>
             </div>
 
-            <!-- Manager Decision -->
+            <!-- Refund Decision -->
             {% if refund.status != 'REQUESTED' %}
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Manager Decision</h5>
+                    <h5 class="mb-0">Refund Decision</h5>
                 </div>
                 <div class="card-body">
-                    <p><strong>Approved by Manager:</strong> {{ refund.approved_by.get_full_name|default:"N/A" }}</p>
+                    <p><strong>Handled by:</strong> {{ refund.approved_by.get_full_name|default:"N/A" }}</p>
                     <p><strong>Decision Date:</strong> {{ refund.approved_at|date:"M d, Y H:i"|default:"N/A" }}</p>
                     
                     {% if refund.status == 'APPROVED' %}
-                    <div class="alert alert-success" role="alert">
-                        <i class="fas fa-check-circle"></i> Your refund request has been <strong>APPROVED</strong> for ₱{{ refund.approved_amount }}
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-clock"></i> This refund request is being <strong>PROCESSED</strong>
                     </div>
                     {% elif refund.status == 'REJECTED' %}
                     <div class="alert alert-danger" role="alert">
@@ -102,7 +102,7 @@
 
                     {% if refund.issued_at %}
                     <hr>
-                    <p><strong>Issued by Admin:</strong> {{ refund.issued_by.get_full_name|default:"N/A" }}</p>
+                    <p><strong>Issued by:</strong> {{ refund.issued_by.get_full_name|default:"N/A" }}</p>
                     <p><strong>Issued Date:</strong> {{ refund.issued_at|date:"M d, Y H:i" }}</p>
                     <p><strong>Transaction ID:</strong> <code>{{ refund.refund_transaction_id|default:"Pending" }}</code></p>
                     {% endif %}

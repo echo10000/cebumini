@@ -1,0 +1,10 @@
+{% if messages %}
+    <div class="auth-message-stack" role="status" aria-live="polite">
+        {% for message in messages %}
+            <div class="auth-message auth-message-{{ message.tags|default:'info' }}">
+                <i class="fas {% if 'success' in message.tags %}fa-circle-check{% elif 'error' in message.tags or 'danger' in message.tags %}fa-circle-xmark{% elif 'warning' in message.tags %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+                <span>{{ message }}</span>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

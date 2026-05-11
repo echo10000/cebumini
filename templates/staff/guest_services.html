@@ -4,1388 +4,271 @@
 
 {% block extra_css %}
 <style>
-    /* ============================================
-       BOOTSTRAP OVERRIDES
-       ============================================ */
-    
-    body {
-        background: #0a0f1e !important;
-    }
-    
     .container-fluid {
-        padding: 1.5rem;
-        max-width: 100%;
-        margin: 0 auto;
         width: 100%;
+        max-width: 100%;
+        padding: 0;
     }
-    
-    h2, h3, h4, h5, h6 {
-        color: #ffffff !important;
-    }
-    
-    .text-muted {
-        color: #9ca3af !important;
-    }
-    
-    .text-white {
-        color: #ffffff !important;
-    }
-    
-    /* ============================================
-       OVERRIDE BOOTSTRAP TABLE STYLES
-       ============================================ */
-    
-    .table {
-        background: #1a2235 !important;
-        color: #ffffff !important;
-    }
-    
-    .table tbody tr {
-        background: #1a2235 !important;
-    }
-    
-    .table tbody tr:hover {
-        background: rgba(201, 168, 76, 0.08) !important;
-    }
-    
-    .table tbody td {
-        color: #ffffff !important;
-        border-color: rgba(201, 168, 76, 0.1) !important;
-    }
-    
-    .table thead th {
-        color: #c9a84c !important;
-        border-color: rgba(201, 168, 76, 0.2) !important;
-    }
-    
-    /* ============================================
-       BREADCRUMB / NAVIGATION TRAIL
-       ============================================ */
-    
+
     .breadcrumb-trail {
         display: flex;
-        gap: 0.75rem;
-        margin-bottom: 1.5rem;
-        font-size: 0.85rem;
-        color: #9ca3af;
         align-items: center;
+        gap: 0.65rem;
+        margin-bottom: 1.25rem;
+        color: var(--staff-muted);
+        font-size: 0.88rem;
     }
-    
+
     .breadcrumb-trail a {
-        color: #9ca3af;
-        text-decoration: none;
-        transition: color 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .breadcrumb-trail a:hover {
-        color: #c9a84c;
-    }
-    
-    .breadcrumb-trail a i {
-        color: #c9a84c;
-    }
-    
-    .breadcrumb-trail .separator {
-        color: #6b7280;
-    }
-    
-    .breadcrumb-trail .active {
-        color: #c9a84c;
-        font-weight: 600;
-    }
-    
-    /* ============================================
-       PAGE HEADER
-       ============================================ */
-    
-    .page-header {
-        margin-bottom: 2rem;
-    }
-    
-    .page-header h2 {
-        font-size: 1.6rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        color: #ffffff !important;
-    }
-    
-    .page-header h2 i {
-        color: #c9a84c;
-        font-size: 1.4rem;
-    }
-    
-    .page-header .subtitle {
-        color: #9ca3af;
-        font-size: 0.95rem;
-        margin: 0;
-    }
-    
-    /* ============================================
-       STAT CARDS
-       ============================================ */
-    
-    .stat-cards-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-        background: linear-gradient(135deg, #1a2235 0%, #0f1623 100%);
-        border: 1px solid rgba(201, 168, 76, 0.15);
-        border-radius: 10px;
-        padding: 1.5rem;
-        text-align: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    .stat-card:hover {
-        border-color: #c9a84c;
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px rgba(201, 168, 76, 0.1);
-    }
-    
-    .stat-card-icon {
-        font-size: 2rem;
-        color: #c9a84c;
-        margin-bottom: 0.75rem;
-    }
-    
-    .stat-card-value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #ffffff;
-        margin-bottom: 0.25rem;
-    }
-    
-    .stat-card-label {
-        color: #9ca3af;
-        font-size: 0.85rem;
-        font-weight: 500;
-    }
-    
-    /* ============================================
-       FILTER / SEARCH SECTION
-       ============================================ */
-    
-    .filter-section {
-        background: #1a2235;
-        border: 1px solid rgba(201, 168, 76, 0.15);
-        border-radius: 10px;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        align-items: center;
-    }
-    
-    .filter-input {
-        background: #0f1623 !important;
-        border: 1px solid rgba(201, 168, 76, 0.3) !important;
-        color: #ffffff !important;
-        padding: 0.75rem 1.25rem;
-        border-radius: 6px;
-        font-size: 0.9rem;
-        transition: all 0.3s ease;
-        flex: 1;
-        min-width: 250px;
-    }
-    
-    .filter-input::placeholder {
-        color: #6b7280;
-    }
-    
-    .filter-input:focus {
-        outline: none;
-        border-color: #c9a84c !important;
-        box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
-    }
-    
-    .filter-button {
-        background: #c9a84c !important;
-        color: #0a0f1e !important;
-        border: none !important;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
         display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .filter-button:hover {
-        background: #b8963d !important;
-        transform: scale(1.02);
-    }
-    
-    /* ============================================
-       TABS
-       ============================================ */
-    
-    .nav-tabs {
-        border-bottom: 2px solid rgba(201, 168, 76, 0.15) !important;
-        gap: 0;
-    }
-    
-    .nav-tabs .nav-link {
-        color: #9ca3af;
-        border: none;
-        padding: 1rem 1.5rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
-        border-bottom: 3px solid transparent;
-        margin-bottom: -2px;
-    }
-    
-    .nav-tabs .nav-link:hover {
-        color: #c9a84c;
-    }
-    
-    .nav-tabs .nav-link.active {
-        color: #c9a84c !important;
-        background: transparent !important;
-        border-bottom-color: #c9a84c;
-    }
-    
-    /* ============================================
-       MESSAGES TABLE
-       ============================================ */
-    
-    .messages-table {
-        background: #1a2235;
-        border: 1px solid rgba(201, 168, 76, 0.15);
-        border-radius: 10px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    }
-    
-    .messages-table table {
-        margin: 0;
-        color: #ffffff;
-        width: 100%;
-        min-width: 900px;
-        table-layout: auto;
-        background: #1a2235;
-        border-collapse: collapse;
-        border-spacing: 0;
-    }
-    
-    .messages-table thead tr,
-    .messages-table tbody tr {
-        display: grid !important;
-        grid-template-columns: 2fr 3fr 2fr 1fr 1fr !important;
-        align-items: center !important;
-        gap: 0 !important;
-    }
-    
-    .messages-table thead tr th,
-    .messages-table tbody tr td {
-        display: block !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        min-width: 0 !important;
-    }
-    
-    .messages-table thead th {
-        color: #c9a84c;
+        gap: 0.45rem;
+        color: var(--staff-muted);
+        text-decoration: none;
         font-weight: 700;
-        padding: 1rem 1.5rem;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        background: linear-gradient(135deg, #0f1623 0%, #1a2235 100%);
-        vertical-align: middle;
-        border-bottom: 1px solid rgba(201, 168, 76, 0.2);
-    }
-    
-    .messages-table tbody tr {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        transition: all 0.25s ease;
-        background: #1a2235;
-        height: auto !important;
-    }
-    
-    .messages-table tbody tr:hover {
-        background: rgba(201, 168, 76, 0.05);
-        transform: translateX(4px);
-    }
-    
-    .messages-table tbody td {
-        padding: 1.2rem 1.5rem !important;
-        vertical-align: middle !important;
-        background: #1a2235 !important;
-        color: #ffffff !important;
-        word-break: break-word;
-        overflow: visible !important;
-        height: auto !important;
-        min-width: 0 !important;
-    }
-    
-    /* Column alignment and width distribution */
-    .messages-table tbody td, .messages-table thead th {
-        text-align: left;
-        vertical-align: middle;
     }
 
-    /* Column 1: Guest (30%) - Left align */
-    .messages-table th:nth-child(1),
-    .messages-table td:nth-child(1) { 
-        width: 30% !important;
-        text-align: left !important;
-        vertical-align: middle !important;
+    .breadcrumb-trail a:hover,
+    .breadcrumb-trail .active,
+    .breadcrumb-trail a i {
+        color: var(--staff-brand-dark);
     }
 
-    /* Column 2: Subject (25%) - Left align */
-    .messages-table th:nth-child(2),
-    .messages-table td:nth-child(2) { 
-        width: 25% !important;
-        text-align: left !important;
-        vertical-align: middle !important;
+    .page-header {
+        margin-bottom: 1.25rem;
     }
 
-    /* Column 3: Date (20%) - Left align */
-    .messages-table th:nth-child(3),
-    .messages-table td:nth-child(3) { 
-        width: 20% !important;
-        text-align: left !important;
-        vertical-align: middle !important;
-    }
-
-    /* Column 4: Status (15%) - Center align */
-    .messages-table th:nth-child(4),
-    .messages-table td:nth-child(4) { 
-        width: 15% !important;
-        text-align: center !important;
-        vertical-align: middle !important;
-    }
-
-    /* Column 5: Actions (10%) - Right align */
-    .messages-table th:nth-child(5),
-    .messages-table td:nth-child(5) { 
-        width: 10% !important;
-        text-align: right !important;
-        vertical-align: middle !important;
-    }
-
-    .messages-table tbody td > div {
-        display: flex !important;
-        flex-direction: column !important;
-        justify-content: center !important;
-        align-items: flex-start !important;
-        width: 100% !important;
-        min-height: auto;
-    }
-
-    .messages-table tbody td > .message-subject,
-    .messages-table tbody td > .message-date,
-    .messages-table tbody td > .sender-name,
-    .messages-table tbody td > .sender-email {
-        display: block !important;
-        overflow: visible !important;
-        min-width: 0 !important;
-        width: 100% !important;
-    }
-
-    .action-buttons {
-        display: flex !important;
-        justify-content: flex-end !important;
-        gap: 0.5rem !important;
-        align-items: center !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 100% !important;
-    }
-    
-    .sender-name {
-        color: #ffffff !important;
-        font-weight: 600 !important;
-        margin-bottom: 0.15rem !important;
-        overflow: visible !important;
-        white-space: normal !important;
-        width: 100% !important;
-        line-height: 1.3 !important;
-    }
-    
-    .sender-email {
-        color: #9ca3af !important;
-        font-size: 0.85rem !important;
-        overflow: visible !important;
-        word-break: break-word !important;
-        width: 100% !important;
-        line-height: 1.3 !important;
-    }
-    
-    .message-subject {
-        color: #c9a84c !important;
-        font-weight: 600 !important;
-        width: 100% !important;
-        white-space: normal !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
-        word-wrap: break-word !important;
-        line-height: 1.3 !important;
-    }
-    
-    .message-preview {
-        color: #9ca3af;
-        font-size: 0.9rem;
-        max-width: 400px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    
-    .badge-unread {
-        background: #f59e0b !important;
-        color: #0a0f1e !important;
-        padding: 0.35rem 0.75rem !important;
-        border-radius: 20px !important;
-        font-weight: 600 !important;
-        font-size: 0.75rem !important;
-        display: inline-flex !important;
-        white-space: nowrap !important;
-        align-items: center !important;
-        gap: 0.25rem !important;
-    }
-    
-    .badge-replied {
-        background: #10b981 !important;
-        color: white !important;
-        padding: 0.35rem 0.75rem !important;
-        border-radius: 20px !important;
-        font-weight: 600 !important;
-        font-size: 0.75rem !important;
-        display: inline-flex !important;
-        white-space: nowrap !important;
-        align-items: center !important;
-        gap: 0.25rem !important;
-    }
-    
-    .badge-pending {
-        background: #6b7280 !important;
-        color: white !important;
-        padding: 0.35rem 0.75rem !important;
-        border-radius: 20px !important;
-        font-weight: 600 !important;
-        font-size: 0.75rem !important;
-        display: inline-flex !important;
-        white-space: nowrap !important;
-        align-items: center !important;
-        gap: 0.25rem !important;
-    }
-    
-    .message-date {
-        color: #9ca3af !important;
-        font-size: 0.85rem !important;
-        white-space: normal !important;
-        line-height: 1.3 !important;
-        width: 100% !important;
-    }
-    
-    .action-buttons {
+    .page-header h2 {
         display: flex;
-        gap: 0.5rem;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0 0 0.35rem;
+        color: var(--staff-ink);
+        font-size: clamp(1.45rem, 2vw, 2rem);
+        font-weight: 850;
     }
-    
-    .action-buttons .btn-sm {
-        padding: 0.4rem 0.8rem !important;
-        font-size: 0.75rem !important;
-        border: none !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 0.25rem !important;
+
+    .page-header h2 i {
+        color: var(--staff-brand);
     }
-    
-    .btn-view {
-        background: #c9a84c !important;
-        color: #0a0f1e !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 0.25rem !important;
-    }
-    
-    .btn-view:hover {
-        background: #b8963d !important;
-    }
-    
-    .btn-delete {
-        background: #dc2626 !important;
-        color: white !important;
-    }
-    
-    .btn-delete:hover {
-        background: #991b1b !important;
-    }
-    
-    /* ============================================
-       EMPTY STATE
-       ============================================ */
-    
-    .empty-state {
-        text-align: center;
-        padding: 3rem 2rem;
-        background: linear-gradient(135deg, #1a2235 0%, #0f1623 100%);
-        border: 1px solid rgba(201, 168, 76, 0.15);
-        border-radius: 10px;
-        color: #9ca3af;
-    }
-    
-    .empty-state i {
-        font-size: 3rem;
-        color: #6b7280;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-    }
-    
-    .empty-state h4 {
-        color: #ffffff;
-        margin: 0.5rem 0 0.5rem;
-    }
-    
-    .empty-state p {
+
+    .page-header .subtitle {
         margin: 0;
-        font-size: 0.95rem;
-    }
-    
-    /* ============================================
-       SUCCESS TOAST NOTIFICATION
-       ============================================ */
-    
-    .toast-notification {
-        position: fixed;
-        top: 2rem;
-        right: 2rem;
-        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-        color: white;
-        padding: 1.25rem 1.75rem;
-        border-radius: 8px;
-        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.3);
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-        border-left: 4px solid #6ee7b7;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    
-    .toast-notification.error {
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
-        border-left-color: #fca5a5;
-    }
-    
-    .toast-notification.warning {
-        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.3);
-        border-left-color: #fcd34d;
-    }
-    
-    .toast-notification.info {
-        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-        border-left-color: #93c5fd;
-    }
-    
-    .toast-notification i {
-        font-size: 1.25rem;
-    }
-    
-    .toast-notification .message {
-        font-weight: 600;
-        font-size: 0.95rem;
-    }
-    
-    @keyframes slideIn {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-    }
-    
-    .toast-notification.removing {
-        animation: slideOut 0.3s ease forwards;
-    }
-    
-    /* ============================================
-       MODAL OVERRIDES
-       ============================================ */
-
-    #messageModal {
-        z-index: 20050 !important;
-        pointer-events: auto;
+        color: var(--staff-muted);
     }
 
-    #messageModal .modal-dialog {
-        pointer-events: auto;
-    }
-
-    .modal-backdrop {
-        z-index: 20040 !important;
-    }
-
-    .modal-dialog {
-        max-width: 760px;
-        width: min(92vw, 760px);
-        margin: 1.75rem auto;
-    }
-
-    .modal-content {
-        background: #0a0f1e !important;
-        border: 1px solid rgba(201,168,76,0.2) !important;
-        border-radius: 12px !important;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
-        overflow: hidden;
-        max-height: calc(100vh - 3.5rem);
-    }
-
-    /* MODAL HEADER */
-    .modal-header {
-        background: linear-gradient(135deg, #c9a84c 0%, #a68a3d 100%) !important;
-        border: none !important;
-        border-radius: 12px 12px 0 0 !important;
-        padding: 1.5rem !important;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .modal-title {
-        color: #0a0f1e !important;
-        font-size: 1.3rem !important;
-        font-weight: 700 !important;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .modal-title i { color: #0a0f1e; }
-
-    .btn-close {
-        background: transparent !important;
-        border: none !important;
-        color: #0a0f1e !important;
-        font-size: 1.5rem;
-        cursor: pointer;
-        padding: 0;
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        opacity: 1 !important;
-        transition: all 0.2s ease;
-        filter: brightness(0.2) !important;
-    }
-
-    .btn-close:hover {
-        opacity: 0.8 !important;
-        transform: scale(1.1);
-    }
-
-    /* MODAL BODY */
-    .modal-body {
-        background: #0a0f1e !important;
-        padding: 1.5rem !important;
-        height: min(78vh, 720px);
-        overflow: hidden;
-        overscroll-behavior: contain;
-        display: flex;
-        flex-direction: column;
-        gap: 1.25rem;
-    }
-
-    /* GUEST INFO HEADER GRID */
-    #messageContent {
-        background: transparent !important;
-        border: none !important;
-        border-radius: 0 !important;
-        padding: 0 0 1.5rem !important;
-        margin-bottom: 0 !important;
-        border-bottom: 2px solid rgba(201,168,76,0.2) !important;
-        flex: 0 0 auto;
-    }
-
-    #messageContent > div:first-child {
+    .stat-cards-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
         gap: 1rem;
+        margin-bottom: 1rem;
     }
 
-    #messageContent > div:first-child > div {
-        display: flex;
-        flex-direction: column;
+    .stat-card,
+    .filter-section,
+    .messages-table,
+    .empty-state {
+        background: rgba(255, 255, 255, 0.96);
+        border: 1px solid var(--staff-line);
+        border-radius: var(--staff-radius);
+        box-shadow: var(--staff-shadow);
+        color: var(--staff-ink);
     }
 
-    /* Subject section */
-    #messageContent > div:last-child {
-        background: #1a2235;
-        border: 1px solid rgba(201,168,76,0.15);
-        border-radius: 8px;
-        padding: 1rem;
-        margin-top: 1rem;
+    .stat-card {
+        padding: 1.1rem;
+        border-left: 4px solid var(--staff-brand);
     }
 
-    /* Info labels */
-    #messageContent [style*="text-transform"],
-    #messageContent [style*="font-size:0.75rem"] {
-        color: #9ca3af !important;
-        font-size: 0.8rem !important;
-        font-weight: 700 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
-        margin-bottom: 0.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+    .stat-card-icon,
+    .stat-card-value {
+        color: var(--staff-brand-dark);
     }
 
-    #msg-from { color: #ffffff !important; font-size: 1rem !important; font-weight: 700 !important; }
-    #msg-email { color: #c9a84c !important; font-size: 0.9rem !important; font-weight: 600 !important; word-break: break-all !important; }
-    #msg-phone { color: #ffffff !important; font-size: 0.95rem !important; font-weight: 600 !important; }
-    #msg-subject { color: #ffffff !important; font-size: 1rem !important; font-weight: 700 !important; }
-
-    /* ============================================
-       CHAT BUBBLES IN MODAL (staff POV)
-       Guest = incoming = LEFT (dark bubble)
-       Staff = outgoing = RIGHT (gold bubble)
-       ============================================ */
-
-    .conversation-panel {
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 auto;
-        min-height: 0;
-        margin-bottom: 0 !important;
+    .stat-card-icon {
+        margin-bottom: 0.55rem;
+        font-size: 1.35rem;
     }
 
-    /* Chat header bar */
-    .modal-chat-header {
-        background: #1a2235;
-        border: 1px solid rgba(201,168,76,0.15);
-        border-bottom: none;
-        border-radius: 8px 8px 0 0;
-        padding: 0.9rem 1.25rem;
+    .stat-card-value {
+        font-size: 1.65rem;
+        font-weight: 850;
+        line-height: 1;
     }
 
-    .modal-chat-header p {
-        margin: 0;
-        color: #ffffff;
+    .stat-card-label {
+        margin-top: 0.35rem;
+        color: var(--staff-muted);
         font-weight: 700;
-        font-size: 1rem;
+    }
+
+    .filter-section {
         display: flex;
         align-items: center;
         gap: 0.75rem;
-        border-bottom: 2px solid rgba(201,168,76,0.2);
-        padding-bottom: 0;
-    }
-
-    .modal-chat-header p i { color: #c9a84c; }
-
-    /* Conversation container */
-    .modal-chat-container {
-        background: #1a2235;
-        border: 1px solid rgba(201,168,76,0.15);
-        border-top: none;
-        border-radius: 0 0 8px 8px;
-        padding: 1.5rem;
-        flex: 1 1 auto;
-        max-height: none;
-        min-height: 180px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        scroll-behavior: smooth;
-    }
-
-    .modal-chat-container::-webkit-scrollbar { width: 5px; }
-    .modal-chat-container::-webkit-scrollbar-track { background: transparent; }
-    .modal-chat-container::-webkit-scrollbar-thumb { background: #c9a84c; border-radius: 3px; }
-
-    /* Base message row */
-    .modal-chat-container .message-row {
-        display: flex;
-        width: 100%;
         margin-bottom: 1rem;
-        animation: fadeInBubble 0.3s ease-in;
+        padding: 1rem;
     }
 
-    .modal-chat-container .message-row--guest {
-        justify-content: flex-start;
+    .filter-input {
+        min-width: 220px;
+        flex: 1;
+        padding: 0.65rem 0.8rem;
+        background: #fff;
+        border: 1px solid var(--staff-line);
+        border-radius: var(--staff-radius);
+        color: var(--staff-ink);
     }
 
-    .modal-chat-container .message-row--staff {
-        justify-content: flex-end;
-    }
-
-    /* Bubble group inside row */
-    .message-bubble {
-        display: flex;
-        flex-direction: column;
-        width: auto;
-        min-width: 180px;
-        max-width: min(72%, 560px);
-    }
-
-    @keyframes fadeInBubble {
-        from { opacity: 0; transform: translateY(6px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    .bubble-avatar {
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
-        border-radius: 50%;
-        display: flex;
+    .filter-button,
+    .btn-view {
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        font-weight: 700;
-        font-size: 0.85rem;
-        flex-shrink: 0;
-        align-self: flex-start;
+        gap: 0.45rem;
+        min-height: 40px;
+        border: 1px solid var(--staff-brand);
+        border-radius: var(--staff-radius);
+        background: var(--staff-brand);
+        color: #fff;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
     }
 
-    .staff-avatar {
-        background: #10b981;
-        color: white;
+    .filter-button {
+        padding: 0.65rem 0.95rem;
     }
 
-    .guest-avatar {
-        background: #f59e0b;
-        color: white;
+    .btn-view {
+        min-width: 84px;
+        padding: 0.5rem 0.75rem;
     }
 
-    /* STAFF MESSAGE = Our message = RIGHT SIDE (GOLD) */
-    .staff-message {
-        align-items: flex-end;
-        text-align: right;
-    }
-
-    .staff-message .bubble-sender {
-        color: #0a0f1e;
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-
-    .staff-message .bubble-content {
-        background: #c9a84c;
-        color: #0a0f1e;
-        border: none;
-        border-radius: 8px 8px 0px 8px;
-        padding: 1rem;
-        word-wrap: break-word;
-        word-break: break-word;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(201,168,76,0.2);
-        transition: box-shadow 0.2s ease;
-        margin-left: auto;
-        width: fit-content;
-        max-width: 100%;
-    }
-
-    .staff-message .bubble-content:hover {
-        box-shadow: 0 4px 14px rgba(201,168,76,0.35);
-    }
-
-    .staff-message .message-time {
-        color: rgba(10,15,30,0.6);
-        font-size: 0.75rem;
-        margin-top: 0.5rem;
-        text-align: right;
-    }
-
-    /* GUEST MESSAGE = Incoming message = LEFT SIDE (DARK) */
-    .guest-message {
-        align-items: flex-start;
-        text-align: left;
-    }
-
-    .guest-message .bubble-sender {
-        color: #f59e0b;
-        font-size: 0.85rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-
-    .guest-message .bubble-content {
-        background: #0f1623;
-        color: #ffffff;
-        border-left: 4px solid #c9a84c;
-        border-radius: 8px 8px 8px 0px;
-        padding: 1rem;
-        word-wrap: break-word;
-        word-break: break-word;
-        font-size: 0.95rem;
-        line-height: 1.6;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        transition: box-shadow 0.2s ease;
-    }
-
-    .guest-message .bubble-content:hover {
-        box-shadow: 0 4px 14px rgba(201,168,76,0.15);
-    }
-
-    .guest-message .message-time {
-        color: #6b7280;
-        font-size: 0.75rem;
-        margin-top: 0.5rem;
-        text-align: left;
-    }
-
-    .bubble-content {
-        box-sizing: border-box;
-        width: fit-content;
-        max-width: 100%;
-    }
-
-    /* ============================================
-       REPLY SECTION IN MODAL
-       ============================================ */
-
-    .reply-section {
-        padding-top: 1.25rem;
-        border-top: 2px solid rgba(201,168,76,0.2);
-        margin-top: 0;
-        scroll-margin-bottom: 1rem;
-        flex: 0 0 auto;
-    }
-
-    .reply-title {
-        color: white;
-        font-size: 1rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .reply-form {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-    }
-
-    .reply-input-group {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .reply-textarea {
-        width: 100%;
-        background: #0f1623;
-        border: 1px solid rgba(201,168,76,0.3);
-        border-radius: 8px;
-        color: white;
-        padding: 1rem;
-        font-size: 0.95rem;
-        font-family: inherit;
-        min-height: 120px;
-        resize: vertical;
-        outline: none;
-        transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .reply-textarea::placeholder {
-        color: #6b7280;
-    }
-
-    .reply-textarea:focus {
-        border-color: #c9a84c;
-        box-shadow: 0 0 0 3px rgba(201,168,76,0.1);
-    }
-
-    .reply-textarea:hover {
-        border-color: rgba(201,168,76,0.5);
-    }
-
-    .reply-notice {
-        background: #0d7377;
-        border: 1px solid #10b981;
-        border-radius: 6px;
-        padding: 0.75rem 1rem;
-        color: #6ee7b7;
-        font-size: 0.85rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .reply-btn {
-        background: #c9a84c;
-        color: #0a0f1e;
-        border: none;
-        padding: 0.85rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 700;
-        font-size: 0.95rem;
-        width: 100%;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-        transition: all 0.3s ease;
-    }
-
-    .reply-btn:hover {
-        background: #b8963d;
-        transform: scale(1.02);
-    }
-
-    .reply-btn:active {
-        transform: scale(0.98);
-    }
-
-    .reply-btn:disabled {
-        background: #4b5563;
-        cursor: not-allowed;
-        transform: none;
-    }
-
-    /* ============================================
-       MODAL FOOTER
-       ============================================ */
-    .modal-footer {
-        background: #0a0f1e !important;
-        border-top: 1px solid rgba(201,168,76,0.15) !important;
-        padding: 1rem 1.5rem !important;
-        display: flex;
-        justify-content: flex-end;
-        gap: 1rem;
-    }
-
-    .modal-footer .btn {
-        background: transparent !important;
-        border: 1px solid #c9a84c !important;
-        color: #c9a84c !important;
-        padding: 0.6rem 1.25rem !important;
-        border-radius: 6px !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
-
-    .modal-footer .btn:hover {
-        background: #c9a84c !important;
-        color: #0a0f1e !important;
-    }
-    
-    /* ============================================
-       RESPONSIVE DESIGN
-       ============================================ */
-    
-    @media (max-width: 768px) {
-        .modal-dialog {
-            width: calc(100vw - 1rem);
-            max-width: none;
-            margin: 0.5rem auto;
-        }
-
-        .modal-content {
-            max-height: calc(100vh - 1rem);
-        }
-
-        .modal-body {
-            height: min(82vh, 680px);
-            padding: 1rem !important;
-        }
-
-        .container-fluid {
-            padding: 1.5rem;
-        }
-        
-        .stat-cards-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-        
-        .filter-section {
-            flex-direction: column;
-            padding: 1.25rem;
-            gap: 1rem;
-        }
-        
-        .filter-input {
-            width: 100%;
-            min-width: auto;
-        }
-        
-        .filter-button {
-            width: 100%;
-            justify-content: center;
-        }
-        
-        .messages-table {
-            font-size: 0.85rem;
-        }
-        
-        .messages-table thead th {
-            padding: 0.75rem;
-        }
-        
-        .messages-table tbody td {
-            padding: 0.75rem;
-        }
-        
-        .message-subject,
-        .message-preview {
-            max-width: none !important;
-            width: auto !important;
-        }
-        
-        .message-bubble {
-            gap: 0.5rem;
-        }
-        
-        .staff-message > div,
-        .guest-message > div {
-            max-width: 80%;
-        }
-        
-        .staff-message::before,
-        .guest-message::before {
-            width: 32px;
-            height: 32px;
-            min-width: 32px;
-            font-size: 0.75rem;
-        }
-        
-        .message-bubble .bubble-sender {
-            font-size: 0.8rem;
-        }
-        
-        .message-bubble .bubble-content {
-            font-size: 0.9rem;
-        }
-    }
-    
-    @media (max-width: 480px) {
-        .container-fluid {
-            padding: 1rem;
-        }
-        
-        .page-header h2 {
-            font-size: 1.3rem;
-        }
-        
-        .stat-cards-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .filter-section {
-            padding: 1rem;
-            gap: 0.75rem;
-        }
-        
-        .nav-tabs .nav-link {
-            padding: 0.75rem 1rem;
-            font-size: 0.85rem;
-        }
-        
-        .messages-table {
-            font-size: 0.75rem;
-        }
-        
-        .messages-table thead th,
-        .messages-table tbody td {
-            padding: 0.5rem;
-        }
-        
-        .action-buttons {
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-        
-        .modal-chat-container {
-            padding: 1rem;
-            gap: 1rem;
-            min-height: 140px;
-        }
-        
-        .message-bubble {
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-        }
-        
-        .staff-message > div,
-        .guest-message > div {
-            max-width: 90%;
-        }
-        
-        .staff-message::before,
-        .guest-message::before {
-            width: 28px;
-            height: 28px;
-            min-width: 28px;
-            font-size: 0.7rem;
-        }
-        
-        .message-bubble .bubble-sender {
-            font-size: 0.75rem;
-        }
-        
-        .message-bubble .bubble-content {
-            font-size: 0.85rem;
-            padding: 0.85rem;
-        }
-        
-        .message-bubble .message-time {
-            font-size: 0.7rem;
-        }
+    .filter-button:hover,
+    .btn-view:hover:hover {
+        background: var(--staff-brand-dark);
+        border-color: var(--staff-brand-dark);
+        color: #fff;
     }
 
     .messages-table {
-        background: rgba(255, 255, 255, 0.96) !important;
-        border: 1px solid var(--guest-line) !important;
-        border-radius: 8px !important;
-        box-shadow: var(--guest-shadow) !important;
-        overflow: hidden;
+        overflow-x: auto;
     }
 
-    .messages-table table,
-    .messages-table thead tr,
-    .messages-table tbody tr,
-    .messages-table tbody td {
-        background: transparent !important;
+    .messages-table table {
+        width: 100%;
+        min-width: 820px;
+        margin: 0;
+        table-layout: fixed;
+        border-collapse: collapse;
     }
 
-    .messages-table thead th {
-        background: var(--guest-surface-alt) !important;
-        color: var(--guest-muted) !important;
-        border-color: var(--guest-line) !important;
-        text-transform: none !important;
-        letter-spacing: 0 !important;
-        font-weight: 800 !important;
+    .messages-table th,
+    .messages-table td {
+        padding: 1rem 1.1rem;
+        border-bottom: 1px solid var(--staff-line);
+        color: var(--staff-ink);
+        vertical-align: middle;
+        overflow-wrap: anywhere;
     }
+
+    .messages-table th {
+        background: var(--staff-surface-alt);
+        color: var(--staff-muted);
+        font-weight: 850;
+    }
+
+    .messages-table th:nth-child(1),
+    .messages-table td:nth-child(1) { width: 26%; }
+    .messages-table th:nth-child(2),
+    .messages-table td:nth-child(2) { width: 28%; }
+    .messages-table th:nth-child(3),
+    .messages-table td:nth-child(3) { width: 16%; }
+    .messages-table th:nth-child(4),
+    .messages-table td:nth-child(4) { width: 15%; text-align: center; }
+    .messages-table th:nth-child(5),
+    .messages-table td:nth-child(5) { width: 15%; text-align: right; }
 
     .messages-table tbody tr:hover {
-        background: rgba(15, 118, 110, 0.05) !important;
-    }
-
-    .messages-table tbody td {
-        color: var(--guest-ink) !important;
-        border-color: var(--guest-line) !important;
-        vertical-align: middle !important;
+        background: rgba(15, 118, 110, 0.05);
     }
 
     .sender-name,
+    .message-subject {
+        color: var(--staff-ink);
+        font-weight: 850;
+    }
+
     .sender-email,
-    .message-subject,
     .message-date,
+    .message-date small,
     .message-preview {
-        color: var(--guest-ink) !important;
+        color: var(--staff-muted);
     }
 
-    .sender-email,
-    .message-date small {
-        color: var(--guest-muted) !important;
+    .action-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
     }
 
-    .btn-view {
-        background: var(--guest-brand) !important;
-        color: #fff !important;
-        border: none !important;
-    }
-
-    .btn-view:hover {
-        background: var(--guest-brand-dark) !important;
-        color: #fff !important;
+    .badge-unread,
+    .badge-replied,
+    .badge-pending {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        font-weight: 850;
+        white-space: nowrap;
     }
 
     .badge-unread {
-        background: #dbeafe !important;
-        color: #1d4ed8 !important;
-        border: 1px solid #bfdbfe !important;
+        background: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
     }
 
     .badge-replied {
-        background: #dcfce7 !important;
-        color: var(--guest-success) !important;
-        border: 1px solid #bbf7d0 !important;
+        background: #dcfce7;
+        color: var(--staff-success);
+        border: 1px solid #bbf7d0;
     }
 
     .badge-pending {
-        background: #fef3c7 !important;
-        color: var(--guest-warning) !important;
-        border: 1px solid #fde68a !important;
+        background: #fef3c7;
+        color: var(--staff-warning);
+        border: 1px solid #fde68a;
     }
 
-    .modal-content,
-    .modal-header,
-    .modal-body,
-    .modal-footer,
-    #messageContent,
-    #messageContent > div:first-child,
-    #messageContent > div:last-child {
-        background: #fff !important;
-        color: var(--guest-ink) !important;
-        border-color: var(--guest-line) !important;
+    .empty-state {
+        padding: 3rem 2rem;
+        text-align: center;
+        color: var(--staff-muted);
     }
 
-    .modal-chat-container {
-        background: #f8fbfb !important;
-        border: 1px solid var(--guest-line) !important;
+    .empty-state i {
+        margin-bottom: 1rem;
+        color: var(--staff-brand);
+        font-size: 2.4rem;
     }
 
-    .staff-message .bubble-content {
-        background: #e6f4f2 !important;
-        color: var(--guest-ink) !important;
-        box-shadow: none !important;
+    .empty-state h4 {
+        color: var(--staff-ink);
     }
 
-    .staff-message .bubble-content strong,
-    .staff-message .message-time {
-        color: var(--guest-brand-dark) !important;
-    }
+    @media (max-width: 900px) {
+        .filter-section {
+            display: grid;
+            grid-template-columns: 1fr;
+        }
 
-    .guest-message .bubble-content {
-        background: #fff !important;
-        color: var(--guest-ink) !important;
-        border: 1px solid var(--guest-line) !important;
-        border-left: 4px solid var(--guest-brand) !important;
-        box-shadow: none !important;
-    }
-
-    .guest-message .bubble-content strong,
-    .guest-message .message-time {
-        color: var(--guest-muted) !important;
+        .messages-table table {
+            min-width: 680px;
+        }
     }
 </style>
 {% endblock %}
@@ -1522,424 +405,33 @@
     {% endif %}
 </div>
 
-<!-- Message Detail Modal -->
-<div class="modal fade" id="messageModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="fas fa-headset"></i> Guest Inquiry Details
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-
-            <div class="modal-body">
-
-                <!-- Guest Info Card -->
-                <div id="messageContent" style="background: #0f1623; border: 1px solid rgba(201,168,76,0.15); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem;">
-                    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:1rem;">
-                        <div>
-                            <div style="color:#9ca3af; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;"><i class="fas fa-user" style="color:#c9a84c;"></i> From</div>
-                            <div id="msg-from" style="color:#ffffff; font-weight:600; font-size:0.95rem;">—</div>
-                        </div>
-                        <div>
-                            <div style="color:#9ca3af; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;"><i class="fas fa-envelope" style="color:#c9a84c;"></i> Email</div>
-                            <div id="msg-email" style="color:#ffffff; font-weight:600; font-size:0.9rem; word-break:break-all;">—</div>
-                        </div>
-                        <div>
-                            <div style="color:#9ca3af; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;"><i class="fas fa-phone" style="color:#c9a84c;"></i> Phone</div>
-                            <div id="msg-phone" style="color:#ffffff; font-weight:600; font-size:0.95rem;">—</div>
-                        </div>
-                    </div>
-                    <div style="margin-top:1rem; padding-top:1rem; border-top:1px solid rgba(201,168,76,0.1);">
-                        <div style="color:#9ca3af; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.3rem;"><i class="fas fa-tag" style="color:#c9a84c;"></i> Subject</div>
-                        <div id="msg-subject" style="color:#ffffff; font-weight:700; font-size:1rem;">—</div>
-                    </div>
-                </div>
-
-                <!-- Conversation -->
-                <div class="conversation-panel">
-                    <div class="modal-chat-header">
-                        <p><i class="fas fa-comments"></i> Conversation</p>
-                    </div>
-                    <div id="conversationContainer" class="modal-chat-container">
-                        <p style="color: #6b7280; font-style: italic; text-align:center; padding: 1rem 0;">Loading conversation...</p>
-                    </div>
-                </div>
-
-                <!-- Reply Section -->
-                <div class="reply-section">
-                    <h3 class="reply-title">
-                        <span>↩ Send Reply</span>
-                    </h3>
-                    
-                    <form method="POST" class="reply-form">
-                        {% csrf_token %}
-                        
-                        <div class="reply-input-group">
-                            <textarea 
-                                name="reply_message"
-                                class="reply-textarea"
-                                placeholder="Type your reply to the guest here..."
-                                rows="4"
-                                required
-                            ></textarea>
-                        </div>
-                        
-                        <div class="reply-notice">
-                            <span>📧 Guest will receive an email notification</span>
-                        </div>
-                        
-                        <button type="submit" class="reply-btn">
-                            ✉ Send Reply & Notify Guest
-                        </button>
-                    </form>
-                </div>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn" data-bs-dismiss="modal">
-                    Close
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
-// Search and filter functionality
-const searchInput = document.getElementById('searchMessages');
-const resetBtn = document.getElementById('resetFilters');
-const messageRows = document.querySelectorAll('.inquiry-row');
+(function () {
+    const searchInput = document.getElementById('searchMessages');
+    const resetBtn = document.getElementById('resetFilters');
+    const messageRows = document.querySelectorAll('.inquiry-row');
 
-function filterMessages() {
-    const searchTerm = searchInput.value.toLowerCase();
-    
-    messageRows.forEach(row => {
-        const guestName = row.getAttribute('data-guest') || '';
-        const email = row.getAttribute('data-email') || '';
-        const subject = row.getAttribute('data-subject') || '';
-        
-        const matches = 
-            guestName.includes(searchTerm) || 
-            email.includes(searchTerm) || 
-            subject.includes(searchTerm);
-        
-        row.style.display = matches ? '' : 'none';
-    });
-}
+    function filterMessages() {
+        const searchTerm = (searchInput ? searchInput.value : '').toLowerCase();
 
-function resetFilters() {
-    searchInput.value = '';
-    messageRows.forEach(row => row.style.display = '');
-}
-
-// Event listeners
-if (searchInput) searchInput.addEventListener('input', filterMessages);
-if (resetBtn) resetBtn.addEventListener('click', resetFilters);
-
-// Modal functionality with AJAX and Auto-Update
-const messageModal = document.getElementById('messageModal');
-let replyForm = null;  // Will be set when modal opens
-let currentMessageId = null;
-let autoUpdateInterval = null;
-let lastReplyCount = -1;  // -1 forces first fetch to always render
-
-// ── Helpers ────────────────────────────────────────────────────────────────
-
-function scrollContainerToBottom(container) {
-    if (!container) return;
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() => { container.scrollTop = container.scrollHeight; });
-    });
-}
-
-function escHtmlInline(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-function parseThreadTimestamp(ts, tsIso = '') {
-    if (tsIso) {
-        const dIso = new Date(tsIso);
-        if (!isNaN(dIso)) return dIso.getTime();
-    }
-    if (!ts) return 0;
-
-    // Handles:
-    // - "April 23, 2026 at 10:15 PM"
-    // - "Apr 23, 2026 at 10:15 PM"
-    // - "Apr 23, 2026 at 22:15"
-    const normalized = String(ts).replace(' at ', ' ');
-    const d = new Date(normalized);
-    if (!isNaN(d)) return d.getTime();
-    return 0;
-}
-
-// ── Conversation renderer ──────────────────────────────────────────────────
-
-function renderConversation(msg, staffReplies, guestReplies, forceScrollToBottom = false) {
-    const container = document.getElementById('conversationContainer');
-    if (!container) return;
-
-    const wasAtBottom = container.scrollTop + container.clientHeight >= container.scrollHeight - 20;
-
-    // Build chronological message array
-    const allMessages = [];
-
-    // Original guest message
-    allMessages.push({
-        type: 'guest',
-        name: msg.name,
-        text: msg.message,
-        timestamp: msg.created_at,
-        sort_time: parseThreadTimestamp(msg.created_at, msg.created_at_iso),
-        seq: 0
-    });
-
-    // Staff replies
-    staffReplies.forEach((r, idx) => {
-        allMessages.push({
-            type: 'staff',
-            staff_name: r.staff_name,
-            text: r.reply_text,
-            timestamp: r.created_at,
-            sort_time: parseThreadTimestamp(r.created_at, r.created_at_iso),
-            seq: idx + 1
+        messageRows.forEach(function (row) {
+            const guestName = row.getAttribute('data-guest') || '';
+            const email = row.getAttribute('data-email') || '';
+            const subject = row.getAttribute('data-subject') || '';
+            const matches = guestName.includes(searchTerm) || email.includes(searchTerm) || subject.includes(searchTerm);
+            row.style.display = matches ? '' : 'none';
         });
-    });
+    }
 
-    // Guest follow-up replies
-    guestReplies.forEach((r, idx) => {
-        allMessages.push({
-            type: 'guest',
-            name: msg.name,
-            text: r.text,
-            timestamp: r.timestamp,
-            sort_time: parseThreadTimestamp(r.timestamp, r.timestamp_iso),
-            seq: staffReplies.length + idx + 1
+    function resetFilters() {
+        if (searchInput) searchInput.value = '';
+        messageRows.forEach(function (row) {
+            row.style.display = '';
         });
-    });
-
-    // Sort chronologically (oldest first, newest at bottom)
-    allMessages.sort((a, b) => {
-        if (a.sort_time !== b.sort_time) return a.sort_time - b.sort_time;
-        return a.seq - b.seq;
-    });
-
-    // Build HTML using structure from working guest template
-    let html = '';
-    allMessages.forEach(message => {
-        const escapedText = escHtmlInline(message.text).replace(/\n/g, '<br>');
-        const escapedTimestamp = escHtmlInline(message.timestamp);
-
-        if (message.type === 'staff') {
-            // STAFF REPLY = Our message = RIGHT SIDE (GOLD)
-            const escapedName = escHtmlInline(message.staff_name);
-            html += `
-            <div class="message-row message-row--staff">
-                <div class="message-bubble staff-message">
-                    <div class="bubble-sender">${escapedName}</div>
-                    <div class="bubble-content">
-                        ${escapedText}
-                    </div>
-                    <div class="message-time">${escapedTimestamp}</div>
-                </div>
-            </div>`;
-        } else {
-            // GUEST MESSAGE = Incoming = LEFT SIDE (DARK)
-            const escapedName = escHtmlInline(message.name || 'Guest');
-            html += `
-            <div class="message-row message-row--guest">
-                <div class="message-bubble guest-message">
-                    <div class="bubble-sender">${escapedName}</div>
-                    <div class="bubble-content">
-                        ${escapedText}
-                    </div>
-                    <div class="message-time">${escapedTimestamp}</div>
-                </div>
-            </div>`;
-        }
-    });
-
-    container.innerHTML = html;
-
-    // Scroll to bottom
-    if (forceScrollToBottom || wasAtBottom || lastReplyCount === -1) {
-        setTimeout(() => { container.scrollTop = container.scrollHeight; }, 50);
-    }
-}
-
-// ── Fetch & update ─────────────────────────────────────────────────────────
-
-function fetchAndUpdateMessageDetails(messageId) {
-    fetch(`/staff/messages/${messageId}/`, {
-        method: 'GET',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (!data.success) return;
-        const msg = data.message;
-
-        // Populate header fields (only on first load when still showing dashes)
-        const fromEl = document.getElementById('msg-from');
-        if (fromEl && fromEl.textContent === '—') {
-            fromEl.textContent = msg.name;
-            document.getElementById('msg-email').textContent = msg.email;
-            document.getElementById('msg-phone').textContent = msg.phone || '—';
-            document.getElementById('msg-subject').textContent = msg.subject;
-        }
-
-        const totalReplies = data.staff_replies.length + data.guest_replies.length;
-
-        // Always rebuild on first fetch (lastReplyCount === -1) OR when count changes
-        if (totalReplies !== lastReplyCount) {
-            renderConversation(msg, data.staff_replies, data.guest_replies);
-            lastReplyCount = totalReplies;
-        }
-
-        updateRowStatus(messageId, msg.is_replied);
-    })
-    .catch(err => console.error('Conversation fetch error:', err));
-}
-
-// ── Auto-update lifecycle ──────────────────────────────────────────────────
-
-function startAutoUpdate(messageId) {
-    if (autoUpdateInterval) clearInterval(autoUpdateInterval);
-    fetchAndUpdateMessageDetails(messageId);
-    autoUpdateInterval = setInterval(() => fetchAndUpdateMessageDetails(messageId), 5000);
-}
-
-function stopAutoUpdate() {
-    if (autoUpdateInterval) { clearInterval(autoUpdateInterval); autoUpdateInterval = null; }
-    lastReplyCount = -1;  // Reset so next modal open always re-renders
-}
-
-// ── Modal open / close ─────────────────────────────────────────────────────
-
-if (messageModal) {
-    messageModal.addEventListener('show.bs.modal', function (event) {
-        const btn = event.relatedTarget;
-        currentMessageId = btn.getAttribute('data-message-id');
-
-        // Reset all fields
-        ['msg-from','msg-email','msg-phone','msg-subject'].forEach(id => {
-            const el = document.getElementById(id);
-            if (el) el.textContent = '—';
-        });
-        document.getElementById('conversationContainer').innerHTML =
-            '<p style="color:#6b7280;font-style:italic;text-align:center;padding:1.5rem 0;">Loading conversation…</p>';
-        
-        // Get and clear the reply textarea
-        const replySection = document.querySelector('.reply-section');
-        if (replySection) {
-            replyForm = replySection.querySelector('.reply-form');
-            const replyTextarea = replyForm.querySelector('[name="reply_message"]');
-            if (replyTextarea) replyTextarea.value = '';
-            
-            // Setup reply form submission handler
-            if (replyForm) {
-                replyForm.removeEventListener('submit', handleReplySubmit);
-                replyForm.addEventListener('submit', handleReplySubmit);
-            }
-        }
-        
-        lastReplyCount = -1;
-
-        startAutoUpdate(currentMessageId);
-    });
-    messageModal.addEventListener('hide.bs.modal', stopAutoUpdate);
-}
-
-function handleReplySubmit(e) {
-    e.preventDefault();
-    const replyTextarea = replyForm.querySelector('[name="reply_message"]');
-    const replyText = replyTextarea.value.trim();
-    
-    if (!replyText) { 
-        showToast('Please enter a reply.', 'warning'); 
-        return; 
     }
 
-    const submitBtn = replyForm.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
-
-    const formData = new FormData();
-    formData.append('reply_text', replyText);
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '';
-
-    fetch(`/staff/messages/${currentMessageId}/reply/`, {
-        method: 'POST',
-        body: formData,
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken }
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            showSuccessToast(data.message || 'Reply sent!');
-            replyTextarea.value = '';
-            updateRowStatus(currentMessageId, true);
-            
-            // Immediately fetch and re-render with forced scroll to bottom
-            fetch(`/staff/messages/${currentMessageId}/`, {
-                method: 'GET',
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            })
-            .then(r => r.json())
-            .then(freshData => {
-                if (freshData.success) {
-                    const msg = freshData.message;
-                    // Render with forceScrollToBottom = true
-                    renderConversation(msg, freshData.staff_replies, freshData.guest_replies, true);
-                    lastReplyCount = freshData.staff_replies.length + freshData.guest_replies.length;
-                }
-            })
-            .catch(err => console.error('Failed to refresh after reply:', err));
-        } else {
-            showToast('Error: ' + (data.error || 'Failed to send reply'), 'error');
-        }
-    })
-    .catch(() => showToast('Network error. Please try again.', 'error'))
-    .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = '✉ Send Reply & Notify Guest';
-    });
-}
-
-// ── Row status badge ───────────────────────────────────────────────────────
-
-function updateRowStatus(messageId, isReplied) {
-    const row = document.querySelector(`tr[data-message-id="${messageId}"]`);
-    if (!row) return;
-    const statusCell = row.querySelector('td:nth-child(4)');
-    if (statusCell) {
-        statusCell.innerHTML = isReplied
-            ? '<span class="badge-replied"><i class="fas fa-check"></i> Replied</span>'
-            : '<span class="badge-pending"><i class="fas fa-clock"></i> Pending</span>';
-    }
-}
-
-// ── Toast notifications ────────────────────────────────────────────────────
-
-function showToast(message, type = 'success') {
-    document.querySelectorAll('.toast-notification').forEach(t => t.remove());
-    const icons = { success:'fa-check-circle', error:'fa-exclamation-circle', warning:'fa-exclamation-triangle', info:'fa-info-circle' };
-    const toast = document.createElement('div');
-    toast.className = `toast-notification ${type}`;
-    toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i><span class="message">${escHtmlInline(message)}</span>`;
-    document.body.appendChild(toast);
-    const dur = type === 'error' ? 6000 : 4000;
-    setTimeout(() => {
-        toast.classList.add('removing');
-        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 300);
-    }, dur);
-}
-
-function showSuccessToast(msg) { showToast(msg, 'success'); }
-
-
+    if (searchInput) searchInput.addEventListener('input', filterMessages);
+    if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+})();
 </script>
 {% endblock %}

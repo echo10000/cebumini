@@ -1,0 +1,817 @@
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - link "C Cebu Luxury Admin Panel" [ref=e3] [cursor=pointer]:
+      - /url: /admin-panel/
+      - generic [ref=e4]: C
+      - generic [ref=e5]:
+        - heading "Cebu Luxury" [level=1] [ref=e6]
+        - paragraph [ref=e7]: Admin Panel
+    - list [ref=e8]:
+      - listitem [ref=e9]:
+        - generic [ref=e10]:
+          - generic [ref=e11]: S
+          - generic [ref=e12]: Super
+      - listitem [ref=e13]:
+        - link " Logout" [ref=e14] [cursor=pointer]:
+          - /url: /auth/logout/
+          - generic [ref=e15]: 
+          - text: Logout
+  - complementary [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]: Dashboard
+      - list [ref=e19]:
+        - listitem [ref=e20]:
+          - link " Overview" [ref=e21] [cursor=pointer]:
+            - /url: /admin-panel/
+            - generic [ref=e22]: 
+            - generic [ref=e23]: Overview
+    - generic [ref=e24]:
+      - generic [ref=e25]: Management
+      - list [ref=e26]:
+        - listitem [ref=e27]:
+          - link " Payments 3" [ref=e28] [cursor=pointer]:
+            - /url: /admin-panel/payments/
+            - generic [ref=e29]: 
+            - generic [ref=e30]: Payments
+            - generic [ref=e31]: "3"
+        - listitem [ref=e32]:
+          - link " Bookings" [ref=e33] [cursor=pointer]:
+            - /url: /admin-panel/bookings/
+            - generic [ref=e34]: 
+            - generic [ref=e35]: Bookings
+        - listitem [ref=e36]:
+          - link " Rooms" [ref=e37] [cursor=pointer]:
+            - /url: /admin-panel/rooms/
+            - generic [ref=e38]: 
+            - generic [ref=e39]: Rooms
+        - listitem [ref=e40]:
+          - link " Users" [ref=e41] [cursor=pointer]:
+            - /url: /admin-panel/users/
+            - generic [ref=e42]: 
+            - generic [ref=e43]: Users
+        - listitem [ref=e44]:
+          - link " Guest Inquiries" [ref=e45] [cursor=pointer]:
+            - /url: /staff/guest-services/
+            - generic [ref=e46]: 
+            - generic [ref=e47]: Guest Inquiries
+    - generic [ref=e48]:
+      - generic [ref=e49]: Reports
+      - list [ref=e50]:
+        - listitem [ref=e51]:
+          - link "Reports" [ref=e52] [cursor=pointer]:
+            - /url: /admin-panel/reports/
+            - generic [ref=e53]: Reports
+    - generic [ref=e54]:
+      - generic [ref=e55]: Other
+      - list [ref=e56]:
+        - listitem [ref=e57]:
+          - link " Back to Hotel" [ref=e58] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e59]: 
+            - generic [ref=e60]: Back to Hotel
+  - main [ref=e61]:
+    - generic [ref=e62]:
+      - heading "Dashboard Overview" [level=1] [ref=e63]
+      - paragraph [ref=e64]: Welcome back to your hotel management system
+      - paragraph [ref=e65]:
+        - 'link " 2FA Status: ✅ Enabled" [ref=e66] [cursor=pointer]':
+          - /url: /auth/2fa/setup/
+          - generic [ref=e67]: 
+          - text: "2FA Status: ✅ Enabled"
+    - generic [ref=e68]:
+      - generic [ref=e69]:
+        - generic [ref=e71]: 
+        - generic [ref=e72]: Total Revenue
+        - generic [ref=e73]: ₱863600.00
+        - generic [ref=e74]: All-time earnings from bookings
+      - generic [ref=e75]:
+        - generic [ref=e77]: 
+        - generic [ref=e78]: Confirmed Bookings
+        - generic [ref=e79]: "25"
+        - generic [ref=e80]: Total confirmed reservations
+      - generic [ref=e81]:
+        - generic [ref=e83]: 
+        - generic [ref=e84]: Pending Payments
+        - generic [ref=e85]: "3"
+        - generic [ref=e86]: Awaiting customer verification
+      - generic [ref=e87]:
+        - generic [ref=e89]: 
+        - generic [ref=e90]: Occupancy Rate
+        - generic [ref=e91]: 45.0%
+        - generic [ref=e92]: Current room occupancy percentage
+    - generic [ref=e94]:
+      - generic [ref=e95]:
+        - generic [ref=e96]:
+          - generic [ref=e97]: 
+          - generic [ref=e98]: Today's Check-ins
+        - generic [ref=e99]:
+          - generic [ref=e100]: "4"
+          - generic [ref=e101]: Guests arriving today
+      - generic [ref=e102]:
+        - generic [ref=e103]:
+          - generic [ref=e104]: 
+          - generic [ref=e105]: Today's Check-outs
+        - generic [ref=e106]:
+          - generic [ref=e107]: "0"
+          - generic [ref=e108]: Guests departing today
+    - generic [ref=e110]:
+      - heading " Occupancy Overview" [level=5] [ref=e112]:
+        - generic [ref=e113]: 
+        - text: Occupancy Overview
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - article [ref=e117]:
+            - generic [ref=e118]:
+              - generic [ref=e119]: Room 101
+              - generic [ref=e120]: Standard Room
+            - generic [ref=e121]: Dirty
+          - article [ref=e122]:
+            - generic [ref=e123]:
+              - generic [ref=e124]: Room 102
+              - generic [ref=e125]: Standard Room
+              - generic [ref=e126]:
+                - generic [ref=e127]: 
+                - text: Pedro Reyes
+            - generic [ref=e128]: Checked In
+          - article [ref=e129]:
+            - generic [ref=e130]:
+              - generic [ref=e131]: Room 103
+              - generic [ref=e132]: Standard Room
+            - generic [ref=e133]: Available
+          - article [ref=e134]:
+            - generic [ref=e135]:
+              - generic [ref=e136]: Room 201
+              - generic [ref=e137]: Deluxe Room
+            - generic [ref=e138]: Available
+          - article [ref=e139]:
+            - generic [ref=e140]:
+              - generic [ref=e141]: Room 202
+              - generic [ref=e142]: Deluxe Room
+              - generic [ref=e143]:
+                - generic [ref=e144]: 
+                - text: Juan dela Cruz
+            - generic [ref=e145]: Checked In
+          - article [ref=e146]:
+            - generic [ref=e147]:
+              - generic [ref=e148]: Room 203
+              - generic [ref=e149]: Suite Room
+              - generic [ref=e150]:
+                - generic [ref=e151]: 
+                - text: Jericho Blando
+            - generic [ref=e152]: Checked In
+          - article [ref=e153]:
+            - generic [ref=e154]:
+              - generic [ref=e155]: Room 301
+              - generic [ref=e156]: Suite Room
+            - generic [ref=e157]: Available
+          - article [ref=e158]:
+            - generic [ref=e159]:
+              - generic [ref=e160]: Room 302
+              - generic [ref=e161]: Suite Room
+            - generic [ref=e162]: Available
+          - article [ref=e163]:
+            - generic [ref=e164]:
+              - generic [ref=e165]: Room QA001
+              - generic [ref=e166]: Standard Room
+            - generic [ref=e167]: Dirty
+          - article [ref=e168]:
+            - generic [ref=e169]:
+              - generic [ref=e170]: Room S-CI01
+              - generic [ref=e171]: Standard Room
+            - generic [ref=e172]: Available
+          - article [ref=e173]:
+            - generic [ref=e174]:
+              - generic [ref=e175]: Room S-CI02
+              - generic [ref=e176]: Deluxe Room
+            - generic [ref=e177]: Available
+          - article [ref=e178]:
+            - generic [ref=e179]:
+              - generic [ref=e180]: Room S-CI03
+              - generic [ref=e181]: Standard Room
+            - generic [ref=e182]: Available
+          - article [ref=e183]:
+            - generic [ref=e184]:
+              - generic [ref=e185]: Room S-CI04
+              - generic [ref=e186]: Suite Room
+            - generic [ref=e187]: Available
+          - article [ref=e188]:
+            - generic [ref=e189]:
+              - generic [ref=e190]: Room S-CO01
+              - generic [ref=e191]: Deluxe Room
+              - generic [ref=e192]:
+                - generic [ref=e193]: 
+                - text: Maya Cruz
+            - generic [ref=e194]: Checked In
+          - article [ref=e195]:
+            - generic [ref=e196]:
+              - generic [ref=e197]: Room S-CO02
+              - generic [ref=e198]: Standard Room
+              - generic [ref=e199]:
+                - generic [ref=e200]: 
+                - text: Ben Torres
+            - generic [ref=e201]: Checked In
+          - article [ref=e202]:
+            - generic [ref=e203]:
+              - generic [ref=e204]: Room S-CO03
+              - generic [ref=e205]: Suite Room
+              - generic [ref=e206]:
+                - generic [ref=e207]: 
+                - text: Alyssa Dela Pena
+            - generic [ref=e208]: Checked In
+          - article [ref=e209]:
+            - generic [ref=e210]:
+              - generic [ref=e211]: Room S-TM01
+              - generic [ref=e212]: Standard Room
+            - generic [ref=e213]: Available
+          - article [ref=e214]:
+            - generic [ref=e215]:
+              - generic [ref=e216]: Room S-TM02
+              - generic [ref=e217]: Deluxe Room
+            - generic [ref=e218]: Available
+          - article [ref=e219]:
+            - generic [ref=e220]:
+              - generic [ref=e221]: Room S-TM03
+              - generic [ref=e222]: Suite Room
+            - generic [ref=e223]: Available
+          - article [ref=e224]:
+            - generic [ref=e225]:
+              - generic [ref=e226]: Room TEST001
+              - generic [ref=e227]: Standard Room
+            - generic [ref=e228]: Dirty
+        - generic [ref=e229]:
+          - generic [ref=e230]:
+            - generic [ref=e232]: 30%
+            - generic [ref=e233]: 6 of 20 rooms occupied
+          - img "Weekly occupancy chart" [ref=e235]
+    - generic [ref=e237]:
+      - generic [ref=e238]:
+        - heading " Recent Audit Logs" [level=5] [ref=e239]:
+          - generic [ref=e240]: 
+          - text: Recent Audit Logs
+        - combobox [ref=e242]:
+          - option "All actions" [selected]
+          - option "Booking Created"
+          - option "Booking Confirmed"
+          - option "Booking Approved"
+          - option "Booking Cancelled"
+          - option "Booking Checked In"
+          - option "Booking Checked Out"
+          - option "Payment Completed"
+          - option "Payment Approved"
+          - option "Payment Rejected"
+          - option "Refund Requested"
+          - option "Refund Requested by Guest"
+          - option "Refund Approved"
+          - option "Refund Rejected"
+          - option "Refund Issued"
+          - option "Room Created"
+          - option "Room Updated"
+          - option "Room Deleted"
+          - option "Pricing Changed"
+          - option "Room Status Changed"
+          - option "Staff Member Registered"
+          - option "Staff Member Deactivated"
+          - option "Staff Member Reactivated"
+          - option "User Created"
+          - option "User Updated"
+          - option "User Deactivated"
+          - option "User Role Changed"
+          - option "Guest Complaint Escalated"
+          - option "Guest Complaint Submitted"
+          - option "Guest Complaint Resolved"
+          - option "Guest Profile Viewed"
+          - option "Login Successful"
+          - option "Login Failed"
+          - option "Logout"
+          - option "Password Changed"
+          - option "2FA Enabled"
+          - option "2FA Disabled"
+          - option "Testimonial Approved"
+          - option "Testimonial Rejected"
+      - table [ref=e245]:
+        - rowgroup [ref=e246]:
+          - row "Time User Action Model Object ID IP Address" [ref=e247]:
+            - columnheader "Time" [ref=e248]
+            - columnheader "User" [ref=e249]
+            - columnheader "Action" [ref=e250]
+            - columnheader "Model" [ref=e251]
+            - columnheader "Object ID" [ref=e252]
+            - columnheader "IP Address" [ref=e253]
+        - rowgroup [ref=e254]:
+          - row "May 11, 2026 20:15 sample.admin@example.com Payment Completed Payment 65 127.0.0.1" [ref=e255]:
+            - cell "May 11, 2026 20:15" [ref=e256]
+            - cell "sample.admin@example.com" [ref=e257]
+            - cell "Payment Completed" [ref=e258]
+            - cell "Payment" [ref=e259]
+            - cell "65" [ref=e260]
+            - cell "127.0.0.1" [ref=e261]
+          - row "May 11, 2026 20:15 sample.admin@example.com Booking Confirmed Booking 76 127.0.0.1" [ref=e262]:
+            - cell "May 11, 2026 20:15" [ref=e263]
+            - cell "sample.admin@example.com" [ref=e264]
+            - cell "Booking Confirmed" [ref=e265]
+            - cell "Booking" [ref=e266]
+            - cell "76" [ref=e267]
+            - cell "127.0.0.1" [ref=e268]
+          - row "May 11, 2026 20:08 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e269]:
+            - cell "May 11, 2026 20:08" [ref=e270]
+            - cell "sample.manager@example.com" [ref=e271]
+            - cell "Login Successful" [ref=e272]
+            - cell "CustomUser" [ref=e273]
+            - cell "157" [ref=e274]
+            - cell "127.0.0.1" [ref=e275]
+          - row "May 11, 2026 20:07 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e276]:
+            - cell "May 11, 2026 20:07" [ref=e277]
+            - cell "sample.manager@example.com" [ref=e278]
+            - cell "Login Successful" [ref=e279]
+            - cell "CustomUser" [ref=e280]
+            - cell "157" [ref=e281]
+            - cell "127.0.0.1" [ref=e282]
+          - row "May 11, 2026 20:06 sample.admin@example.com Login Successful CustomUser 158 127.0.0.1" [ref=e283]:
+            - cell "May 11, 2026 20:06" [ref=e284]
+            - cell "sample.admin@example.com" [ref=e285]
+            - cell "Login Successful" [ref=e286]
+            - cell "CustomUser" [ref=e287]
+            - cell "158" [ref=e288]
+            - cell "127.0.0.1" [ref=e289]
+          - row "May 11, 2026 20:06 sample.manager@example.com Logout CustomUser 157 127.0.0.1" [ref=e290]:
+            - cell "May 11, 2026 20:06" [ref=e291]
+            - cell "sample.manager@example.com" [ref=e292]
+            - cell "Logout" [ref=e293]
+            - cell "CustomUser" [ref=e294]
+            - cell "157" [ref=e295]
+            - cell "127.0.0.1" [ref=e296]
+          - row "May 11, 2026 20:05 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e297]:
+            - cell "May 11, 2026 20:05" [ref=e298]
+            - cell "sample.manager@example.com" [ref=e299]
+            - cell "Login Successful" [ref=e300]
+            - cell "CustomUser" [ref=e301]
+            - cell "157" [ref=e302]
+            - cell "127.0.0.1" [ref=e303]
+          - row "May 11, 2026 20:05 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e304]:
+            - cell "May 11, 2026 20:05" [ref=e305]
+            - cell "sample.manager@example.com" [ref=e306]
+            - cell "Login Successful" [ref=e307]
+            - cell "CustomUser" [ref=e308]
+            - cell "157" [ref=e309]
+            - cell "127.0.0.1" [ref=e310]
+          - row "May 11, 2026 20:05 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e311]:
+            - cell "May 11, 2026 20:05" [ref=e312]
+            - cell "sample.manager@example.com" [ref=e313]
+            - cell "Login Successful" [ref=e314]
+            - cell "CustomUser" [ref=e315]
+            - cell "157" [ref=e316]
+            - cell "127.0.0.1" [ref=e317]
+          - row "May 11, 2026 19:50 sample.manager@example.com Staff Member Registered CustomUser 159 127.0.0.1" [ref=e318]:
+            - cell "May 11, 2026 19:50" [ref=e319]
+            - cell "sample.manager@example.com" [ref=e320]
+            - cell "Staff Member Registered" [ref=e321]
+            - cell "CustomUser" [ref=e322]
+            - cell "159" [ref=e323]
+            - cell "127.0.0.1" [ref=e324]
+          - row "May 11, 2026 19:50 sample.manager@example.com User Created CustomUser 159 127.0.0.1" [ref=e325]:
+            - cell "May 11, 2026 19:50" [ref=e326]
+            - cell "sample.manager@example.com" [ref=e327]
+            - cell "User Created" [ref=e328]
+            - cell "CustomUser" [ref=e329]
+            - cell "159" [ref=e330]
+            - cell "127.0.0.1" [ref=e331]
+          - row "May 11, 2026 19:49 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e332]:
+            - cell "May 11, 2026 19:49" [ref=e333]
+            - cell "sample.manager@example.com" [ref=e334]
+            - cell "Login Successful" [ref=e335]
+            - cell "CustomUser" [ref=e336]
+            - cell "157" [ref=e337]
+            - cell "127.0.0.1" [ref=e338]
+          - row "May 11, 2026 19:46 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e339]:
+            - cell "May 11, 2026 19:46" [ref=e340]
+            - cell "sample.manager@example.com" [ref=e341]
+            - cell "Login Successful" [ref=e342]
+            - cell "CustomUser" [ref=e343]
+            - cell "157" [ref=e344]
+            - cell "127.0.0.1" [ref=e345]
+          - row "May 11, 2026 19:45 sample.manager@example.com Refund Approved RefundRequest 11 127.0.0.1" [ref=e346]:
+            - cell "May 11, 2026 19:45" [ref=e347]
+            - cell "sample.manager@example.com" [ref=e348]
+            - cell "Refund Approved" [ref=e349]
+            - cell "RefundRequest" [ref=e350]
+            - cell "11" [ref=e351]
+            - cell "127.0.0.1" [ref=e352]
+          - row "May 11, 2026 19:45 sample.manager@example.com Refund Approved RefundRequest 11 127.0.0.1" [ref=e353]:
+            - cell "May 11, 2026 19:45" [ref=e354]
+            - cell "sample.manager@example.com" [ref=e355]
+            - cell "Refund Approved" [ref=e356]
+            - cell "RefundRequest" [ref=e357]
+            - cell "11" [ref=e358]
+            - cell "127.0.0.1" [ref=e359]
+          - row "May 11, 2026 19:45 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e360]:
+            - cell "May 11, 2026 19:45" [ref=e361]
+            - cell "sample.manager@example.com" [ref=e362]
+            - cell "Login Successful" [ref=e363]
+            - cell "CustomUser" [ref=e364]
+            - cell "157" [ref=e365]
+            - cell "127.0.0.1" [ref=e366]
+          - row "May 11, 2026 19:45 sample.admin@example.com Login Successful CustomUser 158 127.0.0.1" [ref=e367]:
+            - cell "May 11, 2026 19:45" [ref=e368]
+            - cell "sample.admin@example.com" [ref=e369]
+            - cell "Login Successful" [ref=e370]
+            - cell "CustomUser" [ref=e371]
+            - cell "158" [ref=e372]
+            - cell "127.0.0.1" [ref=e373]
+          - row "May 11, 2026 19:45 System Login Failed CustomUser - 127.0.0.1" [ref=e374]:
+            - cell "May 11, 2026 19:45" [ref=e375]
+            - cell "System" [ref=e376]
+            - cell "Login Failed" [ref=e377]
+            - cell "CustomUser" [ref=e378]
+            - cell "-" [ref=e379]
+            - cell "127.0.0.1" [ref=e380]
+          - row "May 11, 2026 19:45 System Login Failed CustomUser - 127.0.0.1" [ref=e381]:
+            - cell "May 11, 2026 19:45" [ref=e382]
+            - cell "System" [ref=e383]
+            - cell "Login Failed" [ref=e384]
+            - cell "CustomUser" [ref=e385]
+            - cell "-" [ref=e386]
+            - cell "127.0.0.1" [ref=e387]
+          - row "May 11, 2026 19:44 sample.admin@example.com Login Successful CustomUser 158 127.0.0.1" [ref=e388]:
+            - cell "May 11, 2026 19:44" [ref=e389]
+            - cell "sample.admin@example.com" [ref=e390]
+            - cell "Login Successful" [ref=e391]
+            - cell "CustomUser" [ref=e392]
+            - cell "158" [ref=e393]
+            - cell "127.0.0.1" [ref=e394]
+          - row "May 11, 2026 19:44 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e395]:
+            - cell "May 11, 2026 19:44" [ref=e396]
+            - cell "sample.manager@example.com" [ref=e397]
+            - cell "Login Successful" [ref=e398]
+            - cell "CustomUser" [ref=e399]
+            - cell "157" [ref=e400]
+            - cell "127.0.0.1" [ref=e401]
+          - row "May 11, 2026 19:43 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e402]:
+            - cell "May 11, 2026 19:43" [ref=e403]
+            - cell "sample.manager@example.com" [ref=e404]
+            - cell "Login Successful" [ref=e405]
+            - cell "CustomUser" [ref=e406]
+            - cell "157" [ref=e407]
+            - cell "127.0.0.1" [ref=e408]
+          - row "May 11, 2026 19:42 System Login Failed CustomUser - 127.0.0.1" [ref=e409]:
+            - cell "May 11, 2026 19:42" [ref=e410]
+            - cell "System" [ref=e411]
+            - cell "Login Failed" [ref=e412]
+            - cell "CustomUser" [ref=e413]
+            - cell "-" [ref=e414]
+            - cell "127.0.0.1" [ref=e415]
+          - row "May 11, 2026 19:41 sample.admin@example.com Login Successful CustomUser 158 127.0.0.1" [ref=e416]:
+            - cell "May 11, 2026 19:41" [ref=e417]
+            - cell "sample.admin@example.com" [ref=e418]
+            - cell "Login Successful" [ref=e419]
+            - cell "CustomUser" [ref=e420]
+            - cell "158" [ref=e421]
+            - cell "127.0.0.1" [ref=e422]
+          - row "May 11, 2026 19:41 sample.manager@example.com Login Successful CustomUser 157 127.0.0.1" [ref=e423]:
+            - cell "May 11, 2026 19:41" [ref=e424]
+            - cell "sample.manager@example.com" [ref=e425]
+            - cell "Login Successful" [ref=e426]
+            - cell "CustomUser" [ref=e427]
+            - cell "157" [ref=e428]
+            - cell "127.0.0.1" [ref=e429]
+          - row "May 11, 2026 19:41 sample.admin@example.com User Updated CustomUser 158 -" [ref=e430]:
+            - cell "May 11, 2026 19:41" [ref=e431]
+            - cell "sample.admin@example.com" [ref=e432]
+            - cell "User Updated" [ref=e433]
+            - cell "CustomUser" [ref=e434]
+            - cell "158" [ref=e435]
+            - cell "-" [ref=e436]
+          - row "May 11, 2026 19:41 sample.admin@example.com User Created CustomUser 158 -" [ref=e437]:
+            - cell "May 11, 2026 19:41" [ref=e438]
+            - cell "sample.admin@example.com" [ref=e439]
+            - cell "User Created" [ref=e440]
+            - cell "CustomUser" [ref=e441]
+            - cell "158" [ref=e442]
+            - cell "-" [ref=e443]
+          - row "May 11, 2026 19:41 sample.manager@example.com User Updated CustomUser 157 -" [ref=e444]:
+            - cell "May 11, 2026 19:41" [ref=e445]
+            - cell "sample.manager@example.com" [ref=e446]
+            - cell "User Updated" [ref=e447]
+            - cell "CustomUser" [ref=e448]
+            - cell "157" [ref=e449]
+            - cell "-" [ref=e450]
+          - row "May 11, 2026 19:41 sample.manager@example.com User Created CustomUser 157 -" [ref=e451]:
+            - cell "May 11, 2026 19:41" [ref=e452]
+            - cell "sample.manager@example.com" [ref=e453]
+            - cell "User Created" [ref=e454]
+            - cell "CustomUser" [ref=e455]
+            - cell "157" [ref=e456]
+            - cell "-" [ref=e457]
+          - row "May 11, 2026 19:32 System Room Deleted Room 35 -" [ref=e458]:
+            - cell "May 11, 2026 19:32" [ref=e459]
+            - cell "System" [ref=e460]
+            - cell "Room Deleted" [ref=e461]
+            - cell "Room" [ref=e462]
+            - cell "35" [ref=e463]
+            - cell "-" [ref=e464]
+          - row "May 11, 2026 19:32 System Refund Approved RefundRequest 12 127.0.0.1" [ref=e465]:
+            - cell "May 11, 2026 19:32" [ref=e466]
+            - cell "System" [ref=e467]
+            - cell "Refund Approved" [ref=e468]
+            - cell "RefundRequest" [ref=e469]
+            - cell "12" [ref=e470]
+            - cell "127.0.0.1" [ref=e471]
+          - row "May 11, 2026 19:32 System Refund Approved RefundRequest 12 127.0.0.1" [ref=e472]:
+            - cell "May 11, 2026 19:32" [ref=e473]
+            - cell "System" [ref=e474]
+            - cell "Refund Approved" [ref=e475]
+            - cell "RefundRequest" [ref=e476]
+            - cell "12" [ref=e477]
+            - cell "127.0.0.1" [ref=e478]
+          - row "May 11, 2026 19:32 System Refund Requested RefundRequest 12 -" [ref=e479]:
+            - cell "May 11, 2026 19:32" [ref=e480]
+            - cell "System" [ref=e481]
+            - cell "Refund Requested" [ref=e482]
+            - cell "RefundRequest" [ref=e483]
+            - cell "12" [ref=e484]
+            - cell "-" [ref=e485]
+          - row "May 11, 2026 19:32 System Booking Created Booking 77 -" [ref=e486]:
+            - cell "May 11, 2026 19:32" [ref=e487]
+            - cell "System" [ref=e488]
+            - cell "Booking Created" [ref=e489]
+            - cell "Booking" [ref=e490]
+            - cell "77" [ref=e491]
+            - cell "-" [ref=e492]
+          - row "May 11, 2026 19:32 System Room Created Room 35 -" [ref=e493]:
+            - cell "May 11, 2026 19:32" [ref=e494]
+            - cell "System" [ref=e495]
+            - cell "Room Created" [ref=e496]
+            - cell "Room" [ref=e497]
+            - cell "35" [ref=e498]
+            - cell "-" [ref=e499]
+          - row "May 11, 2026 19:32 System User Created CustomUser 156 -" [ref=e500]:
+            - cell "May 11, 2026 19:32" [ref=e501]
+            - cell "System" [ref=e502]
+            - cell "User Created" [ref=e503]
+            - cell "CustomUser" [ref=e504]
+            - cell "156" [ref=e505]
+            - cell "-" [ref=e506]
+          - row "May 11, 2026 19:32 System Staff Member Registered CustomUser 155 127.0.0.1" [ref=e507]:
+            - cell "May 11, 2026 19:32" [ref=e508]
+            - cell "System" [ref=e509]
+            - cell "Staff Member Registered" [ref=e510]
+            - cell "CustomUser" [ref=e511]
+            - cell "155" [ref=e512]
+            - cell "127.0.0.1" [ref=e513]
+          - row "May 11, 2026 19:32 System User Created CustomUser 155 127.0.0.1" [ref=e514]:
+            - cell "May 11, 2026 19:32" [ref=e515]
+            - cell "System" [ref=e516]
+            - cell "User Created" [ref=e517]
+            - cell "CustomUser" [ref=e518]
+            - cell "155" [ref=e519]
+            - cell "127.0.0.1" [ref=e520]
+          - row "May 11, 2026 19:32 System Login Successful CustomUser 154 -" [ref=e521]:
+            - cell "May 11, 2026 19:32" [ref=e522]
+            - cell "System" [ref=e523]
+            - cell "Login Successful" [ref=e524]
+            - cell "CustomUser" [ref=e525]
+            - cell "154" [ref=e526]
+            - cell "-" [ref=e527]
+          - row "May 11, 2026 19:32 System 2FA Enabled TwoFactorAuth 9 -" [ref=e528]:
+            - cell "May 11, 2026 19:32" [ref=e529]
+            - cell "System" [ref=e530]
+            - cell "2FA Enabled" [ref=e531]
+            - cell "TwoFactorAuth" [ref=e532]
+            - cell "9" [ref=e533]
+            - cell "-" [ref=e534]
+          - row "May 11, 2026 19:32 System User Created CustomUser 154 -" [ref=e535]:
+            - cell "May 11, 2026 19:32" [ref=e536]
+            - cell "System" [ref=e537]
+            - cell "User Created" [ref=e538]
+            - cell "CustomUser" [ref=e539]
+            - cell "154" [ref=e540]
+            - cell "-" [ref=e541]
+          - row "May 11, 2026 19:30 System Login Failed CustomUser - 127.0.0.1" [ref=e542]:
+            - cell "May 11, 2026 19:30" [ref=e543]
+            - cell "System" [ref=e544]
+            - cell "Login Failed" [ref=e545]
+            - cell "CustomUser" [ref=e546]
+            - cell "-" [ref=e547]
+            - cell "127.0.0.1" [ref=e548]
+          - row "May 11, 2026 19:25 System Login Failed CustomUser - 127.0.0.1" [ref=e549]:
+            - cell "May 11, 2026 19:25" [ref=e550]
+            - cell "System" [ref=e551]
+            - cell "Login Failed" [ref=e552]
+            - cell "CustomUser" [ref=e553]
+            - cell "-" [ref=e554]
+            - cell "127.0.0.1" [ref=e555]
+          - row "May 11, 2026 19:22 System Login Failed CustomUser - 127.0.0.1" [ref=e556]:
+            - cell "May 11, 2026 19:22" [ref=e557]
+            - cell "System" [ref=e558]
+            - cell "Login Failed" [ref=e559]
+            - cell "CustomUser" [ref=e560]
+            - cell "-" [ref=e561]
+            - cell "127.0.0.1" [ref=e562]
+          - row "May 11, 2026 19:21 System Login Failed CustomUser - 127.0.0.1" [ref=e563]:
+            - cell "May 11, 2026 19:21" [ref=e564]
+            - cell "System" [ref=e565]
+            - cell "Login Failed" [ref=e566]
+            - cell "CustomUser" [ref=e567]
+            - cell "-" [ref=e568]
+            - cell "127.0.0.1" [ref=e569]
+          - row "May 11, 2026 19:21 System Login Failed CustomUser - 127.0.0.1" [ref=e570]:
+            - cell "May 11, 2026 19:21" [ref=e571]
+            - cell "System" [ref=e572]
+            - cell "Login Failed" [ref=e573]
+            - cell "CustomUser" [ref=e574]
+            - cell "-" [ref=e575]
+            - cell "127.0.0.1" [ref=e576]
+          - row "May 11, 2026 19:21 Jericho Blando Logout CustomUser 48 127.0.0.1" [ref=e577]:
+            - cell "May 11, 2026 19:21" [ref=e578]
+            - cell "Jericho Blando" [ref=e579]
+            - cell "Logout" [ref=e580]
+            - cell "CustomUser" [ref=e581]
+            - cell "48" [ref=e582]
+            - cell "127.0.0.1" [ref=e583]
+          - row "May 11, 2026 19:20 Jericho Blando Refund Requested by Guest RefundRequest 11 127.0.0.1" [ref=e584]:
+            - cell "May 11, 2026 19:20" [ref=e585]
+            - cell "Jericho Blando" [ref=e586]
+            - cell "Refund Requested by Guest" [ref=e587]
+            - cell "RefundRequest" [ref=e588]
+            - cell "11" [ref=e589]
+            - cell "127.0.0.1" [ref=e590]
+          - row "May 11, 2026 19:20 Jericho Blando Refund Requested RefundRequest 11 127.0.0.1" [ref=e591]:
+            - cell "May 11, 2026 19:20" [ref=e592]
+            - cell "Jericho Blando" [ref=e593]
+            - cell "Refund Requested" [ref=e594]
+            - cell "RefundRequest" [ref=e595]
+            - cell "11" [ref=e596]
+            - cell "127.0.0.1" [ref=e597]
+          - row "May 11, 2026 19:18 Jericho Blando Booking Cancelled Booking 76 127.0.0.1" [ref=e598]:
+            - cell "May 11, 2026 19:18" [ref=e599]
+            - cell "Jericho Blando" [ref=e600]
+            - cell "Booking Cancelled" [ref=e601]
+            - cell "Booking" [ref=e602]
+            - cell "76" [ref=e603]
+            - cell "127.0.0.1" [ref=e604]
+    - generic [ref=e606]:
+      - heading " Testimonials" [level=5] [ref=e608]:
+        - generic [ref=e609]: 
+        - text: Testimonials
+      - table [ref=e612]:
+        - rowgroup [ref=e613]:
+          - row "Guest Rating Content Date Action" [ref=e614]:
+            - columnheader "Guest" [ref=e615]
+            - columnheader "Rating" [ref=e616]
+            - columnheader "Content" [ref=e617]
+            - columnheader "Date" [ref=e618]
+            - columnheader "Action" [ref=e619]
+        - rowgroup [ref=e620]:
+          - row "Emma Wilson 3 / 5 Overall good experience. The room was nice but the internet was a bit slow. Otherwise, everything was satisfactory. Apr 15, 2026 Approve Reject" [ref=e621]:
+            - cell "Emma Wilson" [ref=e622]
+            - cell "3 / 5" [ref=e623]
+            - cell "Overall good experience. The room was nice but the internet was a bit slow. Otherwise, everything was satisfactory." [ref=e624]
+            - cell "Apr 15, 2026" [ref=e625]
+            - cell "Approve Reject" [ref=e626]:
+              - generic [ref=e627]:
+                - button "Approve" [ref=e629] [cursor=pointer]
+                - button "Reject" [ref=e631] [cursor=pointer]
+    - generic [ref=e633]:
+      - generic [ref=e635]:
+        - heading " This Month's Revenue" [level=5] [ref=e637]:
+          - generic [ref=e638]: 
+          - text: This Month's Revenue
+        - generic [ref=e639]:
+          - heading "₱763800.00" [level=3] [ref=e640]
+          - paragraph [ref=e641]: Total revenue this month
+      - generic [ref=e643]:
+        - heading " Total Bookings" [level=5] [ref=e645]:
+          - generic [ref=e646]: 
+          - text: Total Bookings
+        - generic [ref=e647]:
+          - heading "52" [level=3] [ref=e648]
+          - paragraph [ref=e649]: All bookings in system
+    - generic [ref=e651]:
+      - generic [ref=e652]:
+        - generic [ref=e653]: 
+        - heading "Pending Payments" [level=2] [ref=e654]
+      - table [ref=e655]:
+        - rowgroup [ref=e656]:
+          - row "Booking ID Guest Name Amount Payment Method Date Status Action" [ref=e657]:
+            - columnheader "Booking ID" [ref=e658]
+            - columnheader "Guest Name" [ref=e659]
+            - columnheader "Amount" [ref=e660]
+            - columnheader "Payment Method" [ref=e661]
+            - columnheader "Date" [ref=e662]
+            - columnheader "Status" [ref=e663]
+            - columnheader "Action" [ref=e664]
+        - rowgroup [ref=e665]:
+          - row "#47 Jericho Blando ₱16500.00  PayMongo Apr 28, 2026  Pending Review" [ref=e666]:
+            - cell "#47" [ref=e667]
+            - cell "Jericho Blando" [ref=e668]
+            - cell "₱16500.00" [ref=e669]
+            - cell " PayMongo" [ref=e670]:
+              - generic [ref=e671]:
+                - generic [ref=e672]: 
+                - text: PayMongo
+            - cell "Apr 28, 2026" [ref=e673]
+            - cell " Pending" [ref=e674]:
+              - generic [ref=e675]:
+                - generic [ref=e676]: 
+                - text: Pending
+            - cell "Review" [ref=e677]:
+              - link "Review" [ref=e678] [cursor=pointer]:
+                - /url: /admin-panel/payments/44/
+          - row "#46 Jericho Blando ₱2400.00  PayMongo Apr 28, 2026  Pending Review" [ref=e679]:
+            - cell "#46" [ref=e680]
+            - cell "Jericho Blando" [ref=e681]
+            - cell "₱2400.00" [ref=e682]
+            - cell " PayMongo" [ref=e683]:
+              - generic [ref=e684]:
+                - generic [ref=e685]: 
+                - text: PayMongo
+            - cell "Apr 28, 2026" [ref=e686]
+            - cell " Pending" [ref=e687]:
+              - generic [ref=e688]:
+                - generic [ref=e689]: 
+                - text: Pending
+            - cell "Review" [ref=e690]:
+              - link "Review" [ref=e691] [cursor=pointer]:
+                - /url: /admin-panel/payments/43/
+          - row "#45 Jericho Blando ₱93000.00  PayMongo Apr 28, 2026  Pending Review" [ref=e692]:
+            - cell "#45" [ref=e693]
+            - cell "Jericho Blando" [ref=e694]
+            - cell "₱93000.00" [ref=e695]
+            - cell " PayMongo" [ref=e696]:
+              - generic [ref=e697]:
+                - generic [ref=e698]: 
+                - text: PayMongo
+            - cell "Apr 28, 2026" [ref=e699]
+            - cell " Pending" [ref=e700]:
+              - generic [ref=e701]:
+                - generic [ref=e702]: 
+                - text: Pending
+            - cell "Review" [ref=e703]:
+              - link "Review" [ref=e704] [cursor=pointer]:
+                - /url: /admin-panel/payments/42/
+    - generic [ref=e706]:
+      - generic [ref=e707]:
+        - generic [ref=e708]:
+          - generic [ref=e709]: 
+          - heading "Recent Bookings" [level=2] [ref=e710]
+        - link "View All →" [ref=e711] [cursor=pointer]:
+          - /url: /admin-panel/bookings/
+      - table [ref=e712]:
+        - rowgroup [ref=e713]:
+          - 'row "Booking # Guest Room Check-in / Check-out Status Amount" [ref=e714]':
+            - 'columnheader "Booking #" [ref=e715]'
+            - columnheader "Guest" [ref=e716]
+            - columnheader "Room" [ref=e717]
+            - columnheader "Check-in / Check-out" [ref=e718]
+            - columnheader "Status" [ref=e719]
+            - columnheader "Amount" [ref=e720]
+        - rowgroup [ref=e721]:
+          - row "#76 Jericho Blando DELUXE May 12 - May 16, 2026  CONFIRMED ₱" [ref=e722]:
+            - cell "#76" [ref=e723]
+            - cell "Jericho Blando" [ref=e724]
+            - cell "DELUXE" [ref=e725]
+            - cell "May 12 - May 16, 2026" [ref=e726]
+            - cell " CONFIRMED" [ref=e727]:
+              - generic [ref=e728]:
+                - generic [ref=e729]: 
+                - text: CONFIRMED
+            - cell "₱" [ref=e730]
+          - row "#75 Owen Navarro SUITE May 12 - May 14, 2026  CONFIRMED ₱" [ref=e731]:
+            - cell "#75" [ref=e732]
+            - cell "Owen Navarro" [ref=e733]
+            - cell "SUITE" [ref=e734]
+            - cell "May 12 - May 14, 2026" [ref=e735]
+            - cell " CONFIRMED" [ref=e736]:
+              - generic [ref=e737]:
+                - generic [ref=e738]: 
+                - text: CONFIRMED
+            - cell "₱" [ref=e739]
+          - row "#74 Katrina Yu DELUXE May 12 - May 15, 2026  CONFIRMED ₱" [ref=e740]:
+            - cell "#74" [ref=e741]
+            - cell "Katrina Yu" [ref=e742]
+            - cell "DELUXE" [ref=e743]
+            - cell "May 12 - May 15, 2026" [ref=e744]
+            - cell " CONFIRMED" [ref=e745]:
+              - generic [ref=e746]:
+                - generic [ref=e747]: 
+                - text: CONFIRMED
+            - cell "₱" [ref=e748]
+          - row "#73 Ramon Villanueva STANDARD May 12 - May 14, 2026  CONFIRMED ₱" [ref=e749]:
+            - cell "#73" [ref=e750]
+            - cell "Ramon Villanueva" [ref=e751]
+            - cell "STANDARD" [ref=e752]
+            - cell "May 12 - May 14, 2026" [ref=e753]
+            - cell " CONFIRMED" [ref=e754]:
+              - generic [ref=e755]:
+                - generic [ref=e756]: 
+                - text: CONFIRMED
+            - cell "₱" [ref=e757]
+          - row "#72 Alyssa Dela Pena SUITE May 08 - May 11, 2026  CHECKED_IN ₱" [ref=e758]:
+            - cell "#72" [ref=e759]
+            - cell "Alyssa Dela Pena" [ref=e760]
+            - cell "SUITE" [ref=e761]
+            - cell "May 08 - May 11, 2026" [ref=e762]
+            - cell " CHECKED_IN" [ref=e763]:
+              - generic [ref=e764]:
+                - generic [ref=e765]: 
+                - text: CHECKED_IN
+            - cell "₱" [ref=e766]

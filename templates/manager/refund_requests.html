@@ -86,23 +86,6 @@
         font-weight: 700;
     }
 
-    /* APPROVED BUTTON */
-    .manager-main .btn-group a[href="?status=APPROVED"] {
-        border-color: #10b981;
-        color: #10b981;
-    }
-
-    .manager-main .btn-group a[href="?status=APPROVED"]:hover {
-        background: rgba(16,185,129,0.1);
-    }
-
-    .manager-main .btn-group a[href="?status=APPROVED"].active {
-        background: #064e3b;
-        border-color: #10b981;
-        color: #6ee7b7;
-        font-weight: 700;
-    }
-
     /* REJECTED BUTTON */
     .manager-main .btn-group a[href="?status=REJECTED"] {
         border-color: #dc2626;
@@ -341,8 +324,8 @@
         <a href="?status=REQUESTED" class="btn btn-outline-warning {% if status_filter == 'REQUESTED' %}active{% endif %}">
             Pending
         </a>
-        <a href="?status=APPROVED" class="btn btn-outline-success {% if status_filter == 'APPROVED' %}active{% endif %}">
-            Approved
+        <a href="?status=ISSUED" class="btn btn-outline-info {% if status_filter == 'ISSUED' %}active{% endif %}">
+            Issued
         </a>
         <a href="?status=REJECTED" class="btn btn-outline-danger {% if status_filter == 'REJECTED' %}active{% endif %}">
             Rejected
@@ -378,10 +361,10 @@
                             <td>
                                 {% if refund.status == 'REQUESTED' %}
                                     <span class="badge badge-warning">Pending</span>
-                                {% elif refund.status == 'APPROVED' %}
-                                    <span class="badge badge-success">Approved</span>
                                 {% elif refund.status == 'REJECTED' %}
                                     <span class="badge badge-danger">Rejected</span>
+                                {% elif refund.status == 'APPROVED' %}
+                                    <span class="badge badge-info">Processing</span>
                                 {% else %}
                                     <span class="badge badge-info">{{ refund.get_status_display }}</span>
                                 {% endif %}

@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 from django.shortcuts import render, redirect
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -14,7 +15,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from .forms import RegisterForm, LoginForm
 from .models import Room, TermsAndConditions, TwoFactorAuth
 from .decorators import guest_required
-from .otp_utils import send_otp_email, verify_otp
+from .otp_utils import EmailOTPDeliveryError, send_otp_email, verify_otp
 
 User = get_user_model()
 
@@ -121,7 +122,17 @@ def login_view(request):
                     two_fa = user.two_factor_auth
                     if two_fa.is_enabled:
                         if two_fa.method == 'EMAIL':
-                            send_otp_email(user)
+                            try:
+                                send_otp_email(user)
+                            except EmailOTPDeliveryError as exc:
+                                if getattr(settings, 'DEBUG', False) and exc.otp_code:
+                                    messages.warning(
+                                        request,
+                                        f'Email delivery failed, so your local development verification code is {exc.otp_code}.',
+                                    )
+                                else:
+                                    messages.error(request, 'We could not send your verification code. Please contact an administrator.')
+                                    return redirect('auth:login')
                             request.session['email_otp_user_id'] = user.id
                             request.session['email_otp_remember_me'] = remember_me
                             return redirect('auth:verify_otp')
@@ -594,8 +605,19 @@ def resend_otp_view(request):
     except User.DoesNotExist:
         return redirect('auth:login')
 
-    send_otp_email(user)
-    messages.info(request, 'A new code has been sent to your email.')
+    try:
+        send_otp_email(user)
+    except EmailOTPDeliveryError as exc:
+        if getattr(settings, 'DEBUG', False) and exc.otp_code:
+            messages.warning(
+                request,
+                f'Email delivery failed, so your local development verification code is {exc.otp_code}.',
+            )
+        else:
+            messages.error(request, 'We could not send a new verification code. Please contact an administrator.')
+            return redirect('auth:login')
+    else:
+        messages.info(request, 'A new code has been sent to your email.')
     return redirect('auth:verify_otp')
 
 
@@ -698,6 +720,27 @@ def guest_messages_view(request):
     }
     
     return render(request, 'authentication/guest_messages.html', context)
+
+
+@login_required(login_url='auth:login')
+@require_http_methods(["POST"])
+@guest_required
+def start_guest_conversation_view(request):
+    """Create a guest support conversation and open its message thread."""
+    from .models import ContactMessage
+
+    guest_name = request.user.get_full_name() or request.user.username
+    contact = ContactMessage.objects.create(
+        name=guest_name,
+        email=request.user.email,
+        phone=getattr(request.user, 'phone_number', '') or '',
+        subject='Guest Support Conversation',
+        message='Conversation started. Please type your message below.',
+        guest=request.user,
+        notification_sent=True,
+    )
+
+    return redirect('auth:guest_message_detail', message_id=contact.id)
 
 
 @login_required(login_url='auth:login')

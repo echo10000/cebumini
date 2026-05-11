@@ -43,6 +43,28 @@
         padding: 0.4rem 0.8rem;
         font-size: 0.85rem;
     }
+
+    .front-desk-search {
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .status-badge {
+        border-radius: 6px;
+        display: inline-block;
+        font-size: 0.78rem;
+        font-weight: 700;
+        padding: 0.35rem 0.65rem;
+        text-transform: uppercase;
+    }
+
+    .status-confirmed { background: rgba(25, 135, 84, 0.16); color: #75d39b; }
+    .status-pending { background: rgba(255, 193, 7, 0.16); color: #ffd46b; }
+    .status-checked { background: rgba(13, 202, 240, 0.16); color: #75e8fa; }
+    .status-other { background: rgba(108, 117, 125, 0.22); color: #d6d8db; }
 </style>
 {% endblock %}
 
@@ -52,6 +74,84 @@
     <div class="page-header mb-4">
         <h1><i class="fas fa-arrow-right-arrow-left"></i> Check-In / Check-Out</h1>
         <p>Manage guest arrivals and departures</p>
+    </div>
+
+    <!-- Front Desk Booking Lookup -->
+    <div class="front-desk-search">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-lg-9">
+                <label for="bookingLookup" class="form-label">Find Booking</label>
+                <input type="search" class="form-control" id="bookingLookup" name="q" value="{{ search_query }}" placeholder="Enter reference code, booking ID, guest name, email, or phone">
+            </div>
+            <div class="col-lg-3 d-grid">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+        {% if search_query %}
+            <div class="mt-4">
+                <h5 class="mb-3">Search Results</h5>
+                {% if search_results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Guest Name</th>
+                                    <th>Booking</th>
+                                    <th>Room</th>
+                                    <th>Stay</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in search_results %}
+                                <tr>
+                                    <td>
+                                        <div class="guest-name">{{ booking.guest.get_full_name|default:booking.guest.username }}</div>
+                                        <small>{{ booking.guest.email }}</small>
+                                    </td>
+                                    <td>#{{ booking.id }}</td>
+                                    <td><span class="room-badge">Room {{ booking.room.room_number }}</span></td>
+                                    <td>{{ booking.check_in|date:"M d, Y" }} to {{ booking.check_out|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if booking.status == 'CONFIRMED' %}
+                                            <span class="status-badge status-confirmed">{{ booking.get_status_display }}</span>
+                                        {% elif booking.status == 'PENDING' %}
+                                            <span class="status-badge status-pending">{{ booking.get_status_display }}</span>
+                                        {% elif booking.status == 'CHECKED_IN' %}
+                                            <span class="status-badge status-checked">{{ booking.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="status-badge status-other">{{ booking.get_status_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group-sm">
+                                            <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if booking.can_be_checked_in_now %}
+                                                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmCheckInModal" data-booking-id="{{ booking.id }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:check_in_booking' booking.id %}">
+                                                    <i class="fas fa-check"></i> Verify
+                                                </button>
+                                            {% elif booking.status == 'CONFIRMED' %}
+                                                <span class="status-badge status-other">Not check-in date</span>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning mb-0">
+                        <i class="fas fa-info-circle"></i> No booking matched that search.
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
     </div>
 
     <!-- Today's Check-Ins -->
@@ -67,7 +167,7 @@
                         <thead>
                             <tr>
                                 <th>Guest Name</th>
-                                <th>Reference</th>
+                                <th>Booking</th>
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Room</th>
@@ -81,7 +181,7 @@
                                 <td>
                                     <div class="guest-name">{{ booking.guest.get_full_name|default:booking.guest.username }}</div>
                                 </td>
-                                <td><span class="room-badge">{{ booking.booking_reference }}</span></td>
+                                <td>#{{ booking.id }}</td>
                                 <td>{{ booking.guest.email }}</td>
                                 <td>{{ booking.guest.phone_number|default:"N/A" }}</td>
                                 <td><span class="room-badge">Room {{ booking.room.room_number }}</span></td>
@@ -91,7 +191,7 @@
                                         <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmCheckInModal" data-booking-id="{{ booking.id }}" data-booking-reference="{{ booking.booking_reference }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:check_in_booking' booking.id %}">
+                                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmCheckInModal" data-booking-id="{{ booking.id }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:check_in_booking' booking.id %}">
                                             <i class="fas fa-check"></i> Confirm
                                         </button>
                                     </div>
@@ -229,7 +329,7 @@
                     <div class="mb-3">
                         <label for="checkInReferenceInput" class="form-label">Reference Code</label>
                         <input type="text" class="form-control" id="checkInReferenceInput" name="booking_reference" placeholder="Ask guest for their reference code" autocomplete="off" required>
-                        <div class="form-text">Expected code: <span id="expectedReferenceCode"></span></div>
+                        <div class="form-text">Use the code shown by the guest from their booking confirmation.</div>
                     </div>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="referenceVerified" name="reference_verified" required>
@@ -289,7 +389,6 @@
     const checkInModal = document.getElementById('confirmCheckInModal');
     const checkInForm = document.getElementById('checkInVerificationForm');
     const checkInGuestName = document.getElementById('checkInGuestName');
-    const expectedReferenceCode = document.getElementById('expectedReferenceCode');
     const checkOutModal = document.getElementById('confirmCheckOutModal');
     const checkOutForm = document.getElementById('checkOutForm');
     const checkOutGuestName = document.getElementById('checkOutGuestName');
@@ -300,7 +399,6 @@
             checkInForm.action = button.dataset.actionUrl;
             checkInForm.reset();
             checkInGuestName.textContent = button.dataset.guestName || 'this guest';
-            expectedReferenceCode.textContent = button.dataset.bookingReference || '';
         });
     }
 

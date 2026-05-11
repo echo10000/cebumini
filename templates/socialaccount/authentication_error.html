@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Google Login Problem - Cebu Hotel{% endblock %}
+{% block body_class %} class="auth-page"{% endblock %}
+{% block global_messages %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'css/auth-pages.css' %}" rel="stylesheet">
+<style>
+    .auth-status-list {
+        margin: 1rem 0 1.5rem;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 0.65rem;
+    }
+
+    .auth-status-list li {
+        display: flex;
+        gap: 0.65rem;
+        align-items: flex-start;
+        color: var(--auth-muted);
+        font-size: 0.95rem;
+    }
+
+    .auth-status-list i {
+        color: var(--auth-brand);
+        line-height: 1.5;
+    }
+
+    .auth-button.secondary {
+        margin-top: 0.75rem;
+        background: #fff;
+        border: 1px solid var(--auth-line);
+        color: var(--auth-ink) !important;
+        text-decoration: none;
+    }
+
+    .auth-button.secondary:hover {
+        background: var(--auth-surface-alt);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrap">
+    <section class="auth-story" aria-label="Cebu Luxury Hotel">
+        <div class="auth-brand-mark">C</div>
+        <div>
+            <h1>Google sign in needs another try.</h1>
+            <p>Your stay is still here. The connection just could not be completed this time.</p>
+        </div>
+    </section>
+
+    <section class="auth-panel" aria-labelledby="google-login-error-title">
+        <div class="auth-kicker">Third-party access</div>
+        <h2 id="google-login-error-title">Login was not completed</h2>
+        <p class="auth-subtitle">
+            Google returned you to Cebu Luxury, but the account connection failed before we could finish signing you in.
+        </p>
+
+        {% include 'includes/auth_messages.html' %}
+
+        <ul class="auth-status-list">
+            <li><i class="fas fa-circle-info"></i><span>Try signing in with Google again from the login page.</span></li>
+            <li><i class="fas fa-envelope"></i><span>If your account uses email OTP, make sure Gmail SMTP is configured with a valid app password.</span></li>
+            <li><i class="fas fa-user-check"></i><span>Use a verified Google email that belongs to a guest account.</span></li>
+        </ul>
+
+        <a href="{% url 'account_login' %}" class="auth-button">
+            <i class="fab fa-google"></i>
+            Back to sign in
+        </a>
+        <a href="{% url 'auth:register' %}" class="auth-button secondary">
+            <i class="fas fa-user-plus"></i>
+            Create guest account
+        </a>
+    </section>
+</div>
+{% endblock %}

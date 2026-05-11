@@ -156,6 +156,27 @@ def room_search_view(request):
         rooms = rooms.filter(price_per_night__gte=min_price)
     if max_price:
         rooms = rooms.filter(price_per_night__lte=max_price)
+
+    parsed_check_in = None
+    parsed_check_out = None
+    if check_in and check_out:
+        try:
+            parsed_check_in = datetime.strptime(check_in, '%Y-%m-%d').date()
+            parsed_check_out = datetime.strptime(check_out, '%Y-%m-%d').date()
+        except ValueError:
+            messages.error(request, 'Use valid check-in and check-out dates.')
+
+        if parsed_check_in and parsed_check_out:
+            if parsed_check_out <= parsed_check_in:
+                messages.error(request, 'Check-out must be after check-in.')
+                rooms = rooms.none()
+            else:
+                overlapping_room_ids = Booking.objects.filter(
+                    status__in=BOOKED_CALENDAR_STATUSES,
+                    check_in__lt=parsed_check_out,
+                    check_out__gt=parsed_check_in,
+                ).values_list('room_id', flat=True)
+                rooms = rooms.exclude(id__in=overlapping_room_ids)
     
     # Pagination
     paginator = Paginator(rooms, 12)
@@ -216,7 +237,7 @@ def room_create_view(request):
         if form.is_valid():
             room = form.save()
             messages.success(request, f'Room {room.room_number} created successfully!')
-            return redirect('rooms:detail', room_id=room.id)
+            return redirect('admin_panel:room_detail_admin', room_id=room.id)
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -243,7 +264,7 @@ def room_edit_view(request, room_id):
         if form.is_valid():
             room = form.save()
             messages.success(request, f'Room {room.room_number} updated successfully!')
-            return redirect('rooms:detail', room_id=room.id)
+            return redirect('admin_panel:room_detail_admin', room_id=room.id)
         else:
             for field, errors in form.errors.items():
                 for error in errors:

@@ -1,4 +1,5 @@
 import random
+import smtplib
 import string
 from datetime import timedelta
 
@@ -7,6 +8,14 @@ from django.core.mail import send_mail
 from django.utils import timezone
 
 from .models import EmailOTP
+
+
+class EmailOTPDeliveryError(Exception):
+    """Raised when an email OTP cannot be delivered."""
+
+    def __init__(self, message, otp_code=None):
+        super().__init__(message)
+        self.otp_code = otp_code
 
 
 def generate_otp():
@@ -21,7 +30,7 @@ def send_otp_email(user):
     otp = generate_otp()
     expires_at = timezone.now() + timedelta(seconds=getattr(settings, 'OTP_EMAIL_TOKEN_VALIDITY', 300))
 
-    EmailOTP.objects.create(
+    email_otp = EmailOTP.objects.create(
         user=user,
         otp_code=otp,
         expires_at=expires_at,
@@ -37,13 +46,25 @@ def send_otp_email(user):
         "- Cebu Luxury Hotel"
     )
 
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email=sender,
-        recipient_list=[user.email],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=sender,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except (smtplib.SMTPException, OSError) as exc:
+        if getattr(settings, 'DEBUG', False):
+            raise EmailOTPDeliveryError(
+                'Unable to send the verification code. Please check email settings.',
+                otp_code=otp,
+            ) from exc
+
+        email_otp.is_used = True
+        email_otp.save(update_fields=['is_used'])
+        raise EmailOTPDeliveryError('Unable to send the verification code. Please check email settings.') from exc
+
     return otp
 
 

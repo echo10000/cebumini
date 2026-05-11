@@ -1,6 +1,10 @@
 """
 Signal handlers for OAuth and authentication events
 """
+import logging
+
+from django.conf import settings
+from django.core.mail import send_mail
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.contrib.auth.signals import user_logged_in, user_logged_out, user_login_failed
@@ -25,6 +29,8 @@ from .models import (
     TwoFactorAuth,
 )
 from .utils import get_client_ip, get_user_agent
+
+logger = logging.getLogger(__name__)
 
 try:
     from allauth.account.signals import password_changed
@@ -66,6 +72,39 @@ def _log(actor, action, model_name, object_id=None, affected_user=None, descript
         return None
 
 
+def _send_login_notification(request, user):
+    if not getattr(settings, 'SEND_LOGIN_NOTIFICATION_EMAILS', True) or not user.email:
+        return
+
+    ip_address, user_agent = _request_metadata()
+    subject = 'New sign-in to your Cebu Luxury account'
+    message = (
+        f"Hello {user.get_full_name() or user.email},\n\n"
+        "Your Cebu Luxury account was just signed in successfully.\n\n"
+        f"Email: {user.email}\n"
+        f"IP address: {ip_address or 'Unknown'}\n"
+        f"Browser: {user_agent or 'Unknown'}\n\n"
+        "If this was you, no action is needed. If you did not sign in, please contact the hotel administrator.\n\n"
+        "- Cebu Luxury Hotel"
+    )
+
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            fail_silently=False,
+        )
+    except Exception as exc:
+        logger.warning('Could not send login notification email to %s: %s', user.email, exc)
+        if request:
+            message_api.warning(
+                request,
+                'Signed in successfully, but the login notification email could not be sent. Please check SMTP settings.',
+            )
+
+
 @receiver(user_logged_in)
 def clear_allauth_messages(request, user, **kwargs):
     """
@@ -102,6 +141,7 @@ def clear_allauth_messages(request, user, **kwargs):
         affected_user=user,
         description=f'{user.email or user.username} logged in successfully',
     )
+    _send_login_notification(request, user)
 
 
 @receiver(user_login_failed)

@@ -39,6 +39,13 @@
     
     .btn-view { background: transparent; border: 1.5px solid #c9a84c; color: #c9a84c; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; cursor: pointer; transition: all 0.3s ease; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; }
     .btn-view:hover { background: #c9a84c; color: #0a0f1e; }
+    .payment-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .btn-action-small { border: none; border-radius: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.75rem; font-weight: 700; padding: 0.45rem 0.7rem; text-decoration: none; transition: all 0.2s ease; }
+    .btn-approve-small { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; }
+    .btn-approve-small:hover { background: #10b981; color: #06120e; }
+    .btn-reject-small { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
+    .btn-reject-small:hover { background: #ef4444; color: #ffffff; }
+    .payment-no-action { color: var(--admin-muted, #64748b); display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; font-weight: 700; }
 
     .badge-pill { display: inline-block; padding: 0.4rem 0.8rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
     .badge-pending { background: rgba(251, 146, 60, 0.2); color: #fbbf24; }
@@ -103,6 +110,7 @@
                 <label for="status" class="filter-label">Status</label>
                 <select name="status" id="status" class="form-control filter-select">
                     <option value="">All Statuses</option>
+                    <option value="needs_action" {% if status_filter == 'needs_action' %}selected{% endif %}>Needs Admin Action</option>
                     {% for choice, label in payment_statuses %}
                         <option value="{{ choice }}" {% if status_filter == choice %}selected{% endif %}>{{ label }}</option>
                     {% endfor %}
@@ -153,22 +161,43 @@
                             <td><strong style="color: #c9a84c;">#{{ payment.id }}</strong></td>
                             <td>#{{ payment.booking.id }}</td>
                             <td>{{ payment.booking.guest.first_name }} {{ payment.booking.guest.last_name }}</td>
-                            <td><strong style="color: #c9a84c;">₱{{ payment.amount|floatformat:2 }}</strong></td>
+                            <td><strong style="color: #c9a84c;">PHP {{ payment.amount|floatformat:2 }}</strong></td>
                             <td>{{ payment.get_payment_method_display }}</td>
                             <td>
-                                {% if payment.status == 'PENDING' %}
-                                    <span class="badge-pill badge-pending">Pending</span>
-                                {% elif payment.status == 'COMPLETED' %}
-                                    <span class="badge-pill badge-completed">Completed</span>
+                                {% if payment.status == 'PENDING' or payment.status == 'pending_onsite' or payment.status == 'REFUND_PENDING' %}
+                                    <span class="badge-pill badge-pending">{{ payment.get_status_display }}</span>
+                                {% elif payment.status == 'COMPLETED' or payment.status == 'REFUNDED' or payment.status == 'PARTIALLY_REFUNDED' %}
+                                    <span class="badge-pill badge-completed">{{ payment.get_status_display }}</span>
                                 {% else %}
-                                    <span class="badge-pill badge-failed">Failed</span>
+                                    <span class="badge-pill badge-failed">{{ payment.get_status_display }}</span>
                                 {% endif %}
                             </td>
                             <td>{{ payment.created_at|date:"M d, Y" }}</td>
                             <td>
-                                <a href="{% url 'admin_panel:payment_detail' payment.id %}" class="btn-view">
-                                    <i class="fas fa-eye"></i> View
-                                </a>
+                                <div class="payment-actions">
+                                    <a href="{% url 'admin_panel:payment_detail' payment.id %}" class="btn-view">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                    {% if payment.needs_admin_action %}
+                                        <form method="post" action="{% url 'admin_panel:approve_payment' payment.id %}" class="m-0">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn-action-small btn-approve-small" onclick="return confirm('Approve this payment and confirm the booking?');">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form method="post" action="{% url 'admin_panel:reject_payment' payment.id %}" class="m-0">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="reason" value="Payment rejected by admin">
+                                            <button type="submit" class="btn-action-small btn-reject-small" onclick="return confirm('Reject this payment?');">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <span class="payment-no-action">
+                                            <i class="fas fa-check-circle"></i> No action needed
+                                        </span>
+                                    {% endif %}
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
