@@ -876,6 +876,9 @@
                     <div class="user-avatar">{{ user.first_name|first|upper }}</div>
                     <span class="user-name">{{ user.first_name|default:user.username }}</span>
                 </div>
+                <a href="{% url 'profile' %}" class="btn-admin">
+                    <i class="fas fa-user"></i> Profile
+                </a>
                 <a href="{% url 'auth:logout' %}" class="btn-logout">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </a>
@@ -892,6 +895,9 @@
         <div class="sidebar-title">Guest</div>
         <a href="{% url 'auth:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="fas fa-home"></i> Dashboard
+        </a>
+        <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' or request.resolver_match.url_name == 'change_password' or request.resolver_match.url_name == 'change_email' %}active{% endif %}">
+            <i class="fas fa-user"></i> Profile
         </a>
         <a href="{% url 'rooms:list' %}" class="{% if request.resolver_match.url_name == 'list' %}active{% endif %}">
             <i class="fas fa-door-open"></i> Rooms

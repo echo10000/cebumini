@@ -68,7 +68,7 @@
 
 <button id="chatbot-toggle" class="chatbot-toggle" type="button" style="display: none;" title="Open chat" aria-label="Open chat">
     <i class="fas fa-comments"></i>
-    <span class="chat-badge">1</span>
+    <span class="chat-badge" hidden>0</span>
 </button>
 
 <style>
@@ -464,12 +464,18 @@
     }
 
     .chatbot-toggle {
+        --chatbot-line: var(--guest-line, #d9e1ec);
+        --chatbot-brand: var(--guest-brand, #0f766e);
+        --chatbot-brand-dark: var(--guest-brand-dark, #115e59);
+        --chatbot-on-brand: #ffffff;
+        --chatbot-radius: 999px;
+        --chatbot-shadow: 0 18px 42px rgba(15, 23, 42, 0.26);
         position: fixed;
         right: 20px;
         bottom: 20px;
-        width: 60px;
-        height: 60px;
-        border: 1px solid var(--chatbot-line);
+        width: 64px;
+        height: 64px;
+        border: 3px solid #ffffff;
         border-radius: var(--chatbot-radius);
         background: var(--chatbot-brand);
         color: var(--chatbot-on-brand);
@@ -477,16 +483,22 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 22px;
+        font-size: 26px;
         box-shadow: var(--chatbot-shadow);
         z-index: 9998;
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .chatbot-toggle i {
+        color: inherit;
+        filter: drop-shadow(0 1px 1px rgba(15, 23, 42, 0.24));
     }
 
     .chatbot-toggle:hover,
     .chatbot-toggle:focus-visible {
         transform: translateY(-2px);
-        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.32);
+        background: var(--chatbot-brand-dark);
+        box-shadow: 0 22px 55px rgba(15, 23, 42, 0.34);
         outline: none;
     }
 
@@ -559,6 +571,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const widget = document.getElementById('chatbot-widget');
         const toggle = document.getElementById('chatbot-toggle');
+        const badge = toggle?.querySelector('.chat-badge');
         const minimizeBtn = document.getElementById('chatbot-minimize');
         const resetBtn = document.getElementById('chatbot-reset');
         const form = document.getElementById('chatbot-form');
@@ -580,6 +593,7 @@
         const UI_STATE_KEY = 'cebuhotel_chatbot_ui_state_v1';
         const initialMessagesHtml = messagesContainer?.innerHTML || '';
         let fallbackStrikes = 0;
+        let unreadCount = 0;
 
         if (!widget || !toggle || !minimizeBtn || !resetBtn || !form || !input || !sendBtn || !messagesContainer || !loadingIndicator || !quickRepliesContainer) {
             return;
@@ -622,12 +636,14 @@
         toggle.addEventListener('click', function() {
             widget.style.display = 'flex';
             toggle.style.display = 'none';
+            clearUnreadBadge();
             input.focus();
             persistUiState(false);
         });
 
         resetBtn.addEventListener('click', function() {
             fallbackStrikes = 0;
+            clearUnreadBadge();
             setLoading(false);
             messagesContainer.innerHTML = initialMessagesHtml;
             try {
@@ -715,6 +731,7 @@
             messagesContainer.appendChild(messageDiv);
             scrollToBottom();
             persistChatHistory();
+            updateUnreadBadge(sender);
         }
 
         function formatMessage(text) {
@@ -882,6 +899,7 @@
             messagesContainer.appendChild(messageDiv);
             scrollToBottom();
             persistChatHistory();
+            updateUnreadBadge('bot');
         }
 
         function sendMessage(message) {
@@ -940,6 +958,25 @@
             requestAnimationFrame(() => {
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
+        }
+
+        function isChatMinimized() {
+            return widget.style.display === 'none' || toggle.style.display !== 'none';
+        }
+
+        function updateUnreadBadge(sender) {
+            if (sender !== 'bot' || !isChatMinimized()) {
+                return;
+            }
+            unreadCount += 1;
+            badge.textContent = String(Math.min(unreadCount, 9));
+            badge.hidden = false;
+        }
+
+        function clearUnreadBadge() {
+            unreadCount = 0;
+            badge.textContent = '0';
+            badge.hidden = true;
         }
 
         function persistUiState(minimized) {

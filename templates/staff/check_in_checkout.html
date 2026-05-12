@@ -65,6 +65,59 @@
     .status-pending { background: rgba(255, 193, 7, 0.16); color: #ffd46b; }
     .status-checked { background: rgba(13, 202, 240, 0.16); color: #75e8fa; }
     .status-other { background: rgba(108, 117, 125, 0.22); color: #d6d8db; }
+
+    .queue-pagination {
+        align-items: center;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        justify-content: flex-end;
+        margin-top: 0.9rem;
+    }
+
+    .queue-pagination .page-link {
+        background: var(--card-bg);
+        border: 1px solid rgba(201, 168, 76, 0.28);
+        border-radius: 8px;
+        color: var(--text-light);
+        display: inline-flex;
+        min-width: 2.25rem;
+        justify-content: center;
+        padding: 0.4rem 0.7rem;
+        text-decoration: none;
+    }
+
+    .queue-pagination .page-link.active {
+        background: var(--gold);
+        color: #111827;
+        font-weight: 700;
+    }
+
+    .queue-pagination .page-link.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .reference-code-group {
+        display: flex;
+    }
+
+    .reference-code-prefix {
+        align-items: center;
+        background: rgba(13, 110, 253, 0.08);
+        border: 1px solid #ced4da;
+        border-right: 0;
+        border-radius: 0.375rem 0 0 0.375rem;
+        color: #0f5132;
+        display: inline-flex;
+        font-weight: 700;
+        padding: 0 0.75rem;
+    }
+
+    .reference-code-group .form-control {
+        border-radius: 0 0.375rem 0.375rem 0;
+        text-transform: uppercase;
+    }
 </style>
 {% endblock %}
 
@@ -132,7 +185,7 @@
                                                 <i class="fas fa-eye"></i> View
                                             </a>
                                             {% if booking.can_be_checked_in_now %}
-                                                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmCheckInModal" data-booking-id="{{ booking.id }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:check_in_booking' booking.id %}">
+                                                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmCheckInModal" data-booking-id="{{ booking.id }}" data-room-number="{{ booking.room.room_number }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:check_in_booking' booking.id %}">
                                                     <i class="fas fa-check"></i> Verify
                                                 </button>
                                             {% elif booking.status == 'CONFIRMED' %}
@@ -159,6 +212,7 @@
         <div class="col-12">
             <h3 class="section-title">
                 <i class="fas fa-sign-in-alt"></i> Today's Check-Ins ({{ today }})
+                <span class="status-badge status-confirmed ms-2">{{ check_ins_count }}</span>
             </h3>
             
             {% if check_ins %}
@@ -191,7 +245,7 @@
                                         <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-primary">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmCheckInModal" data-booking-id="{{ booking.id }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:check_in_booking' booking.id %}">
+                                        <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#confirmCheckInModal" data-booking-id="{{ booking.id }}" data-room-number="{{ booking.room.room_number }}" data-guest-name="{{ booking.guest.get_full_name|default:booking.guest.username }}" data-action-url="{% url 'staff:check_in_booking' booking.id %}">
                                             <i class="fas fa-check"></i> Confirm
                                         </button>
                                     </div>
@@ -201,9 +255,119 @@
                         </tbody>
                     </table>
                 </div>
+                {% if check_ins_page.has_other_pages %}
+                    <nav class="queue-pagination" aria-label="Today's check-ins pagination">
+                        {% if check_ins_page.has_previous %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}checkins_page={{ check_ins_page.previous_page_number }}">Previous</a>
+                        {% else %}
+                            <span class="page-link disabled">Previous</span>
+                        {% endif %}
+                        {% for page_number in check_ins_page.paginator.page_range %}
+                            {% if page_number == check_ins_page.number %}
+                                <span class="page-link active">{{ page_number }}</span>
+                            {% else %}
+                                <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}checkins_page={{ page_number }}">{{ page_number }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if check_ins_page.has_next %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}checkins_page={{ check_ins_page.next_page_number }}">Next</a>
+                        {% else %}
+                            <span class="page-link disabled">Next</span>
+                        {% endif %}
+                    </nav>
+                {% endif %}
             {% else %}
                 <div class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle"></i> No check-ins scheduled for today
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Pending Today's Arrivals -->
+    <div class="row">
+        <div class="col-12">
+            <h3 class="section-title">
+                <i class="fas fa-clock"></i> Pending Today's Arrivals ({{ today }})
+                <span class="status-badge status-pending ms-2">{{ pending_arrivals_count }}</span>
+            </h3>
+            
+            {% if pending_arrivals %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Guest Name</th>
+                                <th>Booking</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Room</th>
+                                <th>Check-Out</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for booking in pending_arrivals %}
+                            <tr>
+                                <td>
+                                    <div class="guest-name">{{ booking.guest.get_full_name|default:booking.guest.username }}</div>
+                                </td>
+                                <td>#{{ booking.id }}</td>
+                                <td>{{ booking.guest.email }}</td>
+                                <td>{{ booking.guest.phone_number|default:"N/A" }}</td>
+                                <td><span class="room-badge">Room {{ booking.room.room_number }}</span></td>
+                                <td>{{ booking.check_out|date:"M d, Y" }}</td>
+                                <td><span class="status-badge status-pending">{{ booking.get_status_display }}</span></td>
+                                <td>
+                                    <div class="btn-group-sm">
+                                        <a href="{% url 'staff:room_detail' booking.room.id %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        {% if booking.pending_onsite_payment %}
+                                            <form method="post" action="{% url 'staff:confirm_onsite_payment' booking.pending_onsite_payment.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="next" value="{% url 'staff:check_in_checkout' %}">
+                                                <button type="submit" class="btn btn-sm btn-warning">
+                                                    <i class="fas fa-money-bill-wave"></i> Confirm Cash
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <a href="{% url 'staff:process_remaining_payment' booking.id %}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-money-bill-wave"></i> Resolve Payment
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if pending_arrivals_page.has_other_pages %}
+                    <nav class="queue-pagination" aria-label="Pending arrivals pagination">
+                        {% if pending_arrivals_page.has_previous %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}pending_page={{ pending_arrivals_page.previous_page_number }}">Previous</a>
+                        {% else %}
+                            <span class="page-link disabled">Previous</span>
+                        {% endif %}
+                        {% for page_number in pending_arrivals_page.paginator.page_range %}
+                            {% if page_number == pending_arrivals_page.number %}
+                                <span class="page-link active">{{ page_number }}</span>
+                            {% else %}
+                                <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}pending_page={{ page_number }}">{{ page_number }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if pending_arrivals_page.has_next %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}pending_page={{ pending_arrivals_page.next_page_number }}">Next</a>
+                        {% else %}
+                            <span class="page-link disabled">Next</span>
+                        {% endif %}
+                    </nav>
+                {% endif %}
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle"></i> No pending arrivals for today
                 </div>
             {% endif %}
         </div>
@@ -214,6 +378,7 @@
         <div class="col-12">
             <h3 class="section-title">
                 <i class="fas fa-sign-out-alt"></i> Today's Check-Outs ({{ today }})
+                <span class="status-badge status-checked ms-2">{{ check_outs_count }}</span>
             </h3>
             
             {% if check_outs %}
@@ -254,6 +419,27 @@
                         </tbody>
                     </table>
                 </div>
+                {% if check_outs_page.has_other_pages %}
+                    <nav class="queue-pagination" aria-label="Today's check-outs pagination">
+                        {% if check_outs_page.has_previous %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}checkouts_page={{ check_outs_page.previous_page_number }}">Previous</a>
+                        {% else %}
+                            <span class="page-link disabled">Previous</span>
+                        {% endif %}
+                        {% for page_number in check_outs_page.paginator.page_range %}
+                            {% if page_number == check_outs_page.number %}
+                                <span class="page-link active">{{ page_number }}</span>
+                            {% else %}
+                                <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}checkouts_page={{ page_number }}">{{ page_number }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if check_outs_page.has_next %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}checkouts_page={{ check_outs_page.next_page_number }}">Next</a>
+                        {% else %}
+                            <span class="page-link disabled">Next</span>
+                        {% endif %}
+                    </nav>
+                {% endif %}
             {% else %}
                 <div class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle"></i> No check-outs scheduled for today
@@ -267,6 +453,7 @@
         <div class="col-12">
             <h3 class="section-title">
                 <i class="fas fa-calendar-plus"></i> Tomorrow's Check-Ins ({{ tomorrow|date:"M d, Y" }})
+                <span class="status-badge status-confirmed ms-2">{{ tomorrow_check_ins_count }}</span>
             </h3>
             
             {% if tomorrow_check_ins %}
@@ -302,6 +489,27 @@
                         </tbody>
                     </table>
                 </div>
+                {% if tomorrow_check_ins_page.has_other_pages %}
+                    <nav class="queue-pagination" aria-label="Tomorrow's check-ins pagination">
+                        {% if tomorrow_check_ins_page.has_previous %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}tomorrow_page={{ tomorrow_check_ins_page.previous_page_number }}">Previous</a>
+                        {% else %}
+                            <span class="page-link disabled">Previous</span>
+                        {% endif %}
+                        {% for page_number in tomorrow_check_ins_page.paginator.page_range %}
+                            {% if page_number == tomorrow_check_ins_page.number %}
+                                <span class="page-link active">{{ page_number }}</span>
+                            {% else %}
+                                <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}tomorrow_page={{ page_number }}">{{ page_number }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        {% if tomorrow_check_ins_page.has_next %}
+                            <a class="page-link" href="?{% if search_query %}q={{ search_query|urlencode }}&{% endif %}tomorrow_page={{ tomorrow_check_ins_page.next_page_number }}">Next</a>
+                        {% else %}
+                            <span class="page-link disabled">Next</span>
+                        {% endif %}
+                    </nav>
+                {% endif %}
             {% else %}
                 <div class="alert alert-info" role="alert">
                     <i class="fas fa-info-circle"></i> No check-ins scheduled for tomorrow
@@ -322,14 +530,21 @@
                 </div>
                 <div class="modal-body">
                     {% csrf_token %}
-                    <p class="mb-3">Verify <strong id="checkInGuestName">this guest</strong> before check-in.</p>
+                    <p class="mb-2">Verify <strong id="checkInGuestName">this guest</strong> before check-in.</p>
+                    <div class="alert alert-info py-2" id="checkInBookingSummary">
+                        Booking <strong id="checkInBookingId">#</strong> · Room <strong id="checkInRoomNumber">-</strong>
+                    </div>
                     <div class="alert alert-warning py-2">
                         Enter the guest's reference code and tick all checklist items before submitting.
                     </div>
                     <div class="mb-3">
-                        <label for="checkInReferenceInput" class="form-label">Reference Code</label>
-                        <input type="text" class="form-control" id="checkInReferenceInput" name="booking_reference" placeholder="Ask guest for their reference code" autocomplete="off" required>
-                        <div class="form-text">Use the code shown by the guest from their booking confirmation.</div>
+                        <label for="checkInReferenceSuffixInput" class="form-label">Reference Code</label>
+                        <div class="reference-code-group">
+                            <span class="reference-code-prefix">CEBU-</span>
+                            <input type="text" class="form-control" id="checkInReferenceSuffixInput" maxlength="6" pattern="[A-Za-z0-9]{6}" placeholder="7LZ3YW" autocomplete="off" required>
+                        </div>
+                        <input type="hidden" id="checkInReferenceInput" name="booking_reference">
+                        <div class="form-text">Type only the six characters after CEBU- from the guest's confirmation.</div>
                     </div>
                     <div class="form-check mb-2">
                         <input class="form-check-input" type="checkbox" id="referenceVerified" name="reference_verified" required>
@@ -389,6 +604,10 @@
     const checkInModal = document.getElementById('confirmCheckInModal');
     const checkInForm = document.getElementById('checkInVerificationForm');
     const checkInGuestName = document.getElementById('checkInGuestName');
+    const checkInBookingId = document.getElementById('checkInBookingId');
+    const checkInRoomNumber = document.getElementById('checkInRoomNumber');
+    const checkInReferenceSuffixInput = document.getElementById('checkInReferenceSuffixInput');
+    const checkInReferenceInput = document.getElementById('checkInReferenceInput');
     const checkOutModal = document.getElementById('confirmCheckOutModal');
     const checkOutForm = document.getElementById('checkOutForm');
     const checkOutGuestName = document.getElementById('checkOutGuestName');
@@ -399,6 +618,20 @@
             checkInForm.action = button.dataset.actionUrl;
             checkInForm.reset();
             checkInGuestName.textContent = button.dataset.guestName || 'this guest';
+            checkInBookingId.textContent = button.dataset.bookingId ? `#${button.dataset.bookingId}` : '#';
+            checkInRoomNumber.textContent = button.dataset.roomNumber || '-';
+        });
+
+        checkInForm.addEventListener('submit', () => {
+            const suffix = (checkInReferenceSuffixInput.value || '').trim().toUpperCase();
+            checkInReferenceInput.value = `CEBU-${suffix}`;
+        });
+
+        checkInReferenceSuffixInput.addEventListener('input', () => {
+            checkInReferenceSuffixInput.value = checkInReferenceSuffixInput.value
+                .replace(/[^a-zA-Z0-9]/g, '')
+                .toUpperCase()
+                .slice(0, 6);
         });
     }
 

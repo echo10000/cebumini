@@ -1,0 +1,291 @@
+{% extends base_template %}
+
+{% block title %}My Profile - Cebu Mini Hotel{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .profile-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-width: 1180px;
+        margin: 0 auto;
+        --profile-text: #172033;
+        --profile-muted: #64748b;
+        --profile-line: #d9e1ec;
+        --profile-brand: #0f766e;
+        --profile-brand-dark: #115e59;
+        --profile-card: rgba(255, 255, 255, 0.96);
+        --profile-soft: #eef7f6;
+        --profile-radius: 8px;
+        --profile-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    .profile-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.25rem 0 0.35rem;
+    }
+
+    .profile-kicker {
+        color: var(--profile-muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+        margin: 0 0 0.4rem;
+        text-transform: uppercase;
+    }
+
+    .profile-page-header h1 {
+        color: var(--profile-text) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-size: clamp(1.8rem, 3vw, 2.7rem) !important;
+        font-weight: 850 !important;
+        letter-spacing: 0 !important;
+        line-height: 1.08;
+        margin: 0 0 0.35rem;
+    }
+
+    .profile-page-header p {
+        color: var(--profile-muted) !important;
+        margin: 0;
+    }
+
+    .profile-hero {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        gap: 1.4rem;
+        align-items: center;
+        padding: 1.35rem;
+        background:
+            linear-gradient(135deg, rgba(15, 118, 110, 0.1), rgba(255, 255, 255, 0) 46%),
+            var(--profile-card);
+        border: 1px solid var(--profile-line);
+        border-radius: var(--profile-radius);
+        box-shadow: var(--profile-shadow);
+        color: var(--profile-text);
+    }
+
+    .profile-avatar {
+        width: 96px;
+        height: 96px;
+        border-radius: 999px;
+        background: var(--profile-soft);
+        color: var(--profile-brand-dark);
+        border: 1px solid rgba(15, 118, 110, 0.18);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+        font-size: 2.2rem;
+        font-weight: 850;
+        overflow: hidden;
+    }
+
+    .profile-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        justify-content: flex-end;
+    }
+
+    .profile-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .profile-card {
+        padding: 1.2rem;
+        background: var(--profile-card);
+        border: 1px solid var(--profile-line);
+        border-radius: var(--profile-radius);
+        box-shadow: var(--profile-shadow);
+        color: var(--profile-text);
+    }
+
+    .profile-card h2 {
+        color: var(--profile-text) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-size: 1rem;
+        font-weight: 850;
+        letter-spacing: 0;
+        margin: 0 0 0.8rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid var(--profile-line);
+    }
+
+    .info-row {
+        display: grid;
+        grid-template-columns: minmax(130px, 0.8fr) minmax(0, 1.2fr);
+        gap: 1rem;
+        align-items: start;
+        padding: 0.72rem 0;
+    }
+
+    .info-row:last-child {
+        border-bottom: 0;
+    }
+
+    .info-label {
+        color: var(--profile-muted);
+        font-size: 0.82rem;
+        font-weight: 800;
+    }
+
+    .info-value {
+        color: var(--profile-text);
+        font-size: 0.92rem;
+        font-weight: 750;
+        text-align: right;
+        overflow-wrap: anywhere;
+    }
+
+    .profile-badge {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: var(--profile-soft);
+        color: var(--profile-brand-dark);
+        font-size: 0.78rem;
+        font-weight: 850;
+    }
+
+    .profile-identity h2 {
+        color: var(--profile-text) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-weight: 850;
+        margin-bottom: 0.2rem !important;
+    }
+
+    .profile-identity p {
+        color: var(--profile-muted) !important;
+    }
+
+    @media (max-width: 900px) {
+        .profile-hero,
+        .profile-page-header,
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-page-header,
+        .profile-hero {
+            align-items: flex-start;
+        }
+
+        .profile-actions {
+            justify-content: flex-start;
+        }
+
+        .profile-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .info-row {
+            grid-template-columns: 1fr;
+            gap: 0.25rem;
+        }
+
+        .info-value {
+            text-align: left;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page container-fluid">
+    <section class="profile-page-header">
+        <div>
+            <p class="profile-kicker">My Profile</p>
+            <h1>{{ request.user.get_full_name|default:request.user.username }}</h1>
+            <p>Personal details, role information, and account security in one place.</p>
+        </div>
+    </section>
+
+    <section class="profile-hero">
+        <div class="profile-avatar" aria-label="Profile picture">
+            {% if profile.profile_picture %}
+                <img src="{{ profile.profile_picture.url }}" alt="{{ request.user.get_full_name|default:request.user.username }}">
+            {% else %}
+                {{ request.user.first_name|first|default:request.user.username|first|upper }}
+            {% endif %}
+        </div>
+
+        <div class="profile-identity">
+            <h2 class="h4 mb-1">{{ request.user.get_full_name|default:request.user.username }}</h2>
+            <p class="text-muted mb-2">{{ request.user.email }}</p>
+            <span class="profile-badge">{{ request.user.get_role_display }}</span>
+        </div>
+
+        <div class="profile-actions">
+            <a href="{% url 'profile_edit' %}" class="btn btn-primary">
+                <i class="fas fa-user-pen"></i> Edit Profile
+            </a>
+            <a href="{% url 'change_password' %}" class="btn btn-secondary">
+                <i class="fas fa-lock"></i> Change Password
+            </a>
+            <a href="{% url 'change_email' %}" class="btn btn-secondary">
+                <i class="fas fa-envelope"></i> Change Email
+            </a>
+        </div>
+    </section>
+
+    <div class="profile-grid">
+        <section class="profile-card">
+            <h2>Personal Details</h2>
+            <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">{{ request.user.get_full_name|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Username</span><span class="info-value">{{ request.user.username }}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-value">{{ request.user.email }}</span></div>
+            <div class="info-row"><span class="info-label">Phone</span><span class="info-value">{{ profile.phone_number|default:request.user.phone_number|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Address</span><span class="info-value">{{ profile.address|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Date of Birth</span><span class="info-value">{{ profile.date_of_birth|date:"M d, Y"|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Nationality</span><span class="info-value">{{ profile.nationality|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Bio</span><span class="info-value">{{ profile.bio|linebreaksbr|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Profile Created</span><span class="info-value">{{ profile.created_at|date:"M d, Y" }}</span></div>
+            <div class="info-row"><span class="info-label">Last Updated</span><span class="info-value">{{ profile.updated_at|date:"M d, Y" }}</span></div>
+        </section>
+
+        {% if request.user.role == 'STAFF' or request.user.role == 'MANAGER' or request.user.role == 'ADMIN' %}
+        <section class="profile-card">
+            <h2>Staff Details</h2>
+            <div class="info-row"><span class="info-label">Employee ID</span><span class="info-value">{{ staff_profile.employee_id|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Department</span><span class="info-value">{{ staff_profile.get_department_display|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Position</span><span class="info-value">{{ staff_profile.position|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Hired Date</span><span class="info-value">{{ staff_profile.hired_date|date:"M d, Y"|default:"Not provided" }}</span></div>
+        </section>
+        {% endif %}
+
+        {% if request.user.role == 'MANAGER' or request.user.role == 'ADMIN' %}
+        <section class="profile-card">
+            <h2>Manager Details</h2>
+            <div class="info-row"><span class="info-label">Managed Departments</span><span class="info-value">{{ manager_profile.managed_departments|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Years of Experience</span><span class="info-value">{{ manager_profile.years_of_experience }}</span></div>
+            <div class="info-row"><span class="info-label">Manager Since</span><span class="info-value">{{ manager_profile.manager_since|date:"M d, Y"|default:"Not provided" }}</span></div>
+        </section>
+        {% endif %}
+
+        {% if request.user.role == 'ADMIN' %}
+        <section class="profile-card">
+            <h2>Admin Details</h2>
+            <div class="info-row"><span class="info-label">System Access Level</span><span class="info-value">{{ admin_profile.get_system_access_level_display|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Admin Notes</span><span class="info-value">{{ admin_profile.admin_notes|linebreaksbr|default:"Not provided" }}</span></div>
+            <div class="info-row"><span class="info-label">Last System Audit</span><span class="info-value">{{ admin_profile.last_audit_date|date:"M d, Y"|default:"Not provided" }}</span></div>
+        </section>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

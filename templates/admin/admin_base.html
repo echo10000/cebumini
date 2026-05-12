@@ -677,6 +677,12 @@
                         <span>Overview</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' or request.resolver_match.url_name == 'change_password' or request.resolver_match.url_name == 'change_email' %}active{% endif %}">
+                        <i class="fas fa-user"></i>
+                        <span>Profile</span>
+                    </a>
+                </li>
             </ul>
         </div>
 

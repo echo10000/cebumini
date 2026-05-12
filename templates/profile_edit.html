@@ -1,0 +1,251 @@
+{% extends base_template %}
+
+{% block title %}Edit Profile - Cebu Mini Hotel{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .profile-page {
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        max-width: 1180px;
+        margin: 0 auto;
+        --profile-text: #172033;
+        --profile-muted: #64748b;
+        --profile-line: #d9e1ec;
+        --profile-brand: #0f766e;
+        --profile-brand-dark: #115e59;
+        --profile-card: rgba(255, 255, 255, 0.96);
+        --profile-soft: #eef7f6;
+        --profile-radius: 8px;
+        --profile-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    .profile-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1rem;
+        padding: 0.25rem 0 0.5rem;
+    }
+
+    .profile-kicker {
+        color: var(--profile-muted);
+        font-size: 0.78rem;
+        font-weight: 800;
+        margin: 0 0 0.35rem;
+        text-transform: uppercase;
+    }
+
+    .profile-page-header h1 {
+        color: var(--profile-text) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-size: clamp(1.8rem, 3vw, 2.7rem) !important;
+        font-weight: 850 !important;
+        letter-spacing: 0 !important;
+        line-height: 1.08;
+        margin: 0 0 0.35rem;
+    }
+
+    .profile-page-header p {
+        color: var(--profile-muted) !important;
+        margin: 0;
+    }
+
+    .profile-form-section {
+        background: var(--profile-card);
+        border: 1px solid var(--profile-line);
+        border-radius: var(--profile-radius);
+        box-shadow: var(--profile-shadow);
+        color: var(--profile-text);
+        padding: 1.25rem;
+    }
+
+    .profile-form-section h2 {
+        color: var(--profile-text) !important;
+        font-family: "DM Sans", system-ui, sans-serif !important;
+        font-size: 1.05rem;
+        font-weight: 850;
+        letter-spacing: 0;
+        margin: 0 0 1rem;
+    }
+
+    .profile-form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .profile-form-grid .form-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .profile-preview {
+        width: 96px;
+        height: 96px;
+        border-radius: 999px;
+        object-fit: cover;
+        background: var(--profile-soft);
+        color: var(--profile-brand-dark);
+    }
+
+    .form-label {
+        color: var(--profile-text);
+        font-weight: 750;
+    }
+
+    .errorlist {
+        color: #b91c1c;
+        list-style: none;
+        padding-left: 0;
+        margin-top: 0.4rem;
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .profile-page-header,
+        .profile-form-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-page-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-page container-fluid">
+    <section class="profile-page-header">
+        <div>
+            <p class="profile-kicker">My Profile</p>
+            <h1>Edit Profile</h1>
+            <p>Update the details connected to your {{ request.user.get_role_display|lower }} account.</p>
+        </div>
+        <a href="{% url 'profile' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Profile
+        </a>
+    </section>
+
+    <form method="post" enctype="multipart/form-data" novalidate class="d-flex flex-column gap-3">
+        {% csrf_token %}
+
+        <section class="profile-form-section">
+            <div class="d-flex align-items-center gap-3 mb-4">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="Current profile picture" class="profile-preview" id="profilePicturePreview">
+                {% else %}
+                    <div class="profile-preview d-flex align-items-center justify-content-center" id="profilePictureFallback">
+                        <span style="font-size:2rem;font-weight:850;">{{ request.user.first_name|first|default:request.user.username|first|upper }}</span>
+                    </div>
+                    <img src="" alt="Profile picture preview" class="profile-preview d-none" id="profilePicturePreview">
+                {% endif %}
+                <div>
+                    <h2 class="mb-1">Personal Details</h2>
+                    <p class="text-muted mb-0">{{ request.user.email }}</p>
+                </div>
+            </div>
+
+            {{ profile_form.non_field_errors }}
+            <div class="profile-form-grid">
+                {% for field in profile_form %}
+                    <div class="form-field {% if field.name == 'profile_picture' or field.name == 'address' or field.name == 'bio' %}full{% endif %}">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        {% if request.user.role == 'STAFF' or request.user.role == 'MANAGER' or request.user.role == 'ADMIN' %}
+        <section class="profile-form-section">
+            <h2>Staff Details</h2>
+            {{ staff_form.non_field_errors }}
+            <div class="profile-form-grid">
+                {% for field in staff_form %}
+                    <div class="form-field">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if request.user.role == 'MANAGER' or request.user.role == 'ADMIN' %}
+        <section class="profile-form-section">
+            <h2>Manager Details</h2>
+            {{ manager_form.non_field_errors }}
+            <div class="profile-form-grid">
+                {% for field in manager_form %}
+                    <div class="form-field">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        {% if request.user.role == 'ADMIN' %}
+        <section class="profile-form-section">
+            <h2>Admin Details</h2>
+            {{ admin_form.non_field_errors }}
+            <div class="profile-form-grid">
+                {% for field in admin_form %}
+                    <div class="form-field {% if field.name == 'admin_notes' %}full{% endif %}">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <div class="d-flex justify-content-end gap-2 flex-wrap">
+            <a href="{% url 'profile' %}" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Changes
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const input = document.getElementById('id_profile_picture');
+        const preview = document.getElementById('profilePicturePreview');
+        const fallback = document.getElementById('profilePictureFallback');
+
+        if (!input || !preview) return;
+
+        input.addEventListener('change', function () {
+            const file = input.files && input.files[0];
+            if (!file || !file.type.startsWith('image/')) return;
+
+            const reader = new FileReader();
+            reader.onload = function (event) {
+                preview.src = event.target.result;
+                preview.classList.remove('d-none');
+                if (fallback) fallback.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+</script>
+{% endblock %}

@@ -82,6 +82,130 @@ class CustomUser(AbstractUser):
         self.save()
 
 
+class UserProfile(models.Model):
+    """Shared profile details for every user role."""
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='profile'
+    )
+    profile_picture = models.ImageField(
+        upload_to='profile_pics/',
+        null=True,
+        blank=True
+    )
+    phone_number = models.CharField(max_length=20, blank=True)
+    address = models.TextField(blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    nationality = models.CharField(max_length=100, blank=True)
+    bio = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'user_profiles'
+        verbose_name = 'User Profile'
+        verbose_name_plural = 'User Profiles'
+
+    def __str__(self):
+        return f'Profile for {self.user.email or self.user.username}'
+
+
+class StaffProfile(models.Model):
+    """Staff profile details shared by staff, managers, and admins."""
+    FRONT_DESK = 'FRONT_DESK'
+    HOUSEKEEPING = 'HOUSEKEEPING'
+    MANAGEMENT = 'MANAGEMENT'
+    IT = 'IT'
+    FINANCE = 'FINANCE'
+
+    DEPARTMENT_CHOICES = [
+        (FRONT_DESK, 'Front Desk'),
+        (HOUSEKEEPING, 'Housekeeping'),
+        (MANAGEMENT, 'Management'),
+        (IT, 'IT'),
+        (FINANCE, 'Finance'),
+    ]
+
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='staff_profile'
+    )
+    employee_id = models.CharField(max_length=30, unique=True)
+    department = models.CharField(
+        max_length=30,
+        choices=DEPARTMENT_CHOICES,
+        default=FRONT_DESK
+    )
+    position = models.CharField(max_length=100, blank=True)
+    hired_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'staff_profiles'
+        verbose_name = 'Staff Profile'
+        verbose_name_plural = 'Staff Profiles'
+
+    def __str__(self):
+        return f'Staff profile for {self.user.email or self.user.username}'
+
+
+class ManagerProfile(models.Model):
+    """Manager profile details for manager-level users."""
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='manager_profile'
+    )
+    managed_departments = models.CharField(
+        max_length=255,
+        blank=True,
+        help_text='Comma-separated department names'
+    )
+    years_of_experience = models.IntegerField(default=0)
+    manager_since = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'manager_profiles'
+        verbose_name = 'Manager Profile'
+        verbose_name_plural = 'Manager Profiles'
+
+    def __str__(self):
+        return f'Manager profile for {self.user.email or self.user.username}'
+
+
+class AdminProfile(models.Model):
+    """Admin-only profile details."""
+    FULL_ACCESS = 'FULL_ACCESS'
+    PARTIAL_ACCESS = 'PARTIAL_ACCESS'
+
+    ACCESS_LEVEL_CHOICES = [
+        (FULL_ACCESS, 'Full Access'),
+        (PARTIAL_ACCESS, 'Partial Access'),
+    ]
+
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='admin_profile'
+    )
+    system_access_level = models.CharField(
+        max_length=30,
+        choices=ACCESS_LEVEL_CHOICES,
+        default=FULL_ACCESS
+    )
+    admin_notes = models.TextField(blank=True)
+    last_audit_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'admin_profiles'
+        verbose_name = 'Admin Profile'
+        verbose_name_plural = 'Admin Profiles'
+
+    def __str__(self):
+        return f'Admin profile for {self.user.email or self.user.username}'
+
+
 class RoomType(models.TextChoices):
     """Room type choices"""
     STANDARD = 'STANDARD', 'Standard Room'

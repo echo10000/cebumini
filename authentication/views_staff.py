@@ -4,6 +4,7 @@ Staff members can manage room status, check-ins, check-outs, and maintenance
 """
 
 from django.conf import settings
+from django.core.paginator import Paginator
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
@@ -43,7 +44,7 @@ from .utils import confirm_booking_after_completed_payment, get_occupancy_chart_
 @staff_or_admin_required
 def staff_dashboard(request):
     """Staff Dashboard with daily tasks and room status"""
-    today = timezone.now().date()
+    today = timezone.localdate()
     
     # Get today's bookings
     today_check_ins = Booking.objects.filter(
@@ -150,6 +151,8 @@ def confirm_onsite_cash_payment(request, payment_id):
     )
 
     messages.success(request, 'Cash payment confirmed successfully.')
+    if request.POST.get('next') == reverse('staff:check_in_checkout'):
+        return redirect('staff:check_in_checkout')
     return redirect('staff:dashboard')
 
 
@@ -274,27 +277,50 @@ def room_detail_staff(request, room_id):
 @staff_or_admin_required
 def check_in_checkout_list(request):
     """View upcoming check-ins and check-outs"""
-    today = timezone.now().date()
+    today = timezone.localdate()
     search_query = request.GET.get('q', '').strip()
+
+    def paginate(queryset, page_param, per_page=8):
+        paginator = Paginator(queryset, per_page)
+        return paginator.get_page(request.GET.get(page_param))
     
     # Check-ins today
-    check_ins = Booking.objects.filter(
+    check_ins_qs = Booking.objects.filter(
         check_in=today,
         status=BookingStatus.CONFIRMED
-    ).select_related('guest', 'room')
+    ).select_related('guest', 'room').order_by('check_out', 'room__room_number')
+
+    # Bookings that match today's arrival date but still need payment/confirmation.
+    pending_arrivals_qs = Booking.objects.filter(
+        check_in=today,
+        status=BookingStatus.PENDING
+    ).select_related('guest', 'room').order_by('check_out', 'room__room_number')
     
     # Check-outs today
-    check_outs = Booking.objects.filter(
+    check_outs_qs = Booking.objects.filter(
         check_out=today,
         status=BookingStatus.CHECKED_IN
-    ).select_related('guest', 'room')
+    ).select_related('guest', 'room').order_by('room__room_number')
     
     # Tomorrow's check-ins
     tomorrow = today + timedelta(days=1)
-    tomorrow_check_ins = Booking.objects.filter(
+    tomorrow_check_ins_qs = Booking.objects.filter(
         check_in=tomorrow,
         status=BookingStatus.CONFIRMED
-    ).select_related('guest', 'room')
+    ).select_related('guest', 'room').order_by('check_out', 'room__room_number')
+
+    check_ins_page = paginate(check_ins_qs, 'checkins_page')
+    pending_arrivals_page = paginate(pending_arrivals_qs, 'pending_page')
+    check_outs_page = paginate(check_outs_qs, 'checkouts_page')
+    tomorrow_check_ins_page = paginate(tomorrow_check_ins_qs, 'tomorrow_page')
+
+    for booking in pending_arrivals_page.object_list:
+        booking.pending_onsite_payment = (
+            booking.payments
+            .filter(status=PaymentStatus.PENDING_ONSITE)
+            .order_by('-created_at')
+            .first()
+        )
 
     search_results = Booking.objects.none()
     if search_query:
@@ -319,9 +345,18 @@ def check_in_checkout_list(request):
     context = {
         'today': today,
         'tomorrow': tomorrow,
-        'check_ins': check_ins,
-        'check_outs': check_outs,
-        'tomorrow_check_ins': tomorrow_check_ins,
+        'check_ins': check_ins_page.object_list,
+        'check_ins_page': check_ins_page,
+        'check_ins_count': check_ins_qs.count(),
+        'pending_arrivals': pending_arrivals_page.object_list,
+        'pending_arrivals_page': pending_arrivals_page,
+        'pending_arrivals_count': pending_arrivals_qs.count(),
+        'check_outs': check_outs_page.object_list,
+        'check_outs_page': check_outs_page,
+        'check_outs_count': check_outs_qs.count(),
+        'tomorrow_check_ins': tomorrow_check_ins_page.object_list,
+        'tomorrow_check_ins_page': tomorrow_check_ins_page,
+        'tomorrow_check_ins_count': tomorrow_check_ins_qs.count(),
         'search_query': search_query,
         'search_results': search_results,
     }
@@ -959,11 +994,11 @@ def pending_balance_bookings(request):
     from .models import Payment, PaymentStatus
     from decimal import Decimal
     
-    # Get confirmed or checked-in bookings with a balance due.
+    # Get pending, confirmed, or checked-in bookings with a balance due.
     bookings_with_partial_payment = []
     
     confirmed_bookings = Booking.objects.filter(
-        status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
+        status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
     ).select_related('guest', 'room')
     
     for booking in confirmed_bookings:
@@ -999,7 +1034,7 @@ def process_remaining_payment(request, booking_id):
     booking = get_object_or_404(
         Booking,
         id=booking_id,
-        status__in=[BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
+        status__in=[BookingStatus.PENDING, BookingStatus.CONFIRMED, BookingStatus.CHECKED_IN]
     )
     
     # Calculate total paid and balance due
@@ -1011,8 +1046,17 @@ def process_remaining_payment(request, booking_id):
     balance_due = booking.total_price - total_paid
     
     if balance_due <= 0:
+        if booking.status == BookingStatus.PENDING:
+            completed_payment = (
+                Payment.objects
+                .filter(booking=booking, status=PaymentStatus.COMPLETED)
+                .order_by('-completed_at', '-created_at')
+                .first()
+            )
+            if completed_payment:
+                confirm_booking_after_completed_payment(completed_payment)
         messages.info(request, f'✓ Booking #{booking.id} is fully paid. No additional payment needed.')
-        return redirect('staff:dashboard')
+        return redirect('staff:check_in_checkout')
     
     payment_methods = PaymentMethod.choices
     
@@ -1078,6 +1122,7 @@ def process_remaining_payment(request, booking_id):
                 from django.utils import timezone
                 payment.completed_at = timezone.now()
                 payment.save()
+                confirm_booking_after_completed_payment(payment)
 
             log_activity(
                 request.user,

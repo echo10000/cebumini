@@ -46,6 +46,7 @@
                 <div class="user-avatar">{{ user.first_name|first }}</div>
                 <span class="user-name">{{ user.first_name }} {{ user.last_name }}</span>
             </div>
+            <a href="{% url 'profile' %}" class="btn-logout"><i class="fas fa-user"></i> Profile</a>
             <a href="{% url 'auth:logout' %}" class="btn-logout">Logout</a>
         </div>
     </nav>
@@ -54,6 +55,9 @@
         <div class="sidebar-title">Staff</div>
         <a href="{% url 'staff:dashboard' %}" class="{% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
             <i class="fas fa-chart-line"></i> Overview
+        </a>
+        <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' or request.resolver_match.url_name == 'change_password' or request.resolver_match.url_name == 'change_email' %}active{% endif %}">
+            <i class="fas fa-user"></i> Profile
         </a>
         <a href="{% url 'staff:room_status' %}" class="{% if request.resolver_match.url_name == 'room_status' %}active{% endif %}">
             <i class="fas fa-door-open"></i> Rooms

@@ -616,33 +616,7 @@
                     <form method="post" action="{% url 'admin_panel:booking_edit' booking.id %}" id="booking-action-form">
                         {% csrf_token %}
                         <input type="hidden" name="action" id="booking-action-input" value="">
-                        {% if booking.status == 'CONFIRMED' %}
-                        <div class="verification-panel">
-                            <label for="booking-reference-input">Check-in Reference Code</label>
-                            <input type="text" id="booking-reference-input" name="booking_reference" placeholder="Enter guest-provided reference code" autocomplete="off" required>
-
-                            <label class="verification-check">
-                                <input type="checkbox" name="reference_verified" required>
-                                <span>Guest presented the booking confirmation/reference code.</span>
-                            </label>
-                            <label class="verification-check">
-                                <input type="checkbox" name="id_verified" required>
-                                <span>Valid ID matches {{ guest.first_name }} {{ guest.last_name }}.</span>
-                            </label>
-                            <label class="verification-check">
-                                <input type="checkbox" name="contact_verified" required>
-                                <span>Email or phone matches the guest account.</span>
-                            </label>
-                            <label class="verification-check">
-                                <input type="checkbox" name="payment_verified" required>
-                                <span>Payment status or remaining balance requirement is verified.</span>
-                            </label>
-
-                            <label for="verification-notes" class="mt-3 d-block">Verification Notes</label>
-                            <textarea id="verification-notes" name="verification_notes" rows="2" placeholder="Optional notes"></textarea>
-                            <p class="verification-meta mt-2 mb-0">Do not ask for the guest account password or OTP.</p>
-                        </div>
-                        {% elif booking.verified_at %}
+                        {% if booking.verified_at %}
                         <div class="verification-panel">
                             <p class="verification-meta mb-0">
                                 Check-in verification completed on {{ booking.verified_at|date:"M d, Y g:i A" }}
@@ -662,22 +636,8 @@
                                     <i class="fas fa-times"></i> Cancel
                                 </button>
                             {% elif booking.status == 'CONFIRMED' %}
-                                <button type="submit" name="action" value="checkin" class="btn-action btn-checkin">
-                                    <i class="fas fa-sign-in-alt"></i> Check-In
-                                </button>
                                 <button type="button" data-action-value="cancel" data-confirm-title="Cancel Booking" data-confirm-message="Are you sure you want to cancel this booking?" class="btn-action btn-cancel confirm-action">
                                     <i class="fas fa-times"></i> Cancel
-                                </button>
-                            {% elif booking.status == 'CHECKED_IN' %}
-                                <button type="submit" name="action" value="checkout" class="btn-action btn-checkout">
-                                    <i class="fas fa-sign-out-alt"></i> Check-Out
-                                </button>
-                                <button type="button" data-action-value="undo_checkin" data-confirm-title="Undo Check-In" data-confirm-message="Are you sure you want to undo check-in?" class="btn-action btn-undo confirm-action">
-                                    <i class="fas fa-undo"></i> Undo Check-In
-                                </button>
-                            {% elif booking.status == 'CHECKED_OUT' %}
-                                <button type="button" data-action-value="undo_checkout" data-confirm-title="Undo Check-Out" data-confirm-message="Are you sure you want to undo check-out?" class="btn-action btn-undo confirm-action">
-                                    <i class="fas fa-undo"></i> Undo Check-Out
                                 </button>
                             {% elif booking.status == 'CANCELLED' %}
                                 <button type="button" data-action-value="restore" data-confirm-title="Restore Booking" data-confirm-message="Restore this cancelled booking?" class="btn-action btn-restore confirm-action">

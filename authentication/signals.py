@@ -25,8 +25,13 @@ from .models import (
     RefundRequest,
     RefundRequestStatus,
     Room,
+    AdminProfile,
+    ManagerProfile,
+    StaffProfile,
     Testimonial,
     TwoFactorAuth,
+    UserProfile,
+    UserRole,
 )
 from .utils import get_client_ip, get_user_agent
 
@@ -38,6 +43,10 @@ except ImportError:  # pragma: no cover - depends on installed allauth version
     password_changed = None
 
 User = get_user_model()
+
+
+def _employee_id_for_user(user):
+    return f'EMP-{user.id:05d}'
 
 
 def _request_actor(default=None):
@@ -70,6 +79,25 @@ def _log(actor, action, model_name, object_id=None, affected_user=None, descript
         )
     except Exception:
         return None
+
+
+@receiver(post_save, sender=CustomUser)
+def create_role_profiles(sender, instance, created, **kwargs):
+    """Ensure each user has the profile rows required by their role."""
+    UserProfile.objects.get_or_create(user=instance)
+
+    staff_roles = {UserRole.STAFF, UserRole.MANAGER, UserRole.ADMIN}
+    if instance.role in staff_roles:
+        StaffProfile.objects.get_or_create(
+            user=instance,
+            defaults={'employee_id': _employee_id_for_user(instance)}
+        )
+
+    if instance.role in {UserRole.MANAGER, UserRole.ADMIN}:
+        ManagerProfile.objects.get_or_create(user=instance)
+
+    if instance.role == UserRole.ADMIN:
+        AdminProfile.objects.get_or_create(user=instance)
 
 
 def _send_login_notification(request, user):

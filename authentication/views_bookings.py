@@ -170,14 +170,17 @@ def booking_detail_view(request, booking_id):
         return redirect('rooms:list')
     
     can_cancel = booking.can_be_cancelled()
-    completed_payment = (
+    refundable_payment = (
         Payment.objects
-        .filter(booking=booking, status=PaymentStatus.COMPLETED)
+        .filter(
+            booking=booking,
+            status__in=[PaymentStatus.COMPLETED, PaymentStatus.REFUND_PENDING],
+        )
         .order_by('-completed_at', '-created_at')
         .first()
     )
     existing_refund = RefundRequest.objects.filter(booking=booking).first()
-    can_request_refund = completed_payment is not None and existing_refund is None
+    can_request_refund = refundable_payment is not None and existing_refund is None
     
     # Get recommendations for this booking
     recommendations_context = get_recommendations_context(
@@ -271,14 +274,12 @@ def booking_pdf(request, booking_id):
         return HttpResponseForbidden('You do not have permission to download this booking confirmation.')
 
     try:
-        import qrcode
         from reportlab.lib import colors
         from reportlab.lib.enums import TA_CENTER
         from reportlab.lib.pagesizes import A4
         from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
         from reportlab.lib.units import inch
         from reportlab.platypus import (
-            Image,
             Paragraph,
             SimpleDocTemplate,
             Spacer,
@@ -287,7 +288,7 @@ def booking_pdf(request, booking_id):
         )
     except ImportError as exc:
         return HttpResponse(
-            f'PDF generation dependency is missing: {exc.name}. Please install reportlab and qrcode.',
+            f'PDF generation dependency is missing: {exc.name}. Please install reportlab.',
             status=500,
             content_type='text/plain',
         )
@@ -298,6 +299,9 @@ def booking_pdf(request, booking_id):
         completed_payments.order_by('-completed_at', '-created_at').first()
         or booking.payments.order_by('-created_at').first()
     )
+    amount_paid = total_paid
+    if amount_paid <= 0:
+        amount_paid = payment.amount if payment else booking.total_price
     payment_method = payment.get_payment_method_display() if payment else 'N/A'
     payment_date = (
         (payment.completed_at or payment.updated_at or payment.created_at).strftime('%B %d, %Y')
@@ -305,14 +309,12 @@ def booking_pdf(request, booking_id):
     )
     guest_name = booking.guest.get_full_name() or booking.guest.username
     booking_reference = booking.booking_reference or f'BOOKING-{booking.id}'
-
-    qr_buffer = BytesIO()
-    qr = qrcode.QRCode(version=1, box_size=6, border=2)
-    qr.add_data(str(booking.id))
-    qr.make(fit=True)
-    qr_image = qr.make_image(fill_color='#0f766e', back_color='white')
-    qr_image.save(qr_buffer, format='PNG')
-    qr_buffer.seek(0)
+    navy = colors.HexColor('#0a0f1e')
+    card_navy = colors.HexColor('#1a2235')
+    gold = colors.HexColor('#c9a84c')
+    dark_gray = colors.HexColor('#333333')
+    row_gray = colors.HexColor('#f9f9f9')
+    line_gray = colors.HexColor('#dfe6e9')
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(
@@ -329,127 +331,173 @@ def booking_pdf(request, booking_id):
     title_style = ParagraphStyle(
         'CebuTitle',
         parent=styles['Title'],
-        textColor=colors.HexColor('#0f766e'),
+        textColor=navy,
         fontName='Helvetica-Bold',
-        fontSize=22,
-        leading=26,
+        fontSize=28,
+        leading=34,
         alignment=TA_CENTER,
-        spaceAfter=4,
+        spaceAfter=2,
     )
     subtitle_style = ParagraphStyle(
         'CebuSubtitle',
         parent=styles['Normal'],
-        textColor=colors.HexColor('#475569'),
-        fontSize=10,
+        textColor=gold,
+        fontName='Helvetica-Oblique',
+        fontSize=15,
+        leading=19,
         alignment=TA_CENTER,
-        spaceAfter=16,
+        spaceAfter=6,
     )
-    section_style = ParagraphStyle(
-        'CebuSection',
-        parent=styles['Heading2'],
-        textColor=colors.HexColor('#0f766e'),
+    tagline_style = ParagraphStyle(
+        'CebuTagline',
+        parent=styles['Normal'],
+        textColor=colors.HexColor('#555555'),
+        fontSize=9.5,
+        leading=12,
+        alignment=TA_CENTER,
+        spaceAfter=12,
+    )
+    banner_ref_style = ParagraphStyle(
+        'CebuBannerRef',
+        parent=styles['Normal'],
+        textColor=colors.white,
         fontName='Helvetica-Bold',
-        fontSize=13,
-        leading=16,
-        spaceBefore=12,
-        spaceAfter=8,
+        fontSize=16,
+        leading=20,
+    )
+    status_style = ParagraphStyle(
+        'CebuStatusBadge',
+        parent=styles['Normal'],
+        textColor=colors.white,
+        fontName='Helvetica-Bold',
+        fontSize=9.5,
+        leading=12,
+        alignment=TA_CENTER,
+    )
+    section_header_style = ParagraphStyle(
+        'CebuSectionHeader',
+        parent=styles['Normal'],
+        textColor=colors.white,
+        fontName='Helvetica-Bold',
+        fontSize=11,
+        leading=14,
     )
     footer_style = ParagraphStyle(
         'CebuFooter',
         parent=styles['Normal'],
-        textColor=colors.HexColor('#0f766e'),
+        textColor=navy,
         fontName='Helvetica-Bold',
         alignment=TA_CENTER,
-        fontSize=10,
+        fontSize=10.5,
+        leading=14,
+    )
+    contact_style = ParagraphStyle(
+        'CebuContact',
+        parent=styles['Normal'],
+        textColor=colors.HexColor('#555555'),
+        alignment=TA_CENTER,
+        fontSize=9.5,
+        leading=13,
     )
 
-    logo_table = Table(
-        [[Paragraph('<b>CMH</b>', ParagraphStyle(
-            'LogoText',
-            parent=styles['Normal'],
-            textColor=colors.white,
-            fontName='Helvetica-Bold',
-            fontSize=14,
-            alignment=TA_CENTER,
-        ))]],
-        colWidths=[0.8 * inch],
-        rowHeights=[0.42 * inch],
-        hAlign='CENTER',
-    )
-    logo_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#0f766e')),
-        ('BOX', (0, 0), (-1, -1), 0, colors.HexColor('#0f766e')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    gold_line = Table([['']], colWidths=[6.55 * inch], rowHeights=[0.02 * inch])
+    gold_line.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), gold),
+        ('LINEBELOW', (0, 0), (-1, -1), 0, gold),
     ]))
 
-    def details_table(rows):
-        table = Table(rows, colWidths=[2.15 * inch, 4.2 * inch], hAlign='LEFT')
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, -1), colors.white),
-            ('BOX', (0, 0), (-1, -1), 0.6, colors.HexColor('#d9e2e7')),
-            ('INNERGRID', (0, 0), (-1, -1), 0.4, colors.HexColor('#e5edf0')),
-            ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
-            ('TEXTCOLOR', (0, 0), (0, -1), colors.HexColor('#334155')),
-            ('TEXTCOLOR', (1, 0), (1, -1), colors.HexColor('#111827')),
-            ('FONTSIZE', (0, 0), (-1, -1), 9.5),
-            ('LEADING', (0, 0), (-1, -1), 12),
-            ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+    banner = Table(
+        [[
+            Paragraph(f'Booking Ref: {booking_reference}', banner_ref_style),
+            Paragraph(booking.get_status_display() or 'Confirmed', status_style),
+        ]],
+        colWidths=[5.0 * inch, 1.55 * inch],
+        hAlign='LEFT',
+    )
+    banner.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), navy),
+        ('BACKGROUND', (1, 0), (1, 0), gold),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (0, 0), 14),
+        ('RIGHTPADDING', (0, 0), (0, 0), 14),
+        ('LEFTPADDING', (1, 0), (1, 0), 8),
+        ('RIGHTPADDING', (1, 0), (1, 0), 8),
+        ('TOPPADDING', (0, 0), (-1, -1), 13),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 13),
+    ]))
+
+    def section_table(title, rows, highlight_total=False):
+        table_rows = [[Paragraph(title, section_header_style), '']] + rows
+        table = Table(table_rows, colWidths=[2.25 * inch, 4.3 * inch], hAlign='LEFT')
+        style_commands = [
+            ('SPAN', (0, 0), (-1, 0)),
+            ('BACKGROUND', (0, 0), (-1, 0), card_navy),
+            ('BOX', (0, 0), (-1, -1), 0.6, line_gray),
+            ('INNERGRID', (0, 1), (-1, -1), 0.35, colors.HexColor('#e7ecef')),
+            ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+            ('FONTNAME', (1, 1), (1, -1), 'Helvetica'),
+            ('TEXTCOLOR', (0, 1), (0, -1), dark_gray),
+            ('TEXTCOLOR', (1, 1), (1, -1), dark_gray),
+            ('FONTSIZE', (0, 1), (-1, -1), 9.5),
+            ('LEADING', (0, 1), (-1, -1), 12),
+            ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
             ('LEFTPADDING', (0, 0), (-1, -1), 10),
             ('RIGHTPADDING', (0, 0), (-1, -1), 10),
             ('TOPPADDING', (0, 0), (-1, -1), 8),
             ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
-        ]))
+        ]
+        for row_index in range(1, len(table_rows)):
+            style_commands.append((
+                'BACKGROUND',
+                (0, row_index),
+                (-1, row_index),
+                colors.white if row_index % 2 else row_gray,
+            ))
+        if highlight_total:
+            total_row = len(table_rows) - 1
+            style_commands.extend([
+                ('BACKGROUND', (0, total_row), (-1, total_row), navy),
+                ('TEXTCOLOR', (0, total_row), (-1, total_row), colors.white),
+                ('FONTNAME', (0, total_row), (-1, total_row), 'Helvetica-Bold'),
+                ('FONTSIZE', (0, total_row), (-1, total_row), 12),
+                ('TOPPADDING', (0, total_row), (-1, total_row), 10),
+                ('BOTTOMPADDING', (0, total_row), (-1, total_row), 10),
+            ])
+        table.setStyle(TableStyle(style_commands))
         return table
 
     elements = [
-        logo_table,
-        Spacer(1, 0.12 * inch),
         Paragraph('Cebu Mini Hotel', title_style),
         Paragraph('Booking Confirmation', subtitle_style),
-        details_table([
-            ['Booking Reference Number', booking_reference],
-            ['Booking ID', f'#{booking.id}'],
-            ['Booking Status', booking.get_status_display()],
-        ]),
-        Paragraph('Guest Details', section_style),
-        details_table([
+        Paragraph('Your stay, our priority', tagline_style),
+        gold_line,
+        Spacer(1, 0.18 * inch),
+        banner,
+        Spacer(1, 0.24 * inch),
+        section_table('Guest Details', [
             ['Full Name', guest_name],
             ['Email', booking.guest.email],
+            ['Booking ID', f'#{booking.id}'],
         ]),
-        Paragraph('Stay Details', section_style),
-        details_table([
+        Spacer(1, 0.16 * inch),
+        section_table('Stay Details', [
             ['Room', f'Room {booking.room.room_number} - {booking.room.get_room_type_display()}'],
             ['Check-in Date', booking.check_in.strftime('%B %d, %Y')],
             ['Check-out Date', booking.check_out.strftime('%B %d, %Y')],
             ['Number of Nights', str(booking.get_duration())],
         ]),
-        Paragraph('Payment Details', section_style),
-        details_table([
-            ['Total Amount Paid', f'PHP {total_paid:.2f}'],
+        Spacer(1, 0.16 * inch),
+        section_table('Payment Details', [
             ['Payment Method', payment_method],
             ['Payment Date', payment_date],
-        ]),
-        Paragraph('Arrival QR Code', section_style),
-    ]
-
-    qr_table = Table(
-        [[Image(qr_buffer, width=1.4 * inch, height=1.4 * inch),
-          Paragraph('Staff may scan this QR code on arrival. It contains the booking ID for front desk verification.', styles['Normal'])]],
-        colWidths=[1.65 * inch, 4.7 * inch],
-    )
-    qr_table.setStyle(TableStyle([
-        ('BOX', (0, 0), (-1, -1), 0.6, colors.HexColor('#d9e2e7')),
-        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('LEFTPADDING', (0, 0), (-1, -1), 12),
-        ('RIGHTPADDING', (0, 0), (-1, -1), 12),
-        ('TOPPADDING', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 10),
-    ]))
-    elements.extend([
-        qr_table,
-        Spacer(1, 0.28 * inch),
+            ['Total Amount Paid', f'PHP {amount_paid:.2f}'],
+        ], highlight_total=True),
+        Spacer(1, 0.3 * inch),
+        gold_line,
+        Spacer(1, 0.16 * inch),
         Paragraph('Thank you for choosing Cebu Mini Hotel', footer_style),
-    ])
+        Paragraph('For inquiries, contact us at echogoodkid@gmail.com', contact_style),
+    ]
 
     doc.build(elements)
     buffer.seek(0)
@@ -960,12 +1008,15 @@ def guest_request_refund_view(request, booking_id):
     # Resolve payment safely even if historical duplicates exist.
     payment = (
         Payment.objects
-        .filter(booking=booking, status=PaymentStatus.COMPLETED)
+        .filter(
+            booking=booking,
+            status__in=[PaymentStatus.COMPLETED, PaymentStatus.REFUND_PENDING],
+        )
         .order_by('-completed_at', '-created_at')
         .first()
     )
     if payment is None:
-        messages.error(request, 'Refund requests are only available after a payment has been completed.')
+        messages.error(request, 'Refund requests are only available after a payment has been completed or marked for refund review.')
         return redirect('bookings:booking_detail', booking_id=booking_id)
 
     # Prevent duplicate request for same booking (RefundRequest is OneToOne with Booking)

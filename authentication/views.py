@@ -59,14 +59,30 @@ def register_view(request):
                 user.first_name = form.cleaned_data.get('first_name', '')
                 user.last_name = form.cleaned_data.get('last_name', '')
                 user.role = 'GUEST'  # New users are guests by default
+                user.is_email_verified = False
                 user.save()
 
                 # Record T&C acceptance
                 if form.cleaned_data.get('agree_to_terms'):
                     user.accept_terms(version='1.0')
 
-                messages.success(request, 'Registration successful! Please log in.')
-                return redirect('auth:login')
+                try:
+                    send_otp_email(user)
+                except EmailOTPDeliveryError as exc:
+                    if getattr(settings, 'DEBUG', False) and exc.otp_code:
+                        messages.warning(
+                            request,
+                            f'Email delivery failed, so your local development verification code is {exc.otp_code}.',
+                        )
+                    else:
+                        messages.error(request, 'Your account was created, but we could not send the verification code. Please try signing in to resend it.')
+                        return redirect('auth:login')
+
+                request.session['email_otp_user_id'] = user.id
+                request.session['email_otp_remember_me'] = False
+                request.session['email_otp_purpose'] = 'registration'
+                messages.success(request, 'Registration successful! Enter the verification code sent to your email.')
+                return redirect('auth:verify_otp')
             except IntegrityError:
                 form.add_error('email', 'This email is already registered.')
                 messages.error(request, 'email: This email is already registered.')
@@ -117,6 +133,25 @@ def login_view(request):
                     user = None
 
             if user is not None:
+                if not user.is_email_verified:
+                    try:
+                        send_otp_email(user)
+                    except EmailOTPDeliveryError as exc:
+                        if getattr(settings, 'DEBUG', False) and exc.otp_code:
+                            messages.warning(
+                                request,
+                                f'Email delivery failed, so your local development verification code is {exc.otp_code}.',
+                            )
+                        else:
+                            messages.error(request, 'We could not send your email verification code. Please contact an administrator.')
+                            return redirect('auth:login')
+
+                    request.session['email_otp_user_id'] = user.id
+                    request.session['email_otp_remember_me'] = remember_me
+                    request.session['email_otp_purpose'] = 'registration'
+                    messages.info(request, 'Please verify your email before continuing. We sent you a new code.')
+                    return redirect('auth:verify_otp')
+
                 # Check if 2FA is enabled
                 try:
                     two_fa = user.two_factor_auth
@@ -135,6 +170,7 @@ def login_view(request):
                                     return redirect('auth:login')
                             request.session['email_otp_user_id'] = user.id
                             request.session['email_otp_remember_me'] = remember_me
+                            request.session['email_otp_purpose'] = 'login'
                             return redirect('auth:verify_otp')
                         elif two_fa.method == 'TOTP' and two_fa.is_verified:
                             request.session['2fa_user_id'] = user.id
@@ -533,7 +569,7 @@ def verify_2fa_login(request):
 
 @require_http_methods(["GET", "POST"])
 def verify_otp_view(request):
-    """Verify email OTP during login."""
+    """Verify email OTP during registration or login."""
     user_id = request.session.get('email_otp_user_id')
     if not user_id:
         return redirect('auth:login')
@@ -546,13 +582,23 @@ def verify_otp_view(request):
     if request.method == 'POST':
         otp_code = request.POST.get('otp_code', '').strip()
         if verify_otp(user, otp_code):
+            if not user.is_email_verified:
+                user.is_email_verified = True
+                user.save(update_fields=['is_email_verified', 'updated_at'])
+
             login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             request.session['2fa_verified_user_id'] = user.id
             if request.session.get('email_otp_remember_me'):
                 request.session.set_expiry(86400 * 30)
+
+            purpose = request.session.get('email_otp_purpose')
             request.session.pop('email_otp_user_id', None)
             request.session.pop('email_otp_remember_me', None)
-            request.session['otp_verified_notice'] = 'Email OTP verified successfully. Redirecting you to your dashboard.'
+            request.session.pop('email_otp_purpose', None)
+            if purpose == 'registration':
+                request.session['otp_verified_notice'] = 'Email verified successfully. Redirecting you to your dashboard.'
+            else:
+                request.session['otp_verified_notice'] = 'Email OTP verified successfully. Redirecting you to your dashboard.'
             return redirect('auth:otp_success')
         messages.error(request, 'Invalid or expired code. Please try again.')
 

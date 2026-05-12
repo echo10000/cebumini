@@ -4,7 +4,22 @@ from django.db.models import Q, Sum, Count
 from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from .models import CustomUser, UserRole, TermsAndConditions, Room, RoomImage, Booking, BookingStatus, RoomType, ContactMessage, HousekeepingTask
+from .models import (
+    AdminProfile,
+    CustomUser,
+    ManagerProfile,
+    StaffProfile,
+    UserProfile,
+    UserRole,
+    TermsAndConditions,
+    Room,
+    RoomImage,
+    Booking,
+    BookingStatus,
+    RoomType,
+    ContactMessage,
+    HousekeepingTask,
+)
 import json
 
 
@@ -69,6 +84,33 @@ class BookingStatusFilter(admin.SimpleListFilter):
         if self.value():
             return queryset.filter(status=self.value())
         return queryset
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone_number', 'nationality', 'updated_at')
+    search_fields = ('user__username', 'user__email', 'phone_number', 'nationality')
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(StaffProfile)
+class StaffProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'employee_id', 'department', 'position', 'hired_date')
+    list_filter = ('department',)
+    search_fields = ('user__username', 'user__email', 'employee_id', 'position')
+
+
+@admin.register(ManagerProfile)
+class ManagerProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'managed_departments', 'years_of_experience', 'manager_since')
+    search_fields = ('user__username', 'user__email', 'managed_departments')
+
+
+@admin.register(AdminProfile)
+class AdminProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'system_access_level', 'last_audit_date')
+    list_filter = ('system_access_level',)
+    search_fields = ('user__username', 'user__email', 'admin_notes')
 
 
 @admin.register(CustomUser)

@@ -950,6 +950,7 @@
                 <span class="manager-user-avatar">{{ user.first_name|first|upper|default:user.username|first|upper }}</span>
                 <span class="manager-user-name">{{ user.first_name|default:user.username }}</span>
             </div>
+            <a href="{% url 'profile' %}" class="manager-logout"><i class="fas fa-user"></i> Profile</a>
             <a href="{% url 'auth:logout' %}" class="manager-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
         </div>
     </header>
@@ -961,6 +962,11 @@
                 <li>
                     <a href="{% url 'auth:manager_dashboard' %}" class="{% if request.resolver_match.url_name == 'manager_dashboard' %}active{% endif %}">
                         <i class="fas fa-chart-line"></i> <span>Overview</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'profile' %}" class="{% if request.resolver_match.url_name == 'profile' or request.resolver_match.url_name == 'profile_edit' or request.resolver_match.url_name == 'change_password' or request.resolver_match.url_name == 'change_email' %}active{% endif %}">
+                        <i class="fas fa-user"></i> <span>Profile</span>
                     </a>
                 </li>
             </ul>

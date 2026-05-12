@@ -120,7 +120,7 @@
                                 <strong>₱{{ booking.total_price }}</strong>
                             </td>
                             <td>
-                                <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% else %}danger{% endif %}">
+                                <span class="badge bg-{% if booking.status == 'CONFIRMED' %}success{% elif booking.status == 'PENDING' %}warning{% elif booking.status == 'CHECKED_IN' %}info{% elif booking.status == 'CHECKED_OUT' %}secondary{% elif booking.status == 'NO_SHOW' %}secondary{% else %}danger{% endif %}">
                                     {{ booking.get_status_display }}
                                 </span>
                             </td>

@@ -570,54 +570,8 @@ def booking_edit(request, booking_id):
 
             return redirect('admin_panel:booking_detail', booking_id=booking.id)
 
-        elif action == 'checkin':
-            if booking.status == BookingStatus.CONFIRMED:
-                checklist = {
-                    'reference_verified': request.POST.get('reference_verified') == 'on',
-                    'id_verified': request.POST.get('id_verified') == 'on',
-                    'contact_verified': request.POST.get('contact_verified') == 'on',
-                    'payment_verified': request.POST.get('payment_verified') == 'on',
-                }
-                errors = booking.complete_check_in_verification(
-                    request.user,
-                    request.POST.get('booking_reference'),
-                    checklist,
-                    request.POST.get('verification_notes', '')
-                )
-                if errors:
-                    for error in errors:
-                        messages.error(request, error)
-                else:
-                    messages.success(request, 'Guest identity and booking proof verified. Guest has been checked in successfully.')
-            else:
-                messages.error(request, 'Only confirmed bookings can be checked in.')
-            return redirect('admin_panel:booking_detail', booking_id=booking.id)
-
-        elif action == 'checkout':
-            if booking.status == BookingStatus.CHECKED_IN:
-                booking.status = BookingStatus.CHECKED_OUT
-                booking.save()
-                messages.success(request, 'Guest has been checked out successfully.')
-            else:
-                messages.error(request, 'Only checked-in bookings can be checked out.')
-            return redirect('admin_panel:booking_detail', booking_id=booking.id)
-
-        elif action == 'undo_checkin':
-            if booking.status == BookingStatus.CHECKED_IN:
-                booking.status = BookingStatus.CONFIRMED
-                booking.save()
-                messages.info(request, 'Check-in has been reversed.')
-            else:
-                messages.error(request, 'Only checked-in bookings can be reverted.')
-            return redirect('admin_panel:booking_detail', booking_id=booking.id)
-
-        elif action == 'undo_checkout':
-            if booking.status == BookingStatus.CHECKED_OUT:
-                booking.status = BookingStatus.CONFIRMED
-                booking.save()
-                messages.info(request, 'Check-out has been reversed.')
-            else:
-                messages.error(request, 'Only checked-out bookings can be reverted.')
+        elif action in {'checkin', 'checkout', 'undo_checkin', 'undo_checkout'}:
+            messages.error(request, 'Check-in and check-out actions are handled from the staff front desk workflow.')
             return redirect('admin_panel:booking_detail', booking_id=booking.id)
 
         elif action == 'cancel':

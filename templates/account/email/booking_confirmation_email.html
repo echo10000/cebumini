@@ -1,154 +1,137 @@
 {% load i18n %}<!DOCTYPE html>
 <html>
 <head>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f3f4f6;
-            color: #111827;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 640px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
-        }
-        .header {
-            background-color: #0a0f1e;
-            color: #f8fafc;
-            padding: 28px 32px;
-            text-align: center;
-        }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-        }
-        .header p {
-            margin: 8px 0 0;
-            color: #9ca3af;
-        }
-        .content {
-            padding: 32px;
-        }
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: #111827;
-        }
-        .details {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 24px 0;
-        }
-        .details td {
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .details td:first-child {
-            color: #6b7280;
-            width: 36%;
-            font-weight: 600;
-        }
-        .details td:last-child {
-            color: #111827;
-        }
-        .button-container {
-            text-align: center;
-            margin: 30px 0;
-        }
-        .button {
-            background-color: #0a0f1e;
-            color: #ffffff;
-            text-decoration: none;
-            padding: 14px 28px;
-            border-radius: 999px;
-            display: inline-block;
-            font-weight: 700;
-        }
-        .note-box {
-            background-color: #f8fafc;
-            border-left: 4px solid #c9a84c;
-            padding: 18px 20px;
-            border-radius: 8px;
-            color: #374151;
-            font-size: 14px;
-            line-height: 1.7;
-        }
-        .footer {
-            padding: 24px 32px;
-            background-color: #f9fafb;
-            color: #6b7280;
-            font-size: 13px;
-            line-height: 1.7;
-            text-align: center;
-        }
-        .footer a {
-            color: #0a0f1e;
-            text-decoration: none;
-        }
-    </style>
+    <meta charset="utf-8">
+    <title>Booking Confirmation - Cebu Mini Hotel</title>
 </head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Booking Confirmed</h1>
-            <p>Your reservation at Cebu Hotel is now official.</p>
-        </div>
-        <div class="content">
-            <p>Dear {{ guest.first_name|default:guest.username }},</p>
-            <p>Thank you for booking with Cebu Hotel. Your reservation has been confirmed and we are excited to welcome you.</p>
+<body style="margin: 0; padding: 0; background-color: #f3f5f6; color: #333333; font-family: Arial, Helvetica, sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; background-color: #f3f5f6; margin: 0; padding: 0;">
+        <tr>
+            <td align="center" style="padding: 28px 14px;">
+                <table role="presentation" width="700" cellspacing="0" cellpadding="0" style="width: 700px; max-width: 100%; border-collapse: collapse; background-color: #ffffff; border: 1px solid #e3e6e8;">
+                    <tr>
+                        <td align="center" style="padding: 34px 36px 20px 36px; background-color: #ffffff;">
+                            <h1 style="margin: 0; color: #0a0f1e; font-size: 34px; line-height: 1.2; font-weight: 700; letter-spacing: 0;">Cebu Mini Hotel</h1>
+                            <p style="margin: 8px 0 0 0; color: #c9a84c; font-size: 20px; line-height: 1.4; font-style: italic;">Booking Confirmation</p>
+                            <p style="margin: 10px 0 0 0; color: #555555; font-size: 13px; line-height: 1.5;">Your stay, our priority</p>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; margin-top: 18px;">
+                                <tr>
+                                    <td style="height: 1px; line-height: 1px; background-color: #c9a84c; font-size: 1px;">&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
 
-            <div class="section-title">Booking Details</div>
-            <table class="details">
-                <tr>
-                    <td>Booking ID</td>
-                    <td>#{{ booking.id }}</td>
-                </tr>
-                <tr>
-                    <td>Check-in Reference</td>
-                    <td><strong>{{ booking.booking_reference }}</strong></td>
-                </tr>
-                <tr>
-                    <td>Room</td>
-                    <td>{{ room.room_number }}{% if room.get_room_type_display %} ({{ room.get_room_type_display }}){% endif %}</td>
-                </tr>
-                <tr>
-                    <td>Check-in</td>
-                    <td>{{ booking.check_in }}</td>
-                </tr>
-                <tr>
-                    <td>Check-out</td>
-                    <td>{{ booking.check_out }}</td>
-                </tr>
-                <tr>
-                    <td>Stay Duration</td>
-                    <td>{{ booking.number_of_nights }} night{% if booking.number_of_nights != 1 %}s{% endif %}</td>
-                </tr>
-                <tr>
-                    <td>Total Paid</td>
-                    <td>PHP {{ booking.total_price }}</td>
-                </tr>
-            </table>
+                    <tr>
+                        <td style="padding: 0 36px 24px 36px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; background-color: #0a0f1e;">
+                                <tr>
+                                    <td style="padding: 18px 22px; color: #ffffff; font-size: 22px; line-height: 1.3; font-weight: 700;">
+                                        Booking Ref: {{ booking.booking_reference }}
+                                    </td>
+                                    <td align="right" style="padding: 18px 22px; width: 150px;">
+                                        <span style="display: inline-block; padding: 7px 12px; background-color: #c9a84c; color: #ffffff; font-size: 12px; line-height: 1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                            {{ booking.get_status_display|default:"Confirmed" }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
 
-            <div class="button-container">
-                <a href="{{ booking_url }}" class="button">View Your Booking</a>
-            </div>
+                    <tr>
+                        <td style="padding: 0 36px 8px 36px;">
+                            <p style="margin: 0 0 18px 0; color: #444444; font-size: 15px; line-height: 1.7;">
+                                Dear {{ guest.first_name|default:guest.username }},
+                            </p>
+                            <p style="margin: 0 0 24px 0; color: #444444; font-size: 15px; line-height: 1.7;">
+                                Thank you for booking with Cebu Mini Hotel. Your reservation has been confirmed and we are excited to welcome you.
+                            </p>
+                        </td>
+                    </tr>
 
-            <div class="note-box">
-                <p><strong>Need help?</strong> Please reply to this email or contact our support team at <a href="mailto:support@cebuhotel.com">support@cebuhotel.com</a>.</p>
-                <p>At check-in, please show your reference code and a valid ID matching the booking name.</p>
-                <p>If you want to update your reservation, you can do so from your Cebu Hotel account dashboard.</p>
-            </div>
-        </div>
-        <div class="footer">
-            <p><strong>Cebu Hotel</strong> | <a href="mailto:support@cebuhotel.com">support@cebuhotel.com</a></p>
-            <p>This is an automated confirmation email. Please do not reply directly to this message.</p>
-        </div>
-    </div>
+                    <tr>
+                        <td style="padding: 0 36px 22px 36px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; border: 1px solid #dfe6e9;">
+                                <tr>
+                                    <td colspan="2" style="padding: 11px 16px; background-color: #1a2235; color: #ffffff; font-size: 15px; line-height: 1.4; font-weight: 700;">Guest Details</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; width: 38%; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 700;">Guest Name</td>
+                                    <td style="padding: 12px 16px; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 400;">{{ guest.first_name|default:guest.username }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; background-color: #f9f9f9; color: #333333; font-size: 14px; font-weight: 700;">Booking ID</td>
+                                    <td style="padding: 12px 16px; background-color: #f9f9f9; color: #333333; font-size: 14px; font-weight: 400;">#{{ booking.id }}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 36px 22px 36px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; border: 1px solid #dfe6e9;">
+                                <tr>
+                                    <td colspan="2" style="padding: 11px 16px; background-color: #1a2235; color: #ffffff; font-size: 15px; line-height: 1.4; font-weight: 700;">Stay Details</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; width: 38%; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 700;">Room</td>
+                                    <td style="padding: 12px 16px; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 400;">{{ room.room_number }}{% if room.get_room_type_display %} ({{ room.get_room_type_display }}){% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; background-color: #f9f9f9; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 700;">Check-in</td>
+                                    <td style="padding: 12px 16px; background-color: #f9f9f9; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 400;">{{ booking.check_in }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 700;">Check-out</td>
+                                    <td style="padding: 12px 16px; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 400;">{{ booking.check_out }}</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; background-color: #f9f9f9; color: #333333; font-size: 14px; font-weight: 700;">Stay Duration</td>
+                                    <td style="padding: 12px 16px; background-color: #f9f9f9; color: #333333; font-size: 14px; font-weight: 400;">{{ booking.number_of_nights }} night{% if booking.number_of_nights != 1 %}s{% endif %}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 36px 24px 36px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse; border: 1px solid #dfe6e9;">
+                                <tr>
+                                    <td colspan="2" style="padding: 11px 16px; background-color: #1a2235; color: #ffffff; font-size: 15px; line-height: 1.4; font-weight: 700;">Payment Details</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px 16px; width: 38%; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 700;">Payment Status</td>
+                                    <td style="padding: 12px 16px; background-color: #ffffff; border-bottom: 1px solid #e7ecef; color: #333333; font-size: 14px; font-weight: 400;">Paid</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 15px 16px; background-color: #0a0f1e; color: #ffffff; font-size: 17px; line-height: 1.4; font-weight: 700;">Total Amount Paid</td>
+                                    <td style="padding: 15px 16px; background-color: #0a0f1e; color: #ffffff; font-size: 17px; line-height: 1.4; font-weight: 700;">PHP {{ booking.total_price }}</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="center" style="padding: 0 36px 30px 36px;">
+                            <a href="{{ booking_url }}" style="display: inline-block; padding: 11px 20px; background-color: #0a0f1e; color: #ffffff; font-size: 14px; line-height: 1.3; font-weight: 700; text-decoration: none;">View Your Booking</a>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td style="padding: 0 36px 30px 36px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="width: 100%; border-collapse: collapse;">
+                                <tr>
+                                    <td style="height: 1px; line-height: 1px; background-color: #c9a84c; font-size: 1px;">&nbsp;</td>
+                                </tr>
+                            </table>
+                            <p style="margin: 18px 0 0 0; text-align: center; color: #0a0f1e; font-size: 15px; line-height: 1.6; font-weight: 700;">Thank you for choosing Cebu Mini Hotel</p>
+                            <p style="margin: 6px 0 0 0; text-align: center; color: #555555; font-size: 13px; line-height: 1.6;">For inquiries, contact us at <a href="mailto:echogoodkid@gmail.com" style="color: #0a0f1e; text-decoration: none;">echogoodkid@gmail.com</a></p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

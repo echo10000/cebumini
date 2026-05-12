@@ -852,6 +852,7 @@
                     {% else %}
                         <a href="{% url 'auth:dashboard' %}" style="padding: 0.5rem 1.25rem; background: #c9a84c; color: #0a0f1e; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block; border: none; cursor: pointer;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='#c9a84c'; this.style.color='#0a0f1e'">Dashboard</a>
                     {% endif %}
+                    <a href="{% url 'profile' %}" style="padding: 0.5rem 1.25rem; background: transparent; color: #c9a84c; border: 1px solid #c9a84c; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='transparent'; this.style.color='#c9a84c'">Profile</a>
                     <a href="{% url 'auth:logout' %}" style="padding: 0.5rem 1.25rem; background: transparent; color: #c9a84c; border: 1px solid #c9a84c; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='transparent'; this.style.color='#c9a84c'">Logout</a>
                 {% else %}
                     <a href="{% url 'account_login' %}" style="padding: 0.5rem 1.25rem; background: transparent; color: #c9a84c; border: 1px solid #c9a84c; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease; display: inline-block;" onmouseover="this.style.background='#c9a84c'; this.style.color='#0a0f1e'" onmouseout="this.style.background='transparent'; this.style.color='#c9a84c'">Login</a>
@@ -929,6 +930,7 @@
                     <h4>User Account</h4>
                     <ul>
                         {% if user.is_authenticated %}
+                            <li><a href="{% url 'profile' %}">Profile</a></li>
                             {% if user.is_manager %}
                                 <li><a href="{% url 'auth:manager_dashboard' %}">Manager Dashboard</a></li>
                                 <li><a href="{% url 'auth:manager_refunds' %}">Refund Requests</a></li>

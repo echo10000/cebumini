@@ -8,11 +8,12 @@ import logging
 from typing import Dict, Any, Optional
 
 try:
-    import google.generativeai as genai
+    from google import genai
+    from google.genai import types
     GEMINI_AVAILABLE = True
 except ImportError:
     GEMINI_AVAILABLE = False
-    logging.warning("google-generativeai not installed. Gemini features will be unavailable.")
+    logging.warning("google-genai not installed. Gemini features will be unavailable.")
 
 from decouple import config
 from authentication.models import Room, Booking
@@ -20,6 +21,39 @@ from authentication.chatbot_engine import build_system_prompt
 
 
 logger = logging.getLogger(__name__)
+
+
+class GeminiBlockedResponse(Exception):
+    """Raised when Gemini blocks a prompt or returns no usable text."""
+
+
+def _generate_text(
+    client: "genai.Client",
+    model_name: str,
+    user_message: str,
+    system_prompt: str,
+) -> str:
+    """Generate a text response using the current Google Gen AI SDK."""
+    response = client.models.generate_content(
+        model=model_name,
+        contents=user_message,
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            temperature=0.7,
+            max_output_tokens=500,
+        ),
+    )
+
+    prompt_feedback = getattr(response, "prompt_feedback", None)
+    block_reason = getattr(prompt_feedback, "block_reason", None)
+    if block_reason:
+        block_message = getattr(prompt_feedback, "block_reason_message", None)
+        raise GeminiBlockedResponse(block_message or str(block_reason))
+
+    if not response.text:
+        raise GeminiBlockedResponse("Gemini returned an empty response.")
+
+    return response.text
 
 
 def ask_gemini(user_message: str, availability_data: Dict[str, Any]) -> str:
@@ -64,8 +98,8 @@ def ask_gemini(user_message: str, availability_data: Dict[str, Any]) -> str:
     """
     if not GEMINI_AVAILABLE:
         raise ImportError(
-            "google-generativeai not installed. "
-            "Install it with: pip install google-generativeai"
+            "google-genai not installed. "
+            "Install it with: pip install google-genai"
         )
     
     # Get API key from environment
@@ -77,29 +111,14 @@ def ask_gemini(user_message: str, availability_data: Dict[str, Any]) -> str:
             "Please set it: export GEMINI_API_KEY=your_key_here"
         )
     
-    # Configure the API
-    genai.configure(api_key=api_key)
-    
     # Build system prompt with availability data
     system_prompt = build_system_prompt(availability_data)
-    
-    # Create model with system instruction (modern approach)
-    model = genai.GenerativeModel(
-        model_name='gemini-2.5-flash',
-        system_instruction=system_prompt
-    )
-    
-    # Send user message and get response
-    response = model.generate_content(
-        user_message,
-        generation_config=genai.types.GenerationConfig(
-            temperature=0.7,
-            max_output_tokens=500,
-        )
-    )
-    
-    # Return plain text response
-    return response.text
+
+    client = genai.Client(api_key=api_key)
+    try:
+        return _generate_text(client, 'gemini-2.5-flash', user_message, system_prompt)
+    finally:
+        client.close()
 
 
 logger = logging.getLogger(__name__)
@@ -126,8 +145,8 @@ class GeminiChatbot:
         """
         if not GEMINI_AVAILABLE:
             raise ImportError(
-                "google-generativeai is not installed. "
-                "Install it with: pip install google-generativeai"
+                "google-genai is not installed. "
+                "Install it with: pip install google-genai"
             )
         
         # Try GEMINI_API_KEY first, then fall back to GOOGLE_API_KEY
@@ -144,9 +163,8 @@ class GeminiChatbot:
                 "Please set it in your .env file or pass it directly."
             )
         
-        genai.configure(api_key=self.api_key)
         self.model_name = model
-        self.model = genai.GenerativeModel(model)
+        self.client = genai.Client(api_key=self.api_key)
         self.conversation_history = []
         self.assistant_name = "Echo"
         
@@ -229,22 +247,12 @@ class GeminiChatbot:
             # Build system prompt with current data
             system_prompt = self.build_system_context()
             
-            # Create model with system instruction using modern API
-            model_with_system = genai.GenerativeModel(
-                model_name=self.model_name,
-                system_instruction=system_prompt
-            )
-            
-            # Generate response with user message only
-            response = model_with_system.generate_content(
+            assistant_message = _generate_text(
+                self.client,
+                self.model_name,
                 user_message,
-                generation_config=genai.types.GenerationConfig(
-                    temperature=0.7,
-                    max_output_tokens=500,
-                )
+                system_prompt,
             )
-            
-            assistant_message = response.text
             
             # Store in conversation history
             self.conversation_history.append({
@@ -264,20 +272,11 @@ class GeminiChatbot:
                 'use_ai': True
             }
         
-        except genai.types.BlockedPromptException as e:
+        except GeminiBlockedResponse as e:
             logger.warning(f"Blocked prompt: {e}")
             return {
                 'response': "I appreciate your question, but I'm unable to respond to that right now. Please try asking something else about our hotel services. 🏨",
                 'status': 'blocked',
-                'speaker': self.assistant_name,
-                'use_ai': True
-            }
-        
-        except genai.types.StopCandidateException as e:
-            logger.error(f"Generation stopped: {e}")
-            return {
-                'response': "I'm having trouble generating a response. Please rephrase your question or contact our staff at +63 32 412 3456.",
-                'status': 'error',
                 'speaker': self.assistant_name,
                 'use_ai': True
             }

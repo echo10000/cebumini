@@ -3,7 +3,10 @@ import re
 from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import password_validation
 from django.core.exceptions import ValidationError
+
+from .models import AdminProfile, ManagerProfile, StaffProfile, UserProfile
 
 User = get_user_model()
 
@@ -137,3 +140,139 @@ class LoginForm(forms.Form):
         }),
         label='Remember me'
     )
+
+
+class UserProfileForm(forms.ModelForm):
+    """Form for common profile details."""
+
+    class Meta:
+        model = UserProfile
+        exclude = ['user']
+        widgets = {
+            'profile_picture': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+            'phone_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone number'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Address'}),
+            'date_of_birth': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'nationality': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nationality'}),
+            'bio': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Short bio'}),
+        }
+
+
+class StaffProfileForm(forms.ModelForm):
+    """Form for staff profile details."""
+
+    class Meta:
+        model = StaffProfile
+        exclude = ['user']
+        widgets = {
+            'employee_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Employee ID'}),
+            'department': forms.Select(attrs={'class': 'form-select'}),
+            'position': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Position'}),
+            'hired_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+
+class ManagerProfileForm(forms.ModelForm):
+    """Form for manager profile details."""
+
+    class Meta:
+        model = ManagerProfile
+        exclude = ['user']
+        widgets = {
+            'managed_departments': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Front Desk, Housekeeping, Management',
+            }),
+            'years_of_experience': forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
+            'manager_since': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+
+class AdminProfileForm(forms.ModelForm):
+    """Form for admin-only profile details."""
+
+    class Meta:
+        model = AdminProfile
+        exclude = ['user']
+        widgets = {
+            'system_access_level': forms.Select(attrs={'class': 'form-select'}),
+            'admin_notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Internal admin notes'}),
+            'last_audit_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
+
+
+class ChangePasswordForm(forms.Form):
+    """Password change form that keeps validation close to the current user."""
+    current_password = forms.CharField(
+        label='Current password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'current-password'})
+    )
+    new_password = forms.CharField(
+        label='New password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'})
+    )
+    confirm_new_password = forms.CharField(
+        label='Confirm new password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'})
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_current_password(self):
+        current_password = self.cleaned_data.get('current_password')
+        if not self.user.check_password(current_password):
+            raise ValidationError('Your current password is incorrect.')
+        return current_password
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password = cleaned_data.get('new_password')
+        confirm_new_password = cleaned_data.get('confirm_new_password')
+
+        if new_password and confirm_new_password and new_password != confirm_new_password:
+            self.add_error('confirm_new_password', 'The new passwords do not match.')
+
+        if new_password:
+            try:
+                password_validation.validate_password(new_password, self.user)
+            except ValidationError as error:
+                self.add_error('new_password', error)
+
+        return cleaned_data
+
+
+class UpdateEmailForm(forms.Form):
+    """Email update form with confirmation and uniqueness checks."""
+    new_email = forms.EmailField(
+        label='New email',
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'New email address'})
+    )
+    confirm_email = forms.EmailField(
+        label='Confirm email',
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Confirm email address'})
+    )
+
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super().__init__(*args, **kwargs)
+
+    def clean_new_email(self):
+        email = (self.cleaned_data.get('new_email') or '').strip().lower()
+        if User.objects.filter(email__iexact=email).exclude(pk=self.user.pk).exists():
+            raise ValidationError('This email address is already in use.')
+        return email
+
+    def clean_confirm_email(self):
+        return (self.cleaned_data.get('confirm_email') or '').strip().lower()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_email = cleaned_data.get('new_email')
+        confirm_email = cleaned_data.get('confirm_email')
+
+        if new_email and confirm_email and new_email != confirm_email:
+            self.add_error('confirm_email', 'Email addresses do not match.')
+
+        return cleaned_data

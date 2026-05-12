@@ -22,7 +22,7 @@
     <section class="auth-panel" aria-labelledby="login-title">
         <div class="auth-kicker">Secure sign in</div>
         <h2 id="login-title">Welcome back</h2>
-        <p class="auth-subtitle">Use your email or username to continue to the right dashboard for your role.</p>
+        <p class="auth-subtitle">Use your email to continue to the right dashboard for your role.</p>
 
         {% include 'includes/auth_messages.html' %}
 
@@ -41,7 +41,7 @@
             {% endif %}
 
             <div class="auth-field">
-                <label for="{{ form.username.id_for_label }}">Email or Username</label>
+                <label for="{{ form.username.id_for_label }}">Email </label>
                 {{ form.username }}
                 {% if form.username.errors %}
                     <div class="auth-error">{{ form.username.errors }}</div>

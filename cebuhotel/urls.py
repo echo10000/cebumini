@@ -18,6 +18,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),  # Social auth URLs (allauth backend only)
     
     path('auth/', include('authentication.urls')),  # PRIMARY login: /auth/login/
+    path('', include('authentication.urls_profile')),
     path('rooms/', include('authentication.urls_rooms')),
     path('bookings/', include('authentication.urls_bookings')),
     path('dashboard/', include('authentication.urls_dashboard')),
